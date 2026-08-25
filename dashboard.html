@@ -3,159 +3,207 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arena | Dashboard</title>
+  <title>Arena | Gaming Dashboard</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./assets/style.css" />
   <style>
     .hidden { display: none !important; }
   </style>
 </head>
 <body class="dashboard-body">
-  <!-- Loading Screen -->
+  <!-- Loading State -->
   <div id="loading" class="center-screen">
     <div class="spinner"></div>
-    <p class="loading-text">Loading your arena profile...</p>
+    <p class="loading-text">Synchronizing arena profile...</p>
   </div>
 
-  <!-- Dashboard App Container -->
+  <!-- Dashboard Container -->
   <div id="dashboard" class="app-wrap hidden">
-    <!-- Dashboard Top Bar -->
+    <!-- Navbar -->
     <header class="top-nav">
       <div class="nav-container">
         <div class="brand-logo">
-          <span class="logo-icon">⚡</span>
+          <svg class="logo-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
           <span class="logo-text">ARENA</span>
         </div>
 
         <nav class="nav-links">
-          <a href="#" class="nav-link active">🎮 Games</a>
-          <a href="#" class="nav-link">🏆 Leaderboard</a>
-          <a href="#" class="nav-link">🎁 Rewards</a>
+          <a href="#" class="nav-link active">Duels</a>
+          <a href="#" class="nav-link">Rankings</a>
+          <a href="#" class="nav-link">Vault</a>
         </nav>
 
         <div class="user-stats-bar">
-          <!-- Token Balance Badge -->
+          <!-- Live Token Badge -->
           <div class="token-badge">
-            <span class="token-icon">🪙</span>
+            <svg class="coin-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 7v10M15 9H10a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H9"></path>
+            </svg>
             <span id="balance-value" class="token-count">0</span>
-            <span class="token-unit">Tokens</span>
+            <span class="token-unit">TOKENS</span>
           </div>
 
-          <!-- User Profile Chip -->
+          <!-- User Profile -->
           <div class="user-profile-chip">
-            <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=arena" alt="Avatar" />
+            <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=arena" alt="Avatar" />
             <span id="player-name" class="user-name">Player</span>
           </div>
 
-          <!-- Sign Out -->
-          <button id="logout-btn" class="logout-btn" title="Sign out" type="button">
-            Sign out
-          </button>
+          <button id="logout-btn" class="logout-btn" type="button">Sign Out</button>
         </div>
       </div>
     </header>
 
-    <!-- Main Content Area -->
+    <!-- Main Dashboard Body -->
     <main class="dashboard-main">
-      <!-- Banner Card -->
+      <!-- Promo Banner -->
       <section class="banner-card">
         <div class="banner-info">
-          <span class="banner-tag">🔥 LIVE BATTLES</span>
-          <h2>Select a Game & Challenge Real Players</h2>
-          <p>Entry: <strong>50 tokens</strong> • Winner takes <strong>90 tokens</strong></p>
+          <span class="banner-tag">LIVE COMPETITIONS</span>
+          <h2>Select a Duel & Win Tokens</h2>
+          <p>Entry Fee: <strong>50 Tokens</strong> • Winner Reward: <strong>90 Tokens</strong></p>
         </div>
       </section>
 
-      <!-- Category Filter Tabs -->
+      <!-- Category Filter Pills -->
       <div class="filter-row">
-        <button class="filter-chip active" type="button">All Games</button>
-        <button class="filter-chip" type="button">⚡ Fast Reflex</button>
-        <button class="filter-chip" type="button">⭕ 1v1 Classic</button>
-        <button class="filter-chip" type="button">🧠 Trivia</button>
+        <button class="filter-chip active" type="button">All Modes</button>
+        <button class="filter-chip" type="button">Reflex</button>
+        <button class="filter-chip" type="button">Strategy</button>
+        <button class="filter-chip" type="button">Calculations</button>
       </div>
 
-      <!-- Games Grid (Freecash / Casino Style Cards) -->
+      <!-- Game Cards Grid -->
       <section class="games-grid">
-        <!-- Game 1: Reaction Duel -->
+        <!-- Reaction Duel -->
         <article class="game-card">
           <div class="card-media banner-reaction">
             <span class="card-badge">POPULAR</span>
-            <div class="media-icon">⚡</div>
+            <svg class="game-icon-svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
           </div>
           <div class="card-content">
             <h3 class="card-title">Reaction Duel</h3>
-            <p class="card-desc">Fastest click wins the round</p>
+            <p class="card-desc">Click fastest the instant the signal turns green.</p>
             <div class="card-meta">
-              <span class="fee-tag">Fee: 50 🪙</span>
-              <span class="win-tag">Win: 90 🪙</span>
+              <span class="fee-tag">Fee: 50</span>
+              <span class="win-tag">+90 Reward</span>
             </div>
-            <button class="play-btn" data-game="Reaction Duel" type="button">Play Match</button>
+            <button class="play-btn" data-game="Reaction Duel" data-type="reaction" type="button">Play Duel</button>
           </div>
         </article>
 
-        <!-- Game 2: Tic-Tac-Toe -->
-        <article class="game-card">
-          <div class="card-media banner-tictactoe">
-            <span class="card-badge">CLASSIC</span>
-            <div class="media-icon">⭕</div>
-          </div>
-          <div class="card-content">
-            <h3 class="card-title">Tic-Tac-Toe Blitz</h3>
-            <p class="card-desc">Turn-based 3x3 strategic duel</p>
-            <div class="card-meta">
-              <span class="fee-tag">Fee: 50 🪙</span>
-              <span class="win-tag">Win: 90 🪙</span>
-            </div>
-            <button class="play-btn" data-game="Tic-Tac-Toe Blitz" type="button">Play Match</button>
-          </div>
-        </article>
-
-        <!-- Game 3: Quiz Battle -->
-        <article class="game-card">
-          <div class="card-media banner-quiz">
-            <span class="card-badge">TRIVIA</span>
-            <div class="media-icon">🧠</div>
-          </div>
-          <div class="card-content">
-            <h3 class="card-title">Quiz Battle</h3>
-            <p class="card-desc">5 quick questions, highest score wins</p>
-            <div class="card-meta">
-              <span class="fee-tag">Fee: 50 🪙</span>
-              <span class="win-tag">Win: 90 🪙</span>
-            </div>
-            <button class="play-btn" data-game="Quiz Battle" type="button">Play Match</button>
-          </div>
-        </article>
-
-        <!-- Game 4: Math Duel -->
+        <!-- Math Duel -->
         <article class="game-card">
           <div class="card-media banner-math">
-            <span class="card-badge">BRAIN</span>
-            <div class="media-icon">🔢</div>
+            <span class="card-badge">SPEED</span>
+            <svg class="game-icon-svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+              <line x1="8" y1="6" x2="16" y2="6"></line>
+              <line x1="16" y1="14" x2="16" y2="18"></line>
+              <line x1="8" y1="10" x2="10" y2="10"></line>
+            </svg>
           </div>
           <div class="card-content">
             <h3 class="card-title">Math Duel</h3>
-            <p class="card-desc">Best of 3 speed mental math rounds</p>
+            <p class="card-desc">Solve rapid arithmetic equations under 5 seconds.</p>
             <div class="card-meta">
-              <span class="fee-tag">Fee: 50 🪙</span>
-              <span class="win-tag">Win: 90 🪙</span>
+              <span class="fee-tag">Fee: 50</span>
+              <span class="win-tag">+90 Reward</span>
             </div>
-            <button class="play-btn" data-game="Math Duel" type="button">Play Match</button>
+            <button class="play-btn" data-game="Math Duel" data-type="math" type="button">Play Duel</button>
+          </div>
+        </article>
+
+        <!-- Tic-Tac-Toe Blitz -->
+        <article class="game-card">
+          <div class="card-media banner-tictactoe">
+            <span class="card-badge">CLASSIC</span>
+            <svg class="game-icon-svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Tic-Tac-Toe</h3>
+            <p class="card-desc">Fast 3x3 turn-based tactical grid combat.</p>
+            <div class="card-meta">
+              <span class="fee-tag">Fee: 50</span>
+              <span class="win-tag">+90 Reward</span>
+            </div>
+            <button class="play-btn" data-game="Tic-Tac-Toe" data-type="reaction" type="button">Play Duel</button>
+          </div>
+        </article>
+
+        <!-- Quiz Battle -->
+        <article class="game-card">
+          <div class="card-media banner-quiz">
+            <span class="card-badge">TRIVIA</span>
+            <svg class="game-icon-svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a8 8 0 0 0-8 8c0 3 2 5 3 6v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2c1-1 3-3 3-6a8 8 0 0 0-8-8z"></path>
+              <line x1="9" y1="22" x2="15" y2="22"></line>
+            </svg>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Quiz Battle</h3>
+            <p class="card-desc">Answer 5 high-speed trivia questions to win.</p>
+            <div class="card-meta">
+              <span class="fee-tag">Fee: 50</span>
+              <span class="win-tag">+90 Reward</span>
+            </div>
+            <button class="play-btn" data-game="Quiz Battle" data-type="math" type="button">Play Duel</button>
           </div>
         </article>
       </section>
     </main>
 
-    <!-- Matchmaking Modal Overlay -->
+    <!-- 1. Matchmaking Radar Overlay -->
     <div id="match-overlay" class="modal-overlay hidden">
       <div class="modal-card">
         <div class="radar-pulse">
           <div class="pulse-circle"></div>
-          <div class="pulse-icon">🎮</div>
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a10 10 0 0 1 10 10"></path>
+          </svg>
         </div>
-        <h3 id="match-title">Finding Real Opponent</h3>
-        <p class="modal-subtitle" id="match-status">Searching active queue for players...</p>
-        <div class="modal-fee-notice">Entry fee: <strong>50 tokens</strong> will be locked</div>
-        <button id="cancel-match-btn" class="btn-cancel" type="button">Cancel Matchmaking</button>
+        <h3 id="match-title">Finding Opponent</h3>
+        <p class="modal-subtitle" id="match-status">Scanning active lobby for opponents...</p>
+        <div class="modal-fee-notice">Locked Stake: <strong>50 Tokens</strong></div>
+        <button id="cancel-match-btn" class="btn-cancel" type="button">Cancel Search</button>
+      </div>
+    </div>
+
+    <!-- 2. Interactive Match Arena Screen -->
+    <div id="game-arena-overlay" class="modal-overlay hidden">
+      <div class="arena-card">
+        <!-- Arena Header: Matchup -->
+        <div class="arena-header">
+          <div class="player-stat user-side">
+            <img id="arena-user-avatar" class="arena-avatar" src="" alt="You" />
+            <span id="arena-user-name" class="arena-name">You</span>
+          </div>
+          <div class="vs-badge">VS</div>
+          <div class="player-stat bot-side">
+            <img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
+            <span id="arena-opp-name" class="arena-name">Opponent</span>
+          </div>
+        </div>
+
+        <!-- Active Game Content Box -->
+        <div id="arena-stage" class="arena-stage">
+          <!-- Injected dynamically by dashboard.js -->
+        </div>
+
+        <button id="arena-quit-btn" class="btn-cancel hidden" type="button">Leave Match</button>
       </div>
     </div>
   </div>
