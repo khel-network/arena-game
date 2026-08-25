@@ -1,7 +1,7 @@
 const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
 
-// Indian Names Pool for Simulated Real-Player Fallback
+// Indian Names Pool for Fallback
 const INDIAN_BOT_POOL = [
   { name: "Aarav_Sharma", seed: "aarav" },
   { name: "Priya_Patel", seed: "priya" },
@@ -89,12 +89,14 @@ async function init() {
     currentBalance = wallet ? wallet.dummy_token : 1000;
     updateUI();
 
-    // Show Dashboard
+    // Smooth transition from loading screen to dashboard
     if (loadingEl) loadingEl.classList.add("hidden");
     if (dashEl) dashEl.classList.remove("hidden");
 
   } catch (err) {
     console.error("Initialization error:", err);
+    if (loadingEl) loadingEl.classList.add("hidden");
+    if (dashEl) dashEl.classList.remove("hidden");
   }
 }
 
@@ -103,7 +105,7 @@ function loadLocalUserData() {
   const meta = currentUser.user_metadata || {};
   const initialName = savedName || meta.full_name || meta.name || currentUser.email?.split("@")[0] || "Player";
 
-  // Initial welcome transaction if empty
+  // Load Transactions
   const storedTx = localStorage.getItem(`arena_tx_${currentUser.id}`);
   if (storedTx) {
     transactions = JSON.parse(storedTx);
@@ -114,6 +116,7 @@ function loadLocalUserData() {
     saveTransactions();
   }
 
+  // Load Matches
   const storedMatches = localStorage.getItem(`arena_matches_${currentUser.id}`);
   if (storedMatches) matchHistory = JSON.parse(storedMatches);
 
@@ -131,7 +134,7 @@ function setUserDisplayName(name) {
 function updateUI() {
   if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString();
   
-  // Update Cashout Progress bar ($1 per 1,000 tokens, $2.50 goal = 2,500 tokens)
+  // Update Cashout Progress bar ($1 per 1,000 tokens, $2.50 threshold = 2,500 tokens)
   const progressPercent = Math.min(100, Math.round((currentBalance / 2500) * 100));
   const progressFill = document.getElementById("progress-fill");
   const progressText = document.getElementById("progress-text");
@@ -151,7 +154,7 @@ function updateUI() {
   const statRate = document.getElementById("stat-win-rate");
   const statWon = document.getElementById("stat-tokens-won");
 
-  if (statEarnings) statEarnings.textContent = `${(currentBalance).toLocaleString()} 🪙`;
+  if (statEarnings) statEarnings.textContent = `${currentBalance.toLocaleString()} 🪙`;
   if (statMatches) statMatches.textContent = totalMatches;
   if (statRate) statRate.textContent = `${winRate}%`;
   if (statWon) statWon.textContent = `+${totalWonTokens.toLocaleString()} 🪙`;
@@ -306,7 +309,6 @@ function startMatchmaking() {
       const userKeys = Object.keys(state).filter(k => k !== currentUser.id);
 
       if (userKeys.length > 0) {
-        // Real user found in queue
         const oppId = userKeys[0];
         const oppName = `Player_${oppId.slice(0, 5)}`;
         pairMatch({ name: oppName, seed: oppId }, true);
@@ -318,7 +320,7 @@ function startMatchmaking() {
       }
     });
 
-  // If no live player pairs in 5-8 seconds, fallback to Indian bot
+  // Fallback to Indian bot if no real user in 5-8 seconds
   const searchDuration = Math.floor(Math.random() * 3000) + 5000;
   matchmakingTimer = setTimeout(() => {
     const randomIndianBot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
@@ -407,7 +409,6 @@ function runReactionGame() {
       endDuel(false, "False Start! You clicked before the signal turned green.", 0, 0);
     } else {
       const userReaction = Date.now() - startTime;
-      // Medium bot reaction: 290ms - 410ms
       const botReaction = Math.floor(Math.random() * 120) + 290;
 
       if (userReaction < botReaction) {
@@ -504,13 +505,15 @@ function runColorClashGame() {
   document.getElementById("match-no")?.addEventListener("click", () => evaluate(false));
 }
 
-// GAME 4: Memory Matrix
+// GAME 4: Memory Matrix (Clean 9-tile array)
 function runMemoryMatrixGame() {
+  const tileIndices =;
+  
   arenaStage.innerHTML = `
     <div style="text-align:center;">
       <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:12px;">Memorize the active green tile</p>
       <div style="display:grid; grid-template-columns:repeat(3, 54px); gap:8px; justify-content:center;" id="matrix-grid">
-        ${.map(i => `<div class="matrix-tile" data-idx="${i}" style="width:54px; height:54px; background:var(--bg-card); border-radius:6px; cursor:pointer;"></div>`).join("")}
+        ${tileIndices.map(i => `<div class="matrix-tile" data-idx="${i}" style="width:54px; height:54px; background:var(--bg-card); border-radius:6px; cursor:pointer;"></div>`).join("")}
       </div>
     </div>
   `;
@@ -518,12 +521,10 @@ function runMemoryMatrixGame() {
   const tiles = document.querySelectorAll(".matrix-tile");
   const activeIndex = Math.floor(Math.random() * 9);
 
-  // Flash tile
   setTimeout(() => {
     tiles[activeIndex].style.backgroundColor = "var(--primary-green)";
     setTimeout(() => {
       tiles[activeIndex].style.backgroundColor = "var(--bg-card)";
-      // Enable clicking
       tiles.forEach(t => {
         t.addEventListener("click", () => {
           const clickedIdx = parseInt(t.getAttribute("data-idx"));
@@ -539,7 +540,7 @@ function runMemoryMatrixGame() {
 }
 
 // ----------------------------------------------------
-// 6. Post-Match Analytics & Match Termination
+// 6. Post-Match Analytics & Termination
 // ----------------------------------------------------
 function endDuel(won, analysisText, userStat, oppStat) {
   if (won) {
@@ -547,7 +548,7 @@ function endDuel(won, analysisText, userStat, oppStat) {
     recordTransaction(`Duel Victory: ${activeGame.name}`, "credit", MATCH_WIN_REWARD);
   }
 
-  // Record Match History
+  // Record Match
   matchHistory.unshift({
     game: activeGame.name,
     opponent: activeOpponent.name,
@@ -558,7 +559,7 @@ function endDuel(won, analysisText, userStat, oppStat) {
   saveMatches();
   updateUI();
 
-  // Show Post-Match Analytics Card
+  // Show Post-Match Breakdown
   arenaStage.innerHTML = `
     <div class="result-card">
       <h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2>
