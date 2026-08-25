@@ -3,68 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lobby | Arena</title>
+  <title>Arena | Dashboard</title>
   <link rel="stylesheet" href="assets/style.css" />
+  <!-- Inline fallback to guarantee hidden elements stay hidden while styles load -->
+  <style>
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
-  <p id="loading" class="center-screen loading-text">Loading your dashboard...</p>
+  <!-- 1. Initial Loading Screen -->
+  <div id="loading" class="center-screen">
+    <div class="spinner"></div>
+    <p class="loading-text">Loading your dashboard...</p>
+  </div>
 
+  <!-- 2. Dashboard Interface -->
   <div id="dashboard" class="dash-wrap hidden">
     <header class="dash-header">
       <span class="brand">Arena</span>
-      <button id="logout-btn" class="logout-btn">Sign out</button>
+      <button id="logout-btn" class="logout-btn" type="button">Sign out</button>
     </header>
 
-    <section class="card">
-      <img id="avatar" class="avatar" src="" alt="Player avatar" />
-      <h2 id="player-name">—</h2>
+    <!-- User Profile & Wallet -->
+    <section class="card profile-card">
+      <img id="avatar" class="avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=player" alt="Player avatar" />
+      <h2 id="player-name">Player</h2>
       <div class="balance-box">
-        <p class="balance-label">Token balance</p>
-        <p class="balance-value" id="balance-value">0</p>
+        <span class="balance-label">Token balance</span>
+        <span class="balance-value" id="balance-value">0</span>
       </div>
     </section>
 
-    <section class="card" style="align-items: stretch;">
-      <h3 style="margin: 0 0 4px;">Choose a game</h3>
-      <p class="subtitle" style="margin: 0 0 12px;">
-        Each match costs 50 tokens to enter. Win to earn 90 back.
-      </p>
+    <!-- Game Selection Section -->
+    <section class="games-section">
+      <div class="section-heading">
+        <h3>Choose a game</h3>
+        <p class="subtitle">Each match costs 50 tokens to enter. Win to earn 90 back.</p>
+      </div>
+
       <div class="game-grid">
-        <div class="game-card" data-game="reaction">
-          <div class="icon">⚡</div>
-          <h4>Reaction Duel</h4>
-          <p>Fastest click wins</p>
-        </div>
-        <div class="game-card" data-game="tictactoe">
-          <div class="icon">⭕</div>
-          <h4>Tic-Tac-Toe</h4>
-          <p>Classic 1v1</p>
-        </div>
-        <div class="game-card" data-game="quiz">
-          <div class="icon">🧠</div>
-          <h4>Quiz Battle</h4>
-          <p>5 questions, most points</p>
-        </div>
-        <div class="game-card" data-game="math">
-          <div class="icon">🔢</div>
-          <h4>Math Duel</h4>
-          <p>Best of 3, fastest correct</p>
-        </div>
+        <button class="game-card" data-game="reaction" type="button">
+          <span class="game-icon">⚡</span>
+          <div class="game-info">
+            <h4>Reaction Duel</h4>
+            <p>Fastest click wins</p>
+          </div>
+        </button>
+
+        <button class="game-card" data-game="tictactoe" type="button">
+          <span class="game-icon">⭕</span>
+          <div class="game-info">
+            <h4>Tic-Tac-Toe</h4>
+            <p>Classic 1v1</p>
+          </div>
+        </button>
+
+        <button class="game-card" data-game="quiz" type="button">
+          <span class="game-icon">🧠</span>
+          <div class="game-info">
+            <h4>Quiz Battle</h4>
+            <p>5 questions, most points</p>
+          </div>
+        </button>
+
+        <button class="game-card" data-game="math" type="button">
+          <span class="game-icon">🔢</span>
+          <div class="game-info">
+            <h4>Math Duel</h4>
+            <p>Best of 3, fastest correct</p>
+          </div>
+        </button>
       </div>
     </section>
   </div>
 
-  <div id="matchmaking-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(30,27,46,0.55); display:flex; align-items:center; justify-content:center; z-index:50;">
-    <div class="card searching-box" style="max-width:320px;">
+  <!-- 3. Matchmaking Modal Overlay (Hidden by Default) -->
+  <div id="match-overlay" class="modal-overlay hidden">
+    <div class="modal-card">
       <div class="spinner"></div>
-      <p id="matchmaking-status" class="loading-text">Looking for an opponent...</p>
-      <button id="cancel-matchmaking" class="logout-btn">Cancel</button>
+      <h3 id="match-title">Finding Opponent</h3>
+      <p class="subtitle" id="match-status">Looking for an opponent...</p>
+      <button id="cancel-match-btn" class="cancel-btn" type="button">Cancel</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabaseClient.js"></script>
-  <script src="assets/matchmaking.js"></script>
   <script src="assets/dashboard.js"></script>
 </body>
 </html>
