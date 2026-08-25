@@ -10,7 +10,7 @@ const matchOverlay = document.getElementById("match-overlay");
 const cancelMatchBtn = document.getElementById("cancel-match-btn");
 const matchTitle = document.getElementById("match-title");
 const matchStatus = document.getElementById("match-status");
-const gameCards = document.querySelectorAll(".game-card");
+const playButtons = document.querySelectorAll(".play-btn");
 
 let currentBalance = 0;
 
@@ -26,7 +26,7 @@ async function init() {
     const user = session.user;
     const meta = user.user_metadata || {};
 
-    // 1. Populate player details
+    // 1. Populate user name and avatar
     if (nameEl) {
       nameEl.textContent = meta.full_name || meta.name || user.email?.split("@")[0] || "Player";
     }
@@ -35,7 +35,7 @@ async function init() {
       avatarEl.src = meta.avatar_url || meta.picture;
     }
 
-    // 2. Fetch wallet balance from Supabase
+    // 2. Fetch live wallet token balance
     const { data: wallet, error: walletError } = await client
       .from("wallet")
       .select("dummy_token")
@@ -48,42 +48,42 @@ async function init() {
       balanceEl.textContent = currentBalance.toLocaleString();
     }
 
-    // 3. Switch from loading state to dashboard
+    // 3. Display the dashboard interface
     if (loadingEl) loadingEl.classList.add("hidden");
     if (dashEl) dashEl.classList.remove("hidden");
 
   } catch (err) {
-    console.error("Dashboard initialization error:", err);
+    console.error("Dashboard error:", err);
     if (loadingEl) {
-      loadingEl.innerHTML = `<p style="color: #ef4444;">Failed to load dashboard. <a href="index.html" style="color:#38bdf8;">Return to login</a></p>`;
+      loadingEl.innerHTML = `<p style="color: #ef4444;">Failed to load arena data. <a href="index.html" style="color:#00e701;">Sign in again</a></p>`;
     }
   }
 }
 
-// Attach click handlers to each game card
-gameCards.forEach((card) => {
-  card.addEventListener("click", () => {
-    const gameName = card.querySelector("h4")?.textContent || "Match";
+// 4. Handle game card clicks
+playButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const gameName = btn.getAttribute("data-game") || "Match";
 
     if (currentBalance < MATCH_ENTRY_FEE) {
-      alert(`You need at least ${MATCH_ENTRY_FEE} tokens to play. Current balance: ${currentBalance}`);
+      alert(`You need at least ${MATCH_ENTRY_FEE} tokens to enter. Current balance: ${currentBalance}`);
       return;
     }
 
     if (matchTitle) matchTitle.textContent = `Finding Opponent for ${gameName}`;
-    if (matchStatus) matchStatus.textContent = "Looking for an opponent...";
+    if (matchStatus) matchStatus.textContent = "Connecting to queue with real players...";
     if (matchOverlay) matchOverlay.classList.remove("hidden");
   });
 });
 
-// Cancel Matchmaking
+// 5. Cancel matchmaking
 if (cancelMatchBtn) {
   cancelMatchBtn.addEventListener("click", () => {
     if (matchOverlay) matchOverlay.classList.add("hidden");
   });
 }
 
-// Sign out
+// 6. Sign out
 if (logoutBtn) {
   logoutBtn.addEventListener("click", async () => {
     await client.auth.signOut();
