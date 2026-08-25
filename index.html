@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arena | Play Games & Win Real Tokens</title>
+  <title>Arena | Competitive Skill Duels</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
 <body class="landing-body">
@@ -11,7 +15,9 @@
   <header class="top-nav">
     <div class="nav-container">
       <div class="brand-logo">
-        <span class="logo-icon">⚡</span>
+        <svg class="logo-svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
         <span class="logo-text">ARENA</span>
       </div>
       <div class="nav-links">
@@ -21,7 +27,7 @@
       </div>
       <div class="nav-actions">
         <button id="nav-login-btn" class="btn-secondary" type="button">Sign In</button>
-        <button id="nav-signup-btn" class="btn-primary" type="button">Sign Up</button>
+        <button id="nav-signup-btn" class="btn-primary" type="button">Get Started</button>
       </div>
     </div>
   </header>
@@ -29,56 +35,60 @@
   <!-- Hero Section -->
   <main class="hero-section">
     <div class="hero-container">
-      <!-- Left Hero Text & Stats -->
+      <!-- Left Column: Value Proposition -->
       <div class="hero-left">
         <div class="badge-pill">
           <span class="badge-dot"></span>
-          <span>Live 1v1 Skill Matches</span>
+          <span>Verified 1v1 Skill Arenas</span>
         </div>
         <h1 class="hero-title">
-          Play Games & <span class="highlight-green">Win Real Tokens</span>
+          Play Skill Games. <br/><span class="highlight-green">Win Real Tokens.</span>
         </h1>
         <p class="hero-subtitle">
-          Challenge real opponents in instant skill battles. Start with <strong>1,000 free tokens</strong> upon sign up — 100% real players, zero bots.
+          Compete against players in fast-paced skill duels. Instant matchmaking, fair matchmaking algorithms, and immediate token rewards.
         </p>
 
         <div class="hero-stats-row">
           <div class="stat-item">
-            <span class="stat-number">100%</span>
-            <span class="stat-label">Verified Players</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">Instant</span>
-            <span class="stat-label">Matchmaking</span>
-          </div>
-          <div class="stat-item">
             <span class="stat-number">1,000</span>
-            <span class="stat-label">Free Welcome Bonus</span>
+            <span class="stat-label">Welcome Tokens</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">&lt; 10s</span>
+            <span class="stat-label">Match Queues</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">100%</span>
+            <span class="stat-label">Skill-Based</span>
           </div>
         </div>
       </div>
 
-      <!-- Right Login Card -->
+      <!-- Right Column: Auth Card -->
       <div class="hero-right">
         <div class="auth-card">
           <div class="auth-header">
-            <h3>Start Playing Now</h3>
-            <p>Join thousands of players competing in live arena duels</p>
+            <h3>Create an Account</h3>
+            <p>Sign in to claim your 1,000 tokens and enter live matches</p>
           </div>
 
           <div class="auth-perks">
             <div class="perk-item">
-              <span class="perk-icon">🎁</span>
-              <span><strong>1,000 free tokens</strong> added automatically</span>
+              <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+              <span><strong>1,000 Tokens</strong> instantly credited</span>
             </div>
             <div class="perk-item">
-              <span class="perk-icon">⚡</span>
-              <span>Fast 1-click Google authentication</span>
+              <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <span>Encrypted & secure authentication</span>
             </div>
           </div>
 
           <button id="google-login-btn" class="google-auth-btn" type="button">
-            <svg width="22" height="22" viewBox="0 0 48 48">
+            <svg width="20" height="20" viewBox="0 0 48 48">
               <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
               <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
               <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
@@ -87,7 +97,7 @@
             <span>Continue with Google</span>
           </button>
 
-          <p class="auth-footnote">🔒 Secure authentication powered by Supabase</p>
+          <p class="auth-footnote">By continuing, you agree to the Arena Terms of Service.</p>
         </div>
       </div>
     </div>
