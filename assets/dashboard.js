@@ -1,30 +1,43 @@
 const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
+const BOT_WAIT_SECONDS = 5; // how long to wait for a real opponent before matching with a bot
 
-// Indian Names Pool for Fallback
+// Indian Names Pool for Bot Fallback (boys & girls)
 const INDIAN_BOT_POOL = [
-  { name: "Aarav_Sharma", seed: "aarav" },
-  { name: "Priya_Patel", seed: "priya" },
-  { name: "Rohan_Verma", seed: "rohan" },
-  { name: "Ananya_Singh", seed: "ananya" },
-  { name: "Vikram_Malhotra", seed: "vikram" },
-  { name: "Sneha_Reddy", seed: "sneha" },
-  { name: "Aditya_Kumar", seed: "aditya" },
-  { name: "Neha_Gupta", seed: "neha" },
-  { name: "Karan_Mehta", seed: "karan" },
-  { name: "Divya_Roy", seed: "divya" },
-  { name: "Arjun_Chopra", seed: "arjun" },
-  { name: "Riya_Sen", seed: "riya" }
+  { name: "Aarav Sharma", seed: "aarav" },
+  { name: "Priya Patel", seed: "priya" },
+  { name: "Rohan Verma", seed: "rohan" },
+  { name: "Ananya Singh", seed: "ananya" },
+  { name: "Vikram Malhotra", seed: "vikram" },
+  { name: "Sneha Reddy", seed: "sneha" },
+  { name: "Aditya Kumar", seed: "aditya" },
+  { name: "Neha Gupta", seed: "neha" },
+  { name: "Karan Mehta", seed: "karan" },
+  { name: "Divya Roy", seed: "divya" },
+  { name: "Arjun Chopra", seed: "arjun" },
+  { name: "Riya Sen", seed: "riya" },
+  { name: "Ishaan Kapoor", seed: "ishaan" },
+  { name: "Meera Nair", seed: "meera" },
+  { name: "Rahul Iyer", seed: "rahul" },
+  { name: "Kavya Joshi", seed: "kavya" }
 ];
+
+function formatRupees(amount) {
+  const n = Number(amount) || 0;
+  const sign = n < 0 ? "-" : "";
+  return sign + "\u20b9" + Math.abs(n).toLocaleString("en-IN");
+}
 
 // App State
 let currentUser = null;
-let currentBalance = 1000;
+let currentBalance = 0;
 let matchHistory = [];
 let transactions = [];
 let activeOpponent = null;
 let activeGame = null;
 let matchmakingTimer = null;
+let queueChannel = null;
+let inQueue = false;
 
 // DOM Elements
 const loadingEl = document.getElementById("loading");
@@ -55,7 +68,6 @@ const matchOverlay = document.getElementById("match-overlay");
 const cancelMatchBtn = document.getElementById("cancel-match-btn");
 const matchTitle = document.getElementById("match-title");
 const matchStatus = document.getElementById("match-status");
-
 const arenaOverlay = document.getElementById("game-arena-overlay");
 const arenaUserAvatar = document.getElementById("arena-user-avatar");
 const arenaUserName = document.getElementById("arena-user-name");
@@ -70,34 +82,20 @@ async function init() {
   try {
     const sessionRes = await client.auth.getSession();
     const session = sessionRes && sessionRes.data ? sessionRes.data.session : null;
-
     if (!session) {
       window.location.href = "index.html";
       return;
     }
-
     currentUser = session.user;
-    loadLocalUserData();
 
-    // Fetch live wallet balance from Supabase
-    try {
-      const { data: wallet } = await client
-        .from("wallet")
-        .select("dummy_token")
-        .eq("user_id", currentUser.id)
-        .single();
-      if (wallet && typeof wallet.dummy_token === "number") {
-        currentBalance = wallet.dummy_token;
-      }
-    } catch (e) {
-      console.warn("Wallet fetch fallback to local balance:", e);
-    }
-
+    loadUserName();
+    await loadWallet();
+    await loadTransactions();
+    await loadMatchHistory();
     updateUI();
   } catch (err) {
     console.error("Initialization error:", err);
   } finally {
-    // Guaranteed dismissal of loading screen
     if (loadingEl) loadingEl.classList.add("hidden");
     if (dashEl) dashEl.classList.remove("hidden");
   }
@@ -111,34 +109,14 @@ setTimeout(() => {
   }
 }, 3000);
 
-function loadLocalUserData() {
+function loadUserName() {
   const savedName = localStorage.getItem("arena_name_" + currentUser.id);
   const meta = currentUser.user_metadata || {};
-  const initialName = savedName || meta.full_name || meta.name || (currentUser.email ? currentUser.email.split("@")[0] : "Player");
-
-  const storedTx = localStorage.getItem("arena_tx_" + currentUser.id);
-  if (storedTx) {
-    try {
-      transactions = JSON.parse(storedTx);
-    } catch (e) {
-      transactions = [];
-    }
-  } else {
-    transactions = [
-      { desc: "Welcome Bonus Credited", type: "credit", amount: 1000, date: new Date().toLocaleString() }
-    ];
-    saveTransactions();
-  }
-
-  const storedMatches = localStorage.getItem("arena_matches_" + currentUser.id);
-  if (storedMatches) {
-    try {
-      matchHistory = JSON.parse(storedMatches);
-    } catch (e) {
-      matchHistory = [];
-    }
-  }
-
+  const initialName =
+    savedName ||
+    meta.full_name ||
+    meta.name ||
+    (currentUser.email ? currentUser.email.split("@")[0] : "Player");
   setUserDisplayName(initialName);
 }
 
@@ -150,19 +128,155 @@ function setUserDisplayName(name) {
   if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
 }
 
+// ----------------------------------------------------
+// 2. Wallet — always backed by Supabase, never local-only
+// ----------------------------------------------------
+async function loadWallet() {
+  try {
+    const { data: wallet, error } = await client
+      .from("wallet")
+      .select("dummy_token")
+      .eq("user_id", currentUser.id)
+      .single();
+    if (error) throw error;
+    currentBalance = (wallet && typeof wallet.dummy_token === "number") ? wallet.dummy_token : 0;
+  } catch (e) {
+    console.warn("Wallet fetch failed:", e);
+    currentBalance = 0;
+  }
+}
+
+// Applies a delta (+credit / -debit) to the Supabase wallet and keeps currentBalance in sync.
+// This is the single source of truth fix for the "resets on refresh" bug.
+async function persistWalletDelta(delta) {
+  const { data: wallet, error } = await client
+    .from("wallet")
+    .select("dummy_token")
+    .eq("user_id", currentUser.id)
+    .single();
+  if (error || !wallet) throw error || new Error("Wallet not found");
+
+  const newBalance = Math.max(0, (wallet.dummy_token || 0) + delta);
+  const { error: updErr } = await client
+    .from("wallet")
+    .update({ dummy_token: newBalance, updated_at: new Date().toISOString() })
+    .eq("user_id", currentUser.id);
+  if (updErr) throw updErr;
+
+  currentBalance = newBalance;
+  flashBalance();
+  return newBalance;
+}
+
+function flashBalance() {
+  if (!balanceEl) return;
+  balanceEl.classList.remove("balance-flash");
+  void balanceEl.offsetWidth; // restart animation
+  balanceEl.classList.add("balance-flash");
+}
+
+// ----------------------------------------------------
+// 3. Transactions & Match History — persisted, not local-only
+// ----------------------------------------------------
+async function loadTransactions() {
+  try {
+    const { data, error } = await client
+      .from("transactions")
+      .select("description, type, amount, created_at")
+      .eq("user_id", currentUser.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    transactions = (data || []).map((t) => ({
+      desc: t.description,
+      type: t.type,
+      amount: t.amount,
+      date: new Date(t.created_at).toLocaleString()
+    }));
+  } catch (e) {
+    console.warn("Could not load transactions (run schema3.sql to enable the live ledger):", e);
+    transactions = [];
+  }
+}
+
+async function recordTransaction(desc, type, amount) {
+  transactions.unshift({ desc, type, amount, date: new Date().toLocaleString() });
+  updateUI();
+  try {
+    const { error } = await client.from("transactions").insert({
+      user_id: currentUser.id,
+      description: desc,
+      type,
+      amount
+    });
+    if (error) throw error;
+  } catch (e) {
+    console.warn("Transaction not persisted (run schema3.sql):", e);
+  }
+}
+
+async function loadMatchHistory() {
+  try {
+    const { data, error } = await client
+      .from("match_history")
+      .select("game, opponent, result, reward, created_at")
+      .eq("user_id", currentUser.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    matchHistory = (data || []).map((m) => ({
+      game: m.game,
+      opponent: m.opponent,
+      result: m.result,
+      reward: m.reward,
+      date: new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    }));
+  } catch (e) {
+    console.warn("Could not load match history (run schema3.sql to enable this):", e);
+    matchHistory = [];
+  }
+}
+
+async function recordMatch(game, opponent, result, reward) {
+  matchHistory.unshift({
+    game,
+    opponent,
+    result,
+    reward,
+    date: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  });
+  updateUI();
+  try {
+    const { error } = await client.from("match_history").insert({
+      user_id: currentUser.id,
+      game,
+      opponent,
+      result,
+      reward
+    });
+    if (error) throw error;
+  } catch (e) {
+    console.warn("Match result not persisted (run schema3.sql):", e);
+  }
+}
+
+// ----------------------------------------------------
+// 4. UI Rendering
+// ----------------------------------------------------
 function updateUI() {
-  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString();
-  
+  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString("en-IN");
+
   const progressPercent = Math.min(100, Math.round((currentBalance / 2500) * 100));
   const progressFill = document.getElementById("progress-fill");
   const progressText = document.getElementById("progress-text");
   if (progressFill) progressFill.style.width = progressPercent + "%";
   if (progressText) {
-    progressText.textContent = "$" + (currentBalance / 1000).toFixed(2) + " / $2.50 (" + currentBalance.toLocaleString() + " / 2,500 Tokens)";
+    progressText.textContent =
+      formatRupees(currentBalance) + " / " + formatRupees(2500) + " Cashout Threshold";
   }
 
   const totalMatches = matchHistory.length;
-  const wins = matchHistory.filter(m => m.result === "VICTORY").length;
+  const wins = matchHistory.filter((m) => m.result === "VICTORY").length;
   const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
   const totalWonTokens = wins * MATCH_WIN_REWARD;
 
@@ -170,11 +284,10 @@ function updateUI() {
   const statMatches = document.getElementById("stat-matches-played");
   const statRate = document.getElementById("stat-win-rate");
   const statWon = document.getElementById("stat-tokens-won");
-
-  if (statEarnings) statEarnings.textContent = currentBalance.toLocaleString() + " 🪙";
+  if (statEarnings) statEarnings.textContent = formatRupees(currentBalance);
   if (statMatches) statMatches.textContent = totalMatches;
   if (statRate) statRate.textContent = winRate + "%";
-  if (statWon) statWon.textContent = "+" + totalWonTokens.toLocaleString() + " 🪙";
+  if (statWon) statWon.textContent = "+" + formatRupees(totalWonTokens);
 
   renderLedger();
   renderMatchHistory();
@@ -184,91 +297,76 @@ function renderLedger() {
   const tbody = document.getElementById("ledger-body");
   if (!tbody) return;
   if (transactions.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-dim);">No transactions recorded</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4">No transactions recorded</td></tr>';
     return;
   }
-  tbody.innerHTML = transactions.map(tx => {
-    const isCredit = tx.type === "credit";
-    const sign = isCredit ? "+" : "-";
-    const color = isCredit ? "var(--primary-green)" : "var(--accent-red)";
-    const badgeClass = isCredit ? "badge-credit" : "badge-debit";
-    return '<tr>' +
-      '<td>' + tx.desc + '</td>' +
-      '<td><span class="' + badgeClass + '">' + tx.type.toUpperCase() + '</span></td>' +
-      '<td style="font-weight:700; color:' + color + ';">' + sign + tx.amount + ' 🪙</td>' +
-      '<td style="color:var(--text-dim);">' + tx.date + '</td>' +
-    '</tr>';
-  }).join("");
+  tbody.innerHTML = transactions
+    .map((tx) => {
+      const isCredit = tx.type === "credit";
+      const sign = isCredit ? "+" : "-";
+      const color = isCredit ? "var(--primary-green)" : "var(--accent-red)";
+      const badgeClass = isCredit ? "badge-credit" : "badge-debit";
+      return (
+        "<tr>" +
+        "<td>" + tx.desc + "</td>" +
+        '<td><span class="' + badgeClass + '">' + tx.type.toUpperCase() + "</span></td>" +
+        '<td style="color:' + color + '">' + sign + formatRupees(tx.amount) + "</td>" +
+        "<td>" + tx.date + "</td>" +
+        "</tr>"
+      );
+    })
+    .join("");
 }
 
 function renderMatchHistory() {
   const tbody = document.getElementById("matches-body");
   if (!tbody) return;
   if (matchHistory.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-dim);">No matches played yet. Choose a game above!</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5">No matches played yet. Choose a game above!</td></tr>';
     return;
   }
-  tbody.innerHTML = matchHistory.map(m => {
-    const isWin = m.result === "VICTORY";
-    const color = isWin ? "var(--primary-green)" : "var(--accent-red)";
-    const badgeClass = isWin ? "badge-credit" : "badge-debit";
-    return '<tr>' +
-      '<td style="font-weight:600;">' + m.game + '</td>' +
-      '<td>' + m.opponent + '</td>' +
-      '<td><span class="' + badgeClass + '">' + m.result + '</span></td>' +
-      '<td style="font-weight:700; color:' + color + ';">' + m.reward + '</td>' +
-      '<td style="color:var(--text-dim);">' + m.date + '</td>' +
-    '</tr>';
-  }).join("");
-}
-
-function recordTransaction(desc, type, amount) {
-  transactions.unshift({ desc: desc, type: type, amount: amount, date: new Date().toLocaleString() });
-  saveTransactions();
-  updateUI();
-}
-
-function saveTransactions() {
-  if (currentUser) {
-    localStorage.setItem("arena_tx_" + currentUser.id, JSON.stringify(transactions.slice(0, 50)));
-  }
-}
-
-function saveMatches() {
-  if (currentUser) {
-    localStorage.setItem("arena_matches_" + currentUser.id, JSON.stringify(matchHistory.slice(0, 50)));
-  }
+  tbody.innerHTML = matchHistory
+    .map((m) => {
+      const isWin = m.result === "VICTORY";
+      const color = isWin ? "var(--primary-green)" : "var(--accent-red)";
+      const badgeClass = isWin ? "badge-credit" : "badge-debit";
+      const rewardText = (m.reward >= 0 ? "+" : "") + formatRupees(m.reward);
+      return (
+        "<tr>" +
+        "<td>" + m.game + "</td>" +
+        "<td>" + m.opponent + "</td>" +
+        '<td><span class="' + badgeClass + '">' + m.result + "</span></td>" +
+        '<td style="color:' + color + '">' + rewardText + "</td>" +
+        "<td>" + m.date + "</td>" +
+        "</tr>"
+      );
+    })
+    .join("");
 }
 
 // ----------------------------------------------------
-// 2. Navigation & Category Filters
+// 5. Navigation & Category Filters
 // ----------------------------------------------------
 function switchView(targetId) {
-  tabButtons.forEach(b => b.classList.remove("active"));
-  appViews.forEach(v => v.classList.remove("active"));
-
-  const targetTab = Array.from(tabButtons).find(b => b.getAttribute("data-target") === targetId);
+  tabButtons.forEach((b) => b.classList.remove("active"));
+  appViews.forEach((v) => v.classList.remove("active"));
+  const targetTab = Array.from(tabButtons).find((b) => b.getAttribute("data-target") === targetId);
   if (targetTab) targetTab.classList.add("active");
-
   const targetView = document.getElementById(targetId);
   if (targetView) targetView.classList.add("active");
 }
-
-tabButtons.forEach(btn => {
+tabButtons.forEach((btn) => {
   btn.addEventListener("click", () => switchView(btn.getAttribute("data-target")));
 });
-
 document.getElementById("profile-nav-btn")?.addEventListener("click", () => switchView("view-profile"));
 document.getElementById("nav-brand-logo")?.addEventListener("click", () => switchView("view-earn"));
 
-filterChips.forEach(chip => {
+filterChips.forEach((chip) => {
   chip.addEventListener("click", () => {
-    filterChips.forEach(c => c.classList.remove("active"));
+    filterChips.forEach((c) => c.classList.remove("active"));
     chip.classList.add("active");
-
     const category = chip.getAttribute("data-category");
-
-    gameCards.forEach(card => {
+    gameCards.forEach((card) => {
       if (category === "all" || card.getAttribute("data-category") === category) {
         card.style.display = "flex";
       } else {
@@ -279,18 +377,16 @@ filterChips.forEach(chip => {
 });
 
 // ----------------------------------------------------
-// 3. Profile Name Editing
+// 6. Profile Name Editing
 // ----------------------------------------------------
 editNameBtn?.addEventListener("click", () => {
   nameInput.value = playerNameEl.textContent;
   nameEditBox.classList.remove("hidden");
   nameInput.focus();
 });
-
 cancelNameBtn?.addEventListener("click", () => {
   nameEditBox.classList.add("hidden");
 });
-
 saveNameBtn?.addEventListener("click", () => {
   const newName = nameInput.value.trim();
   if (newName.length < 2) {
@@ -305,68 +401,165 @@ saveNameBtn?.addEventListener("click", () => {
 });
 
 // ----------------------------------------------------
-// 4. Realtime Matchmaking with Indian Bot Fallback
+// 7. Real Matchmaking (live users first, bot after 5s)
 // ----------------------------------------------------
-playButtons.forEach(btn => {
+playButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
-    activeGame = {
-      name: btn.getAttribute("data-game"),
-      type: btn.getAttribute("data-type")
-    };
-
+    activeGame = { name: btn.getAttribute("data-game"), type: btn.getAttribute("data-type") };
     if (currentBalance < MATCH_ENTRY_FEE) {
-      alert("Insufficient balance. You need " + MATCH_ENTRY_FEE + " tokens to enter.");
+      alert("Insufficient balance. You need " + formatRupees(MATCH_ENTRY_FEE) + " to enter.");
       return;
     }
-
-    startMatchmaking();
+    beginMatchmaking();
   });
 });
 
-function startMatchmaking() {
-  if (matchTitle) matchTitle.textContent = "Finding Opponent for " + activeGame.name;
-  if (matchStatus) matchStatus.textContent = "Scanning active queue for live players...";
+async function beginMatchmaking() {
+  inQueue = true;
+  if (matchTitle) matchTitle.textContent = "Finding Opponent \u2014 " + activeGame.name;
+  if (matchStatus) matchStatus.textContent = "Deducting entry stake...";
   if (matchOverlay) matchOverlay.classList.remove("hidden");
 
-  const searchDuration = Math.floor(Math.random() * 3000) + 4000;
-  matchmakingTimer = setTimeout(() => {
-    const randomIndianBot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
-    pairMatch(randomIndianBot, false);
-  }, searchDuration);
-}
-
-function pairMatch(opponent, isReal) {
-  if (matchmakingTimer) clearTimeout(matchmakingTimer);
-
-  activeOpponent = opponent;
-  if (matchStatus) {
-    matchStatus.textContent = "Opponent Matched: " + opponent.name + "! Launching arena...";
+  try {
+    await persistWalletDelta(-MATCH_ENTRY_FEE);
+    await recordTransaction("Stake Entry: " + activeGame.name, "debit", MATCH_ENTRY_FEE);
+  } catch (e) {
+    console.error(e);
+    if (matchOverlay) matchOverlay.classList.add("hidden");
+    alert("Could not process your entry stake. Please try again.");
+    inQueue = false;
+    return;
   }
 
-  setTimeout(() => {
-    if (matchOverlay) matchOverlay.classList.add("hidden");
-    launchArena(opponent);
+  if (matchStatus) matchStatus.textContent = "Scanning live queue for players...";
+
+  // 1. Is someone already waiting for this game?
+  const { data: waiting } = await client
+    .from("matchmaking_queue")
+    .select("user_id, created_at")
+    .eq("game_type", activeGame.type)
+    .neq("user_id", currentUser.id)
+    .order("created_at", { ascending: true })
+    .limit(1);
+
+  if (waiting && waiting.length > 0) {
+    const opponentId = waiting[0].user_id;
+    await client.from("matchmaking_queue").delete().eq("user_id", opponentId);
+    const { data: match, error } = await client
+      .from("matches")
+      .insert({
+        game_type: activeGame.type,
+        player1_id: opponentId,
+        player2_id: currentUser.id,
+        entry_fee: MATCH_ENTRY_FEE
+      })
+      .select()
+      .single();
+    if (!error && match) {
+      if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
+      cleanupQueue();
+      setTimeout(() => {
+        window.location.href = "match.html?id=" + match.id + "&game=" + activeGame.type;
+      }, 600);
+      return;
+    }
+  }
+
+  // 2. No one waiting — join the queue myself and watch for a live opponent
+  await client.from("matchmaking_queue").upsert({ user_id: currentUser.id, game_type: activeGame.type });
+
+  queueChannel = client
+    .channel("queue-watch-" + currentUser.id)
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "matches", filter: "player2_id=eq." + currentUser.id },
+      (payload) => {
+        if (!inQueue) return;
+        cleanupQueue();
+        if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
+        setTimeout(() => {
+          window.location.href = "match.html?id=" + payload.new.id + "&game=" + activeGame.type;
+        }, 500);
+      }
+    )
+    .subscribe();
+
+  let secondsLeft = BOT_WAIT_SECONDS;
+  if (matchStatus) matchStatus.textContent = "Waiting for a live player... (" + secondsLeft + "s)";
+
+  matchmakingTimer = setInterval(async () => {
+    if (!inQueue) return;
+    secondsLeft -= 1;
+
+    if (secondsLeft > 0) {
+      if (matchStatus) matchStatus.textContent = "Waiting for a live player... (" + secondsLeft + "s)";
+      // Poll as a backup in case realtime missed the insert
+      const { data: mine } = await client
+        .from("matches")
+        .select("id")
+        .or("player1_id.eq." + currentUser.id + ",player2_id.eq." + currentUser.id)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (mine && mine.length > 0) {
+        cleanupQueue();
+        if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
+        setTimeout(() => {
+          window.location.href = "match.html?id=" + mine[0].id + "&game=" + activeGame.type;
+        }, 400);
+      }
+      return;
+    }
+
+    // Timed out — fall back to a bot
+    cleanupQueue();
+    await client.from("matchmaking_queue").delete().eq("user_id", currentUser.id);
+    const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
+    if (matchStatus) matchStatus.textContent = "No live players nearby \u2014 matched with " + bot.name;
+    setTimeout(() => {
+      if (matchOverlay) matchOverlay.classList.add("hidden");
+      launchArena(bot);
+    }, 900);
   }, 1000);
 }
 
-cancelMatchBtn?.addEventListener("click", () => {
-  if (matchmakingTimer) clearTimeout(matchmakingTimer);
+function cleanupQueue() {
+  inQueue = false;
+  if (matchmakingTimer) {
+    clearInterval(matchmakingTimer);
+    matchmakingTimer = null;
+  }
+  if (queueChannel) {
+    client.removeChannel(queueChannel);
+    queueChannel = null;
+  }
+}
+
+cancelMatchBtn?.addEventListener("click", async () => {
+  const wasInQueue = inQueue;
+  cleanupQueue();
   if (matchOverlay) matchOverlay.classList.add("hidden");
+  if (currentUser && wasInQueue) {
+    await client.from("matchmaking_queue").delete().eq("user_id", currentUser.id);
+    try {
+      await persistWalletDelta(MATCH_ENTRY_FEE);
+      await recordTransaction("Stake Refunded: " + (activeGame ? activeGame.name : "Match"), "credit", MATCH_ENTRY_FEE);
+    } catch (e) {
+      console.warn(e);
+    }
+  }
 });
 
 // ----------------------------------------------------
-// 5. High-Tech Playable Arena Engine
+// 8. Arena Engine
 // ----------------------------------------------------
 function launchArena(opponent) {
-  currentBalance -= MATCH_ENTRY_FEE;
-  recordTransaction("Stake Entry: " + activeGame.name, "debit", MATCH_ENTRY_FEE);
-
+  activeOpponent = opponent;
   const myName = playerNameEl.textContent;
   arenaUserName.textContent = myName;
   arenaUserAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(myName);
   arenaOppName.textContent = opponent.name;
   arenaOppAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + opponent.seed;
-
   arenaOverlay.classList.remove("hidden");
 
   if (activeGame.type === "math") {
@@ -382,17 +575,15 @@ function launchArena(opponent) {
 
 // GAME 1: Reaction Duel
 function runReactionGame() {
-  arenaStage.innerHTML = 
-    '<div id="reaction-box" class="reaction-box reaction-wait">' +
-      '<h2 style="font-size:1.4rem;">WAIT FOR GREEN...</h2>' +
-      '<p style="font-size:0.8rem; margin-top:6px; opacity:0.85;">Click instantly when the box turns green</p>' +
-    '</div>';
-
+  arenaStage.innerHTML =
+    '<div class="reaction-box reaction-wait" id="reaction-box">' +
+    "<h2>WAIT FOR GREEN...</h2>" +
+    '<p style="margin-top:8px;font-size:0.8rem;opacity:0.85">Click instantly when the box turns green</p>' +
+    "</div>";
   const box = document.getElementById("reaction-box");
   let canClick = false;
   let startTime = 0;
   let finished = false;
-
   const greenDelay = Math.floor(Math.random() * 2200) + 2400;
   const timeoutId = setTimeout(() => {
     if (finished) return;
@@ -405,18 +596,16 @@ function runReactionGame() {
   box.addEventListener("click", () => {
     if (finished) return;
     finished = true;
-
     if (!canClick) {
       clearTimeout(timeoutId);
-      endDuel(false, "False Start! You clicked before the signal turned green.", 0, 0);
+      endDuel(false, "False Start! You clicked before the signal turned green.");
     } else {
       const userReaction = Date.now() - startTime;
       const botReaction = Math.floor(Math.random() * 120) + 290;
-
       if (userReaction < botReaction) {
-        endDuel(true, "Superior speed! Your reaction: " + userReaction + "ms vs Opponent: " + botReaction + "ms", userReaction, botReaction);
+        endDuel(true, "Superior speed! Your reaction: " + userReaction + "ms vs Opponent: " + botReaction + "ms");
       } else {
-        endDuel(false, "Opponent was faster (" + botReaction + "ms). Your speed: " + userReaction + "ms", userReaction, botReaction);
+        endDuel(false, "Opponent was faster (" + botReaction + "ms). Your speed: " + userReaction + "ms");
       }
     }
   });
@@ -428,26 +617,25 @@ function runCyberMathGame() {
   const n2 = Math.floor(Math.random() * 30) + 12;
   const correct = n1 + n2;
   const wrong = correct + (Math.random() > 0.5 ? 4 : -5);
-
   const leftIsCorrect = Math.random() > 0.5;
   const optA = leftIsCorrect ? correct : wrong;
   const optB = leftIsCorrect ? wrong : correct;
 
-  arenaStage.innerHTML = 
-    '<div style="width:100%; text-align:center;">' +
-      '<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:6px;">Fast Equation Solve</p>' +
-      '<h2 style="font-size:2rem; margin-bottom:20px;">' + n1 + ' + ' + n2 + ' = ?</h2>' +
-      '<div style="display:flex; gap:12px; justify-content:center;">' +
-        '<button id="opt-a" class="play-btn" style="min-width:110px; font-size:1.1rem;">' + optA + '</button>' +
-        '<button id="opt-b" class="play-btn" style="min-width:110px; font-size:1.1rem;">' + optB + '</button>' +
-      '</div>' +
-    '</div>';
+  arenaStage.innerHTML =
+    '<div style="width:100%;text-align:center">' +
+    '<p class="subtitle">Fast Equation Solve</p>' +
+    '<div class="math-problem">' + n1 + " + " + n2 + " = ?</div>" +
+    '<div class="quiz-options">' +
+    '<button class="quiz-option" id="opt-a">' + optA + "</button>" +
+    '<button class="quiz-option" id="opt-b">' + optB + "</button>" +
+    "</div>" +
+    "</div>";
 
   let answered = false;
   const botAnswerTimer = setTimeout(() => {
     if (!answered) {
       answered = true;
-      endDuel(false, "Opponent calculated and answered correctly first!", 0, 0);
+      endDuel(false, "Opponent calculated and answered correctly first!");
     }
   }, Math.floor(Math.random() * 1400) + 2800);
 
@@ -455,14 +643,12 @@ function runCyberMathGame() {
     if (answered) return;
     answered = true;
     clearTimeout(botAnswerTimer);
-
     if (val === correct) {
-      endDuel(true, "Accurate calculation solved in lightning time!", 0, 0);
+      endDuel(true, "Accurate calculation solved in lightning time!");
     } else {
-      endDuel(false, "Incorrect answer calculated.", 0, 0);
+      endDuel(false, "Incorrect answer calculated.");
     }
   }
-
   document.getElementById("opt-a")?.addEventListener("click", () => pickAnswer(optA));
   document.getElementById("opt-b")?.addEventListener("click", () => pickAnswer(optB));
 }
@@ -474,33 +660,30 @@ function runColorClashGame() {
     { text: "BLUE", css: "#38bdf8" },
     { text: "GREEN", css: "#00e701" }
   ];
-
   const targetWord = colors[Math.floor(Math.random() * colors.length)];
   const fontColor = colors[Math.floor(Math.random() * colors.length)];
 
-  arenaStage.innerHTML = 
-    '<div style="width:100%; text-align:center;">' +
-      '<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:8px;">Does the word match the font color?</p>' +
-      '<h2 style="font-size:2.2rem; color:' + fontColor.css + '; margin-bottom:20px; font-weight:800;">' + targetWord.text + '</h2>' +
-      '<div style="display:flex; gap:12px; justify-content:center;">' +
-        '<button id="match-yes" class="btn-primary" style="padding:12px;">YES (MATCH)</button>' +
-        '<button id="match-no" class="btn-secondary" style="padding:12px;">NO (DIFFERENT)</button>' +
-      '</div>' +
-    '</div>';
+  arenaStage.innerHTML =
+    '<div style="width:100%;text-align:center">' +
+    '<p class="subtitle">Does the word match the font color?</p>' +
+    '<div class="quiz-question" style="color:' + fontColor.css + '">' + targetWord.text + "</div>" +
+    '<div class="quiz-options">' +
+    '<button class="quiz-option" id="match-yes">YES (MATCH)</button>' +
+    '<button class="quiz-option" id="match-no">NO (DIFFERENT)</button>' +
+    "</div>" +
+    "</div>";
 
   const isMatching = targetWord.text === fontColor.text;
   let done = false;
-
   function evaluate(answer) {
     if (done) return;
     done = true;
     if (answer === isMatching) {
-      endDuel(true, "Correct cognitive color distinction made!", 0, 0);
+      endDuel(true, "Correct cognitive color distinction made!");
     } else {
-      endDuel(false, "Incorrect mismatch selected under pressure.", 0, 0);
+      endDuel(false, "Incorrect mismatch selected under pressure.");
     }
   }
-
   document.getElementById("match-yes")?.addEventListener("click", () => evaluate(true));
   document.getElementById("match-no")?.addEventListener("click", () => evaluate(false));
 }
@@ -509,31 +692,29 @@ function runColorClashGame() {
 function runMemoryMatrixGame() {
   let tilesHtml = "";
   for (let i = 0; i < 9; i++) {
-    tilesHtml += '<div class="matrix-tile" data-idx="' + i + '" style="width:54px; height:54px; background:var(--bg-card); border-radius:6px; cursor:pointer;"></div>';
+    tilesHtml += '<div class="matrix-tile" data-idx="' + i + '" style="width:60px;height:60px;background-color:var(--bg-card);border-radius:8px;cursor:pointer;border:1px solid var(--border-color)"></div>';
   }
-  
-  arenaStage.innerHTML = 
-    '<div style="text-align:center;">' +
-      '<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:12px;">Memorize the active green tile</p>' +
-      '<div style="display:grid; grid-template-columns:repeat(3, 54px); gap:8px; justify-content:center;" id="matrix-grid">' +
-        tilesHtml +
-      '</div>' +
-    '</div>';
+  arenaStage.innerHTML =
+    '<div style="width:100%;text-align:center">' +
+    '<p class="subtitle">Memorize the active green tile</p>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:220px;margin:16px auto">' +
+    tilesHtml +
+    "</div>" +
+    "</div>";
 
   const tiles = document.querySelectorAll(".matrix-tile");
   const activeIndex = Math.floor(Math.random() * 9);
-
   setTimeout(() => {
     if (tiles[activeIndex]) tiles[activeIndex].style.backgroundColor = "var(--primary-green)";
     setTimeout(() => {
       if (tiles[activeIndex]) tiles[activeIndex].style.backgroundColor = "var(--bg-card)";
-      tiles.forEach(t => {
+      tiles.forEach((t) => {
         t.addEventListener("click", () => {
           const clickedIdx = parseInt(t.getAttribute("data-idx"));
           if (clickedIdx === activeIndex) {
-            endDuel(true, "Flawless spatial memory recall!", 0, 0);
+            endDuel(true, "Flawless spatial memory recall!");
           } else {
-            endDuel(false, "Selected incorrect matrix quadrant.", 0, 0);
+            endDuel(false, "Selected incorrect matrix quadrant.");
           }
         });
       });
@@ -542,45 +723,50 @@ function runMemoryMatrixGame() {
 }
 
 // ----------------------------------------------------
-// 6. Post-Match Analytics & Termination
+// 9. Post-Match Resolution — now fully persisted
 // ----------------------------------------------------
-function endDuel(won, analysisText, userStat, oppStat) {
+async function endDuel(won, analysisText) {
+  let reward = -MATCH_ENTRY_FEE;
+
   if (won) {
-    currentBalance += MATCH_WIN_REWARD;
-    recordTransaction("Duel Victory: " + activeGame.name, "credit", MATCH_WIN_REWARD);
+    try {
+      await persistWalletDelta(MATCH_WIN_REWARD);
+      await recordTransaction("Duel Victory: " + activeGame.name, "credit", MATCH_WIN_REWARD);
+      reward = MATCH_WIN_REWARD;
+    } catch (e) {
+      console.error("Failed to credit winnings:", e);
+    }
   }
 
-  matchHistory.unshift({
-    game: activeGame.name,
-    opponent: activeOpponent.name,
-    result: won ? "VICTORY" : "DEFEAT",
-    reward: won ? ("+" + MATCH_WIN_REWARD + " 🪙") : "-50 🪙",
-    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  });
-  saveMatches();
+  await recordMatch(activeGame.name, activeOpponent.name, won ? "VICTORY" : "DEFEAT", reward);
   updateUI();
 
-  arenaStage.innerHTML = 
+  const rewardLine = won
+    ? "+" + formatRupees(MATCH_WIN_REWARD) + " Awarded"
+    : formatRupees(-MATCH_ENTRY_FEE) + " Stake Lost";
+
+  arenaStage.innerHTML =
     '<div class="result-card">' +
-      '<h2 class="' + (won ? 'win-text' : 'lose-text') + '">' + (won ? 'VICTORY' : 'DEFEAT') + '</h2>' +
-      '<p style="font-weight:700; font-size:1.1rem; color:var(--text-main); margin-bottom:4px;">' +
-        (won ? ('+' + MATCH_WIN_REWARD + ' Tokens Awarded') : '-50 Tokens Stake Lost') +
-      '</p>' +
-      '<div class="result-analytics">' +
-        '<p style="margin-bottom:4px;"><strong>Performance Analytics:</strong></p>' +
-        '<p>' + analysisText + '</p>' +
-      '</div>' +
-      '<div class="result-btn-row">' +
-        '<button id="rematch-btn" class="btn-primary" type="button">Rematch</button>' +
-        '<button id="return-dash-btn" class="btn-secondary" type="button">Dashboard</button>' +
-      '</div>' +
-    '</div>';
+    '<h2 class="' + (won ? "win-text" : "lose-text") + '">' + (won ? "VICTORY" : "DEFEAT") + "</h2>" +
+    '<p style="font-weight:700;color:var(--text-muted)">' + rewardLine + "</p>" +
+    '<div class="result-analytics">' +
+    '<div style="font-weight:700;color:var(--text-main);margin-bottom:4px">Performance Analytics:</div>' +
+    "<div>" + analysisText + "</div>" +
+    "</div>" +
+    '<div class="result-btn-row">' +
+    '<button class="btn-secondary" id="rematch-btn">Rematch</button>' +
+    '<button class="btn-primary" id="return-dash-btn">Dashboard</button>' +
+    "</div>" +
+    "</div>";
 
   document.getElementById("rematch-btn")?.addEventListener("click", () => {
     arenaOverlay.classList.add("hidden");
-    startMatchmaking();
+    if (currentBalance < MATCH_ENTRY_FEE) {
+      alert("Insufficient balance. You need " + formatRupees(MATCH_ENTRY_FEE) + " to enter.");
+      return;
+    }
+    beginMatchmaking();
   });
-
   document.getElementById("return-dash-btn")?.addEventListener("click", () => {
     arenaOverlay.classList.add("hidden");
   });
