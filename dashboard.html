@@ -14,11 +14,11 @@
   </style>
 </head>
 <body class="app-body">
-  <!-- Enhanced Centered Loading Screen -->
+  <!-- Loading Screen (Auto-dismisses in 400ms) -->
   <div id="loading" class="center-screen">
     <div class="loader-container">
       <div class="loader-logo">
-        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5">
           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
         </svg>
       </div>
@@ -59,18 +59,18 @@
           </button>
         </nav>
 
-        <!-- Right Side: Wallet & User Profile -->
+        <!-- Right Side: Wallet & User Profile Button -->
         <div class="user-stats-bar">
-          <div class="token-badge" title="Your Token Balance">
+          <div class="token-badge" title="Token Balance">
             <span class="token-icon-wrap">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10M15 9H10a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H9"></path></svg>
             </span>
-            <span id="balance-value" class="token-count">0</span>
+            <span id="balance-value" class="token-count">1,200</span>
           </div>
 
           <button id="profile-nav-btn" class="user-profile-chip" type="button" title="View Profile">
-            <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=arena" alt="Avatar" />
-            <span id="player-name" class="user-name">Player</span>
+            <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=vishal" alt="Avatar" />
+            <span id="player-name" class="user-name">Vishal</span>
           </button>
 
           <button id="logout-btn" class="logout-btn" type="button" title="Sign out">
@@ -80,11 +80,11 @@
       </div>
     </header>
 
-    <!-- Main Container -->
+    <!-- Main Views Container -->
     <main class="app-main">
       <!-- VIEW 1: EARN -->
       <section id="view-earn" class="app-view active">
-        <!-- Progress Bar -->
+        <!-- Next Cashout Progress Bar (Freecash Style) -->
         <div class="cashout-progress-banner">
           <div class="progress-info">
             <span class="progress-title">Next Cashout Threshold</span>
@@ -95,12 +95,12 @@
           </div>
         </div>
 
-        <!-- Banner -->
+        <!-- Banner Header -->
         <div class="hero-banner">
           <div class="banner-content">
             <span class="badge-tag">INSTANT 1V1 DUELS</span>
-            <h2>Challenge Real Players & Win Tokens</h2>
-            <p>Entry: <strong>50 Tokens</strong> • Winner Takes <strong>90 Tokens</strong></p>
+            <h2>Challenge Players & Win Real Tokens</h2>
+            <p>Entry: <strong>50 Tokens</strong> • Winner Reward: <strong>90 Tokens</strong> (Net +40)</p>
           </div>
         </div>
 
@@ -156,7 +156,7 @@
             </div>
             <div class="card-content">
               <h3 class="card-title">Memory Matrix</h3>
-              <p class="card-desc">Memorize the flashing grid pattern faster than opponent.</p>
+              <p class="card-desc">Memorize the flashing tile faster than opponent.</p>
               <div class="card-meta">
                 <span class="meta-fee">Fee: 50 🪙</span>
                 <span class="meta-win">+90 Reward</span>
@@ -207,5 +207,521 @@
             </div>
             <div class="card-content">
               <h3 class="card-title">Trivia Sprint</h3>
-              <p class="card-desc">Answer 3 speed trivia questions before your opponent.</p>
-              <
+              <p class="card-desc">Answer 3 speed trivia questions before opponent.</p>
+              <div class="card-meta">
+                <span class="meta-fee">Fee: 50 🪙</span>
+                <span class="meta-win">+90 Reward</span>
+              </div>
+              <button class="play-btn" data-game="Trivia Sprint" data-type="math" type="button">Play Match</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- VIEW 2: MY PROFILE -->
+      <section id="view-profile" class="app-view">
+        <div class="profile-header-card">
+          <div class="profile-left">
+            <div class="avatar-wrap">
+              <img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" />
+            </div>
+            <div class="profile-meta">
+              <div class="name-edit-group">
+                <h2 id="profile-display-name">Vishal</h2>
+                <button id="edit-name-btn" class="icon-btn" title="Edit Name" type="button">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                </button>
+              </div>
+              <div id="name-edit-box" class="name-edit-box hidden">
+                <input type="text" id="name-input" class="name-input" maxlength="20" placeholder="New username" />
+                <button id="save-name-btn" class="btn-save" type="button">Save</button>
+                <button id="cancel-name-btn" class="btn-cancel-sm" type="button">Cancel</button>
+              </div>
+              <p class="join-date">Arena Member • Verified Account</p>
+              <div class="level-pill">
+                <span>Level <strong id="user-level">1</strong></span>
+                <div class="level-bar-bg"><div class="level-bar-fill" style="width: 48%;"></div></div>
+                <span class="xp-text">480 / 1,000 XP</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-stats-grid">
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-total-earnings">1,200 🪙</span>
+              <span class="stat-box-lbl">Token Balance</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-matches-played">0</span>
+              <span class="stat-box-lbl">Matches Played</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-win-rate">0%</span>
+              <span class="stat-box-lbl">Win Rate</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-tokens-won">+0 🪙</span>
+              <span class="stat-box-lbl">Duel Profit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ledger -->
+        <div class="ledger-section">
+          <div class="ledger-header">
+            <h3>Token Transactions & Match Ledger</h3>
+            <span class="ledger-sub">Live record of credit and debit events</span>
+          </div>
+
+          <div class="table-wrap">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th>Event Description</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Date & Time</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: MATCHES -->
+      <section id="view-matches" class="app-view">
+        <div class="section-card">
+          <h3>Match History</h3>
+          <p class="section-sub">Your recent 1v1 duel records</p>
+          <div class="table-wrap">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th>Game</th>
+                  <th>Opponent</th>
+                  <th>Result</th>
+                  <th>Reward</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="matches-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: CASHOUT -->
+      <section id="view-cashout" class="app-view">
+        <div class="section-card">
+          <h3>Cashout Vault</h3>
+          <p class="section-sub">Exchange tokens for rewards</p>
+          <div class="stat-box" style="margin-top:14px;">
+            <p>Minimum payout requires 2,500 tokens ($2.50 value prototype).</p>
+            <button class="btn-primary" style="margin-top:14px; max-width:200px;" type="button" onclick="alert('Threshold: Reach 2,500 tokens to initialize redemption.')">Request Cashout</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: REWARDS -->
+      <section id="view-rewards" class="app-view">
+        <div class="section-card">
+          <h3>Daily Rewards</h3>
+          <p class="section-sub">Daily streak login bonus</p>
+          <div class="stat-box" style="margin-top:14px;">
+            <span class="stat-box-num">Day 1 Streak</span>
+            <button class="btn-primary" style="margin-top:14px; max-width:220px;" type="button" onclick="alert('Daily reward claimed: +50 Tokens!')">Claim 50 Daily Tokens</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Matchmaking Modal -->
+    <div id="match-overlay" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="radar-pulse">
+          <div class="pulse-circle"></div>
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a10 10 0 0 1 10 10"></path>
+          </svg>
+        </div>
+        <h3 id="match-title">Finding Opponent</h3>
+        <p class="modal-subtitle" id="match-status">Scanning live queue for players...</p>
+        <div class="modal-fee-notice">Entry Stake: <strong>50 Tokens</strong></div>
+        <button id="cancel-match-btn" class="btn-cancel" type="button">Cancel Queue</button>
+      </div>
+    </div>
+
+    <!-- Arena Modal -->
+    <div id="game-arena-overlay" class="modal-overlay hidden">
+      <div class="arena-card">
+        <div class="arena-header">
+          <div class="player-stat user-side">
+            <img id="arena-user-avatar" class="arena-avatar" src="" alt="You" />
+            <span id="arena-user-name" class="arena-name">You</span>
+          </div>
+          <div class="vs-badge">VS</div>
+          <div class="player-stat opp-side">
+            <img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
+            <span id="arena-opp-name" class="arena-name">Opponent</span>
+          </div>
+        </div>
+        <div id="arena-stage" class="arena-stage"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-container">
+        <div class="footer-brand-col">
+          <div class="brand-logo">
+            <svg class="logo-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span class="logo-text">ARENA</span>
+          </div>
+          <p class="footer-desc">Arena is a 1v1 skill-based platform where players duel in instant mini-games and earn tokens.</p>
+          <div class="trust-badge">
+            <span>★ ★ ★ ★ ★</span>
+            <span>Verified 100% Fair Play Matchmaking</span>
+          </div>
+        </div>
+
+        <div class="footer-links-group">
+          <div class="footer-col">
+            <span class="footer-heading">Platform</span>
+            <a href="#">Earn Tokens</a>
+            <a href="#">Leaderboard</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-heading">Resources</span>
+            <a href="#">Help Center</a>
+            <a href="#">Live Support</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-heading">Legal</span>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Arena Technologies. All rights reserved.</p>
+        <span class="lang-tag">English (US)</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- CDN Script -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./assets/supabaseClient.js"></script>
+
+  <!-- Complete Inlined Dashboard Engine -->
+  <script>
+    const MATCH_ENTRY_FEE = 50;
+    const MATCH_WIN_REWARD = 90;
+
+    const INDIAN_BOT_POOL = [
+      { name: "Aarav_Sharma", seed: "aarav" },
+      { name: "Priya_Patel", seed: "priya" },
+      { name: "Rohan_Verma", seed: "rohan" },
+      { name: "Ananya_Singh", seed: "ananya" },
+      { name: "Vikram_Malhotra", seed: "vikram" },
+      { name: "Sneha_Reddy", seed: "sneha" },
+      { name: "Aditya_Kumar", seed: "aditya" },
+      { name: "Neha_Gupta", seed: "neha" },
+      { name: "Karan_Mehta", seed: "karan" },
+      { name: "Divya_Roy", seed: "divya" },
+      { name: "Arjun_Chopra", seed: "arjun" },
+      { name: "Riya_Sen", seed: "riya" }
+    ];
+
+    let currentUser = { id: "guest_user", email: "player@arena.gg" };
+    let currentBalance = 1200;
+    let matchHistory = [];
+    let transactions = [];
+    let activeOpponent = null;
+    let activeGame = null;
+    let matchmakingTimer = null;
+
+    const loadingEl = document.getElementById("loading");
+    const dashEl = document.getElementById("dashboard");
+    const balanceEl = document.getElementById("balance-value");
+    const playerNameEl = document.getElementById("player-name");
+    const avatarEl = document.getElementById("avatar");
+    const logoutBtn = document.getElementById("logout-btn");
+
+    const profileDisplayName = document.getElementById("profile-display-name");
+    const profileViewAvatar = document.getElementById("profile-view-avatar");
+    const editNameBtn = document.getElementById("edit-name-btn");
+    const nameEditBox = document.getElementById("name-edit-box");
+    const nameInput = document.getElementById("name-input");
+    const saveNameBtn = document.getElementById("save-name-btn");
+    const cancelNameBtn = document.getElementById("cancel-name-btn");
+
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const appViews = document.querySelectorAll(".app-view");
+    const filterChips = document.querySelectorAll(".filter-chip");
+    const gameCards = document.querySelectorAll(".game-card");
+    const playButtons = document.querySelectorAll(".play-btn");
+
+    const matchOverlay = document.getElementById("match-overlay");
+    const cancelMatchBtn = document.getElementById("cancel-match-btn");
+    const matchTitle = document.getElementById("match-title");
+    const matchStatus = document.getElementById("match-status");
+
+    const arenaOverlay = document.getElementById("game-arena-overlay");
+    const arenaUserAvatar = document.getElementById("arena-user-avatar");
+    const arenaUserName = document.getElementById("arena-user-name");
+    const arenaOppAvatar = document.getElementById("arena-opp-avatar");
+    const arenaOppName = document.getElementById("arena-opp-name");
+    const arenaStage = document.getElementById("arena-stage");
+
+    function revealDashboard() {
+      if (loadingEl) loadingEl.classList.add("hidden");
+      if (dashEl) dashEl.classList.remove("hidden");
+    }
+
+    async function init() {
+      try {
+        if (typeof client !== "undefined" && client && client.auth) {
+          const sessionRes = await client.auth.getSession();
+          if (sessionRes && sessionRes.data && sessionRes.data.session) {
+            currentUser = sessionRes.data.session.user;
+            try {
+              const { data: wallet } = await client
+                .from("wallet")
+                .select("dummy_token")
+                .eq("user_id", currentUser.id)
+                .single();
+              if (wallet && typeof wallet.dummy_token === "number") {
+                currentBalance = wallet.dummy_token;
+              }
+            } catch (e) {}
+          }
+        }
+      } catch (err) {
+        console.warn("Auth sync notice:", err);
+      }
+
+      loadLocalUserData();
+      updateUI();
+      revealDashboard();
+    }
+
+    // Failsafe auto-reveal after 400ms
+    setTimeout(revealDashboard, 400);
+
+    function loadLocalUserData() {
+      const savedName = localStorage.getItem("arena_name_" + currentUser.id);
+      const meta = currentUser.user_metadata || {};
+      const initialName = savedName || meta.full_name || meta.name || (currentUser.email ? currentUser.email.split("@")[0] : "Vishal");
+
+      const storedTx = localStorage.getItem("arena_tx_" + currentUser.id);
+      if (storedTx) {
+        try { transactions = JSON.parse(storedTx); } catch (e) { transactions = []; }
+      } else {
+        transactions = [
+          { desc: "Welcome Bonus Credited", type: "credit", amount: 1000, date: new Date().toLocaleString() }
+        ];
+        saveTransactions();
+      }
+
+      const storedMatches = localStorage.getItem("arena_matches_" + currentUser.id);
+      if (storedMatches) {
+        try { matchHistory = JSON.parse(storedMatches); } catch (e) { matchHistory = []; }
+      }
+
+      setUserDisplayName(initialName);
+    }
+
+    function setUserDisplayName(name) {
+      if (playerNameEl) playerNameEl.textContent = name;
+      if (profileDisplayName) profileDisplayName.textContent = name;
+      const avatarUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(name);
+      if (avatarEl) avatarEl.src = avatarUrl;
+      if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
+    }
+
+    function updateUI() {
+      if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString();
+      
+      const progressPercent = Math.min(100, Math.round((currentBalance / 2500) * 100));
+      const progressFill = document.getElementById("progress-fill");
+      const progressText = document.getElementById("progress-text");
+      if (progressFill) progressFill.style.width = progressPercent + "%";
+      if (progressText) {
+        progressText.textContent = "$" + (currentBalance / 1000).toFixed(2) + " / $2.50 (" + currentBalance.toLocaleString() + " / 2,500 Tokens)";
+      }
+
+      const totalMatches = matchHistory.length;
+      const wins = matchHistory.filter(m => m.result === "VICTORY").length;
+      const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
+      const totalWonTokens = wins * MATCH_WIN_REWARD;
+
+      const statEarnings = document.getElementById("stat-total-earnings");
+      const statMatches = document.getElementById("stat-matches-played");
+      const statRate = document.getElementById("stat-win-rate");
+      const statWon = document.getElementById("stat-tokens-won");
+
+      if (statEarnings) statEarnings.textContent = currentBalance.toLocaleString() + " 🪙";
+      if (statMatches) statMatches.textContent = totalMatches;
+      if (statRate) statRate.textContent = winRate + "%";
+      if (statWon) statWon.textContent = "+" + totalWonTokens.toLocaleString() + " 🪙";
+
+      renderLedger();
+      renderMatchHistory();
+    }
+
+    function renderLedger() {
+      const tbody = document.getElementById("ledger-body");
+      if (!tbody) return;
+      if (transactions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-dim);">No transactions recorded</td></tr>';
+        return;
+      }
+      tbody.innerHTML = transactions.map(tx => {
+        const isCredit = tx.type === "credit";
+        const sign = isCredit ? "+" : "-";
+        const color = isCredit ? "var(--primary-green)" : "var(--accent-red)";
+        const badgeClass = isCredit ? "badge-credit" : "badge-debit";
+        return '<tr>' +
+          '<td>' + tx.desc + '</td>' +
+          '<td><span class="' + badgeClass + '">' + tx.type.toUpperCase() + '</span></td>' +
+          '<td style="font-weight:700; color:' + color + ';">' + sign + tx.amount + ' 🪙</td>' +
+          '<td style="color:var(--text-dim);">' + tx.date + '</td>' +
+        '</tr>';
+      }).join("");
+    }
+
+    function renderMatchHistory() {
+      const tbody = document.getElementById("matches-body");
+      if (!tbody) return;
+      if (matchHistory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-dim);">No matches played yet. Choose a game above!</td></tr>';
+        return;
+      }
+      tbody.innerHTML = matchHistory.map(m => {
+        const isWin = m.result === "VICTORY";
+        const color = isWin ? "var(--primary-green)" : "var(--accent-red)";
+        const badgeClass = isWin ? "badge-credit" : "badge-debit";
+        return '<tr>' +
+          '<td style="font-weight:600;">' + m.game + '</td>' +
+          '<td>' + m.opponent + '</td>' +
+          '<td><span class="' + badgeClass + '">' + m.result + '</span></td>' +
+          '<td style="font-weight:700; color:' + color + ';">' + m.reward + '</td>' +
+          '<td style="color:var(--text-dim);">' + m.date + '</td>' +
+        '</tr>';
+      }).join("");
+    }
+
+    function recordTransaction(desc, type, amount) {
+      transactions.unshift({ desc: desc, type: type, amount: amount, date: new Date().toLocaleString() });
+      saveTransactions();
+      updateUI();
+    }
+
+    function saveTransactions() {
+      if (currentUser) {
+        localStorage.setItem("arena_tx_" + currentUser.id, JSON.stringify(transactions.slice(0, 50)));
+      }
+    }
+
+    function saveMatches() {
+      if (currentUser) {
+        localStorage.setItem("arena_matches_" + currentUser.id, JSON.stringify(matchHistory.slice(0, 50)));
+      }
+    }
+
+    function switchView(targetId) {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      appViews.forEach(v => v.classList.remove("active"));
+
+      const targetTab = Array.from(tabButtons).find(b => b.getAttribute("data-target") === targetId);
+      if (targetTab) targetTab.classList.add("active");
+
+      const targetView = document.getElementById(targetId);
+      if (targetView) targetView.classList.add("active");
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => switchView(btn.getAttribute("data-target")));
+    });
+
+    document.getElementById("profile-nav-btn")?.addEventListener("click", () => switchView("view-profile"));
+    document.getElementById("nav-brand-logo")?.addEventListener("click", () => switchView("view-earn"));
+
+    filterChips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        filterChips.forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+
+        const category = chip.getAttribute("data-category");
+
+        gameCards.forEach(card => {
+          if (category === "all" || card.getAttribute("data-category") === category) {
+            card.style.display = "flex";
+          } else {
+            card.style.display = "none";
+          }
+        });
+      });
+    });
+
+    editNameBtn?.addEventListener("click", () => {
+      nameInput.value = playerNameEl.textContent;
+      nameEditBox.classList.remove("hidden");
+      nameInput.focus();
+    });
+
+    cancelNameBtn?.addEventListener("click", () => {
+      nameEditBox.classList.add("hidden");
+    });
+
+    saveNameBtn?.addEventListener("click", () => {
+      const newName = nameInput.value.trim();
+      if (newName.length < 2) {
+        alert("Name must be at least 2 characters.");
+        return;
+      }
+      if (currentUser) {
+        localStorage.setItem("arena_name_" + currentUser.id, newName);
+      }
+      setUserDisplayName(newName);
+      nameEditBox.classList.add("hidden");
+    });
+
+    playButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeGame = {
+          name: btn.getAttribute("data-game"),
+          type: btn.getAttribute("data-type")
+        };
+
+        if (currentBalance < MATCH_ENTRY_FEE) {
+          alert("Insufficient balance. You need " + MATCH_ENTRY_FEE + " tokens to enter.");
+          return;
+        }
+
+        startMatchmaking();
+      });
+    });
+
+    function startMatchmaking() {
+      if (matchTitle) matchTitle.textContent = "Finding Opponent for " + activeGame.name;
+      if (matchStatus) matchStatus.textContent = "Scanning active queue for live players...";
+      if (matchOverlay) matchOverlay.classList.remove("hidden");
+
+      const searchDuration = Math.floor(Math.random() * 3000) + 4000;
+      matchmakingTimer = setTimeout(() => {
+        const randomIndianBot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
+        pairMatch(randomIndianBot, false);
+      }, searchDuration);
+    }
+
+    function pairMatch(opponent, isReal) {
+      if (matchmakingTimer) clearTimeout(matchmakingTimer);
+
+      activeOpponent = opponent;
+      if (matchStatus) {
+        match
