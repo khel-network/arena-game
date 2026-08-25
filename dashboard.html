@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arena | Competitive Gaming Platform</title>
-  <!-- Google Fonts: Inter (Professional Clean Typography) -->
+  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,19 +14,26 @@
   </style>
 </head>
 <body class="app-body">
-  <!-- Loading Screen -->
+  <!-- Enhanced Centered Loading Screen -->
   <div id="loading" class="center-screen">
-    <div class="spinner"></div>
-    <p class="loading-text">Connecting to Arena Network...</p>
+    <div class="loader-container">
+      <div class="loader-logo">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <div class="spinner"></div>
+      <p class="loading-text">Connecting to Arena Network...</p>
+    </div>
   </div>
 
   <div id="dashboard" class="app-wrap hidden">
-    <!-- Freecash-Style Top Navbar -->
+    <!-- Top Navigation -->
     <header class="top-nav">
       <div class="nav-container">
         <!-- Logo -->
         <div class="brand-logo" id="nav-brand-logo">
-          <svg class="logo-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="logo-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
           </svg>
           <span class="logo-text">ARENA</span>
@@ -52,9 +59,8 @@
           </button>
         </nav>
 
-        <!-- Right Side: Wallet & User Profile Button -->
+        <!-- Right Side: Wallet & User Profile -->
         <div class="user-stats-bar">
-          <!-- Token Badge -->
           <div class="token-badge" title="Your Token Balance">
             <span class="token-icon-wrap">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10M15 9H10a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H9"></path></svg>
@@ -62,13 +68,11 @@
             <span id="balance-value" class="token-count">0</span>
           </div>
 
-          <!-- Profile Button (Switches to Profile View) -->
-          <button id="profile-nav-btn" class="user-profile-chip" type="button" title="View Profile & Settings">
+          <button id="profile-nav-btn" class="user-profile-chip" type="button" title="View Profile">
             <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=arena" alt="Avatar" />
             <span id="player-name" class="user-name">Player</span>
           </button>
 
-          <!-- Logout -->
           <button id="logout-btn" class="logout-btn" type="button" title="Sign out">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
           </button>
@@ -76,14 +80,11 @@
       </div>
     </header>
 
-    <!-- Main Dynamic View Container -->
+    <!-- Main Container -->
     <main class="app-main">
-
-      <!-- ========================================================
-           VIEW 1: EARN (MAIN GAMES LOBBY)
-           ======================================================== -->
+      <!-- VIEW 1: EARN -->
       <section id="view-earn" class="app-view active">
-        <!-- Next Cashout Progress Bar (Freecash Style) -->
+        <!-- Progress Bar -->
         <div class="cashout-progress-banner">
           <div class="progress-info">
             <span class="progress-title">Next Cashout Threshold</span>
@@ -94,12 +95,12 @@
           </div>
         </div>
 
-        <!-- Banner Header -->
+        <!-- Banner -->
         <div class="hero-banner">
           <div class="banner-content">
             <span class="badge-tag">INSTANT 1V1 DUELS</span>
             <h2>Challenge Real Players & Win Tokens</h2>
-            <p>Entry: <strong>50 Tokens</strong> • Winner Takes <strong>90 Tokens</strong> (Net +40)</p>
+            <p>Entry: <strong>50 Tokens</strong> • Winner Takes <strong>90 Tokens</strong></p>
           </div>
         </div>
 
@@ -111,7 +112,7 @@
           <button class="filter-chip" data-category="brain" type="button">Memory & Brain</button>
         </div>
 
-        <!-- 6 High-Tech Games Grid -->
+        <!-- Games Grid -->
         <div class="games-grid">
           <!-- Game 1: Reaction Duel -->
           <article class="game-card" data-category="reflex">
@@ -130,7 +131,7 @@
             </div>
           </article>
 
-          <!-- Game 2: Cyber Math Duel -->
+          <!-- Game 2: Cyber Math -->
           <article class="game-card" data-category="math">
             <div class="card-media banner-math">
               <span class="card-badge">SKILL</span>
@@ -207,248 +208,4 @@
             <div class="card-content">
               <h3 class="card-title">Trivia Sprint</h3>
               <p class="card-desc">Answer 3 speed trivia questions before your opponent.</p>
-              <div class="card-meta">
-                <span class="meta-fee">Fee: 50 🪙</span>
-                <span class="meta-win">+90 Reward</span>
-              </div>
-              <button class="play-btn" data-game="Trivia Sprint" data-type="math" type="button">Play Match</button>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <!-- ========================================================
-           VIEW 2: MY PROFILE & TRANSACTIONS (Freecash Style)
-           ======================================================== -->
-      <section id="view-profile" class="app-view">
-        <div class="profile-header-card">
-          <!-- Left: User Details & Name Edit -->
-          <div class="profile-left">
-            <div class="avatar-wrap">
-              <img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" />
-            </div>
-            <div class="profile-meta">
-              <div class="name-edit-group">
-                <h2 id="profile-display-name">Player</h2>
-                <button id="edit-name-btn" class="icon-btn" title="Edit Name" type="button">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                </button>
-              </div>
-              <div id="name-edit-box" class="name-edit-box hidden">
-                <input type="text" id="name-input" class="name-input" maxlength="20" placeholder="Enter new username" />
-                <button id="save-name-btn" class="btn-save" type="button">Save</button>
-                <button id="cancel-name-btn" class="btn-cancel-sm" type="button">Cancel</button>
-              </div>
-              <p class="join-date">Joined Arena Member • Verified Player</p>
-              <div class="level-pill">
-                <span>Level <strong id="user-level">1</strong></span>
-                <div class="level-bar-bg"><div id="level-bar-fill" class="level-bar-fill" style="width: 35%;"></div></div>
-                <span class="xp-text">350 / 1,000 XP</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: Key Stat Boxes -->
-          <div class="profile-stats-grid">
-            <div class="stat-box">
-              <span class="stat-box-num" id="stat-total-earnings">0 🪙</span>
-              <span class="stat-box-lbl">Total Tokens Earned</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-box-num" id="stat-matches-played">0</span>
-              <span class="stat-box-lbl">Matches Played</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-box-num" id="stat-win-rate">0%</span>
-              <span class="stat-box-lbl">Win Rate</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-box-num" id="stat-tokens-won">+0 🪙</span>
-              <span class="stat-box-lbl">Profit from Duels</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Transaction Ledger (Credit & Debit) -->
-        <div class="ledger-section">
-          <div class="ledger-header">
-            <h3>Token Transactions & Match Ledger</h3>
-            <span class="ledger-sub">Live recording of credit and debit events</span>
-          </div>
-
-          <div class="table-wrap">
-            <table class="ledger-table">
-              <thead>
-                <tr>
-                  <th>Event Description</th>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Date & Time</th>
-                </tr>
-              </thead>
-              <tbody id="ledger-body">
-                <!-- Injected via JavaScript -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- ========================================================
-           VIEW 3: MY MATCHES
-           ======================================================== -->
-      <section id="view-matches" class="app-view">
-        <div class="section-card">
-          <h3>Match History</h3>
-          <p class="section-sub">Your recent live player vs player duel records</p>
-          <div class="table-wrap">
-            <table class="ledger-table">
-              <thead>
-                <tr>
-                  <th>Game</th>
-                  <th>Opponent</th>
-                  <th>Result</th>
-                  <th>Reward</th>
-                  <th>Timestamp</th>
-                </tr>
-              </thead>
-              <tbody id="matches-body">
-                <!-- Injected via JavaScript -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- ========================================================
-           VIEW 4: CASHOUT / REWARDS
-           ======================================================== -->
-      <section id="view-cashout" class="app-view">
-        <div class="section-card">
-          <h3>Cashout & Vault</h3>
-          <p class="section-sub">Convert your dummy test tokens or review payout channels</p>
-          <div class="cashout-grid">
-            <div class="cashout-card">
-              <h4>Instant Payouts</h4>
-              <p>Minimum payout starts at 2,500 tokens ($2.50 value prototype).</p>
-              <button class="btn-primary" style="margin-top:16px;" type="button" onclick="alert('Threshold: You need 2,500 tokens to initialize a cashout request.')">Request Cashout</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="view-rewards" class="app-view">
-        <div class="section-card">
-          <h3>Daily Rewards & Tiers</h3>
-          <p class="section-sub">Collect streak bonuses and level milestones</p>
-          <div class="rewards-box">
-            <div class="stat-box">
-              <span class="stat-box-num">Day 1</span>
-              <span class="stat-box-lbl">Streak Active</span>
-            </div>
-            <button class="btn-primary" style="margin-top:16px;" type="button" onclick="alert('Daily reward claimed: +50 Tokens added!')">Claim Daily 50 Tokens</button>
-          </div>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- ========================================================
-         MODAL 1: MATCHMAKING RADAR (REAL USER + INDIAN BOT FALLBACK)
-         ======================================================== -->
-    <div id="match-overlay" class="modal-overlay hidden">
-      <div class="modal-card">
-        <div class="radar-pulse">
-          <div class="pulse-circle"></div>
-          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 2a10 10 0 0 1 10 10"></path>
-          </svg>
-        </div>
-        <h3 id="match-title">Finding Opponent</h3>
-        <p class="modal-subtitle" id="match-status">Scanning live lobby for active players...</p>
-        <div class="modal-fee-notice">Entry Stake: <strong>50 Tokens</strong> (Locked)</div>
-        <button id="cancel-match-btn" class="btn-cancel" type="button">Cancel Queue</button>
-      </div>
-    </div>
-
-    <!-- ========================================================
-         MODAL 2: HIGH-TECH PLAYABLE DUEL ARENA & POST-MATCH ANALYTICS
-         ======================================================== -->
-    <div id="game-arena-overlay" class="modal-overlay hidden">
-      <div class="arena-card">
-        <!-- Versus Header -->
-        <div class="arena-header">
-          <div class="player-stat user-side">
-            <img id="arena-user-avatar" class="arena-avatar" src="" alt="You" />
-            <span id="arena-user-name" class="arena-name">You</span>
-          </div>
-          <div class="vs-badge">VS</div>
-          <div class="player-stat opp-side">
-            <img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
-            <span id="arena-opp-name" class="arena-name">Opponent</span>
-          </div>
-        </div>
-
-        <!-- Stage Container -->
-        <div id="arena-stage" class="arena-stage">
-          <!-- Dynamically populated with active gameplay or results -->
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================================================
-         FREECASH-STYLE GLOBAL FOOTER
-         ======================================================== -->
-    <footer class="app-footer">
-      <div class="footer-container">
-        <!-- Left: Brand Info -->
-        <div class="footer-brand-col">
-          <div class="brand-logo">
-            <svg class="logo-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-            <span class="logo-text">ARENA</span>
-          </div>
-          <p class="footer-desc">
-            Arena is a 1v1 skill-based platform where players duel in instant mini-games, earn tokens, and compete for leaderboard ranks.
-          </p>
-          <div class="trust-badge">
-            <span class="trust-star">★ ★ ★ ★ ★</span>
-            <span class="trust-text">Verified 100% Real Matchmaking</span>
-          </div>
-        </div>
-
-        <!-- Middle Columns: Links -->
-        <div class="footer-links-group">
-          <div class="footer-col">
-            <span class="footer-heading">Platform</span>
-            <a href="#">Earn Tokens</a>
-            <a href="#">Leaderboard</a>
-            <a href="#">Cashout Guide</a>
-          </div>
-          <div class="footer-col">
-            <span class="footer-heading">Resources</span>
-            <a href="#">Help Center</a>
-            <a href="#">Live Support</a>
-            <a href="#">Fair Play Policy</a>
-          </div>
-          <div class="footer-col">
-            <span class="footer-heading">Legal</span>
-            <a href="#">Terms of Service</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Cookie Settings</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>© 2026 Arena Technologies. All rights reserved.</p>
-        <span class="lang-tag">English (US)</span>
-      </div>
-    </footer>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./assets/supabaseClient.js"></script>
-  <script src="./assets/dashboard.js"></script>
-</body>
-</html>
+              <
