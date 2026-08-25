@@ -19,13 +19,12 @@ const INDIAN_BOT_POOL = [
 
 // App State
 let currentUser = null;
-let currentBalance = 0;
+let currentBalance = 1000;
 let matchHistory = [];
 let transactions = [];
 let activeOpponent = null;
 let activeGame = null;
 let matchmakingTimer = null;
-let realUserChannel = null;
 
 // DOM Elements
 const loadingEl = document.getElementById("loading");
@@ -69,9 +68,10 @@ const arenaStage = document.getElementById("arena-stage");
 // ----------------------------------------------------
 async function init() {
   try {
-    const { data: { session }, error: sessionError } = await client.auth.getSession();
+    const sessionRes = await client.auth.getSession();
+    const session = sessionRes && sessionRes.data ? sessionRes.data.session : null;
 
-    if (sessionError || !session) {
+    if (!session) {
       window.location.href = "index.html";
       return;
     }
@@ -86,32 +86,43 @@ async function init() {
         .select("dummy_token")
         .eq("user_id", currentUser.id)
         .single();
-      currentBalance = wallet ? wallet.dummy_token : 1000;
+      if (wallet && typeof wallet.dummy_token === "number") {
+        currentBalance = wallet.dummy_token;
+      }
     } catch (e) {
-      currentBalance = 1000;
+      console.warn("Wallet fetch fallback to local balance:", e);
     }
 
     updateUI();
-
-    // Transition from loading screen to dashboard
-    if (loadingEl) loadingEl.classList.add("hidden");
-    if (dashEl) dashEl.classList.remove("hidden");
-
   } catch (err) {
     console.error("Initialization error:", err);
+  } finally {
+    // Guaranteed dismissal of loading screen
     if (loadingEl) loadingEl.classList.add("hidden");
     if (dashEl) dashEl.classList.remove("hidden");
   }
 }
 
-function loadLocalUserData() {
-  const savedName = localStorage.getItem(`arena_name_${currentUser.id}`);
-  const meta = currentUser.user_metadata || {};
-  const initialName = savedName || meta.full_name || meta.name || currentUser.email?.split("@")[0] || "Player";
+// 3-second absolute safety fallback
+setTimeout(() => {
+  if (loadingEl && !loadingEl.classList.contains("hidden")) {
+    loadingEl.classList.add("hidden");
+    if (dashEl) dashEl.classList.remove("hidden");
+  }
+}, 3000);
 
-  const storedTx = localStorage.getItem(`arena_tx_${currentUser.id}`);
+function loadLocalUserData() {
+  const savedName = localStorage.getItem("arena_name_" + currentUser.id);
+  const meta = currentUser.user_metadata || {};
+  const initialName = savedName || meta.full_name || meta.name || (currentUser.email ? currentUser.email.split("@")[0] : "Player");
+
+  const storedTx = localStorage.getItem("arena_tx_" + currentUser.id);
   if (storedTx) {
-    transactions = JSON.parse(storedTx);
+    try {
+      transactions = JSON.parse(storedTx);
+    } catch (e) {
+      transactions = [];
+    }
   } else {
     transactions = [
       { desc: "Welcome Bonus Credited", type: "credit", amount: 1000, date: new Date().toLocaleString() }
@@ -119,8 +130,14 @@ function loadLocalUserData() {
     saveTransactions();
   }
 
-  const storedMatches = localStorage.getItem(`arena_matches_${currentUser.id}`);
-  if (storedMatches) matchHistory = JSON.parse(storedMatches);
+  const storedMatches = localStorage.getItem("arena_matches_" + currentUser.id);
+  if (storedMatches) {
+    try {
+      matchHistory = JSON.parse(storedMatches);
+    } catch (e) {
+      matchHistory = [];
+    }
+  }
 
   setUserDisplayName(initialName);
 }
@@ -128,7 +145,7 @@ function loadLocalUserData() {
 function setUserDisplayName(name) {
   if (playerNameEl) playerNameEl.textContent = name;
   if (profileDisplayName) profileDisplayName.textContent = name;
-  const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(name)}`;
+  const avatarUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(name);
   if (avatarEl) avatarEl.src = avatarUrl;
   if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
 }
@@ -139,9 +156,9 @@ function updateUI() {
   const progressPercent = Math.min(100, Math.round((currentBalance / 2500) * 100));
   const progressFill = document.getElementById("progress-fill");
   const progressText = document.getElementById("progress-text");
-  if (progressFill) progressFill.style.width = `${progressPercent}%`;
+  if (progressFill) progressFill.style.width = progressPercent + "%";
   if (progressText) {
-    progressText.textContent = `$${(currentBalance / 1000).toFixed(2)} / $2.50 (${currentBalance.toLocaleString()} / 2,500 Tokens)`;
+    progressText.textContent = "$" + (currentBalance / 1000).toFixed(2) + " / $2.50 (" + currentBalance.toLocaleString() + " / 2,500 Tokens)";
   }
 
   const totalMatches = matchHistory.length;
@@ -154,10 +171,10 @@ function updateUI() {
   const statRate = document.getElementById("stat-win-rate");
   const statWon = document.getElementById("stat-tokens-won");
 
-  if (statEarnings) statEarnings.textContent = `${currentBalance.toLocaleString()} 🪙`;
+  if (statEarnings) statEarnings.textContent = currentBalance.toLocaleString() + " 🪙";
   if (statMatches) statMatches.textContent = totalMatches;
-  if (statRate) statRate.textContent = `${winRate}%`;
-  if (statWon) statWon.textContent = `+${totalWonTokens.toLocaleString()} 🪙`;
+  if (statRate) statRate.textContent = winRate + "%";
+  if (statWon) statWon.textContent = "+" + totalWonTokens.toLocaleString() + " 🪙";
 
   renderLedger();
   renderMatchHistory();
@@ -167,49 +184,60 @@ function renderLedger() {
   const tbody = document.getElementById("ledger-body");
   if (!tbody) return;
   if (transactions.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-dim);">No transactions recorded</td></tr>`;
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-dim);">No transactions recorded</td></tr>';
     return;
   }
-  tbody.innerHTML = transactions.map(tx => `
-    <tr>
-      <td>${tx.desc}</td>
-      <td><span class="${tx.type === 'credit' ? 'badge-credit' : 'badge-debit'}">${tx.type.toUpperCase()}</span></td>
-      <td style="font-weight:700; color:${tx.type === 'credit' ? 'var(--primary-green)' : 'var(--accent-red)'};">${tx.type === 'credit' ? '+' : '-'}${tx.amount} 🪙</td>
-      <td style="color:var(--text-dim);">${tx.date}</td>
-    </tr>
-  `).join("");
+  tbody.innerHTML = transactions.map(tx => {
+    const isCredit = tx.type === "credit";
+    const sign = isCredit ? "+" : "-";
+    const color = isCredit ? "var(--primary-green)" : "var(--accent-red)";
+    const badgeClass = isCredit ? "badge-credit" : "badge-debit";
+    return '<tr>' +
+      '<td>' + tx.desc + '</td>' +
+      '<td><span class="' + badgeClass + '">' + tx.type.toUpperCase() + '</span></td>' +
+      '<td style="font-weight:700; color:' + color + ';">' + sign + tx.amount + ' 🪙</td>' +
+      '<td style="color:var(--text-dim);">' + tx.date + '</td>' +
+    '</tr>';
+  }).join("");
 }
 
 function renderMatchHistory() {
   const tbody = document.getElementById("matches-body");
   if (!tbody) return;
   if (matchHistory.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-dim);">No matches played yet. Choose a game above!</td></tr>`;
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-dim);">No matches played yet. Choose a game above!</td></tr>';
     return;
   }
-  tbody.innerHTML = matchHistory.map(m => `
-    <tr>
-      <td style="font-weight:600;">${m.game}</td>
-      <td>${m.opponent}</td>
-      <td><span class="${m.result === 'VICTORY' ? 'badge-credit' : 'badge-debit'}">${m.result}</span></td>
-      <td style="font-weight:700; color:${m.result === 'VICTORY' ? 'var(--primary-green)' : 'var(--accent-red)'};">${m.reward}</td>
-      <td style="color:var(--text-dim);">${m.date}</td>
-    </tr>
-  `).join("");
+  tbody.innerHTML = matchHistory.map(m => {
+    const isWin = m.result === "VICTORY";
+    const color = isWin ? "var(--primary-green)" : "var(--accent-red)";
+    const badgeClass = isWin ? "badge-credit" : "badge-debit";
+    return '<tr>' +
+      '<td style="font-weight:600;">' + m.game + '</td>' +
+      '<td>' + m.opponent + '</td>' +
+      '<td><span class="' + badgeClass + '">' + m.result + '</span></td>' +
+      '<td style="font-weight:700; color:' + color + ';">' + m.reward + '</td>' +
+      '<td style="color:var(--text-dim);">' + m.date + '</td>' +
+    '</tr>';
+  }).join("");
 }
 
 function recordTransaction(desc, type, amount) {
-  transactions.unshift({ desc, type, amount, date: new Date().toLocaleString() });
+  transactions.unshift({ desc: desc, type: type, amount: amount, date: new Date().toLocaleString() });
   saveTransactions();
   updateUI();
 }
 
 function saveTransactions() {
-  localStorage.setItem(`arena_tx_${currentUser.id}`, JSON.stringify(transactions.slice(0, 50)));
+  if (currentUser) {
+    localStorage.setItem("arena_tx_" + currentUser.id, JSON.stringify(transactions.slice(0, 50)));
+  }
 }
 
 function saveMatches() {
-  localStorage.setItem(`arena_matches_${currentUser.id}`, JSON.stringify(matchHistory.slice(0, 50)));
+  if (currentUser) {
+    localStorage.setItem("arena_matches_" + currentUser.id, JSON.stringify(matchHistory.slice(0, 50)));
+  }
 }
 
 // ----------------------------------------------------
@@ -233,7 +261,6 @@ tabButtons.forEach(btn => {
 document.getElementById("profile-nav-btn")?.addEventListener("click", () => switchView("view-profile"));
 document.getElementById("nav-brand-logo")?.addEventListener("click", () => switchView("view-earn"));
 
-// Category Filter Handler
 filterChips.forEach(chip => {
   chip.addEventListener("click", () => {
     filterChips.forEach(c => c.classList.remove("active"));
@@ -270,7 +297,9 @@ saveNameBtn?.addEventListener("click", () => {
     alert("Name must be at least 2 characters.");
     return;
   }
-  localStorage.setItem(`arena_name_${currentUser.id}`, newName);
+  if (currentUser) {
+    localStorage.setItem("arena_name_" + currentUser.id, newName);
+  }
   setUserDisplayName(newName);
   nameEditBox.classList.add("hidden");
 });
@@ -286,7 +315,7 @@ playButtons.forEach(btn => {
     };
 
     if (currentBalance < MATCH_ENTRY_FEE) {
-      alert(`Insufficient balance. You need ${MATCH_ENTRY_FEE} tokens to enter.`);
+      alert("Insufficient balance. You need " + MATCH_ENTRY_FEE + " tokens to enter.");
       return;
     }
 
@@ -295,7 +324,7 @@ playButtons.forEach(btn => {
 });
 
 function startMatchmaking() {
-  if (matchTitle) matchTitle.textContent = `Finding Opponent for ${activeGame.name}`;
+  if (matchTitle) matchTitle.textContent = "Finding Opponent for " + activeGame.name;
   if (matchStatus) matchStatus.textContent = "Scanning active queue for live players...";
   if (matchOverlay) matchOverlay.classList.remove("hidden");
 
@@ -311,7 +340,7 @@ function pairMatch(opponent, isReal) {
 
   activeOpponent = opponent;
   if (matchStatus) {
-    matchStatus.textContent = `Opponent Matched: ${opponent.name}! Launching arena...`;
+    matchStatus.textContent = "Opponent Matched: " + opponent.name + "! Launching arena...";
   }
 
   setTimeout(() => {
@@ -330,13 +359,13 @@ cancelMatchBtn?.addEventListener("click", () => {
 // ----------------------------------------------------
 function launchArena(opponent) {
   currentBalance -= MATCH_ENTRY_FEE;
-  recordTransaction(`Stake Entry: ${activeGame.name}`, "debit", MATCH_ENTRY_FEE);
+  recordTransaction("Stake Entry: " + activeGame.name, "debit", MATCH_ENTRY_FEE);
 
   const myName = playerNameEl.textContent;
   arenaUserName.textContent = myName;
-  arenaUserAvatar.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(myName)}`;
+  arenaUserAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(myName);
   arenaOppName.textContent = opponent.name;
-  arenaOppAvatar.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${opponent.seed}`;
+  arenaOppAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + opponent.seed;
 
   arenaOverlay.classList.remove("hidden");
 
@@ -353,12 +382,11 @@ function launchArena(opponent) {
 
 // GAME 1: Reaction Duel
 function runReactionGame() {
-  arenaStage.innerHTML = `
-    <div id="reaction-box" class="reaction-box reaction-wait">
-      <h2 style="font-size:1.4rem;">WAIT FOR GREEN...</h2>
-      <p style="font-size:0.8rem; margin-top:6px; opacity:0.85;">Click instantly when the box turns green</p>
-    </div>
-  `;
+  arenaStage.innerHTML = 
+    '<div id="reaction-box" class="reaction-box reaction-wait">' +
+      '<h2 style="font-size:1.4rem;">WAIT FOR GREEN...</h2>' +
+      '<p style="font-size:0.8rem; margin-top:6px; opacity:0.85;">Click instantly when the box turns green</p>' +
+    '</div>';
 
   const box = document.getElementById("reaction-box");
   let canClick = false;
@@ -386,9 +414,9 @@ function runReactionGame() {
       const botReaction = Math.floor(Math.random() * 120) + 290;
 
       if (userReaction < botReaction) {
-        endDuel(true, `Superior speed! Your reaction: ${userReaction}ms vs Opponent: ${botReaction}ms`, userReaction, botReaction);
+        endDuel(true, "Superior speed! Your reaction: " + userReaction + "ms vs Opponent: " + botReaction + "ms", userReaction, botReaction);
       } else {
-        endDuel(false, `Opponent was faster (${botReaction}ms). Your speed: ${userReaction}ms`, userReaction, botReaction);
+        endDuel(false, "Opponent was faster (" + botReaction + "ms). Your speed: " + userReaction + "ms", userReaction, botReaction);
       }
     }
   });
@@ -405,16 +433,15 @@ function runCyberMathGame() {
   const optA = leftIsCorrect ? correct : wrong;
   const optB = leftIsCorrect ? wrong : correct;
 
-  arenaStage.innerHTML = `
-    <div style="width:100%; text-align:center;">
-      <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:6px;">Fast Equation Solve</p>
-      <h2 style="font-size:2rem; margin-bottom:20px;">${n1} + ${n2} = ?</h2>
-      <div style="display:flex; gap:12px; justify-content:center;">
-        <button id="opt-a" class="play-btn" style="min-width:110px; font-size:1.1rem;">${optA}</button>
-        <button id="opt-b" class="play-btn" style="min-width:110px; font-size:1.1rem;">${optB}</button>
-      </div>
-    </div>
-  `;
+  arenaStage.innerHTML = 
+    '<div style="width:100%; text-align:center;">' +
+      '<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:6px;">Fast Equation Solve</p>' +
+      '<h2 style="font-size:2rem; margin-bottom:20px;">' + n1 + ' + ' + n2 + ' = ?</h2>' +
+      '<div style="display:flex; gap:12px; justify-content:center;">' +
+        '<button id="opt-a" class="play-btn" style="min-width:110px; font-size:1.1rem;">' + optA + '</button>' +
+        '<button id="opt-b" class="play-btn" style="min-width:110px; font-size:1.1rem;">' + optB + '</button>' +
+      '</div>' +
+    '</div>';
 
   let answered = false;
   const botAnswerTimer = setTimeout(() => {
@@ -451,16 +478,15 @@ function runColorClashGame() {
   const targetWord = colors[Math.floor(Math.random() * colors.length)];
   const fontColor = colors[Math.floor(Math.random() * colors.length)];
 
-  arenaStage.innerHTML = `
-    <div style="width:100%; text-align:center;">
-      <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:8px;">Does the word match the font color?</p>
-      <h2 style="font-size:2.2rem; color:${fontColor.css}; margin-bottom:20px; font-weight:800;">${targetWord.text}</h2>
-      <div style="display:flex; gap:12px; justify-content:center;">
-        <button id="match-yes" class="btn-primary" style="padding:12px;">YES (MATCH)</button>
-        <button id="match-no" class="btn-secondary" style="padding:12px;">NO (DIFFERENT)</button>
-      </div>
-    </div>
-  `;
+  arenaStage.innerHTML = 
+    '<div style="width:100%; text-align:center;">' +
+      '<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:8px;">Does the word match the font color?</p>' +
+      '<h2 style="font-size:2.2rem; color:' + fontColor.css + '; margin-bottom:20px; font-weight:800;">' + targetWord.text + '</h2>' +
+      '<div style="display:flex; gap:12px; justify-content:center;">' +
+        '<button id="match-yes" class="btn-primary" style="padding:12px;">YES (MATCH)</button>' +
+        '<button id="match-no" class="btn-secondary" style="padding:12px;">NO (DIFFERENT)</button>' +
+      '</div>' +
+    '</div>';
 
   const isMatching = targetWord.text === fontColor.text;
   let done = false;
@@ -481,24 +507,26 @@ function runColorClashGame() {
 
 // GAME 4: Memory Matrix
 function runMemoryMatrixGame() {
-  const tileIndices =;
+  let tilesHtml = "";
+  for (let i = 0; i < 9; i++) {
+    tilesHtml += '<div class="matrix-tile" data-idx="' + i + '" style="width:54px; height:54px; background:var(--bg-card); border-radius:6px; cursor:pointer;"></div>';
+  }
   
-  arenaStage.innerHTML = `
-    <div style="text-align:center;">
-      <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:12px;">Memorize the active green tile</p>
-      <div style="display:grid; grid-template-columns:repeat(3, 54px); gap:8px; justify-content:center;" id="matrix-grid">
-        ${tileIndices.map(i => `<div class="matrix-tile" data-idx="${i}" style="width:54px; height:54px; background:var(--bg-card); border-radius:6px; cursor:pointer;"></div>`).join("")}
-      </div>
-    </div>
-  `;
+  arenaStage.innerHTML = 
+    '<div style="text-align:center;">' +
+      '<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:12px;">Memorize the active green tile</p>' +
+      '<div style="display:grid; grid-template-columns:repeat(3, 54px); gap:8px; justify-content:center;" id="matrix-grid">' +
+        tilesHtml +
+      '</div>' +
+    '</div>';
 
   const tiles = document.querySelectorAll(".matrix-tile");
   const activeIndex = Math.floor(Math.random() * 9);
 
   setTimeout(() => {
-    tiles[activeIndex].style.backgroundColor = "var(--primary-green)";
+    if (tiles[activeIndex]) tiles[activeIndex].style.backgroundColor = "var(--primary-green)";
     setTimeout(() => {
-      tiles[activeIndex].style.backgroundColor = "var(--bg-card)";
+      if (tiles[activeIndex]) tiles[activeIndex].style.backgroundColor = "var(--bg-card)";
       tiles.forEach(t => {
         t.addEventListener("click", () => {
           const clickedIdx = parseInt(t.getAttribute("data-idx"));
@@ -519,37 +547,34 @@ function runMemoryMatrixGame() {
 function endDuel(won, analysisText, userStat, oppStat) {
   if (won) {
     currentBalance += MATCH_WIN_REWARD;
-    recordTransaction(`Duel Victory: ${activeGame.name}`, "credit", MATCH_WIN_REWARD);
+    recordTransaction("Duel Victory: " + activeGame.name, "credit", MATCH_WIN_REWARD);
   }
 
   matchHistory.unshift({
     game: activeGame.name,
     opponent: activeOpponent.name,
     result: won ? "VICTORY" : "DEFEAT",
-    reward: won ? `+${MATCH_WIN_REWARD} 🪙` : "-50 🪙",
+    reward: won ? ("+" + MATCH_WIN_REWARD + " 🪙") : "-50 🪙",
     date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   });
   saveMatches();
   updateUI();
 
-  arenaStage.innerHTML = `
-    <div class="result-card">
-      <h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2>
-      <p style="font-weight:700; font-size:1.1rem; color:var(--text-main); margin-bottom:4px;">
-        ${won ? `+${MATCH_WIN_REWARD} Tokens Awarded` : '-50 Tokens Stake Lost'}
-      </p>
-      
-      <div class="result-analytics">
-        <p style="margin-bottom:4px;"><strong>Performance Analytics:</strong></p>
-        <p>${analysisText}</p>
-      </div>
-
-      <div class="result-btn-row">
-        <button id="rematch-btn" class="btn-primary" type="button">Rematch</button>
-        <button id="return-dash-btn" class="btn-secondary" type="button">Dashboard</button>
-      </div>
-    </div>
-  `;
+  arenaStage.innerHTML = 
+    '<div class="result-card">' +
+      '<h2 class="' + (won ? 'win-text' : 'lose-text') + '">' + (won ? 'VICTORY' : 'DEFEAT') + '</h2>' +
+      '<p style="font-weight:700; font-size:1.1rem; color:var(--text-main); margin-bottom:4px;">' +
+        (won ? ('+' + MATCH_WIN_REWARD + ' Tokens Awarded') : '-50 Tokens Stake Lost') +
+      '</p>' +
+      '<div class="result-analytics">' +
+        '<p style="margin-bottom:4px;"><strong>Performance Analytics:</strong></p>' +
+        '<p>' + analysisText + '</p>' +
+      '</div>' +
+      '<div class="result-btn-row">' +
+        '<button id="rematch-btn" class="btn-primary" type="button">Rematch</button>' +
+        '<button id="return-dash-btn" class="btn-secondary" type="button">Dashboard</button>' +
+      '</div>' +
+    '</div>';
 
   document.getElementById("rematch-btn")?.addEventListener("click", () => {
     arenaOverlay.classList.add("hidden");
