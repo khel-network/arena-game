@@ -2,7 +2,7 @@ const ENTRY_FEE = 50;
 let queuePollTimer = null;
 let queueChannel = null;
 
-async function startMatchmaking(gameType, userId, onStatus) {
+async function startRealMatchmaking(gameType, userId, onStatus) {
   onStatus("Deducting entry fee...");
 
   const { data: wallet } = await client
@@ -95,7 +95,7 @@ function cleanupMatchmaking() {
   if (queueChannel) client.removeChannel(queueChannel);
 }
 
-async function cancelMatchmaking(userId) {
+async function cancelRealMatchmaking(userId) {
   cleanupMatchmaking();
   await client.from("matchmaking_queue").delete().eq("user_id", userId);
 
