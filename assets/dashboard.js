@@ -25,18 +25,6 @@ let transactions = [];
 let activeOpponent = null;
 let activeGame = null;
 let matchmakingTimer = null;
-let walletChannel = null;
-let currentFlowIsReal = false;
-
-const REAL_MULTIPLAYER_GAMES = ["reaction", "tictactoe", "quiz", "math"];
-
-// ----------------------------------------------------
-// Currency helper - all amounts are shown in Indian Rupees
-// ----------------------------------------------------
-function formatINR(amount) {
-  const n = Number(amount) || 0;
-  return "\u20b9" + n.toLocaleString("en-IN");
-}
 
 // DOM Elements
 const loadingEl = document.getElementById("loading");
@@ -90,8 +78,21 @@ async function init() {
 
     currentUser = session.user;
     loadLocalUserData();
-    await refreshWalletFromServer();
-    subscribeWalletRealtime();
+
+    // Fetch live wallet balance from Supabase
+    try {
+      const { data: wallet } = await client
+        .from("wallet")
+        .select("dummy_token")
+        .eq("user_id", currentUser.id)
+        .single();
+      if (wallet && typeof wallet.dummy_token === "number") {
+        currentBalance = wallet.dummy_token;
+      }
+    } catch (e) {
+      console.warn("Wallet fetch fallback to local balance:", e);
+    }
+
     updateUI();
   } catch (err) {
     console.error("Initialization error:", err);
@@ -149,111 +150,15 @@ function setUserDisplayName(name) {
   if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
 }
 
-// ----------------------------------------------------
-// Live wallet sync — keeps the balance accurate across tabs,
-// devices, and re-logins to the same account instead of
-// relying on a stale local number.
-// ----------------------------------------------------
-async function refreshWalletFromServer() {
-  if (!currentUser) return;
-  try {
-    const { data: wallet, error } = await client
-      .from("wallet")
-      .select("dummy_token")
-      .eq("user_id", currentUser.id)
-      .single();
-    if (!error && wallet && typeof wallet.dummy_token === "number") {
-      if (wallet.dummy_token !== currentBalance) {
-        currentBalance = wallet.dummy_token;
-        updateUI();
-        flashBalance();
-      }
-    }
-  } catch (e) {
-    console.warn("Wallet refresh fallback to local balance:", e);
-  }
-}
-
-function subscribeWalletRealtime() {
-  if (!currentUser || typeof client === "undefined") return;
-  if (walletChannel) {
-    client.removeChannel(walletChannel);
-  }
-  walletChannel = client
-    .channel("wallet-live-" + currentUser.id)
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "wallet",
-        filter: `user_id=eq.${currentUser.id}`,
-      },
-      (payload) => {
-        if (payload.new && typeof payload.new.dummy_token === "number" && payload.new.dummy_token !== currentBalance) {
-          currentBalance = payload.new.dummy_token;
-          updateUI();
-          flashBalance();
-        }
-      }
-    )
-    .subscribe();
-}
-
-// Re-sync whenever the tab regains focus/visibility, or the same
-// browser session signs back in — covers cases where a realtime
-// event was missed while the tab was backgrounded.
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") refreshWalletFromServer();
-});
-window.addEventListener("focus", refreshWalletFromServer);
-
-if (typeof client !== "undefined" && client.auth) {
-  client.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_OUT") {
-      window.location.href = "index.html";
-      return;
-    }
-    if (event === "SIGNED_IN" && session && session.user) {
-      currentUser = session.user;
-      refreshWalletFromServer();
-      subscribeWalletRealtime();
-    }
-  });
-}
-
-async function writeWalletBalance(newBalance) {
-  currentBalance = newBalance;
-  if (!currentUser) return;
-  try {
-    await client
-      .from("wallet")
-      .update({ dummy_token: newBalance, updated_at: new Date().toISOString() })
-      .eq("user_id", currentUser.id);
-  } catch (e) {
-    console.warn("Wallet write failed, will resync on next refresh:", e);
-  }
-}
-
-function flashBalance() {
-  [balanceEl, document.getElementById("stat-total-earnings")].forEach((el) => {
-    if (!el) return;
-    el.classList.remove("balance-flash");
-    // force reflow so the animation can retrigger
-    void el.offsetWidth;
-    el.classList.add("balance-flash");
-  });
-}
-
 function updateUI() {
-  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString("en-IN");
-
+  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString();
+  
   const progressPercent = Math.min(100, Math.round((currentBalance / 2500) * 100));
   const progressFill = document.getElementById("progress-fill");
   const progressText = document.getElementById("progress-text");
   if (progressFill) progressFill.style.width = progressPercent + "%";
   if (progressText) {
-    progressText.textContent = formatINR(currentBalance) + " / " + formatINR(2500) + " towards cashout";
+    progressText.textContent = "$" + (currentBalance / 1000).toFixed(2) + " / $2.50 (" + currentBalance.toLocaleString() + " / 2,500 Tokens)";
   }
 
   const totalMatches = matchHistory.length;
@@ -266,10 +171,10 @@ function updateUI() {
   const statRate = document.getElementById("stat-win-rate");
   const statWon = document.getElementById("stat-tokens-won");
 
-  if (statEarnings) statEarnings.textContent = formatINR(currentBalance);
+  if (statEarnings) statEarnings.textContent = currentBalance.toLocaleString() + " 🪙";
   if (statMatches) statMatches.textContent = totalMatches;
   if (statRate) statRate.textContent = winRate + "%";
-  if (statWon) statWon.textContent = "+" + formatINR(totalWonTokens);
+  if (statWon) statWon.textContent = "+" + totalWonTokens.toLocaleString() + " 🪙";
 
   renderLedger();
   renderMatchHistory();
@@ -290,7 +195,7 @@ function renderLedger() {
     return '<tr>' +
       '<td>' + tx.desc + '</td>' +
       '<td><span class="' + badgeClass + '">' + tx.type.toUpperCase() + '</span></td>' +
-      '<td style="font-weight:700; color:' + color + ';">' + sign + formatINR(tx.amount) + '</td>' +
+      '<td style="font-weight:700; color:' + color + ';">' + sign + tx.amount + ' 🪙</td>' +
       '<td style="color:var(--text-dim);">' + tx.date + '</td>' +
     '</tr>';
   }).join("");
@@ -321,7 +226,6 @@ function recordTransaction(desc, type, amount) {
   transactions.unshift({ desc: desc, type: type, amount: amount, date: new Date().toLocaleString() });
   saveTransactions();
   updateUI();
-  flashBalance();
 }
 
 function saveTransactions() {
@@ -343,7 +247,8 @@ function switchView(targetId) {
   tabButtons.forEach(b => b.classList.remove("active"));
   appViews.forEach(v => v.classList.remove("active"));
 
-  document.querySelectorAll('.tab-btn[data-target="' + targetId + '"]').forEach(b => b.classList.add("active"));
+  const targetTab = Array.from(tabButtons).find(b => b.getAttribute("data-target") === targetId);
+  if (targetTab) targetTab.classList.add("active");
 
   const targetView = document.getElementById(targetId);
   if (targetView) targetView.classList.add("active");
@@ -400,49 +305,23 @@ saveNameBtn?.addEventListener("click", () => {
 });
 
 // ----------------------------------------------------
-// 4. Realtime Matchmaking with Indian Bot Fallback (bot games)
-//    + Real Multiplayer Matchmaking (reaction/tictactoe/quiz/math)
+// 4. Realtime Matchmaking with Indian Bot Fallback
 // ----------------------------------------------------
 playButtons.forEach(btn => {
-  btn.addEventListener("click", async () => {
+  btn.addEventListener("click", () => {
     activeGame = {
       name: btn.getAttribute("data-game"),
       type: btn.getAttribute("data-type")
     };
 
-    // Re-check against the server balance right before queueing so a
-    // stale local number can never let someone queue for a match they
-    // can't actually afford.
-    await refreshWalletFromServer();
     if (currentBalance < MATCH_ENTRY_FEE) {
-      alert("Insufficient balance. You need " + formatINR(MATCH_ENTRY_FEE) + " to enter.");
+      alert("Insufficient balance. You need " + MATCH_ENTRY_FEE + " tokens to enter.");
       return;
     }
 
-    if (REAL_MULTIPLAYER_GAMES.includes(activeGame.type)) {
-      currentFlowIsReal = true;
-      startRealMatchFlow(activeGame.type);
-    } else {
-      currentFlowIsReal = false;
-      startMatchmaking();
-    }
+    startMatchmaking();
   });
 });
-
-function startRealMatchFlow(gameType) {
-  if (matchTitle) matchTitle.textContent = "Finding Opponent for " + activeGame.name;
-  if (matchStatus) matchStatus.textContent = "Connecting...";
-  if (matchOverlay) matchOverlay.classList.remove("hidden");
-
-  startRealMatchmaking(gameType, currentUser.id, (status) => {
-    if (status === "insufficient") {
-      if (matchOverlay) matchOverlay.classList.add("hidden");
-      alert("Insufficient balance. You need " + formatINR(MATCH_ENTRY_FEE) + " to enter.");
-      return;
-    }
-    if (matchStatus) matchStatus.textContent = status;
-  });
-}
 
 function startMatchmaking() {
   if (matchTitle) matchTitle.textContent = "Finding Opponent for " + activeGame.name;
@@ -458,3 +337,258 @@ function startMatchmaking() {
 
 function pairMatch(opponent, isReal) {
   if (matchmakingTimer) clearTimeout(matchmakingTimer);
+
+  activeOpponent = opponent;
+  if (matchStatus) {
+    matchStatus.textContent = "Opponent Matched: " + opponent.name + "! Launching arena...";
+  }
+
+  setTimeout(() => {
+    if (matchOverlay) matchOverlay.classList.add("hidden");
+    launchArena(opponent);
+  }, 1000);
+}
+
+cancelMatchBtn?.addEventListener("click", () => {
+  if (matchmakingTimer) clearTimeout(matchmakingTimer);
+  if (matchOverlay) matchOverlay.classList.add("hidden");
+});
+
+// ----------------------------------------------------
+// 5. High-Tech Playable Arena Engine
+// ----------------------------------------------------
+function launchArena(opponent) {
+  currentBalance -= MATCH_ENTRY_FEE;
+  recordTransaction("Stake Entry: " + activeGame.name, "debit", MATCH_ENTRY_FEE);
+
+  const myName = playerNameEl.textContent;
+  arenaUserName.textContent = myName;
+  arenaUserAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(myName);
+  arenaOppName.textContent = opponent.name;
+  arenaOppAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + opponent.seed;
+
+  arenaOverlay.classList.remove("hidden");
+
+  if (activeGame.type === "math") {
+    runCyberMathGame();
+  } else if (activeGame.type === "memory") {
+    runMemoryMatrixGame();
+  } else if (activeGame.type === "color") {
+    runColorClashGame();
+  } else {
+    runReactionGame();
+  }
+}
+
+// GAME 1: Reaction Duel
+function runReactionGame() {
+  arenaStage.innerHTML = 
+    '<div id="reaction-box" class="reaction-box reaction-wait">' +
+      '<h2 style="font-size:1.4rem;">WAIT FOR GREEN...</h2>' +
+      '<p style="font-size:0.8rem; margin-top:6px; opacity:0.85;">Click instantly when the box turns green</p>' +
+    '</div>';
+
+  const box = document.getElementById("reaction-box");
+  let canClick = false;
+  let startTime = 0;
+  let finished = false;
+
+  const greenDelay = Math.floor(Math.random() * 2200) + 2400;
+  const timeoutId = setTimeout(() => {
+    if (finished) return;
+    canClick = true;
+    startTime = Date.now();
+    box.className = "reaction-box reaction-go";
+    box.querySelector("h2").textContent = "CLICK NOW!";
+  }, greenDelay);
+
+  box.addEventListener("click", () => {
+    if (finished) return;
+    finished = true;
+
+    if (!canClick) {
+      clearTimeout(timeoutId);
+      endDuel(false, "False Start! You clicked before the signal turned green.", 0, 0);
+    } else {
+      const userReaction = Date.now() - startTime;
+      const botReaction = Math.floor(Math.random() * 120) + 290;
+
+      if (userReaction < botReaction) {
+        endDuel(true, "Superior speed! Your reaction: " + userReaction + "ms vs Opponent: " + botReaction + "ms", userReaction, botReaction);
+      } else {
+        endDuel(false, "Opponent was faster (" + botReaction + "ms). Your speed: " + userReaction + "ms", userReaction, botReaction);
+      }
+    }
+  });
+}
+
+// GAME 2: Cyber Math Duel
+function runCyberMathGame() {
+  const n1 = Math.floor(Math.random() * 30) + 12;
+  const n2 = Math.floor(Math.random() * 30) + 12;
+  const correct = n1 + n2;
+  const wrong = correct + (Math.random() > 0.5 ? 4 : -5);
+
+  const leftIsCorrect = Math.random() > 0.5;
+  const optA = leftIsCorrect ? correct : wrong;
+  const optB = leftIsCorrect ? wrong : correct;
+
+  arenaStage.innerHTML = 
+    '<div style="width:100%; text-align:center;">' +
+      '<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:6px;">Fast Equation Solve</p>' +
+      '<h2 style="font-size:2rem; margin-bottom:20px;">' + n1 + ' + ' + n2 + ' = ?</h2>' +
+      '<div style="display:flex; gap:12px; justify-content:center;">' +
+        '<button id="opt-a" class="play-btn" style="min-width:110px; font-size:1.1rem;">' + optA + '</button>' +
+        '<button id="opt-b" class="play-btn" style="min-width:110px; font-size:1.1rem;">' + optB + '</button>' +
+      '</div>' +
+    '</div>';
+
+  let answered = false;
+  const botAnswerTimer = setTimeout(() => {
+    if (!answered) {
+      answered = true;
+      endDuel(false, "Opponent calculated and answered correctly first!", 0, 0);
+    }
+  }, Math.floor(Math.random() * 1400) + 2800);
+
+  function pickAnswer(val) {
+    if (answered) return;
+    answered = true;
+    clearTimeout(botAnswerTimer);
+
+    if (val === correct) {
+      endDuel(true, "Accurate calculation solved in lightning time!", 0, 0);
+    } else {
+      endDuel(false, "Incorrect answer calculated.", 0, 0);
+    }
+  }
+
+  document.getElementById("opt-a")?.addEventListener("click", () => pickAnswer(optA));
+  document.getElementById("opt-b")?.addEventListener("click", () => pickAnswer(optB));
+}
+
+// GAME 3: Color Clash
+function runColorClashGame() {
+  const colors = [
+    { text: "RED", css: "#ef4444" },
+    { text: "BLUE", css: "#38bdf8" },
+    { text: "GREEN", css: "#00e701" }
+  ];
+
+  const targetWord = colors[Math.floor(Math.random() * colors.length)];
+  const fontColor = colors[Math.floor(Math.random() * colors.length)];
+
+  arenaStage.innerHTML = 
+    '<div style="width:100%; text-align:center;">' +
+      '<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:8px;">Does the word match the font color?</p>' +
+      '<h2 style="font-size:2.2rem; color:' + fontColor.css + '; margin-bottom:20px; font-weight:800;">' + targetWord.text + '</h2>' +
+      '<div style="display:flex; gap:12px; justify-content:center;">' +
+        '<button id="match-yes" class="btn-primary" style="padding:12px;">YES (MATCH)</button>' +
+        '<button id="match-no" class="btn-secondary" style="padding:12px;">NO (DIFFERENT)</button>' +
+      '</div>' +
+    '</div>';
+
+  const isMatching = targetWord.text === fontColor.text;
+  let done = false;
+
+  function evaluate(answer) {
+    if (done) return;
+    done = true;
+    if (answer === isMatching) {
+      endDuel(true, "Correct cognitive color distinction made!", 0, 0);
+    } else {
+      endDuel(false, "Incorrect mismatch selected under pressure.", 0, 0);
+    }
+  }
+
+  document.getElementById("match-yes")?.addEventListener("click", () => evaluate(true));
+  document.getElementById("match-no")?.addEventListener("click", () => evaluate(false));
+}
+
+// GAME 4: Memory Matrix
+function runMemoryMatrixGame() {
+  let tilesHtml = "";
+  for (let i = 0; i < 9; i++) {
+    tilesHtml += '<div class="matrix-tile" data-idx="' + i + '" style="width:54px; height:54px; background:var(--bg-card); border-radius:6px; cursor:pointer;"></div>';
+  }
+  
+  arenaStage.innerHTML = 
+    '<div style="text-align:center;">' +
+      '<p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:12px;">Memorize the active green tile</p>' +
+      '<div style="display:grid; grid-template-columns:repeat(3, 54px); gap:8px; justify-content:center;" id="matrix-grid">' +
+        tilesHtml +
+      '</div>' +
+    '</div>';
+
+  const tiles = document.querySelectorAll(".matrix-tile");
+  const activeIndex = Math.floor(Math.random() * 9);
+
+  setTimeout(() => {
+    if (tiles[activeIndex]) tiles[activeIndex].style.backgroundColor = "var(--primary-green)";
+    setTimeout(() => {
+      if (tiles[activeIndex]) tiles[activeIndex].style.backgroundColor = "var(--bg-card)";
+      tiles.forEach(t => {
+        t.addEventListener("click", () => {
+          const clickedIdx = parseInt(t.getAttribute("data-idx"));
+          if (clickedIdx === activeIndex) {
+            endDuel(true, "Flawless spatial memory recall!", 0, 0);
+          } else {
+            endDuel(false, "Selected incorrect matrix quadrant.", 0, 0);
+          }
+        });
+      });
+    }, 800);
+  }, 400);
+}
+
+// ----------------------------------------------------
+// 6. Post-Match Analytics & Termination
+// ----------------------------------------------------
+function endDuel(won, analysisText, userStat, oppStat) {
+  if (won) {
+    currentBalance += MATCH_WIN_REWARD;
+    recordTransaction("Duel Victory: " + activeGame.name, "credit", MATCH_WIN_REWARD);
+  }
+
+  matchHistory.unshift({
+    game: activeGame.name,
+    opponent: activeOpponent.name,
+    result: won ? "VICTORY" : "DEFEAT",
+    reward: won ? ("+" + MATCH_WIN_REWARD + " 🪙") : "-50 🪙",
+    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+  saveMatches();
+  updateUI();
+
+  arenaStage.innerHTML = 
+    '<div class="result-card">' +
+      '<h2 class="' + (won ? 'win-text' : 'lose-text') + '">' + (won ? 'VICTORY' : 'DEFEAT') + '</h2>' +
+      '<p style="font-weight:700; font-size:1.1rem; color:var(--text-main); margin-bottom:4px;">' +
+        (won ? ('+' + MATCH_WIN_REWARD + ' Tokens Awarded') : '-50 Tokens Stake Lost') +
+      '</p>' +
+      '<div class="result-analytics">' +
+        '<p style="margin-bottom:4px;"><strong>Performance Analytics:</strong></p>' +
+        '<p>' + analysisText + '</p>' +
+      '</div>' +
+      '<div class="result-btn-row">' +
+        '<button id="rematch-btn" class="btn-primary" type="button">Rematch</button>' +
+        '<button id="return-dash-btn" class="btn-secondary" type="button">Dashboard</button>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById("rematch-btn")?.addEventListener("click", () => {
+    arenaOverlay.classList.add("hidden");
+    startMatchmaking();
+  });
+
+  document.getElementById("return-dash-btn")?.addEventListener("click", () => {
+    arenaOverlay.classList.add("hidden");
+  });
+}
+
+logoutBtn?.addEventListener("click", async () => {
+  await client.auth.signOut();
+  window.location.href = "index.html";
+});
+
+init();
