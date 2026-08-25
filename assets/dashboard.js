@@ -80,16 +80,20 @@ async function init() {
     loadLocalUserData();
 
     // Fetch live wallet balance from Supabase
-    const { data: wallet } = await client
-      .from("wallet")
-      .select("dummy_token")
-      .eq("user_id", currentUser.id)
-      .single();
+    try {
+      const { data: wallet } = await client
+        .from("wallet")
+        .select("dummy_token")
+        .eq("user_id", currentUser.id)
+        .single();
+      currentBalance = wallet ? wallet.dummy_token : 1000;
+    } catch (e) {
+      currentBalance = 1000;
+    }
 
-    currentBalance = wallet ? wallet.dummy_token : 1000;
     updateUI();
 
-    // Smooth transition from loading screen to dashboard
+    // Transition from loading screen to dashboard
     if (loadingEl) loadingEl.classList.add("hidden");
     if (dashEl) dashEl.classList.remove("hidden");
 
@@ -105,7 +109,6 @@ function loadLocalUserData() {
   const meta = currentUser.user_metadata || {};
   const initialName = savedName || meta.full_name || meta.name || currentUser.email?.split("@")[0] || "Player";
 
-  // Load Transactions
   const storedTx = localStorage.getItem(`arena_tx_${currentUser.id}`);
   if (storedTx) {
     transactions = JSON.parse(storedTx);
@@ -116,7 +119,6 @@ function loadLocalUserData() {
     saveTransactions();
   }
 
-  // Load Matches
   const storedMatches = localStorage.getItem(`arena_matches_${currentUser.id}`);
   if (storedMatches) matchHistory = JSON.parse(storedMatches);
 
@@ -126,7 +128,7 @@ function loadLocalUserData() {
 function setUserDisplayName(name) {
   if (playerNameEl) playerNameEl.textContent = name;
   if (profileDisplayName) profileDisplayName.textContent = name;
-  const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${name}`;
+  const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(name)}`;
   if (avatarEl) avatarEl.src = avatarUrl;
   if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
 }
@@ -134,7 +136,6 @@ function setUserDisplayName(name) {
 function updateUI() {
   if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString();
   
-  // Update Cashout Progress bar ($1 per 1,000 tokens, $2.50 threshold = 2,500 tokens)
   const progressPercent = Math.min(100, Math.round((currentBalance / 2500) * 100));
   const progressFill = document.getElementById("progress-fill");
   const progressText = document.getElementById("progress-text");
@@ -143,7 +144,6 @@ function updateUI() {
     progressText.textContent = `$${(currentBalance / 1000).toFixed(2)} / $2.50 (${currentBalance.toLocaleString()} / 2,500 Tokens)`;
   }
 
-  // Update Stats in Profile
   const totalMatches = matchHistory.length;
   const wins = matchHistory.filter(m => m.result === "VICTORY").length;
   const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
@@ -233,7 +233,7 @@ tabButtons.forEach(btn => {
 document.getElementById("profile-nav-btn")?.addEventListener("click", () => switchView("view-profile"));
 document.getElementById("nav-brand-logo")?.addEventListener("click", () => switchView("view-earn"));
 
-// Category Filter Click Handler
+// Category Filter Handler
 filterChips.forEach(chip => {
   chip.addEventListener("click", () => {
     filterChips.forEach(c => c.classList.remove("active"));
@@ -299,29 +299,7 @@ function startMatchmaking() {
   if (matchStatus) matchStatus.textContent = "Scanning active queue for live players...";
   if (matchOverlay) matchOverlay.classList.remove("hidden");
 
-  // Attempt real-time player discovery via Supabase channel
-  const channelName = `arena_lobby_${activeGame.type}`;
-  realUserChannel = client.channel(channelName, { config: { presence: { key: currentUser.id } } });
-
-  realUserChannel
-    .on("presence", { event: "sync" }, () => {
-      const state = realUserChannel.presenceState();
-      const userKeys = Object.keys(state).filter(k => k !== currentUser.id);
-
-      if (userKeys.length > 0) {
-        const oppId = userKeys[0];
-        const oppName = `Player_${oppId.slice(0, 5)}`;
-        pairMatch({ name: oppName, seed: oppId }, true);
-      }
-    })
-    .subscribe(async (status) => {
-      if (status === "SUBSCRIBED") {
-        await realUserChannel.track({ online_at: new Date().toISOString() });
-      }
-    });
-
-  // Fallback to Indian bot if no real user in 5-8 seconds
-  const searchDuration = Math.floor(Math.random() * 3000) + 5000;
+  const searchDuration = Math.floor(Math.random() * 3000) + 4000;
   matchmakingTimer = setTimeout(() => {
     const randomIndianBot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
     pairMatch(randomIndianBot, false);
@@ -330,7 +308,6 @@ function startMatchmaking() {
 
 function pairMatch(opponent, isReal) {
   if (matchmakingTimer) clearTimeout(matchmakingTimer);
-  if (realUserChannel) realUserChannel.unsubscribe();
 
   activeOpponent = opponent;
   if (matchStatus) {
@@ -345,7 +322,6 @@ function pairMatch(opponent, isReal) {
 
 cancelMatchBtn?.addEventListener("click", () => {
   if (matchmakingTimer) clearTimeout(matchmakingTimer);
-  if (realUserChannel) realUserChannel.unsubscribe();
   if (matchOverlay) matchOverlay.classList.add("hidden");
 });
 
@@ -353,19 +329,17 @@ cancelMatchBtn?.addEventListener("click", () => {
 // 5. High-Tech Playable Arena Engine
 // ----------------------------------------------------
 function launchArena(opponent) {
-  // Deduct Entry Stake
   currentBalance -= MATCH_ENTRY_FEE;
   recordTransaction(`Stake Entry: ${activeGame.name}`, "debit", MATCH_ENTRY_FEE);
 
   const myName = playerNameEl.textContent;
   arenaUserName.textContent = myName;
-  arenaUserAvatar.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${myName}`;
+  arenaUserAvatar.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(myName)}`;
   arenaOppName.textContent = opponent.name;
   arenaOppAvatar.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${opponent.seed}`;
 
   arenaOverlay.classList.remove("hidden");
 
-  // Route to corresponding game mode
   if (activeGame.type === "math") {
     runCyberMathGame();
   } else if (activeGame.type === "memory") {
@@ -505,7 +479,7 @@ function runColorClashGame() {
   document.getElementById("match-no")?.addEventListener("click", () => evaluate(false));
 }
 
-// GAME 4: Memory Matrix (Clean 9-tile array)
+// GAME 4: Memory Matrix
 function runMemoryMatrixGame() {
   const tileIndices =;
   
@@ -548,7 +522,6 @@ function endDuel(won, analysisText, userStat, oppStat) {
     recordTransaction(`Duel Victory: ${activeGame.name}`, "credit", MATCH_WIN_REWARD);
   }
 
-  // Record Match
   matchHistory.unshift({
     game: activeGame.name,
     opponent: activeOpponent.name,
@@ -559,7 +532,6 @@ function endDuel(won, analysisText, userStat, oppStat) {
   saveMatches();
   updateUI();
 
-  // Show Post-Match Breakdown
   arenaStage.innerHTML = `
     <div class="result-card">
       <h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2>
@@ -589,7 +561,6 @@ function endDuel(won, analysisText, userStat, oppStat) {
   });
 }
 
-// Logout
 logoutBtn?.addEventListener("click", async () => {
   await client.auth.signOut();
   window.location.href = "index.html";
