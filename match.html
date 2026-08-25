@@ -2,16 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Match | Arena</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css" />
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=3" />
 </head>
 <body>
   <p id="loading" class="center-screen loading-text">Loading match...</p>
+
   <div id="match-root" class="match-wrap hidden">
     <div class="vs-bar">
       <div class="vs-player">
@@ -24,8 +21,10 @@
         <img id="opp-avatar" src="" alt="Opponent" />
       </div>
     </div>
+
     <div class="game-stage" id="stage"></div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabaseClient.js"></script>
   <script src="assets/match-common.js"></script>
@@ -38,11 +37,13 @@
       const params = new URLSearchParams(window.location.search);
       const matchId = params.get("id");
       const gameType = params.get("game");
+
       const { data: { session } } = await client.auth.getSession();
       if (!session) {
         window.location.href = "index.html";
         return;
       }
+
       let roomInfo;
       try {
         roomInfo = await MatchRoom.init(matchId, session.user.id);
@@ -51,19 +52,25 @@
           "Couldn't load this match. It may have expired.";
         return;
       }
+
       const { data: profiles } = await client
         .from("users")
         .select("id, full_name, avatar_url")
         .in("id", [roomInfo.match.player1_id, roomInfo.match.player2_id]);
+
       const me = profiles.find((p) => p.id === session.user.id);
       const opp = profiles.find((p) => p.id === roomInfo.opponentId);
+
       document.getElementById("me-name").textContent = me?.full_name || "You";
       document.getElementById("me-avatar").src = me?.avatar_url || "";
       document.getElementById("opp-name").textContent = opp?.full_name || "Opponent";
       document.getElementById("opp-avatar").src = opp?.avatar_url || "";
+
       document.getElementById("loading").classList.add("hidden");
       document.getElementById("match-root").classList.remove("hidden");
+
       const stage = document.getElementById("stage");
+
       switch (gameType) {
         case "reaction":
           initReactionDuel(stage, roomInfo.iAmPlayer1);
@@ -81,6 +88,7 @@
           stage.innerHTML = "<p>Unknown game type.</p>";
       }
     }
+
     boot();
     window.addEventListener("beforeunload", () => MatchRoom.cleanup());
   </script>
