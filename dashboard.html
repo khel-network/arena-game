@@ -4,91 +4,164 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arena | Dashboard</title>
-  <link rel="stylesheet" href="assets/style.css" />
-  <!-- Inline fallback to guarantee hidden elements stay hidden while styles load -->
+  <link rel="stylesheet" href="./assets/style.css" />
   <style>
     .hidden { display: none !important; }
   </style>
 </head>
-<body>
-  <!-- 1. Initial Loading Screen -->
+<body class="dashboard-body">
+  <!-- Loading Screen -->
   <div id="loading" class="center-screen">
     <div class="spinner"></div>
-    <p class="loading-text">Loading your dashboard...</p>
+    <p class="loading-text">Loading your arena profile...</p>
   </div>
 
-  <!-- 2. Dashboard Interface -->
-  <div id="dashboard" class="dash-wrap hidden">
-    <header class="dash-header">
-      <span class="brand">Arena</span>
-      <button id="logout-btn" class="logout-btn" type="button">Sign out</button>
+  <!-- Dashboard App Container -->
+  <div id="dashboard" class="app-wrap hidden">
+    <!-- Dashboard Top Bar -->
+    <header class="top-nav">
+      <div class="nav-container">
+        <div class="brand-logo">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">ARENA</span>
+        </div>
+
+        <nav class="nav-links">
+          <a href="#" class="nav-link active">🎮 Games</a>
+          <a href="#" class="nav-link">🏆 Leaderboard</a>
+          <a href="#" class="nav-link">🎁 Rewards</a>
+        </nav>
+
+        <div class="user-stats-bar">
+          <!-- Token Balance Badge -->
+          <div class="token-badge">
+            <span class="token-icon">🪙</span>
+            <span id="balance-value" class="token-count">0</span>
+            <span class="token-unit">Tokens</span>
+          </div>
+
+          <!-- User Profile Chip -->
+          <div class="user-profile-chip">
+            <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=arena" alt="Avatar" />
+            <span id="player-name" class="user-name">Player</span>
+          </div>
+
+          <!-- Sign Out -->
+          <button id="logout-btn" class="logout-btn" title="Sign out" type="button">
+            Sign out
+          </button>
+        </div>
+      </div>
     </header>
 
-    <!-- User Profile & Wallet -->
-    <section class="card profile-card">
-      <img id="avatar" class="avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=player" alt="Player avatar" />
-      <h2 id="player-name">Player</h2>
-      <div class="balance-box">
-        <span class="balance-label">Token balance</span>
-        <span class="balance-value" id="balance-value">0</span>
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+      <!-- Banner Card -->
+      <section class="banner-card">
+        <div class="banner-info">
+          <span class="banner-tag">🔥 LIVE BATTLES</span>
+          <h2>Select a Game & Challenge Real Players</h2>
+          <p>Entry: <strong>50 tokens</strong> • Winner takes <strong>90 tokens</strong></p>
+        </div>
+      </section>
+
+      <!-- Category Filter Tabs -->
+      <div class="filter-row">
+        <button class="filter-chip active" type="button">All Games</button>
+        <button class="filter-chip" type="button">⚡ Fast Reflex</button>
+        <button class="filter-chip" type="button">⭕ 1v1 Classic</button>
+        <button class="filter-chip" type="button">🧠 Trivia</button>
       </div>
-    </section>
 
-    <!-- Game Selection Section -->
-    <section class="games-section">
-      <div class="section-heading">
-        <h3>Choose a game</h3>
-        <p class="subtitle">Each match costs 50 tokens to enter. Win to earn 90 back.</p>
+      <!-- Games Grid (Freecash / Casino Style Cards) -->
+      <section class="games-grid">
+        <!-- Game 1: Reaction Duel -->
+        <article class="game-card">
+          <div class="card-media banner-reaction">
+            <span class="card-badge">POPULAR</span>
+            <div class="media-icon">⚡</div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Reaction Duel</h3>
+            <p class="card-desc">Fastest click wins the round</p>
+            <div class="card-meta">
+              <span class="fee-tag">Fee: 50 🪙</span>
+              <span class="win-tag">Win: 90 🪙</span>
+            </div>
+            <button class="play-btn" data-game="Reaction Duel" type="button">Play Match</button>
+          </div>
+        </article>
+
+        <!-- Game 2: Tic-Tac-Toe -->
+        <article class="game-card">
+          <div class="card-media banner-tictactoe">
+            <span class="card-badge">CLASSIC</span>
+            <div class="media-icon">⭕</div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Tic-Tac-Toe Blitz</h3>
+            <p class="card-desc">Turn-based 3x3 strategic duel</p>
+            <div class="card-meta">
+              <span class="fee-tag">Fee: 50 🪙</span>
+              <span class="win-tag">Win: 90 🪙</span>
+            </div>
+            <button class="play-btn" data-game="Tic-Tac-Toe Blitz" type="button">Play Match</button>
+          </div>
+        </article>
+
+        <!-- Game 3: Quiz Battle -->
+        <article class="game-card">
+          <div class="card-media banner-quiz">
+            <span class="card-badge">TRIVIA</span>
+            <div class="media-icon">🧠</div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Quiz Battle</h3>
+            <p class="card-desc">5 quick questions, highest score wins</p>
+            <div class="card-meta">
+              <span class="fee-tag">Fee: 50 🪙</span>
+              <span class="win-tag">Win: 90 🪙</span>
+            </div>
+            <button class="play-btn" data-game="Quiz Battle" type="button">Play Match</button>
+          </div>
+        </article>
+
+        <!-- Game 4: Math Duel -->
+        <article class="game-card">
+          <div class="card-media banner-math">
+            <span class="card-badge">BRAIN</span>
+            <div class="media-icon">🔢</div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Math Duel</h3>
+            <p class="card-desc">Best of 3 speed mental math rounds</p>
+            <div class="card-meta">
+              <span class="fee-tag">Fee: 50 🪙</span>
+              <span class="win-tag">Win: 90 🪙</span>
+            </div>
+            <button class="play-btn" data-game="Math Duel" type="button">Play Match</button>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <!-- Matchmaking Modal Overlay -->
+    <div id="match-overlay" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="radar-pulse">
+          <div class="pulse-circle"></div>
+          <div class="pulse-icon">🎮</div>
+        </div>
+        <h3 id="match-title">Finding Real Opponent</h3>
+        <p class="modal-subtitle" id="match-status">Searching active queue for players...</p>
+        <div class="modal-fee-notice">Entry fee: <strong>50 tokens</strong> will be locked</div>
+        <button id="cancel-match-btn" class="btn-cancel" type="button">Cancel Matchmaking</button>
       </div>
-
-      <div class="game-grid">
-        <button class="game-card" data-game="reaction" type="button">
-          <span class="game-icon">⚡</span>
-          <div class="game-info">
-            <h4>Reaction Duel</h4>
-            <p>Fastest click wins</p>
-          </div>
-        </button>
-
-        <button class="game-card" data-game="tictactoe" type="button">
-          <span class="game-icon">⭕</span>
-          <div class="game-info">
-            <h4>Tic-Tac-Toe</h4>
-            <p>Classic 1v1</p>
-          </div>
-        </button>
-
-        <button class="game-card" data-game="quiz" type="button">
-          <span class="game-icon">🧠</span>
-          <div class="game-info">
-            <h4>Quiz Battle</h4>
-            <p>5 questions, most points</p>
-          </div>
-        </button>
-
-        <button class="game-card" data-game="math" type="button">
-          <span class="game-icon">🔢</span>
-          <div class="game-info">
-            <h4>Math Duel</h4>
-            <p>Best of 3, fastest correct</p>
-          </div>
-        </button>
-      </div>
-    </section>
-  </div>
-
-  <!-- 3. Matchmaking Modal Overlay (Hidden by Default) -->
-  <div id="match-overlay" class="modal-overlay hidden">
-    <div class="modal-card">
-      <div class="spinner"></div>
-      <h3 id="match-title">Finding Opponent</h3>
-      <p class="subtitle" id="match-status">Looking for an opponent...</p>
-      <button id="cancel-match-btn" class="cancel-btn" type="button">Cancel</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/supabaseClient.js"></script>
-  <script src="assets/dashboard.js"></script>
+  <script src="./assets/supabaseClient.js"></script>
+  <script src="./assets/dashboard.js"></script>
 </body>
 </html>
