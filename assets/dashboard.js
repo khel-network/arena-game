@@ -25,6 +25,15 @@ let transactions = [];
 let activeOpponent = null;
 let activeGame = null;
 let matchmakingTimer = null;
+let walletChannel = null;
+
+// ----------------------------------------------------
+// Currency helper - all amounts are shown in Indian Rupees
+// ----------------------------------------------------
+function formatINR(amount) {
+  const n = Number(amount) || 0;
+  return "\u20b9" + n.toLocaleString("en-IN");
+}
 
 // DOM Elements
 const loadingEl = document.getElementById("loading");
@@ -78,21 +87,8 @@ async function init() {
 
     currentUser = session.user;
     loadLocalUserData();
-
-    // Fetch live wallet balance from Supabase
-    try {
-      const { data: wallet } = await client
-        .from("wallet")
-        .select("dummy_token")
-        .eq("user_id", currentUser.id)
-        .single();
-      if (wallet && typeof wallet.dummy_token === "number") {
-        currentBalance = wallet.dummy_token;
-      }
-    } catch (e) {
-      console.warn("Wallet fetch fallback to local balance:", e);
-    }
-
+    await refreshWalletFromServer();
+    subscribeWalletRealtime();
     updateUI();
   } catch (err) {
     console.error("Initialization error:", err);
@@ -150,15 +146,111 @@ function setUserDisplayName(name) {
   if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
 }
 
+// ----------------------------------------------------
+// Live wallet sync — keeps the balance accurate across tabs,
+// devices, and re-logins to the same account instead of
+// relying on a stale local number.
+// ----------------------------------------------------
+async function refreshWalletFromServer() {
+  if (!currentUser) return;
+  try {
+    const { data: wallet, error } = await client
+      .from("wallet")
+      .select("dummy_token")
+      .eq("user_id", currentUser.id)
+      .single();
+    if (!error && wallet && typeof wallet.dummy_token === "number") {
+      if (wallet.dummy_token !== currentBalance) {
+        currentBalance = wallet.dummy_token;
+        updateUI();
+        flashBalance();
+      }
+    }
+  } catch (e) {
+    console.warn("Wallet refresh fallback to local balance:", e);
+  }
+}
+
+function subscribeWalletRealtime() {
+  if (!currentUser || typeof client === "undefined") return;
+  if (walletChannel) {
+    client.removeChannel(walletChannel);
+  }
+  walletChannel = client
+    .channel("wallet-live-" + currentUser.id)
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "wallet",
+        filter: `user_id=eq.${currentUser.id}`,
+      },
+      (payload) => {
+        if (payload.new && typeof payload.new.dummy_token === "number" && payload.new.dummy_token !== currentBalance) {
+          currentBalance = payload.new.dummy_token;
+          updateUI();
+          flashBalance();
+        }
+      }
+    )
+    .subscribe();
+}
+
+// Re-sync whenever the tab regains focus/visibility, or the same
+// browser session signs back in — covers cases where a realtime
+// event was missed while the tab was backgrounded.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") refreshWalletFromServer();
+});
+window.addEventListener("focus", refreshWalletFromServer);
+
+if (typeof client !== "undefined" && client.auth) {
+  client.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_OUT") {
+      window.location.href = "index.html";
+      return;
+    }
+    if (event === "SIGNED_IN" && session && session.user) {
+      currentUser = session.user;
+      refreshWalletFromServer();
+      subscribeWalletRealtime();
+    }
+  });
+}
+
+async function writeWalletBalance(newBalance) {
+  currentBalance = newBalance;
+  if (!currentUser) return;
+  try {
+    await client
+      .from("wallet")
+      .update({ dummy_token: newBalance, updated_at: new Date().toISOString() })
+      .eq("user_id", currentUser.id);
+  } catch (e) {
+    console.warn("Wallet write failed, will resync on next refresh:", e);
+  }
+}
+
+function flashBalance() {
+  [balanceEl, document.getElementById("stat-total-earnings")].forEach((el) => {
+    if (!el) return;
+    el.classList.remove("balance-flash");
+    // force reflow so the animation can retrigger
+    void el.offsetWidth;
+    el.classList.add("balance-flash");
+  });
+}
+
 function updateUI() {
-  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString();
-  
+  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString("en-IN");
+
   const progressPercent = Math.min(100, Math.round((currentBalance / 2500) * 100));
   const progressFill = document.getElementById("progress-fill");
   const progressText = document.getElementById("progress-text");
   if (progressFill) progressFill.style.width = progressPercent + "%";
   if (progressText) {
-    progressText.textContent = "$" + (currentBalance / 1000).toFixed(2) + " / $2.50 (" + currentBalance.toLocaleString() + " / 2,500 Tokens)";
+    progressText.textContent = formatINR(currentBalance) + " / " + formatINR(2500) + " towards cashout";
   }
 
   const totalMatches = matchHistory.length;
@@ -171,10 +263,10 @@ function updateUI() {
   const statRate = document.getElementById("stat-win-rate");
   const statWon = document.getElementById("stat-tokens-won");
 
-  if (statEarnings) statEarnings.textContent = currentBalance.toLocaleString() + " 🪙";
+  if (statEarnings) statEarnings.textContent = formatINR(currentBalance);
   if (statMatches) statMatches.textContent = totalMatches;
   if (statRate) statRate.textContent = winRate + "%";
-  if (statWon) statWon.textContent = "+" + totalWonTokens.toLocaleString() + " 🪙";
+  if (statWon) statWon.textContent = "+" + formatINR(totalWonTokens);
 
   renderLedger();
   renderMatchHistory();
@@ -195,7 +287,7 @@ function renderLedger() {
     return '<tr>' +
       '<td>' + tx.desc + '</td>' +
       '<td><span class="' + badgeClass + '">' + tx.type.toUpperCase() + '</span></td>' +
-      '<td style="font-weight:700; color:' + color + ';">' + sign + tx.amount + ' 🪙</td>' +
+      '<td style="font-weight:700; color:' + color + ';">' + sign + formatINR(tx.amount) + '</td>' +
       '<td style="color:var(--text-dim);">' + tx.date + '</td>' +
     '</tr>';
   }).join("");
@@ -226,6 +318,7 @@ function recordTransaction(desc, type, amount) {
   transactions.unshift({ desc: desc, type: type, amount: amount, date: new Date().toLocaleString() });
   saveTransactions();
   updateUI();
+  flashBalance();
 }
 
 function saveTransactions() {
@@ -247,8 +340,7 @@ function switchView(targetId) {
   tabButtons.forEach(b => b.classList.remove("active"));
   appViews.forEach(v => v.classList.remove("active"));
 
-  const targetTab = Array.from(tabButtons).find(b => b.getAttribute("data-target") === targetId);
-  if (targetTab) targetTab.classList.add("active");
+  document.querySelectorAll('.tab-btn[data-target="' + targetId + '"]').forEach(b => b.classList.add("active"));
 
   const targetView = document.getElementById(targetId);
   if (targetView) targetView.classList.add("active");
@@ -308,14 +400,18 @@ saveNameBtn?.addEventListener("click", () => {
 // 4. Realtime Matchmaking with Indian Bot Fallback
 // ----------------------------------------------------
 playButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
+  btn.addEventListener("click", async () => {
     activeGame = {
       name: btn.getAttribute("data-game"),
       type: btn.getAttribute("data-type")
     };
 
+    // Re-check against the server balance right before queueing so a
+    // stale local number can never let someone queue for a match they
+    // can't actually afford.
+    await refreshWalletFromServer();
     if (currentBalance < MATCH_ENTRY_FEE) {
-      alert("Insufficient balance. You need " + MATCH_ENTRY_FEE + " tokens to enter.");
+      alert("Insufficient balance. You need " + formatINR(MATCH_ENTRY_FEE) + " to enter.");
       return;
     }
 
@@ -357,8 +453,16 @@ cancelMatchBtn?.addEventListener("click", () => {
 // ----------------------------------------------------
 // 5. High-Tech Playable Arena Engine
 // ----------------------------------------------------
-function launchArena(opponent) {
-  currentBalance -= MATCH_ENTRY_FEE;
+async function launchArena(opponent) {
+  // Re-confirm balance and write the deduction straight to the wallet
+  // table (not just a local variable) so it is correct immediately for
+  // every open tab and the next login on this account.
+  await refreshWalletFromServer();
+  if (currentBalance < MATCH_ENTRY_FEE) {
+    alert("Insufficient balance. You need " + formatINR(MATCH_ENTRY_FEE) + " to enter.");
+    return;
+  }
+  await writeWalletBalance(currentBalance - MATCH_ENTRY_FEE);
   recordTransaction("Stake Entry: " + activeGame.name, "debit", MATCH_ENTRY_FEE);
 
   const myName = playerNameEl.textContent;
@@ -544,9 +648,9 @@ function runMemoryMatrixGame() {
 // ----------------------------------------------------
 // 6. Post-Match Analytics & Termination
 // ----------------------------------------------------
-function endDuel(won, analysisText, userStat, oppStat) {
+async function endDuel(won, analysisText, userStat, oppStat) {
   if (won) {
-    currentBalance += MATCH_WIN_REWARD;
+    await writeWalletBalance(currentBalance + MATCH_WIN_REWARD);
     recordTransaction("Duel Victory: " + activeGame.name, "credit", MATCH_WIN_REWARD);
   }
 
@@ -554,7 +658,7 @@ function endDuel(won, analysisText, userStat, oppStat) {
     game: activeGame.name,
     opponent: activeOpponent.name,
     result: won ? "VICTORY" : "DEFEAT",
-    reward: won ? ("+" + MATCH_WIN_REWARD + " 🪙") : "-50 🪙",
+    reward: won ? ("+" + formatINR(MATCH_WIN_REWARD)) : ("-" + formatINR(MATCH_ENTRY_FEE)),
     date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   });
   saveMatches();
@@ -564,7 +668,7 @@ function endDuel(won, analysisText, userStat, oppStat) {
     '<div class="result-card">' +
       '<h2 class="' + (won ? 'win-text' : 'lose-text') + '">' + (won ? 'VICTORY' : 'DEFEAT') + '</h2>' +
       '<p style="font-weight:700; font-size:1.1rem; color:var(--text-main); margin-bottom:4px;">' +
-        (won ? ('+' + MATCH_WIN_REWARD + ' Tokens Awarded') : '-50 Tokens Stake Lost') +
+        (won ? (formatINR(MATCH_WIN_REWARD) + ' Credited') : (formatINR(MATCH_ENTRY_FEE) + ' Stake Lost')) +
       '</p>' +
       '<div class="result-analytics">' +
         '<p style="margin-bottom:4px;"><strong>Performance Analytics:</strong></p>' +
@@ -587,6 +691,7 @@ function endDuel(won, analysisText, userStat, oppStat) {
 }
 
 logoutBtn?.addEventListener("click", async () => {
+  if (walletChannel) client.removeChannel(walletChannel);
   await client.auth.signOut();
   window.location.href = "index.html";
 });
