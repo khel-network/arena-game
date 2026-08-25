@@ -3,16 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | Arena</title>
+  <title>Lobby | Arena</title>
   <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
   <p id="loading" class="center-screen loading-text">Loading your dashboard...</p>
+
   <div id="dashboard" class="dash-wrap hidden">
     <header class="dash-header">
       <span class="brand">Arena</span>
       <button id="logout-btn" class="logout-btn">Sign out</button>
     </header>
+
     <section class="card">
       <img id="avatar" class="avatar" src="" alt="Player avatar" />
       <h2 id="player-name">—</h2>
@@ -21,14 +23,48 @@
         <p class="balance-value" id="balance-value">0</p>
       </div>
     </section>
-    <section class="card">
-      <h3>Ready to play?</h3>
-      <p class="subtitle" style="margin-top:0">You'll be matched against a real, currently-online opponent. Entry fee is deducted from your balance.</p>
-      <button id="match-btn" class="match-btn">Join Match</button>
+
+    <section class="card" style="align-items: stretch;">
+      <h3 style="margin: 0 0 4px;">Choose a game</h3>
+      <p class="subtitle" style="margin: 0 0 12px;">
+        Each match costs 50 tokens to enter. Win to earn 90 back.
+      </p>
+      <div class="game-grid">
+        <div class="game-card" data-game="reaction">
+          <div class="icon">⚡</div>
+          <h4>Reaction Duel</h4>
+          <p>Fastest click wins</p>
+        </div>
+        <div class="game-card" data-game="tictactoe">
+          <div class="icon">⭕</div>
+          <h4>Tic-Tac-Toe</h4>
+          <p>Classic 1v1</p>
+        </div>
+        <div class="game-card" data-game="quiz">
+          <div class="icon">🧠</div>
+          <h4>Quiz Battle</h4>
+          <p>5 questions, most points</p>
+        </div>
+        <div class="game-card" data-game="math">
+          <div class="icon">🔢</div>
+          <h4>Math Duel</h4>
+          <p>Best of 3, fastest correct</p>
+        </div>
+      </div>
     </section>
   </div>
+
+  <div id="matchmaking-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(30,27,46,0.55); display:flex; align-items:center; justify-content:center; z-index:50;">
+    <div class="card searching-box" style="max-width:320px;">
+      <div class="spinner"></div>
+      <p id="matchmaking-status" class="loading-text">Looking for an opponent...</p>
+      <button id="cancel-matchmaking" class="logout-btn">Cancel</button>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabaseClient.js"></script>
+  <script src="assets/matchmaking.js"></script>
   <script src="assets/dashboard.js"></script>
 </body>
 </html>
