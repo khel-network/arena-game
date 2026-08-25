@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Arena</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <p id="loading" class="center-screen loading-text">Loading your dashboard...</p>
+  <div id="dashboard" class="dash-wrap hidden">
+    <header class="dash-header">
+      <span class="brand">Arena</span>
+      <button id="logout-btn" class="logout-btn">Sign out</button>
+    </header>
+    <section class="card">
+      <img id="avatar" class="avatar" src="" alt="Player avatar" />
+      <h2 id="player-name">—</h2>
+      <div class="balance-box">
+        <p class="balance-label">Token balance</p>
+        <p class="balance-value" id="balance-value">0</p>
+      </div>
+    </section>
+    <section class="card">
+      <h3>Ready to play?</h3>
+      <p class="subtitle" style="margin-top:0">You'll be matched against a real, currently-online opponent. Entry fee is deducted from your balance.</p>
+      <button id="match-btn" class="match-btn">Join Match</button>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabaseClient.js"></script>
+  <script src="assets/dashboard.js"></script>
+</body>
+</html>
