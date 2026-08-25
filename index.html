@@ -3,37 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arena | Play Real Players</title>
-  <link rel="stylesheet" href="assets/style.css" />
+  <title>Arena | Play Games & Win Real Tokens</title>
+  <link rel="stylesheet" href="./assets/style.css" />
 </head>
-<body>
-  <main class="center-screen">
-    <div>
-      <h1>Play. Compete. <span>Win Real Matches.</span></h1>
-      <p class="subtitle">
-        Sign in, get 1,000 free tokens, and challenge real opponents —
-        no bots, ever.
-      </p>
+<body class="landing-body">
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <div class="brand-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">ARENA</span>
+      </div>
+      <div class="nav-links">
+        <a href="#games" class="nav-link active">Games</a>
+        <a href="#rewards" class="nav-link">Rewards</a>
+        <a href="#leaderboard" class="nav-link">Leaderboard</a>
+      </div>
+      <div class="nav-actions">
+        <button id="nav-login-btn" class="btn-secondary" type="button">Sign In</button>
+        <button id="nav-signup-btn" class="btn-primary" type="button">Sign Up</button>
+      </div>
     </div>
+  </header>
 
-    <button id="google-login-btn" class="google-btn">
-      <svg width="20" height="20" viewBox="0 0 48 48">
-        <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
-        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
-        <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
-        <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/>
-      </svg>
-      Sign in with Google
-    </button>
+  <!-- Hero Section -->
+  <main class="hero-section">
+    <div class="hero-container">
+      <!-- Left Hero Text & Stats -->
+      <div class="hero-left">
+        <div class="badge-pill">
+          <span class="badge-dot"></span>
+          <span>Live 1v1 Skill Matches</span>
+        </div>
+        <h1 class="hero-title">
+          Play Games & <span class="highlight-green">Win Real Tokens</span>
+        </h1>
+        <p class="hero-subtitle">
+          Challenge real opponents in instant skill battles. Start with <strong>1,000 free tokens</strong> upon sign up — 100% real players, zero bots.
+        </p>
 
-    <p class="fine-print">
-      By signing in you agree this is a prototype. Tokens have no real
-      monetary value yet.
-    </p>
+        <div class="hero-stats-row">
+          <div class="stat-item">
+            <span class="stat-number">100%</span>
+            <span class="stat-label">Verified Players</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">Instant</span>
+            <span class="stat-label">Matchmaking</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">1,000</span>
+            <span class="stat-label">Free Welcome Bonus</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Login Card -->
+      <div class="hero-right">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h3>Start Playing Now</h3>
+            <p>Join thousands of players competing in live arena duels</p>
+          </div>
+
+          <div class="auth-perks">
+            <div class="perk-item">
+              <span class="perk-icon">🎁</span>
+              <span><strong>1,000 free tokens</strong> added automatically</span>
+            </div>
+            <div class="perk-item">
+              <span class="perk-icon">⚡</span>
+              <span>Fast 1-click Google authentication</span>
+            </div>
+          </div>
+
+          <button id="google-login-btn" class="google-auth-btn" type="button">
+            <svg width="22" height="22" viewBox="0 0 48 48">
+              <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
+              <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
+              <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
+              <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+
+          <p class="auth-footnote">🔒 Secure authentication powered by Supabase</p>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/supabaseClient.js"></script>
-  <script src="assets/auth.js"></script>
+  <script src="./assets/supabaseClient.js"></script>
+  <script src="./assets/auth.js"></script>
 </body>
 </html>
