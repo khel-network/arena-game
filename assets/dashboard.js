@@ -497,6 +497,49 @@ playButtons.forEach((btn) => {
   });
 });
 
+// Looks for a live opponent already waiting in the queue for this game
+// and, if one exists, atomically claims their queue slot and creates the
+// match. Used both when we first join the queue AND on every poll tick
+// while we wait — this is what lets two real players who queue up within
+// a few seconds of each other actually find one another instead of both
+// timing out to a bot. The delete-then-check-rows step prevents two
+// players from both claiming the same opponent at once (a genuine race
+// when both are polling every second).
+async function findAndClaimOpponent() {
+  const { data: waiting } = await client
+    .from("matchmaking_queue")
+    .select("user_id, created_at")
+    .eq("game_type", activeGame.type)
+    .neq("user_id", currentUser.id)
+    .order("created_at", { ascending: true })
+    .limit(1);
+
+  if (!waiting || waiting.length === 0) return null;
+
+  const opponentId = waiting[0].user_id;
+
+  const { data: claimed } = await client
+    .from("matchmaking_queue")
+    .delete()
+    .eq("user_id", opponentId)
+    .select();
+
+  if (!claimed || claimed.length === 0) return null; // someone else claimed them first
+
+  const { data: match, error } = await client
+    .from("matches")
+    .insert({
+      game_type: activeGame.type,
+      player1_id: opponentId,
+      player2_id: currentUser.id,
+      entry_fee: MATCH_ENTRY_FEE
+    })
+    .select()
+    .single();
+
+  return !error && match ? match : null;
+}
+
 async function beginMatchmaking() {
   inQueue = true;
   if (matchTitle) matchTitle.textContent = "Finding Opponent \u2014 " + activeGame.name;
@@ -517,35 +560,14 @@ async function beginMatchmaking() {
   if (matchStatus) matchStatus.textContent = "Scanning live queue for players...";
 
   // 1. Is someone already waiting for this game?
-  const { data: waiting } = await client
-    .from("matchmaking_queue")
-    .select("user_id, created_at")
-    .eq("game_type", activeGame.type)
-    .neq("user_id", currentUser.id)
-    .order("created_at", { ascending: true })
-    .limit(1);
-
-  if (waiting && waiting.length > 0) {
-    const opponentId = waiting[0].user_id;
-    await client.from("matchmaking_queue").delete().eq("user_id", opponentId);
-    const { data: match, error } = await client
-      .from("matches")
-      .insert({
-        game_type: activeGame.type,
-        player1_id: opponentId,
-        player2_id: currentUser.id,
-        entry_fee: MATCH_ENTRY_FEE
-      })
-      .select()
-      .single();
-    if (!error && match) {
-      if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
-      cleanupQueue();
-      setTimeout(() => {
-        window.location.href = "match.html?id=" + match.id + "&game=" + activeGame.type;
-      }, 600);
-      return;
-    }
+  const foundMatch = await findAndClaimOpponent();
+  if (foundMatch) {
+    if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
+    cleanupQueue();
+    setTimeout(() => {
+      window.location.href = "match.html?id=" + foundMatch.id + "&game=" + activeGame.type;
+    }, 600);
+    return;
   }
 
   // 2. No one waiting — join the queue myself and watch for a live opponent
@@ -576,6 +598,22 @@ async function beginMatchmaking() {
 
     if (secondsLeft > 0) {
       if (matchStatus) matchStatus.textContent = "Waiting for a live player... (" + secondsLeft + "s)";
+
+      // Actively re-scan the queue for a live opponent who joined after us.
+      // (Previously we only checked once at the very start, so two real
+      // players queueing within the same few seconds would both sit here
+      // and both eventually time out to a bot instead of matching each
+      // other.)
+      const liveMatch = await findAndClaimOpponent();
+      if (liveMatch) {
+        cleanupQueue();
+        if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
+        setTimeout(() => {
+          window.location.href = "match.html?id=" + liveMatch.id + "&game=" + activeGame.type;
+        }, 400);
+        return;
+      }
+
       // Poll as a backup in case realtime missed the insert
       const { data: mine } = await client
         .from("matches")
@@ -722,7 +760,7 @@ function runCyberMathGame() {
       answered = true;
       endDuel(false, "Opponent calculated and answered correctly first!");
     }
-  }, Math.floor(Math.random() * 1400) + 2800);
+  }, botDelay());
 
   function pickAnswer(val) {
     if (answered) return;
@@ -807,7 +845,8 @@ function runMemoryMatrixGame() {
   }, 400);
 }
 
-// GAME 5: Tic-Tac-Toe Blitz (classic 3x3, 5-second per-turn clock)
+// GAME 5: Tic-Tac-Toe Blitz (classic 3x3 — no forced turn clock; the bot
+// "thinks" for a humanized 2-3s before every move, same as other bot games)
 function runTicTacToeGame() {
   const board = Array(9).fill(null);
   const WIN_LINES = [
@@ -817,11 +856,8 @@ function runTicTacToeGame() {
   ];
   let playerTurn = true; // player is always X and moves first
   let over = false;
-  let timerInterval = null;
-  let timeLeft = 5;
 
   renderBoard();
-  startTurnTimer();
 
   function renderBoard() {
     let cellsHtml = "";
@@ -831,11 +867,10 @@ function runTicTacToeGame() {
         (val || "") +
         "</div>";
     });
-    const statusHtml = over
-      ? '<p class="ttt-turn-timer" style="min-height:20px"></p>'
-      : playerTurn
-      ? '<p class="ttt-turn-timer" id="ttt-timer">\u23F1 ' + timeLeft + "s</p>"
-      : '<p class="ttt-opp-dots" id="ttt-opp-indicator"><span></span><span></span><span></span></p>';
+    const statusHtml =
+      !over && !playerTurn
+        ? '<p class="ttt-opp-dots" id="ttt-opp-indicator"><span></span><span></span><span></span></p>'
+        : "";
 
     arenaStage.innerHTML =
       '<div style="width:100%;text-align:center">' +
@@ -857,32 +892,13 @@ function runTicTacToeGame() {
     }
   }
 
-  function startTurnTimer() {
-    clearInterval(timerInterval);
-    if (over || !playerTurn) return;
-    timeLeft = 5;
-    timerInterval = setInterval(() => {
-      timeLeft -= 1;
-      const timerEl = document.getElementById("ttt-timer");
-      if (timerEl) timerEl.textContent = "\u23F1 " + timeLeft + "s";
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        if (!over) {
-          over = true;
-          endDuel(false, "Time expired on your turn \u2014 match forfeited under Blitz rules.");
-        }
-      }
-    }, 1000);
-  }
-
   function handlePlayerMove(idx) {
     if (over || !playerTurn || board[idx]) return;
-    clearInterval(timerInterval);
     board[idx] = "X";
     playerTurn = false;
     renderBoard();
     if (checkEnd()) return;
-    setTimeout(botMove, 550);
+    setTimeout(botMove, botDelay());
   }
 
   function botMove() {
@@ -891,8 +907,7 @@ function runTicTacToeGame() {
     board[idx] = "O";
     playerTurn = true;
     renderBoard();
-    if (checkEnd()) return;
-    startTurnTimer();
+    checkEnd();
   }
 
   function pickBotMove() {
