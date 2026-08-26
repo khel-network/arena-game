@@ -502,42 +502,30 @@ playButtons.forEach((btn) => {
 // match. Used both when we first join the queue AND on every poll tick
 // while we wait — this is what lets two real players who queue up within
 // a few seconds of each other actually find one another instead of both
-// timing out to a bot. The delete-then-check-rows step prevents two
-// players from both claiming the same opponent at once (a genuine race
-// when both are polling every second).
+// timing out to a bot.
+//
+// This calls the "claim_opponent" database function (see schema4.sql)
+// instead of doing the select/delete/insert here in the browser. That's
+// required, not just a style choice: the matchmaking_queue table's RLS
+// policy only allows a user to delete THEIR OWN row, so a client-side
+// delete of the *opponent's* row was always silently blocked by the
+// database, which is why real-vs-real matches never actually formed no
+// matter how the polling was tuned. The database function runs with
+// elevated rights and locks the row (FOR UPDATE SKIP LOCKED), so it can
+// both bypass that restriction safely and guarantee two players polling
+// at the same instant can never claim the same opponent.
 async function findAndClaimOpponent() {
-  const { data: waiting } = await client
-    .from("matchmaking_queue")
-    .select("user_id, created_at")
-    .eq("game_type", activeGame.type)
-    .neq("user_id", currentUser.id)
-    .order("created_at", { ascending: true })
-    .limit(1);
+  const { data: match, error } = await client.rpc("claim_opponent", {
+    p_game_type: activeGame.type,
+    p_entry_fee: MATCH_ENTRY_FEE
+  });
 
-  if (!waiting || waiting.length === 0) return null;
+  if (error) {
+    console.error("claim_opponent failed:", error);
+    return null;
+  }
 
-  const opponentId = waiting[0].user_id;
-
-  const { data: claimed } = await client
-    .from("matchmaking_queue")
-    .delete()
-    .eq("user_id", opponentId)
-    .select();
-
-  if (!claimed || claimed.length === 0) return null; // someone else claimed them first
-
-  const { data: match, error } = await client
-    .from("matches")
-    .insert({
-      game_type: activeGame.type,
-      player1_id: opponentId,
-      player2_id: currentUser.id,
-      entry_fee: MATCH_ENTRY_FEE
-    })
-    .select()
-    .single();
-
-  return !error && match ? match : null;
+  return match || null;
 }
 
 async function beginMatchmaking() {
