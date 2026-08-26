@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Arena Design System
+   Arena Platform Design System
    ========================================================================== */
 
 :root {
@@ -26,7 +26,7 @@
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   
   --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-md: 12px;
   --radius-lg: 16px;
 }
 
@@ -51,10 +51,7 @@ body {
   display: none !important;
 }
 
-/* ==========================================================================
-   Centered Loading Screen
-   ========================================================================== */
-
+/* Centered Loading Screen */
 .center-screen {
   position: fixed;
   inset: 0;
@@ -93,9 +90,7 @@ body {
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .loading-text {
   font-size: 0.9rem;
@@ -103,10 +98,7 @@ body {
   color: var(--text-muted);
 }
 
-/* ==========================================================================
-   Top Navigation
-   ========================================================================== */
-
+/* Top Navigation */
 .top-nav {
   background-color: rgba(14, 19, 31, 0.95);
   backdrop-filter: blur(12px);
@@ -136,19 +128,12 @@ body {
   cursor: pointer;
 }
 
-.logo-svg {
-  color: var(--primary-green);
-}
+.logo-svg { color: var(--primary-green); }
 
-.nav-tabs {
-  display: flex;
-  gap: 6px;
-}
+.nav-tabs { display: flex; gap: 6px; }
 
 @media (max-width: 768px) {
-  .nav-tabs {
-    display: none;
-  }
+  .nav-tabs { display: none; }
 }
 
 .tab-btn {
@@ -192,16 +177,8 @@ body {
   gap: 8px;
 }
 
-.token-icon-wrap {
-  color: var(--accent-gold);
-  display: flex;
-}
-
-.token-count {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--accent-gold);
-}
+.token-icon-wrap { color: var(--accent-gold); display: flex; }
+.token-count { font-size: 0.95rem; font-weight: 700; color: var(--accent-gold); }
 
 .user-profile-chip {
   display: flex;
@@ -215,9 +192,7 @@ body {
   transition: border-color 0.2s ease;
 }
 
-.user-profile-chip:hover {
-  border-color: var(--primary-green);
-}
+.user-profile-chip:hover { border-color: var(--primary-green); }
 
 .user-avatar {
   width: 26px;
@@ -249,15 +224,9 @@ body {
   transition: all 0.15s ease;
 }
 
-.logout-btn:hover {
-  color: var(--accent-red);
-  border-color: var(--accent-red);
-}
+.logout-btn:hover { color: var(--accent-red); border-color: var(--accent-red); }
 
-/* ==========================================================================
-   Main App Content
-   ========================================================================== */
-
+/* Main App Content */
 .app-main {
   max-width: 1240px;
   width: 100%;
@@ -266,15 +235,10 @@ body {
   flex: 1;
 }
 
-.app-view {
-  display: none;
-}
+.app-view { display: none; }
+.app-view.active { display: block; }
 
-.app-view.active {
-  display: block;
-}
-
-/* Progress Bar */
+/* Progress Banner */
 .cashout-progress-banner {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
@@ -291,13 +255,8 @@ body {
   margin-bottom: 8px;
 }
 
-.progress-title {
-  color: var(--text-muted);
-}
-
-.progress-nums {
-  color: var(--primary-green);
-}
+.progress-title { color: var(--text-muted); }
+.progress-nums { color: var(--primary-green); }
 
 .progress-track {
   width: 100%;
@@ -332,18 +291,10 @@ body {
   display: inline-block;
 }
 
-.hero-banner h2 {
-  font-size: 1.35rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
+.hero-banner h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
+.hero-banner p { color: var(--text-muted); font-size: 0.88rem; }
 
-.hero-banner p {
-  color: var(--text-muted);
-  font-size: 0.88rem;
-}
-
-/* Category Filter Row */
+/* Filters */
 .filter-bar {
   display: flex;
   gap: 8px;
@@ -372,13 +323,13 @@ body {
 }
 
 /* ==========================================================================
-   High-Tech Game Cards & Vector Art Covers
+   21 High-Tech Game Cards & Vector Cover Banners
    ========================================================================== */
 
 .games-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
+  gap: 18px;
 }
 
 @media (min-width: 580px) {
@@ -387,7 +338,13 @@ body {
   }
 }
 
-@media (min-width: 992px) {
+@media (min-width: 960px) {
+  .games-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
   .games-grid {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -400,17 +357,17 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .game-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   border-color: var(--border-highlight);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
 }
 
 .card-media {
-  height: 140px;
+  height: 145px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -418,9 +375,9 @@ body {
   overflow: hidden;
 }
 
-/* Gradient Themes for Thumbnails */
-.banner-tictactoe{ background: radial-gradient(circle at 50% 40%, #1e1b4b 0%, #0f172a 100%); }
-.banner-rps      { background: radial-gradient(circle at 50% 40%, #064e3b 0%, #022c22 100%); }
+/* Dynamic Radial Gradients */
+.banner-tictactoe{ background: radial-gradient(circle at 50% 40%, #1e1b4b 0%, #090d16 100%); }
+.banner-rps      { background: radial-gradient(circle at 50% 40%, #064e3b 0%, #052e16 100%); }
 .banner-connect4 { background: radial-gradient(circle at 50% 40%, #1e3a8a 0%, #0f172a 100%); }
 .banner-reaction { background: radial-gradient(circle at 50% 40%, #854d0e 0%, #451a03 100%); }
 .banner-math     { background: radial-gradient(circle at 50% 40%, #065f46 0%, #022c22 100%); }
@@ -428,7 +385,7 @@ body {
 .banner-color    { background: radial-gradient(circle at 50% 40%, #831843 0%, #4c0519 100%); }
 .banner-trivia   { background: radial-gradient(circle at 50% 40%, #4a044e 0%, #2e1065 100%); }
 
-.thumb-artwork {
+.thumb-art {
   width: 100%;
   height: 100%;
   display: flex;
@@ -437,27 +394,27 @@ body {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.game-card:hover .thumb-artwork {
+.game-card:hover .thumb-art {
   transform: scale(1.08);
 }
 
-.art-svg {
-  width: 100px;
-  height: 100px;
+.game-cover-svg {
+  width: 130px;
+  height: 95px;
 }
 
 .card-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background-color: rgba(7, 9, 14, 0.75);
+  top: 8px;
+  left: 8px;
+  background-color: rgba(7, 9, 14, 0.82);
   backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #ffffff;
   font-size: 0.65rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
-  padding: 4px 8px;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
   border-radius: 4px;
   z-index: 2;
 }
@@ -488,7 +445,7 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 14px;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
@@ -512,10 +469,7 @@ body {
   background-color: #1d4ed8;
 }
 
-/* ==========================================================================
-   Profile & Ledger Styles
-   ========================================================================== */
-
+/* Profile & Ledger */
 .profile-header-card {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
@@ -533,11 +487,7 @@ body {
   }
 }
 
-.profile-left {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
+.profile-left { display: flex; align-items: center; gap: 18px; }
 
 .profile-avatar-lg {
   width: 72px;
@@ -548,16 +498,8 @@ body {
   background-color: var(--bg-card);
 }
 
-.name-edit-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.name-edit-group h2 {
-  font-size: 1.3rem;
-  font-weight: 700;
-}
+.name-edit-group { display: flex; align-items: center; gap: 10px; }
+.name-edit-group h2 { font-size: 1.3rem; font-weight: 700; }
 
 .icon-btn {
   background: transparent;
@@ -570,11 +512,7 @@ body {
 
 .icon-btn:hover { color: var(--primary-green); }
 
-.name-edit-box {
-  display: flex;
-  gap: 6px;
-  margin: 6px 0;
-}
+.name-edit-box { display: flex; gap: 6px; margin: 6px 0; }
 
 .name-input {
   background-color: var(--bg-card);
@@ -607,19 +545,9 @@ body {
   cursor: pointer;
 }
 
-.join-date {
-  font-size: 0.78rem;
-  color: var(--text-dim);
-  margin: 4px 0 10px;
-}
+.join-date { font-size: 0.78rem; color: var(--text-dim); margin: 4px 0 10px; }
 
-.level-pill {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
+.level-pill { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; font-weight: 600; }
 
 .level-bar-bg {
   width: 100px;
@@ -629,15 +557,8 @@ body {
   overflow: hidden;
 }
 
-.level-bar-fill {
-  height: 100%;
-  background-color: var(--primary-green);
-}
-
-.xp-text {
-  color: var(--text-dim);
-  font-size: 0.72rem;
-}
+.level-bar-fill { height: 100%; background-color: var(--primary-green); }
+.xp-text { color: var(--text-dim); font-size: 0.72rem; }
 
 .profile-stats-grid {
   display: grid;
@@ -654,17 +575,8 @@ body {
   flex-direction: column;
 }
 
-.stat-box-num {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.stat-box-lbl {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
+.stat-box-num { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
+.stat-box-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
 
 /* Ledger & Tables */
 .ledger-section, .section-card {
@@ -675,20 +587,10 @@ body {
   margin-bottom: 24px;
 }
 
-.ledger-header h3, .section-card h3 {
-  font-size: 1.15rem;
-  font-weight: 700;
-}
+.ledger-header h3, .section-card h3 { font-size: 1.15rem; font-weight: 700; }
+.ledger-sub, .section-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px; }
 
-.ledger-sub, .section-sub {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin-bottom: 18px;
-}
-
-.table-wrap {
-  overflow-x: auto;
-}
+.table-wrap { overflow-x: auto; }
 
 .ledger-table {
   width: 100%;
@@ -731,10 +633,7 @@ body {
   font-size: 0.75rem;
 }
 
-/* ==========================================================================
-   Modals & Active Game Arena
-   ========================================================================== */
-
+/* Modals & Active Arena */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -783,17 +682,8 @@ body {
   100% { transform: scale(1.6); opacity: 0; }
 }
 
-.modal-card h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.modal-subtitle {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
+.modal-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; }
+.modal-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; }
 
 .modal-fee-notice {
   background-color: var(--bg-card);
@@ -820,12 +710,9 @@ body {
   transition: all 0.15s ease;
 }
 
-.btn-cancel:hover {
-  background-color: var(--bg-card);
-  color: var(--text-main);
-}
+.btn-cancel:hover { background-color: var(--bg-card); color: var(--text-main); }
 
-/* Arena Gameplay Elements */
+/* Arena Elements */
 .arena-header {
   display: flex;
   align-items: center;
@@ -835,12 +722,7 @@ body {
   margin-bottom: 20px;
 }
 
-.player-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
+.player-stat { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 
 .arena-avatar {
   width: 52px;
@@ -851,17 +733,8 @@ body {
 }
 
 .opp-side .arena-avatar { border-color: var(--accent-blue); }
-
-.arena-name {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.vs-badge {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--text-dim);
-}
+.arena-name { font-size: 0.85rem; font-weight: 600; }
+.vs-badge { font-size: 1rem; font-weight: 800; color: var(--text-dim); }
 
 .arena-stage {
   min-height: 220px;
@@ -902,10 +775,7 @@ body {
   line-height: 1.5;
 }
 
-.result-btn-row {
-  display: flex;
-  gap: 10px;
-}
+.result-btn-row { display: flex; gap: 10px; }
 
 .btn-primary {
   background-color: var(--primary-green);
@@ -931,10 +801,7 @@ body {
   flex: 1;
 }
 
-/* ==========================================================================
-   Footer
-   ========================================================================== */
-
+/* Footer */
 .app-footer {
   background-color: var(--bg-surface);
   border-top: 1px solid var(--border-color);
