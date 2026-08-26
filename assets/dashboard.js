@@ -113,6 +113,25 @@ const nameEditBox = document.getElementById("name-edit-box");
 const nameInput = document.getElementById("name-input");
 const saveNameBtn = document.getElementById("save-name-btn");
 const cancelNameBtn = document.getElementById("cancel-name-btn");
+const profileEmailEl = document.getElementById("profile-email");
+
+// Account Menu / Wallet / Refer & Earn / Add Tokens Elements
+const walletBadgeBtn = document.getElementById("wallet-badge-btn");
+const menuTransactionsBtn = document.getElementById("menu-transactions-btn");
+const menuAddTokensBtn = document.getElementById("menu-addtokens-btn");
+const menuReferBtn = document.getElementById("menu-refer-btn");
+const menuLogoutBtn = document.getElementById("menu-logout-btn");
+const ledgerBackBtn = document.getElementById("ledger-back-btn");
+const referBackBtn = document.getElementById("refer-back-btn");
+const addtokenBackBtn = document.getElementById("addtoken-back-btn");
+const myReferralCodeEl = document.getElementById("my-referral-code");
+const copyReferralBtn = document.getElementById("copy-referral-btn");
+const referralInput = document.getElementById("referral-input");
+const submitReferralBtn = document.getElementById("submit-referral-btn");
+const referralStatusMsg = document.getElementById("referral-status-msg");
+const amountChips = document.querySelectorAll(".amount-chip");
+const addtokenInput = document.getElementById("addtoken-input");
+const addtokenSubmitBtn = document.getElementById("addtoken-submit-btn");
 
 // Navigation & Category Elements
 const tabButtons = document.querySelectorAll(".tab-btn");
@@ -479,6 +498,127 @@ tabButtons.forEach((btn) => {
 });
 document.getElementById("profile-nav-btn")?.addEventListener("click", () => switchView("view-profile"));
 document.getElementById("nav-brand-logo")?.addEventListener("click", () => switchView("view-earn"));
+
+// Wallet badge (header) opens Token Transactions directly.
+walletBadgeBtn?.addEventListener("click", () => switchView("view-ledger"));
+
+// Profile account menu — these views are only reachable via a click,
+// never shown directly inside the profile section itself.
+menuTransactionsBtn?.addEventListener("click", () => switchView("view-ledger"));
+menuAddTokensBtn?.addEventListener("click", () => switchView("view-addtoken"));
+menuReferBtn?.addEventListener("click", () => switchView("view-refer"));
+menuLogoutBtn?.addEventListener("click", async () => {
+  await client.auth.signOut();
+  window.location.href = "index.html";
+});
+ledgerBackBtn?.addEventListener("click", () => switchView("view-profile"));
+referBackBtn?.addEventListener("click", () => switchView("view-profile"));
+addtokenBackBtn?.addEventListener("click", () => switchView("view-profile"));
+
+// ----------------------------------------------------
+// 6b. Refer & Earn
+// ----------------------------------------------------
+// Builds a code like "VISHA859": first 5 letters of the email's local
+// part (uppercased, padded with X if the local part is shorter), plus
+// 3 random digits.
+function generateReferralCode(email) {
+  const local = (email || "player").split("@")[0].replace(/[^a-zA-Z]/g, "").toUpperCase();
+  const prefix = (local + "XXXXX").slice(0, 5);
+  const digits = Math.floor(100 + Math.random() * 900);
+  return prefix + digits;
+}
+
+async function loadReferralInfo() {
+  if (!myReferralCodeEl) return;
+  try {
+    const { data: row, error } = await client
+      .from("users")
+      .select("referral_code")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+    if (error) throw error;
+
+    let code = row && row.referral_code;
+    if (!code) {
+      // First time here — generate and save one. Retry a couple of times
+      // in the rare case of a random collision with an existing code.
+      for (let attempt = 0; attempt < 4 && !code; attempt++) {
+        const candidate = generateReferralCode(currentUser.email);
+        const { error: upErr } = await client
+          .from("users")
+          .update({ referral_code: candidate })
+          .eq("id", currentUser.id);
+        if (!upErr) code = candidate;
+      }
+    }
+    myReferralCodeEl.textContent = code || "—";
+  } catch (e) {
+    console.warn("Could not load referral code (run schema6.sql to enable Refer & Earn):", e);
+    myReferralCodeEl.textContent = "Unavailable";
+  }
+}
+
+copyReferralBtn?.addEventListener("click", async () => {
+  const code = myReferralCodeEl?.textContent || "";
+  if (!code || code === "—" || code === "Unavailable") return;
+  try {
+    await navigator.clipboard.writeText(code);
+    copyReferralBtn.textContent = "Copied!";
+    setTimeout(() => { copyReferralBtn.textContent = "Copy"; }, 1500);
+  } catch (e) {
+    console.warn("Clipboard copy failed:", e);
+  }
+});
+
+submitReferralBtn?.addEventListener("click", async () => {
+  const code = (referralInput?.value || "").trim().toUpperCase();
+  if (!referralStatusMsg) return;
+  referralStatusMsg.className = "refer-status-msg";
+  referralStatusMsg.textContent = "";
+
+  if (!code) {
+    referralStatusMsg.textContent = "Please enter a referral code.";
+    referralStatusMsg.className = "refer-status-msg error";
+    return;
+  }
+
+  submitReferralBtn.disabled = true;
+  try {
+    const { data, error } = await client.rpc("redeem_referral_code", { p_code: code });
+    if (error) throw error;
+
+    if (data && data.success) {
+      referralStatusMsg.textContent = data.message || "Referral applied!";
+      referralStatusMsg.className = "refer-status-msg success";
+      referralInput.value = "";
+      await loadWallet();
+      await loadTransactions();
+      updateUI();
+    } else {
+      referralStatusMsg.textContent = (data && data.message) || "That code couldn't be applied.";
+      referralStatusMsg.className = "refer-status-msg error";
+    }
+  } catch (e) {
+    console.warn("Referral redemption failed (run schema6.sql to enable this):", e);
+    referralStatusMsg.textContent = "Referral program isn't set up yet — please try again later.";
+    referralStatusMsg.className = "refer-status-msg error";
+  } finally {
+    submitReferralBtn.disabled = false;
+  }
+});
+
+// ----------------------------------------------------
+// 6c. Add Tokens — UI only for now, wired up later once a payment
+// provider is connected. Selecting a quick amount fills the custom
+// input; the Add button intentionally does nothing yet.
+// ----------------------------------------------------
+amountChips.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    amountChips.forEach((c) => c.classList.remove("active"));
+    chip.classList.add("active");
+    if (addtokenInput) addtokenInput.value = chip.getAttribute("data-amount");
+  });
+});
 
 filterChips.forEach((chip) => {
   chip.addEventListener("click", () => {
