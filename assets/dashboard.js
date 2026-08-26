@@ -568,6 +568,8 @@ function launchArena(opponent) {
     runMemoryMatrixGame();
   } else if (activeGame.type === "color") {
     runColorClashGame();
+  } else if (activeGame.type === "tictactoe") {
+    runTicTacToeGame();
   } else {
     runReactionGame();
   }
@@ -720,6 +722,166 @@ function runMemoryMatrixGame() {
       });
     }, 800);
   }, 400);
+}
+
+// GAME 5: Tic-Tac-Toe Blitz (classic 3x3, 5-second per-turn clock)
+function runTicTacToeGame() {
+  const board = Array(9).fill(null);
+  const WIN_LINES = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6],
+  ];
+  let playerTurn = true; // player is always X and moves first
+  let over = false;
+  let timerInterval = null;
+  let timeLeft = 5;
+
+  renderBoard();
+  startTurnTimer();
+
+  function renderBoard() {
+    let cellsHtml = "";
+    board.forEach((val, i) => {
+      cellsHtml +=
+        '<div class="ttt-cell' + (val ? " filled" : "") + '" data-idx="' + i + '">' +
+        (val || "") +
+        "</div>";
+    });
+    arenaStage.innerHTML =
+      '<div style="width:100%;text-align:center">' +
+      '<p class="subtitle">You are X &middot; Opponent is O</p>' +
+      '<p class="loading-text" id="ttt-turn-label">' +
+      (over ? "" : playerTurn ? "Your move" : "Opponent's move") +
+      "</p>" +
+      '<p style="font-weight:700;color:var(--accent-red);margin-bottom:6px;min-height:20px" id="ttt-timer">' +
+      (playerTurn && !over ? "\u23F1 " + timeLeft + "s" : "") +
+      "</p>" +
+      '<div class="ttt-board" id="ttt-board">' + cellsHtml + "</div>" +
+      "</div>";
+
+    if (playerTurn && !over) {
+      document.querySelectorAll("#ttt-board .ttt-cell").forEach((cell) => {
+        cell.addEventListener("click", () => handlePlayerMove(parseInt(cell.getAttribute("data-idx"), 10)));
+      });
+    }
+  }
+
+  function startTurnTimer() {
+    clearInterval(timerInterval);
+    if (over || !playerTurn) return;
+    timeLeft = 5;
+    timerInterval = setInterval(() => {
+      timeLeft -= 1;
+      const timerEl = document.getElementById("ttt-timer");
+      if (timerEl) timerEl.textContent = "\u23F1 " + timeLeft + "s";
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        if (!over) {
+          over = true;
+          endDuel(false, "Time expired on your turn \u2014 match forfeited under Blitz rules.");
+        }
+      }
+    }, 1000);
+  }
+
+  function handlePlayerMove(idx) {
+    if (over || !playerTurn || board[idx]) return;
+    clearInterval(timerInterval);
+    board[idx] = "X";
+    playerTurn = false;
+    renderBoard();
+    if (checkEnd()) return;
+    setTimeout(botMove, 550);
+  }
+
+  function botMove() {
+    if (over) return;
+    const idx = pickBotMove();
+    board[idx] = "O";
+    playerTurn = true;
+    renderBoard();
+    if (checkEnd()) return;
+    startTurnTimer();
+  }
+
+  function pickBotMove() {
+    const empty = board.map((v, i) => (v ? null : i)).filter((v) => v !== null);
+    for (const i of empty) {
+      board[i] = "O";
+      if (hasWinner("O")) { board[i] = null; return i; }
+      board[i] = null;
+    }
+    for (const i of empty) {
+      board[i] = "X";
+      if (hasWinner("X")) { board[i] = null; return i; }
+      board[i] = null;
+    }
+    if (!board[4]) return 4;
+    const corners = [0, 2, 6, 8].filter((i) => !board[i]);
+    if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
+    return empty[Math.floor(Math.random() * empty.length)];
+  }
+
+  function hasWinner(symbol) {
+    return WIN_LINES.some((line) => line.every((i) => board[i] === symbol));
+  }
+
+  function checkEnd() {
+    if (hasWinner("X")) {
+      over = true;
+      setTimeout(() => endDuel(true, "Completed a winning line before your opponent!"), 400);
+      return true;
+    }
+    if (hasWinner("O")) {
+      over = true;
+      setTimeout(() => endDuel(false, "Opponent completed a winning line first."), 400);
+      return true;
+    }
+    if (board.every((c) => c)) {
+      over = true;
+      setTimeout(endDrawnMatch, 400);
+      return true;
+    }
+    return false;
+  }
+
+  async function endDrawnMatch() {
+    try {
+      await persistWalletDelta(MATCH_ENTRY_FEE);
+      await recordTransaction("Stake Refunded: " + activeGame.name, "credit", MATCH_ENTRY_FEE);
+      await recordMatch(activeGame.name, activeOpponent.name, "DRAW", 0);
+    } catch (e) {
+      console.warn(e);
+    }
+    updateUI();
+
+    arenaStage.innerHTML =
+      '<div class="result-card">' +
+      '<h2 style="color:var(--text-main)">DRAW</h2>' +
+      '<p style="font-weight:700;color:var(--text-muted)">Stake Refunded</p>' +
+      '<div class="result-analytics">' +
+      '<div style="font-weight:700;color:var(--text-main);margin-bottom:4px">Performance Analytics:</div>' +
+      "<div>Full board stalemate \u2014 neither player completed a line. Entry fee refunded.</div>" +
+      "</div>" +
+      '<div class="result-btn-row">' +
+      '<button class="btn-secondary" id="rematch-btn">Rematch</button>' +
+      '<button class="btn-primary" id="return-dash-btn">Dashboard</button>' +
+      "</div>" +
+      "</div>";
+
+    document.getElementById("rematch-btn")?.addEventListener("click", () => {
+      arenaOverlay.classList.add("hidden");
+      if (currentBalance < MATCH_ENTRY_FEE) {
+        alert("Insufficient balance. You need " + formatRupees(MATCH_ENTRY_FEE) + " to enter.");
+        return;
+      }
+      beginMatchmaking();
+    });
+    document.getElementById("return-dash-btn")?.addEventListener("click", () => {
+      arenaOverlay.classList.add("hidden");
+    });
+  }
 }
 
 // ----------------------------------------------------
