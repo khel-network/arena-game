@@ -4,18 +4,728 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arena | Competitive Skill Duels</title>
-  <!-- Google Fonts: Space Grotesk (headings) + Inter (body) — matches assets/style.css --font-heading -->
+  <!-- Google Fonts: Space Grotesk (headings) + Inter (body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/style.css?v=6" />
-  <!-- SVG Favicon with Cache Buster -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=3" />
-  <!-- High-Compatibility Fallback Data URI -->
-  <link rel="alternate icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e131f'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
+  <!-- Favicon embedded directly as a data URI so it can never go missing from a separate file again -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e131f'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
+  <style>
+/* ======================================================================
+==== Arena Design System
+====================================================================== ==== */
+
+/* Professional font pairing — loaded here so it works even if the
+   HTML <head> doesn't have a Google Fonts <link> tag. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg-dark: #12161f;
+  --bg-surface: #1a2130;
+  --bg-card: #232c40;
+  --bg-card-hover: #2c3650;
+  --primary-green: #00e701;
+  --primary-green-hover: #00c601;
+  --primary-glow: rgba(0, 231, 1, 0.22);
+  --accent-blue: #38bdf8;
+  --accent-gold: #f59e0b;
+  --accent-red: #f16464;
+  --text-main: #ffffff;
+  --text-muted: #b3bfd6;
+  --text-dim: #8492ac;
+  --border-color: #313d58;
+  --border-highlight: #455274;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: 'Space Grotesk', var(--font-family);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  letter-spacing: -0.01em;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overflow-y: auto;
+  height: auto;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Keep double-tap-to-zoom disabled on buttons/links (the original intent of
+   the removed html { touch-action: manipulation } rule) without applying it
+   to <html> itself -- that global rule was what silently blocked two-finger
+   trackpad scrolling in desktop Chrome (pinch-zoom still worked because
+   "manipulation" explicitly allows it, only panning/scroll got eaten). */
+button, a, .play-btn, .tab-btn, .filter-chip, .game-card, .quiz-option, .ttt-cell {
+  touch-action: manipulation;
+}
+
+h1, h2, h3, .logo-text, .card-title, .stat-box-num, .token-count, .modal-card h3,
+.arena-name, .result-card h2, .hero-banner h2, .name-edit-group h2, .auth-header h3,
+.quiz-question, .math-problem {
+  font-family: var(--font-heading);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+input, textarea, select { font-size: 16px; }
+.hidden { display: none !important; }
+
+button, a, .play-btn, .tab-btn, .filter-chip, .game-card, .quiz-option, .ttt-cell {
+  transition: transform 0.15s var(--ease-smooth), background-color 0.15s ease,
+    border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .filter-chip:active {
+  transform: scale(0.97);
+}
+
+/* ====================================================================== */
+.center-screen {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
+  background-color: var(--bg-dark); display: flex; align-items: center; justify-content: center; z-index: 99999;
+}
+.loader-container { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.loader-logo { color: var(--primary-green); animation: pulseLogo 1.5s ease-in-out infinite; }
+@keyframes pulseLogo {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 12px var(--primary-green)); }
+}
+.spinner {
+  width: 40px; height: 40px; border: 3px solid var(--border-color);
+  border-top-color: var(--primary-green); border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
+
+/* ====================================================================== */
+.top-nav {
+  background-color: rgba(14, 19, 31, 0.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100;
+  padding-top: env(safe-area-inset-top);
+}
+.nav-container {
+  max-width: 1240px; margin: 0 auto; padding: 10px 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.brand-logo { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 800; color: var(--text-main); cursor: pointer; }
+.logo-svg { color: var(--primary-green); }
+.nav-tabs { display: flex; gap: 6px; }
+@media (max-width: 768px) { .nav-tabs { display: none; } }
+.tab-btn {
+  background: transparent; border: none; color: var(--text-muted); padding: 8px 14px;
+  border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 600;
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+}
+.tab-btn:hover { color: var(--text-main); background-color: var(--bg-card); }
+.tab-btn.active { color: var(--primary-green); background-color: rgba(0, 231, 1, 0.08); }
+
+.bottom-nav { display: none; }
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 500;
+    background-color: rgba(14, 19, 31, 0.97); backdrop-filter: blur(14px);
+    border-top: 1px solid var(--border-color); justify-content: space-around; align-items: center;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+  .bottom-nav .tab-btn { flex-direction: column; gap: 3px; font-size: 0.64rem; padding: 6px 10px; border-radius: var(--radius-sm); }
+  .bottom-nav .tab-btn svg { width: 19px; height: 19px; }
+  .app-main { padding-bottom: 96px; }
+}
+
+.user-stats-bar { display: flex; align-items: center; gap: 10px; }
+.token-badge {
+  background-color: var(--bg-card); border: 1px solid var(--border-highlight);
+  padding: 5px 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px;
+  cursor: pointer; font: inherit; color: inherit;
+}
+.token-badge:hover { border-color: var(--primary-green); }
+.token-icon-wrap { color: var(--accent-gold); display: flex; align-items: center; font-weight: 800; font-size: 0.9rem; font-family: var(--font-heading); }
+.token-count { font-size: 0.95rem; font-weight: 700; color: var(--accent-gold); display: inline-block; }
+@keyframes balancePulse {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.14); color: var(--primary-green); }
+  100% { transform: scale(1); }
+}
+.token-count.balance-flash, .stat-box-num.balance-flash { animation: balancePulse 0.55s var(--ease-smooth); }
+
+.user-profile-chip {
+  display: flex; align-items: center; gap: 8px; background-color: var(--bg-card);
+  border: 1px solid var(--border-color); padding: 3px 12px 3px 4px; border-radius: 999px; cursor: pointer;
+}
+.user-profile-chip:hover { border-color: var(--primary-green); }
+.user-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--primary-green); }
+.user-name {
+  font-size: 0.85rem; font-weight: 600; color: var(--text-main); max-width: 100px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* ====================================================================== */
+.app-main { max-width: 1240px; width: 100%; margin: 0 auto; padding: 24px 20px 60px; flex: 1; }
+.app-view { display: none; }
+@keyframes fadeSlideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.app-view.active { display: block; animation: fadeSlideUp 0.4s var(--ease-smooth); }
+
+.cashout-progress-banner { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 20px; }
+.progress-info { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; }
+.progress-title { color: var(--text-muted); }
+.progress-nums { color: var(--primary-green); }
+.progress-track { width: 100%; height: 8px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary-green), var(--accent-blue)); border-radius: 999px; transition: width 0.5s var(--ease-smooth); }
+
+.hero-banner { background: linear-gradient(135deg, #101726 0%, #0c121e 100%); border: 1px solid var(--border-highlight); border-radius: var(--radius-md); padding: 24px 28px; margin-bottom: 20px; position: relative; overflow: hidden; }
+.badge-tag { font-size: 0.72rem; font-weight: 700; color: var(--primary-green); letter-spacing: 0.08em; margin-bottom: 6px; display: inline-block; }
+.hero-banner h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
+.hero-banner p { color: var(--text-muted); font-size: 0.88rem; }
+
+.filter-bar { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 2px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-chip {
+  background-color: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-muted);
+  padding: 8px 16px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.filter-chip:hover, .filter-chip.active { background-color: var(--primary-green); color: #000000; border-color: var(--primary-green); }
+
+.games-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 580px) { .games-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 992px) { .games-grid { grid-template-columns: repeat(3, 1fr); } }
+.game-card {
+  background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+  overflow: hidden; display: flex; flex-direction: column; animation: fadeSlideUp 0.45s var(--ease-smooth) backwards;
+}
+.game-card:nth-child(2) { animation-delay: 0.04s; }
+.game-card:nth-child(3) { animation-delay: 0.08s; }
+.game-card:nth-child(4) { animation-delay: 0.12s; }
+.game-card:nth-child(5) { animation-delay: 0.16s; }
+.game-card:nth-child(6) { animation-delay: 0.2s; }
+.game-card:hover { transform: translateY(-3px); border-color: var(--border-highlight); box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.55); }
+.card-media { height: 120px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.banner-reaction { background: linear-gradient(135deg, #854d0e 0%, #582e07 100%); }
+.banner-math { background: linear-gradient(135deg, #047857 0%, #034b36 100%); }
+.banner-memory { background: linear-gradient(135deg, #1d4ed8 0%, #112e82 100%); }
+.banner-color { background: linear-gradient(135deg, #b91c1c 0%, #6d0f0f 100%); }
+.banner-tictactoe { background: linear-gradient(135deg, #4338ca 0%, #292277 100%); }
+.banner-trivia { background: linear-gradient(135deg, #7e22ce 0%, #4c147d 100%); }
+.game-icon-svg { color: #ffffff; opacity: 0.95; }
+.card-badge { position: absolute; top: 8px; left: 8px; background-color: rgba(0, 0, 0, 0.65); color: #ffffff; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 4px; }
+.card-content { padding: 16px; display: flex; flex-direction: column; flex: 1; }
+.card-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+.card-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 14px; flex: 1; }
+.card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 0.78rem; font-weight: 600; }
+.meta-fee { color: var(--text-dim); }
+.meta-win { color: var(--primary-green); }
+.play-btn {
+  width: 100%; background-color: #2563eb; color: #ffffff; border: none; padding: 12px;
+  border-radius: var(--radius-sm); font-weight: 700; font-size: 0.88rem; cursor: pointer; min-height: 44px;
+  position: relative; overflow: hidden;
+}
+.play-btn:hover { background-color: #1d4ed8; }
+
+/* ====================================================================== */
+.profile-header-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
+@media (min-width: 840px) { .profile-header-card { grid-template-columns: 1fr 1.2fr; } }
+.profile-left { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.profile-avatar-lg { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--primary-green); object-fit: cover; background-color: var(--bg-card); }
+.name-edit-group { display: flex; align-items: center; gap: 10px; }
+.name-edit-group h2 { font-size: 1.3rem; font-weight: 700; }
+.icon-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; }
+.icon-btn:hover { color: var(--primary-green); }
+.name-edit-box { display: flex; gap: 6px; margin: 6px 0; flex-wrap: wrap; }
+.name-input { background-color: var(--bg-card); border: 1px solid var(--border-highlight); color: var(--text-main); padding: 8px 10px; border-radius: var(--radius-sm); outline: none; }
+.btn-save { background-color: var(--primary-green); color: #000; border: none; font-weight: 700; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer; }
+.btn-cancel-sm { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 10px; border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer; }
+.join-date { font-size: 0.78rem; color: var(--text-dim); margin: 4px 0 10px; }
+.level-pill { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; font-weight: 600; flex-wrap: wrap; }
+.level-bar-bg { width: 100px; height: 6px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; }
+.level-bar-fill { height: 100%; background-color: var(--primary-green); transition: width 0.5s var(--ease-smooth); }
+.xp-text { color: var(--text-dim); font-size: 0.72rem; }
+.profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; flex-direction: column; }
+.stat-box-num { font-size: 1.2rem; font-weight: 700; color: var(--text-main); display: inline-block; }
+.stat-box-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+.ledger-section, .section-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; }
+
+/* ====================================================================== */
+/* Profile Account Menu */
+.profile-menu-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.menu-row {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  padding: 14px 16px; cursor: pointer; color: var(--text-main);
+}
+button.menu-row { font: inherit; }
+.menu-row:hover { border-color: var(--border-highlight); background-color: var(--bg-card-hover); }
+.menu-row-static { cursor: default; }
+.menu-row-static:hover { border-color: var(--border-color); background-color: var(--bg-card); }
+.menu-row-icon {
+  width: 36px; height: 36px; min-width: 36px; border-radius: 50%; background-color: var(--bg-surface);
+  color: var(--primary-green); display: flex; align-items: center; justify-content: center;
+}
+.menu-row-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.menu-row-title { font-size: 0.92rem; font-weight: 700; }
+.menu-row-sub { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.menu-row-arrow { color: var(--text-dim); font-size: 1.2rem; font-weight: 700; }
+.menu-row-danger .menu-row-icon { color: var(--accent-red); }
+.menu-row-danger:hover { border-color: var(--accent-red); }
+
+.back-link {
+  background: transparent; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; padding: 0; margin-bottom: 14px; display: inline-block;
+}
+.back-link:hover { color: var(--primary-green); }
+
+/* Refer & Earn */
+.refer-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.refer-info-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+.refer-info-num { font-size: 1.4rem; font-weight: 800; color: var(--primary-green); font-family: var(--font-heading); }
+.refer-info-lbl { font-size: 0.78rem; color: var(--text-muted); }
+.refer-explainer { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+.refer-code-box, .refer-redeem-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; }
+.refer-code-lbl { font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+.refer-code-row, .refer-redeem-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.refer-code-value { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--text-main); letter-spacing: 0.06em; background-color: var(--bg-surface); border: 1px dashed var(--border-highlight); border-radius: var(--radius-sm); padding: 8px 14px; flex: 1; min-width: 140px; }
+.refer-redeem-row .name-input { flex: 1; min-width: 160px; }
+.refer-status-msg { font-size: 0.82rem; font-weight: 600; margin-top: 10px; min-height: 1em; }
+.refer-status-msg.success { color: var(--primary-green); }
+.refer-status-msg.error { color: var(--accent-red); }
+
+/* Add Tokens */
+.addtoken-amount-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 20px; }
+@media (min-width: 480px) { .addtoken-amount-grid { grid-template-columns: repeat(4, 1fr); } }
+.amount-chip {
+  background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);
+  padding: 14px 10px; border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center;
+}
+.amount-chip:hover, .amount-chip.active { background-color: var(--primary-green); color: #000; border-color: var(--primary-green); }
+.ledger-header h3, .section-card h3 { font-size: 1.15rem; font-weight: 700; }
+.ledger-sub, .section-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ledger-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+.ledger-table th { color: var(--text-dim); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 14px; border-bottom: 1px solid var(--border-color); }
+.ledger-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+.badge-credit { background-color: rgba(0, 231, 1, 0.1); color: var(--primary-green); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+.badge-debit { background-color: rgba(239, 68, 68, 0.1); color: var(--accent-red); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+
+/* ====================================================================== */
+.modal-overlay {
+  position: fixed; inset: 0; background-color: rgba(10, 13, 20, 0.85); backdrop-filter: blur(8px);
+  display: flex; align-items: center; align-items: safe center; justify-content: center; z-index: 1000;
+  padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; animation: fadeSlideUp 0.25s ease;
+}
+.modal-card, .arena-card {
+  background-color: var(--bg-surface); border: 1px solid var(--border-highlight); border-radius: var(--radius-lg);
+  padding: 32px 24px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+  animation: fadeSlideUp 0.35s var(--ease-smooth);
+  max-height: calc(100dvh - 40px); overflow-y: auto; -webkit-overflow-scrolling: touch; margin: auto 0;
+}
+.radar-pulse { position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--primary-green); }
+.pulse-circle { position: absolute; inset: 0; border-radius: 50%; background: var(--primary-green); opacity: 0.25; animation: pulse 1.6s ease-out infinite; }
+@keyframes pulse { 0% { transform: scale(0.6); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
+.modal-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; }
+.modal-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; }
+.modal-fee-notice { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.82rem; color: var(--text-muted); margin-bottom: 20px; }
+.modal-fee-notice strong { color: var(--accent-gold); }
+.btn-cancel { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.85rem; cursor: pointer; width: 100%; min-height: 44px; }
+.btn-cancel:hover { background-color: var(--bg-card); color: var(--text-main); }
+
+.arena-header { display: flex; align-items: center; justify-content: space-around; padding-bottom: 18px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+.player-stat { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.arena-avatar { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--primary-green); background-color: var(--bg-card); }
+.opp-side .arena-avatar { border-color: var(--accent-blue); }
+.arena-name { font-size: 0.85rem; font-weight: 600; }
+.vs-badge { font-size: 1rem; font-weight: 800; color: var(--text-dim); }
+.arena-stage { min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.reaction-box { width: 100%; height: 180px; border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: background-color 0.1s ease; }
+.reaction-wait { background-color: #7f1d1d; color: #fff; }
+.reaction-go { background-color: var(--primary-green); color: #000; font-weight: 800; }
+.result-card h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
+.win-text { color: var(--primary-green); }
+.lose-text { color: var(--accent-red); }
+.result-analytics { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin: 14px 0 20px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+.result-btn-row { display: flex; gap: 10px; }
+.btn-primary { background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; min-height: 44px; position: relative; overflow: hidden; }
+.btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); font-weight: 600; font-size: 0.88rem; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; min-height: 44px; }
+
+/* ====================================================================== */
+.app-footer { background-color: var(--bg-surface); border-top: 1px solid var(--border-color); padding: 40px 20px 20px; margin-top: auto; }
+.footer-container { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; padding-bottom: 30px; border-bottom: 1px solid var(--border-color); }
+@media (min-width: 768px) { .footer-container { grid-template-columns: 1.4fr 2fr; } }
+.footer-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin: 12px 0; max-width: 380px; }
+.trust-badge { font-size: 0.78rem; color: var(--primary-green); display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.footer-links-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.footer-col { display: flex; flex-direction: column; gap: 8px; }
+.footer-heading { font-size: 0.82rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+.footer-col a { color: var(--text-muted); font-size: 0.8rem; text-decoration: none; }
+.footer-col a:hover { color: var(--primary-green); }
+.footer-bottom { max-width: 1240px; margin: 20px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-dim); flex-wrap: wrap; gap: 8px; }
+
+/* ====================================================================== */
+.landing-body {
+  background-color: var(--bg-dark);
+  background-image: radial-gradient(circle at 15% 10%, rgba(0, 231, 1, 0.08), transparent 40%), radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.06), transparent 45%);
+  min-height: 100vh; min-height: 100dvh;
+}
+.logo-text { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-main); }
+.nav-links { display: none; align-items: center; gap: 28px; }
+@media (min-width: 900px) { .nav-links { display: flex; } }
+.nav-link { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-decoration: none; }
+.nav-link:hover, .nav-link.active { color: var(--text-main); }
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+.nav-actions .btn-secondary, .nav-actions .btn-primary { flex: none; padding: 9px 18px; }
+.nav-actions .btn-primary { box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.25), 0 8px 20px -8px var(--primary-glow); }
+.nav-actions .btn-primary:hover { background-color: var(--primary-green-hover); }
+.nav-actions .btn-secondary:hover { border-color: var(--border-highlight); background-color: var(--bg-card); }
+
+.hero-section { flex: 1; display: flex; align-items: center; padding: 60px 20px 80px; }
+.hero-container { max-width: 1240px; width: 100%; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 56px; align-items: center; }
+@media (min-width: 960px) { .hero-container { grid-template-columns: 1.1fr 0.9fr; gap: 40px; } }
+.hero-left { display: flex; flex-direction: column; gap: 24px; }
+.badge-pill { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; background-color: rgba(0, 231, 1, 0.1); border: 1px solid rgba(0, 231, 1, 0.25); color: var(--primary-green); font-size: 0.8rem; font-weight: 600; padding: 7px 14px; border-radius: 999px; }
+.badge-dot { width: 7px; height: 7px; border-radius: 50%; background-color: var(--primary-green); box-shadow: 0 0 8px var(--primary-green); }
+.hero-title { font-family: var(--font-heading); font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.12; letter-spacing: -0.02em; color: var(--text-main); }
+.highlight-green { color: var(--primary-green); }
+.hero-subtitle { font-size: 1.05rem; line-height: 1.6; color: var(--text-muted); max-width: 540px; }
+.hero-stats-row { display: flex; flex-wrap: wrap; gap: 36px; margin-top: 8px; padding-top: 24px; border-top: 1px solid var(--border-color); }
+.stat-item { display: flex; flex-direction: column; gap: 4px; }
+.stat-number { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; color: var(--text-main); }
+.stat-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 500; }
+
+.hero-right { display: flex; justify-content: center; }
+.auth-card { width: 100%; max-width: 400px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 22px; animation: fadeSlideUp 0.5s var(--ease-smooth); }
+.auth-header h3 { font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
+.auth-header p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
+.auth-perks { display: flex; flex-direction: column; gap: 12px; }
+.perk-item { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; color: var(--text-muted); }
+.perk-item strong { color: var(--text-main); }
+.perk-svg { flex: none; color: var(--primary-green); }
+.google-auth-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background-color: #fff; color: #1f2937; font-size: 0.92rem; font-weight: 600; border: none; border-radius: var(--radius-sm); padding: 13px 18px; cursor: pointer; min-height: 44px; }
+.google-auth-btn:hover { box-shadow: 0 8px 20px -8px rgba(255, 255, 255, 0.25); transform: translateY(-1px); }
+.auth-footnote { font-size: 0.76rem; color: var(--text-dim); text-align: center; line-height: 1.5; }
+
+/* ====================================================================== */
+.match-wrap { max-width: 720px; width: 100%; margin: 0 auto; padding: 20px 16px 60px; animation: fadeSlideUp 0.4s var(--ease-smooth); }
+.vs-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; }
+.vs-player { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; }
+.vs-player img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary-green); background-color: var(--bg-card); object-fit: cover; }
+.vs-label { font-family: var(--font-heading); font-weight: 800; color: var(--text-dim); }
+.game-stage { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 28px 20px; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; }
+.reaction-pad { width: 100%; height: 200px; border-radius: var(--radius-md); background-color: #7f1d1d; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; cursor: pointer; user-select: none; }
+.reaction-pad.go { background-color: var(--primary-green); color: #000; }
+.reaction-pad.early { background-color: var(--accent-red); }
+.ttt-wrapper { position: relative; width: 238px; margin: 0 auto; }
+.ttt-board { display: grid; grid-template-columns: repeat(3, 74px); grid-template-rows: repeat(3, 74px); gap: 8px; margin-top: 8px; }
+.ttt-cell { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; cursor: pointer; }
+.ttt-cell:hover:not(.filled) { background-color: var(--bg-card-hover); }
+.ttt-cell.filled { cursor: default; }
+.ttt-line-overlay { position: absolute; top: 8px; left: 0; width: 238px; height: 238px; pointer-events: none; }
+.ttt-winline { stroke: var(--primary-green); stroke-width: 6; stroke-linecap: round; filter: drop-shadow(0 0 6px var(--primary-glow)); }
+.ttt-turn-timer { font-weight: 700; color: var(--accent-red); margin-bottom: 6px; min-height: 20px; font-size: 0.95rem; }
+.ttt-opp-dots { display: inline-flex; gap: 4px; margin-bottom: 6px; min-height: 20px; align-items: center; justify-content: center; }
+.ttt-opp-dots span { width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-dim); animation: tttDotBounce 1s ease-in-out infinite; }
+.ttt-opp-dots span:nth-child(2) { animation-delay: 0.15s; }
+.ttt-opp-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes tttDotBounce { 0%, 80%, 100% { opacity: 0.35; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+@media (max-width: 380px) {
+  .ttt-wrapper, .ttt-line-overlay { width: 204px; }
+  .ttt-board { grid-template-columns: repeat(3, 62px); grid-template-rows: repeat(3, 62px); gap: 8px; }
+  .ttt-cell { font-size: 1.5rem; }
+}
+.score-row { display: flex; gap: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: var(--text-muted); }
+.score-row .me { color: var(--primary-green); }
+.quiz-question, .math-problem { font-size: 1.3rem; font-weight: 700; margin: 8px 0 20px; }
+.quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.quiz-option { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px; cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; justify-content: center; text-align: center; }
+.quiz-option:hover { border-color: var(--border-highlight); }
+.quiz-option.correct { background-color: rgba(0, 231, 1, 0.15); border-color: var(--primary-green); color: var(--primary-green); }
+.quiz-option.wrong { background-color: rgba(239, 68, 68, 0.15); border-color: var(--accent-red); color: var(--accent-red); }
+.math-input { width: 160px; text-align: center; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-highlight); background-color: var(--bg-card); color: var(--text-main); font-weight: 700; }
+.result-banner { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+.result-banner.win { color: var(--primary-green); }
+.result-banner.lose { color: var(--accent-red); }
+.result-banner.draw { color: var(--accent-gold); }
+.btn { display: inline-block; margin-top: 18px; background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 12px 22px; border-radius: var(--radius-sm); text-decoration: none; min-height: 44px; }
+
+/* ======================================================================
+==== NEW: High-Tech Visual Polish & Animations (added)
+====================================================================== ==== */
+
+/* Subtle animated grid backdrop for a "high-tech" feel behind the app */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 231, 1, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 231, 1, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%);
+  opacity: 0.6;
+}
+
+/* Neon glow + shine sweep on primary call-to-action buttons */
+.play-btn::after, .btn-primary::after, .google-auth-btn::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+.play-btn:hover::after, .btn-primary:hover::after { left: 130%; }
+
+.play-btn:hover, .btn-primary:hover {
+  box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.15), 0 10px 26px -10px var(--primary-glow);
+  transform: translateY(-1px);
+}
+
+/* Glowing active nav tab underline */
+.tab-btn.active { position: relative; }
+.tab-btn.active::after {
+  content: "";
+  position: absolute;
+  left: 14px; right: 14px; bottom: -2px;
+  height: 2px;
+  background: var(--primary-green);
+  box-shadow: 0 0 8px var(--primary-green);
+  border-radius: 2px;
+}
+
+/* Shimmer sweep across card media on hover — high-tech card feel */
+.card-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.7s ease;
+}
+.game-card:hover .card-media::before { transform: translateX(100%); }
+
+/* Animated gradient sheen on the hero banner border */
+.hero-banner::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(0, 231, 1, 0.35), rgba(56, 189, 248, 0.15), rgba(0, 231, 1, 0.35));
+  background-size: 200% 200%;
+  animation: gradientShift 6s ease infinite;
+  opacity: 0.5;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Badge pill breathing glow (used for "live" / matchmaking indicators) */
+.badge-pill { animation: badgeGlow 2.4s ease-in-out infinite; }
+@keyframes badgeGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(0, 231, 1, 0); }
+  50% { box-shadow: 0 0 14px rgba(0, 231, 1, 0.35); }
+}
+
+/* Smoother, more "arcade" result reveal */
+.result-card h2 { animation: resultPop 0.45s var(--ease-smooth); }
+@keyframes resultPop {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Radar pulse gets a second, offset ring for a richer scanning effect */
+.radar-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--primary-green);
+  opacity: 0.15;
+  animation: pulse 1.6s ease-out infinite;
+  animation-delay: 0.5s;
+}
+
+/* Table rows get a soft highlight sweep when new ledger/match rows arrive */
+@keyframes rowIn {
+  from { background-color: rgba(0, 231, 1, 0.14); }
+  to { background-color: transparent; }
+}
+.ledger-table tbody tr:first-child td,
+#matches-body tr:first-child td { animation: rowIn 1.2s ease-out; }
+
+/* ======================================================================
+==== Minimal Toast Notifications (wallet credit/debit)
+====================================================================== ==== */
+.toast-stack {
+  position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 99998;
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
+  pointer-events: none; max-width: calc(100vw - 28px);
+}
+.toast {
+  pointer-events: auto;
+  display: flex; align-items: center; gap: 10px;
+  background-color: var(--bg-surface); border: 1px solid var(--border-highlight);
+  border-left: 3px solid var(--primary-green);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+  font-size: 0.82rem; font-weight: 600; color: var(--text-main);
+  max-width: 320px; animation: toastIn 0.3s var(--ease-smooth);
+}
+.toast.toast-debit { border-left-color: var(--accent-red); }
+.toast-icon { flex: none; display: flex; }
+.toast.toast-credit .toast-icon { color: var(--primary-green); }
+.toast.toast-debit .toast-icon { color: var(--accent-red); }
+.toast-text { display: flex; flex-direction: column; gap: 1px; }
+.toast-amount.toast-credit-text { color: var(--primary-green); }
+.toast-amount.toast-debit-text { color: var(--accent-red); }
+.toast-desc { color: var(--text-muted); font-weight: 500; font-size: 0.74rem; }
+.toast.toast-out { animation: toastOut 0.25s ease forwards; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(24px); } }
+@media (max-width: 480px) {
+  .toast-stack { left: 14px; right: 14px; align-items: stretch; }
+  .toast { max-width: none; }
+}
+
+/* ======================================================================
+==== Turn Indicator (Your Turn / Opponent's Turn)
+====================================================================== ==== */
+.arena-turn-indicator {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: -6px 0 18px; padding: 8px 16px; border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color);
+  width: fit-content; margin-left: auto; margin-right: auto;
+}
+.turn-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.turn-dot-you { background-color: var(--primary-green); box-shadow: 0 0 8px var(--primary-green); animation: turnDotPulse 1.4s ease-in-out infinite; }
+.turn-dot-opp { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); animation: turnDotPulse 1.4s ease-in-out infinite; }
+@keyframes turnDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+.turn-text { font-family: var(--font-heading); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.01em; }
+.turn-text-you { color: var(--primary-green); animation: turnTextGlowGreen 1.4s ease-in-out infinite; }
+.turn-text-opp { color: var(--accent-red); animation: turnTextGlowRed 1.4s ease-in-out infinite; }
+@keyframes turnTextGlowGreen {
+  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(0, 231, 1, 0.55); }
+  50% { opacity: 0.55; text-shadow: 0 0 2px rgba(0, 231, 1, 0); }
+}
+@keyframes turnTextGlowRed {
+  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(241, 100, 100, 0.55); }
+  50% { opacity: 0.55; text-shadow: 0 0 2px rgba(241, 100, 100, 0); }
+}
+/* Whichever side currently has the turn gets a glowing ring + slightly
+   raised look; the inactive side visibly dims so it always reads clearly
+   at a glance, on any game type. */
+.player-stat { transition: opacity 0.25s ease; opacity: 0.55; }
+.player-stat.side-active { opacity: 1; }
+.player-stat.side-active .arena-avatar { box-shadow: 0 0 0 3px rgba(0, 231, 1, 0.18); }
+.player-stat.side-active.opp-side .arena-avatar { box-shadow: 0 0 0 3px rgba(241, 100, 100, 0.18); border-color: var(--accent-red); }
+.player-stat:not(.side-active) .arena-avatar { border-color: var(--border-color); }
+
+/* ======================================================================
+==== Live / High-Tech Chips & Matchmaking Polish
+====================================================================== ==== */
+.live-chip {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 0.66rem; font-weight: 800;
+  letter-spacing: 0.08em; color: var(--primary-green); background-color: rgba(0, 231, 1, 0.1);
+  border: 1px solid rgba(0, 231, 1, 0.28); padding: 4px 10px; border-radius: 999px; margin: 0 auto 14px;
+}
+.live-chip-dot { width: 6px; height: 6px; border-radius: 50%; background-color: var(--primary-green); box-shadow: 0 0 6px var(--primary-green); animation: turnDotPulse 1.2s ease-in-out infinite; }
+.arena-live-chip { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); margin: 0; }
+.arena-card { position: relative; }
+.modal-scan-bar { width: 100%; height: 3px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; margin: 4px 0 18px; }
+.modal-scan-bar-fill { width: 40%; height: 100%; background: linear-gradient(90deg, transparent, var(--primary-green), transparent); animation: scanSweep 1.3s ease-in-out infinite; }
+@keyframes scanSweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+
+/* Modal cards get a subtle glowing gradient border for a premium feel */
+.modal-card, .arena-card {
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.08), 0 24px 60px -20px rgba(0, 0, 0, 0.65);
+}
+
+/* Logout / destructive confirmation dialog */
+.confirm-card { max-width: 360px; }
+.confirm-icon-wrap {
+  width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; color: var(--accent-red); background-color: rgba(241, 100, 100, 0.12);
+  border: 1px solid rgba(241, 100, 100, 0.3);
+}
+.confirm-btn-row { display: flex; gap: 10px; margin-top: 20px; }
+.confirm-btn-row .btn-cancel { width: auto; flex: 1; margin: 0; }
+.btn-danger {
+  flex: 1; background: linear-gradient(135deg, #f16464, #d43f3f); color: #fff; border: none;
+  padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.85rem;
+  cursor: pointer; min-height: 44px;
+}
+.btn-danger:hover { box-shadow: 0 10px 24px -10px rgba(241, 100, 100, 0.5); transform: translateY(-1px); }
+
+/* Menu row danger state gets a touch more presence to signal it's the
+   sign-out action, not just another settings link */
+.menu-row-danger .menu-row-icon { color: var(--accent-red); }
+.menu-row-danger:hover { border-color: rgba(241, 100, 100, 0.35); }
+
+/* ======================================================================
+==== Mobile-friendly refinements
+====================================================================== ==== */
+@media (max-width: 480px) {
+  .app-main { padding-left: 14px; padding-right: 14px; }
+  .nav-container { padding-left: 14px; padding-right: 14px; gap: 10px; }
+  .hero-banner { padding: 18px 16px; }
+  .modal-card, .arena-card { padding: 24px 16px; }
+  .footer-links-group { grid-template-columns: repeat(2, 1fr); gap: 18px 16px; }
+  .footer-bottom { justify-content: center; text-align: center; }
+  .arena-header { gap: 6px; }
+  .arena-name { max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .quiz-options { grid-template-columns: 1fr; }
+  .hero-stats-row { gap: 20px; }
+  .card-title { font-size: 1rem; }
+}
+html, body { overflow-x: hidden; }
+
+  </style>
 </head>
-<body class="landing-body">
-  <!-- Top Navigation -->
+<body class="app-body">
+  <div id="page-landing">
+<!-- Top Navigation -->
   <header class="top-nav">
     <div class="nav-container">
       <div class="brand-logo">
@@ -106,9 +816,2605 @@
       </div>
     </div>
   </main>
+  </div>
 
+<div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+  <!-- Loading Screen (Auto-dismisses in 400ms) -->
+  <div id="loading" class="center-screen hidden">
+    <div class="loader-container">
+      <div class="loader-logo">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <div class="spinner"></div>
+      <p class="loading-text">Connecting to Arena Network...</p>
+    </div>
+  </div>
+
+  <div id="dashboard" class="app-wrap hidden">
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <div class="nav-container">
+        <!-- Logo -->
+        <div class="brand-logo" id="nav-brand-logo">
+          <svg class="logo-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span class="logo-text">ARENA</span>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+          <button class="tab-btn active" data-target="view-earn" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+            <span>Earn</span>
+          </button>
+          <button class="tab-btn" data-target="view-matches" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>My Matches</span>
+          </button>
+          <button class="tab-btn" data-target="view-cashout" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+            <span>Cashout</span>
+          </button>
+          <button class="tab-btn" data-target="view-rewards" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7.5"></path><path d="M14 14.66V17c0 .55.45 1 1 1h1.5"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg>
+            <span>Rewards</span>
+          </button>
+        </nav>
+
+        <!-- Right Side: Wallet & User Profile Button -->
+        <div class="user-stats-bar">
+          <button id="wallet-badge-btn" class="token-badge" title="View Token Transactions" type="button">
+            <span class="token-icon-wrap">₹</span>
+            <span id="balance-value" class="token-count">1,200</span>
+          </button>
+
+          <button id="profile-nav-btn" class="user-profile-chip" type="button" title="View Profile">
+            <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=vishal" alt="Avatar" />
+            <span id="player-name" class="user-name">Vishal</span>
+          </button>
+
+          <button id="logout-btn" class="logout-btn" type="button" title="Sign out">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Views Container -->
+    <main class="app-main">
+      <!-- VIEW 1: EARN -->
+      <section id="view-earn" class="app-view active">
+        <!-- Next Cashout Progress Bar (Freecash Style) -->
+        <div class="cashout-progress-banner">
+          <div class="progress-info">
+            <span class="progress-title">Next Cashout Threshold</span>
+            <span id="progress-text" class="progress-nums">₹1,200 / ₹2,500 Cashout Threshold</span>
+          </div>
+          <div class="progress-track">
+            <div id="progress-fill" class="progress-bar" style="width: 48%;"></div>
+          </div>
+        </div>
+
+        <!-- Banner Header -->
+        <div class="hero-banner">
+          <div class="banner-content">
+            <span class="badge-tag">INSTANT 1V1 DUELS</span>
+            <h2>Challenge Players & Win Real Tokens</h2>
+            <p>Entry: <strong>₹50</strong> • Winner Reward: <strong>₹90</strong> (Net +₹40)</p>
+          </div>
+        </div>
+
+        <!-- Category Filters -->
+        <div class="filter-bar">
+          <button class="filter-chip active" data-category="all" type="button">All Games</button>
+          <button class="filter-chip" data-category="reflex" type="button">Reflex Speed</button>
+          <button class="filter-chip" data-category="math" type="button">Math Calculations</button>
+          <button class="filter-chip" data-category="brain" type="button">Memory & Brain</button>
+          <button class="filter-chip" data-category="strategy" type="button">Strategy</button>
+        </div>
+
+        <!-- Games Grid -->
+        <div class="games-grid" id="gamesGrid"></div>
+      </section>
+
+      <!-- VIEW 2: MY PROFILE -->
+      <section id="view-profile" class="app-view">
+        <div class="profile-header-card">
+          <div class="profile-left">
+            <div class="avatar-wrap">
+              <img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" />
+            </div>
+            <div class="profile-meta">
+              <div class="name-edit-group">
+                <h2 id="profile-display-name">Vishal</h2>
+                <button id="edit-name-btn" class="icon-btn" title="Edit Name" type="button">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                </button>
+              </div>
+              <div id="name-edit-box" class="name-edit-box hidden">
+                <input type="text" id="name-input" class="name-input" maxlength="20" placeholder="New username" />
+                <button id="save-name-btn" class="btn-save" type="button">Save</button>
+                <button id="cancel-name-btn" class="btn-cancel-sm" type="button">Cancel</button>
+              </div>
+              <p class="join-date">Arena Member • Verified Account</p>
+              <div class="level-pill">
+                <span>Level <strong id="user-level">1</strong></span>
+                <div class="level-bar-bg"><div class="level-bar-fill" style="width: 48%;"></div></div>
+                <span class="xp-text">480 / 1,000 XP</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-stats-grid">
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-total-earnings">₹1,200</span>
+              <span class="stat-box-lbl">Token Balance</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-matches-played">0</span>
+              <span class="stat-box-lbl">Matches Played</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-win-rate">0%</span>
+              <span class="stat-box-lbl">Win Rate</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-tokens-won">+₹0</span>
+              <span class="stat-box-lbl">Duel Profit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Menu -->
+        <div class="section-card">
+          <h3>Account</h3>
+          <p class="section-sub">Manage your wallet, profile and referral program</p>
+
+          <div class="profile-menu-list">
+            <div class="menu-row menu-row-static">
+              <div class="menu-row-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"></path><path d="M22 6l-10 7L2 6"></path><path d="M2 6h20v12H2z"></path></svg>
+              </div>
+              <div class="menu-row-text">
+                <span class="menu-row-title">Signed in as</span>
+                <span class="menu-row-sub" id="profile-email">—</span>
+              </div>
+            </div>
+
+            <button class="menu-row" id="menu-transactions-btn" type="button">
+              <div class="menu-row-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              </div>
+              <div class="menu-row-text">
+                <span class="menu-row-title">Token Transactions</span>
+                <span class="menu-row-sub">View your full credit &amp; debit history</span>
+              </div>
+              <span class="menu-row-arrow">›</span>
+            </button>
+
+            <button class="menu-row" id="menu-addtokens-btn" type="button">
+              <div class="menu-row-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+              </div>
+              <div class="menu-row-text">
+                <span class="menu-row-title">Add Tokens</span>
+                <span class="menu-row-sub">Top up your wallet balance</span>
+              </div>
+              <span class="menu-row-arrow">›</span>
+            </button>
+
+            <button class="menu-row" id="menu-refer-btn" type="button">
+              <div class="menu-row-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+              <div class="menu-row-text">
+                <span class="menu-row-title">Refer &amp; Earn</span>
+                <span class="menu-row-sub">Invite friends, earn bonus tokens</span>
+              </div>
+              <span class="menu-row-arrow">›</span>
+            </button>
+
+            <button class="menu-row menu-row-danger" id="menu-logout-btn" type="button">
+              <div class="menu-row-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              </div>
+              <div class="menu-row-text">
+                <span class="menu-row-title">Log Out</span>
+                <span class="menu-row-sub">Sign out of your Arena account</span>
+              </div>
+              <span class="menu-row-arrow">›</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: TOKEN TRANSACTIONS (Ledger) -->
+      <section id="view-ledger" class="app-view">
+        <div class="section-card">
+          <button class="back-link" id="ledger-back-btn" type="button">‹ Back to Profile</button>
+          <h3>Token Transactions</h3>
+          <p class="section-sub">Live record of credit and debit events</p>
+          <div class="table-wrap">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th>Event Description</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Date & Time</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: REFER & EARN -->
+      <section id="view-refer" class="app-view">
+        <div class="section-card">
+          <button class="back-link" id="refer-back-btn" type="button">‹ Back to Profile</button>
+          <h3>Refer &amp; Earn</h3>
+          <p class="section-sub">Invite friends to Arena and earn free tokens together</p>
+
+          <div class="refer-info-grid">
+            <div class="refer-info-box">
+              <span class="refer-info-num">₹100</span>
+              <span class="refer-info-lbl">You get, per friend who joins</span>
+            </div>
+            <div class="refer-info-box">
+              <span class="refer-info-num">₹300</span>
+              <span class="refer-info-lbl">Your friend gets, on signup</span>
+            </div>
+          </div>
+          <p class="refer-explainer">Share your referral code below. When a friend enters it, they instantly receive ₹300 in tokens and you receive ₹100 — for every friend you refer, with no limit.</p>
+
+          <div class="refer-code-box">
+            <span class="refer-code-lbl">Your Referral Code</span>
+            <div class="refer-code-row">
+              <span id="my-referral-code" class="refer-code-value">—</span>
+              <button id="copy-referral-btn" class="btn-secondary" type="button">Copy</button>
+            </div>
+          </div>
+
+          <div class="refer-redeem-box">
+            <span class="refer-code-lbl">Have a Referral Code?</span>
+            <div class="refer-redeem-row">
+              <input type="text" id="referral-input" class="name-input" maxlength="12" placeholder="Enter code e.g. VISHA859" />
+              <button id="submit-referral-btn" class="btn-primary" type="button">Submit</button>
+            </div>
+            <p id="referral-status-msg" class="refer-status-msg"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: ADD TOKENS -->
+      <section id="view-addtoken" class="app-view">
+        <div class="section-card">
+          <button class="back-link" id="addtoken-back-btn" type="button">‹ Back to Profile</button>
+          <h3>Add Tokens</h3>
+          <p class="section-sub">Top up your wallet balance</p>
+
+          <div class="addtoken-amount-grid">
+            <button class="amount-chip" data-amount="20" type="button">₹20</button>
+            <button class="amount-chip" data-amount="50" type="button">₹50</button>
+            <button class="amount-chip" data-amount="100" type="button">₹100</button>
+            <button class="amount-chip" data-amount="200" type="button">₹200</button>
+          </div>
+
+          <div class="refer-redeem-box">
+            <span class="refer-code-lbl">Or Enter a Custom Amount</span>
+            <div class="refer-redeem-row">
+              <input type="number" id="addtoken-input" class="name-input" min="1" placeholder="Enter amount (₹)" />
+              <button id="addtoken-submit-btn" class="btn-primary" type="button">Add</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: MATCHES -->
+      <section id="view-matches" class="app-view">
+        <div class="section-card">
+          <h3>Match History</h3>
+          <p class="section-sub">Your recent 1v1 duel records</p>
+          <div class="table-wrap">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th>Game</th>
+                  <th>Opponent</th>
+                  <th>Result</th>
+                  <th>Reward</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="matches-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: CASHOUT -->
+      <section id="view-cashout" class="app-view">
+        <div class="section-card">
+          <h3>Cashout Vault</h3>
+          <p class="section-sub">Exchange tokens for rewards</p>
+          <div class="stat-box" style="margin-top:14px;">
+            <p>Minimum payout requires ₹2,500 in your wallet.</p>
+            <button class="btn-primary" style="margin-top:14px; max-width:200px;" type="button" onclick="alert('Threshold: Reach ₹2,500 to initialize redemption.')">Request Cashout</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: REWARDS -->
+      <section id="view-rewards" class="app-view">
+        <div class="section-card">
+          <h3>Daily Rewards</h3>
+          <p class="section-sub">Daily streak login bonus</p>
+          <div class="stat-box" style="margin-top:14px;">
+            <span class="stat-box-num">Day 1 Streak</span>
+            <button class="btn-primary" style="margin-top:14px; max-width:220px;" type="button" onclick="alert('Daily reward claimed: +₹50!')">Claim ₹50 Daily Bonus</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Matchmaking Modal -->
+    <div id="match-overlay" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="radar-pulse">
+          <div class="pulse-circle"></div>
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a10 10 0 0 1 10 10"></path>
+          </svg>
+        </div>
+        <h3 id="match-title">Finding Opponent</h3>
+        <p class="modal-subtitle" id="match-status">Scanning live queue for players...</p>
+        <div class="modal-fee-notice">Entry Stake: <strong>₹50</strong></div>
+        <button id="cancel-match-btn" class="btn-cancel" type="button">Cancel Queue</button>
+      </div>
+    </div>
+
+    <!-- Arena Modal -->
+    <div id="game-arena-overlay" class="modal-overlay hidden">
+      <div class="arena-card">
+        <div class="arena-header">
+          <div class="player-stat user-side">
+            <img id="arena-user-avatar" class="arena-avatar" src="" alt="You" />
+            <span id="arena-user-name" class="arena-name">You</span>
+          </div>
+          <div class="vs-badge">VS</div>
+          <div class="player-stat opp-side">
+            <img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
+            <span id="arena-opp-name" class="arena-name">Opponent</span>
+          </div>
+        </div>
+        <div id="arena-stage" class="arena-stage"></div>
+      </div>
+    </div>
+
+
+    <!-- Logout Confirmation Modal (this markup was missing from the project;
+         without it, clicking "Log Out" in the profile menu did nothing) -->
+    <div id="logout-confirm-overlay" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h3>Log Out?</h3>
+        <p class="modal-subtitle">You'll need to sign in again to access your wallet and matches.</p>
+        <div class="result-btn-row">
+          <button id="logout-cancel-btn" class="btn-secondary" type="button">Cancel</button>
+          <button id="logout-confirm-btn" class="btn-primary" type="button">Log Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-container">
+        <div class="footer-brand-col">
+          <div class="brand-logo">
+            <svg class="logo-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span class="logo-text">ARENA</span>
+          </div>
+          <p class="footer-desc">Arena is a 1v1 skill-based platform where players duel in instant mini-games and earn tokens.</p>
+          <div class="trust-badge">
+            <span>★ ★ ★ ★ ★</span>
+            <span>Verified 100% Fair Play Matchmaking</span>
+          </div>
+        </div>
+
+        <div class="footer-links-group">
+          <div class="footer-col">
+            <span class="footer-heading">Platform</span>
+            <a href="#">Earn Tokens</a>
+            <a href="#">Leaderboard</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-heading">Resources</span>
+            <a href="#">Help Center</a>
+            <a href="#">Live Support</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-heading">Legal</span>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Arena Technologies. All rights reserved.</p>
+        <span class="lang-tag">English (US)</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- CDN Script -->
+<!-- Dashboard Engine (single source of truth — no more inline duplicate script) -->
+<rect width='64' height='64' rx='14' fill='%230e131f'/><path d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/></svg>" />
+
+  <div id="page-match" class="hidden">
+<p id="match-loading" class="center-screen loading-text">Loading match...</p>
+
+  <div id="match-root" class="match-wrap hidden">
+    <div class="vs-bar">
+      <div class="vs-player">
+        <img id="me-avatar" src="" alt="You" />
+        <span id="me-name">You</span>
+      </div>
+      <span class="vs-label">VS</span>
+      <div class="vs-player">
+        <span id="opp-name">Opponent</span>
+        <img id="opp-avatar" src="" alt="Opponent" />
+      </div>
+    </div>
+
+    <div class="game-stage" id="stage"></div>
+  </div>
+  </div>
+
+  <!-- Supabase client library (external CDN — this is the one piece that can't be inlined) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./assets/supabaseClient.js?v=5"></script>
-  <script src="./assets/auth.js?v=5"></script>
+  <script>
+// ==== assets/supabaseClient.js ====
+const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5Zm1iaWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDE3NDIsImV4cCI6MjEwMzIxNzc0Mn0.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ==== assets/auth.js (login handlers only — redirect logic replaced by the router below) ====
+// Check for existing session and redirect if already logged in
+const googleLoginBtn = document.getElementById("google-login-btn");
+const navLoginBtn = document.getElementById("nav-login-btn");
+const navSignupBtn = document.getElementById("nav-signup-btn");
+
+async function triggerGoogleLogin() {
+  const btn = googleLoginBtn;
+  if (btn) {
+    btn.disabled = true;
+    btn.querySelector("span").textContent = "Connecting to Google...";
+  }
+
+  const redirectUrl = window.location.origin + window.location.pathname;
+
+  const { error } = await client.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: redirectUrl,
+    },
+  });
+
+  if (error) {
+    alert("Login failed: " + error.message);
+    if (btn) {
+      btn.disabled = false;
+      btn.querySelector("span").textContent = "Continue with Google";
+    }
+  }
+}
+
+if (googleLoginBtn) googleLoginBtn.addEventListener("click", triggerGoogleLogin);
+if (navLoginBtn) navLoginBtn.addEventListener("click", triggerGoogleLogin);
+if (navSignupBtn) navSignupBtn.addEventListener("click", triggerGoogleLogin);
+
+// ==== assets/dashboard.js ====
+const MATCH_ENTRY_FEE = 50;
+const MATCH_WIN_REWARD = 90;
+const BOT_WAIT_SECONDS = 5; // how long to wait for a real opponent before matching with a bot
+const BOT_MOVE_MIN_MS = 2000; // bot opponents always "think" for 2-3s, never instant
+const BOT_MOVE_MAX_MS = 3000;
+function botDelay() {
+  return Math.floor(Math.random() * (BOT_MOVE_MAX_MS - BOT_MOVE_MIN_MS + 1)) + BOT_MOVE_MIN_MS;
+}
+
+// ----------------------------------------------------
+// Presence Heartbeat (requires schema7.sql)
+// ----------------------------------------------------
+// A queue row in matchmaking_queue used to be treated as "a live
+// player waiting" forever, even if that account had closed the tab
+// (or was a different account of yours that queued once and never
+// came back). That let matchmaking hand out "live opponent" matches
+// to accounts that weren't actually online.
+//
+// Fix: while the dashboard is open we send a heartbeat every few
+// seconds that stamps public.users.last_seen for this account.
+// claim_opponent() (see schema7.sql) only ever offers an opponent
+// whose last_seen is fresh, and purges any queue row that has gone
+// stale — so only a genuinely-online player can be matched with
+// inside the 5-second window; everyone else falls through to a bot,
+// exactly as the "Waiting for a live player... (5s)" timer intends.
+const PRESENCE_HEARTBEAT_MS = 8000;
+let presenceHeartbeatTimer = null;
+
+async function touchPresence() {
+  if (!currentUser) return;
+  try {
+    await client
+      .from("users")
+      .update({ last_seen: new Date().toISOString() })
+      .eq("id", currentUser.id);
+  } catch (err) {
+    console.warn("Presence heartbeat failed:", err);
+  }
+}
+
+function startPresenceHeartbeat() {
+  touchPresence();
+  if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
+  presenceHeartbeatTimer = setInterval(touchPresence, PRESENCE_HEARTBEAT_MS);
+}
+
+// ----------------------------------------------------
+// Game Catalog — single source of truth for the dashboard grid,
+// bot-arena dispatch (launchArena) and the live match.html dispatch.
+// icon = one emoji shown on the card banner; badge = small pill label.
+// ----------------------------------------------------
+const GAME_CATALOG = [
+  { type: "tictactoe", name: "Tic-Tac-Toe Blitz", desc: "Classic 3x3 grid combat — get three in a row to win.", icon: "\u2716\uFE0F", badge: "CLASSIC", category: "brain" },
+  { type: "rps", name: "RPS Duel", desc: "Best-of-5 rock, paper, scissors against your opponent.", icon: "\u270A", badge: "CLASSIC", category: "strategy" },
+  { type: "connect4", name: "Connect 4", desc: "Drop discs and connect four in a row before they do.", icon: "\uD83D\uDD34", badge: "STRATEGY", category: "strategy" },
+  { type: "memory", name: "Memory Match", desc: "Flip pairs and clear the board faster than your opponent.", icon: "\uD83E\uDDE0", badge: "BRAIN", category: "brain" },
+  { type: "scramble", name: "Word Scramble", desc: "Unscramble the word before your opponent figures it out.", icon: "\uD83D\uDD24", badge: "WORD", category: "brain" },
+  { type: "typing", name: "Typing Race", desc: "Type the sentence exactly, first to finish wins.", icon: "\u2328\uFE0F", badge: "SPEED", category: "reflex" },
+  { type: "higherlower", name: "Higher-Lower Duel", desc: "Guess the secret number in the fewest tries.", icon: "\uD83C\uDFAF", badge: "LOGIC", category: "brain" },
+  { type: "snake", name: "Snake Duel", desc: "Eat, grow, survive — highest score before crashing wins.", icon: "\uD83D\uDC0D", badge: "ARCADE", category: "reflex" },
+  { type: "simon", name: "Simon Says", desc: "Repeat the growing color pattern, go furthest to win.", icon: "\uD83C\uDFB5", badge: "MEMORY", category: "brain" },
+  { type: "dice", name: "Dice Battle", desc: "Push your luck rolling dice, bank before you bust.", icon: "\uD83C\uDFB2", badge: "LUCK", category: "strategy" },
+  { type: "tap", name: "Tap Race", desc: "Most taps in 5 seconds takes the win.", icon: "\uD83D\uDC46", badge: "SPEED", category: "reflex" },
+  { type: "whack", name: "Whack-a-Mole", desc: "First to 15 correct hits wins the duel.", icon: "\uD83D\uDD28", badge: "REFLEX", category: "reflex" },
+  { type: "recall", name: "Sequence Recall", desc: "Numbers flash briefly — tap them back in order.", icon: "\uD83D\uDD22", badge: "MEMORY", category: "brain" },
+  { type: "superttt", name: "Tic-Tac-Toe Ultimate", desc: "A 3x3 grid of tic-tac-toe boards — win the meta-board.", icon: "\uD83D\uDD32", badge: "STRATEGY", category: "strategy" },
+  { type: "slide", name: "Slide Puzzle Race", desc: "Solve the shuffled 15-puzzle before your opponent.", icon: "\uD83E\uDDE9", badge: "PUZZLE", category: "brain" },
+  { type: "stroop", name: "Color Match Rush", desc: "Fewest mistakes wins this color-word speed test.", icon: "\uD83C\uDFA8", badge: "REFLEX", category: "reflex" },
+  { type: "reflex", name: "Reflex Grid", desc: "Tap the lit tile before it fades — first to 10.", icon: "\u26A1", badge: "REFLEX", category: "reflex" },
+  { type: "mathduel", name: "Math Duel", desc: "Solve 5 equations fastest to win the duel.", icon: "\u2795", badge: "MATH", category: "math" },
+  { type: "battleship", name: "Battleship Mini", desc: "Sink the hidden fleet in the fewest shots.", icon: "\uD83D\uDEA2", badge: "STRATEGY", category: "strategy" },
+  { type: "emojisprint", name: "Emoji Memory Sprint", desc: "Memory match with a growing grid each round.", icon: "\uD83C\uDF1F", badge: "MEMORY", category: "brain" },
+  { type: "mathchain", name: "Fast Math Chain", desc: "Solve 5 quick sums back-to-back, fastest wins.", icon: "\u2795", badge: "MATH", category: "math" },
+];
+const BANNER_CLASSES = ["banner-reaction", "banner-math", "banner-memory", "banner-color", "banner-tictactoe", "banner-trivia"];
+
+function renderGameCards() {
+  const grid = document.getElementById("gamesGrid");
+  if (!grid) return;
+  grid.innerHTML = GAME_CATALOG.map((g, i) => {
+    const banner = BANNER_CLASSES[i % BANNER_CLASSES.length];
+    return (
+      '<article class="game-card" data-category="' + g.category + '">' +
+      '<div class="card-media ' + banner + '">' +
+      '<span class="card-badge">' + g.badge + "</span>" +
+      '<span style="font-size:44px;line-height:1">' + g.icon + "</span>" +
+      "</div>" +
+      '<div class="card-content">' +
+      '<h3 class="card-title">' + g.name + "</h3>" +
+      '<p class="card-desc">' + g.desc + "</p>" +
+      '<div class="card-meta"><span class="meta-fee">Fee: \u20B950</span><span class="meta-win">+\u20B990 Reward</span></div>' +
+      '<button class="play-btn" data-game="' + g.name + '" data-type="' + g.type + '" type="button">Play Match</button>' +
+      "</div>" +
+      "</article>"
+    );
+  }).join("");
+}
+renderGameCards();
+
+// Indian Names Pool for Bot Fallback (boys & girls)
+const INDIAN_BOT_POOL = [
+  { name: "Aarav Sharma", seed: "aarav" },
+  { name: "Priya Patel", seed: "priya" },
+  { name: "Rohan Verma", seed: "rohan" },
+  { name: "Ananya Singh", seed: "ananya" },
+  { name: "Vikram Malhotra", seed: "vikram" },
+  { name: "Sneha Reddy", seed: "sneha" },
+  { name: "Aditya Kumar", seed: "aditya" },
+  { name: "Neha Gupta", seed: "neha" },
+  { name: "Karan Mehta", seed: "karan" },
+  { name: "Divya Roy", seed: "divya" },
+  { name: "Arjun Chopra", seed: "arjun" },
+  { name: "Riya Sen", seed: "riya" },
+  { name: "Ishaan Kapoor", seed: "ishaan" },
+  { name: "Meera Nair", seed: "meera" },
+  { name: "Rahul Iyer", seed: "rahul" },
+  { name: "Kavya Joshi", seed: "kavya" }
+];
+
+function formatRupees(amount) {
+  const n = Number(amount) || 0;
+  const sign = n < 0 ? "-" : "";
+  return sign + "\u20b9" + Math.abs(n).toLocaleString("en-IN");
+}
+
+// App State
+let currentUser = null;
+let currentBalance = 0;
+let matchHistory = [];
+let transactions = [];
+let activeOpponent = null;
+let activeGame = null;
+let matchmakingTimer = null;
+let queueChannel = null;
+let inQueue = false;
+
+// DOM Elements
+const loadingEl = document.getElementById("loading");
+const dashEl = document.getElementById("dashboard");
+const balanceEl = document.getElementById("balance-value");
+const playerNameEl = document.getElementById("player-name");
+const avatarEl = document.getElementById("avatar");
+
+// Profile View Elements
+const profileDisplayName = document.getElementById("profile-display-name");
+const profileViewAvatar = document.getElementById("profile-view-avatar");
+const editNameBtn = document.getElementById("edit-name-btn");
+const nameEditBox = document.getElementById("name-edit-box");
+const nameInput = document.getElementById("name-input");
+const saveNameBtn = document.getElementById("save-name-btn");
+const cancelNameBtn = document.getElementById("cancel-name-btn");
+const profileEmailEl = document.getElementById("profile-email");
+
+// Account Menu / Wallet / Refer & Earn / Add Tokens Elements
+const walletBadgeBtn = document.getElementById("wallet-badge-btn");
+const menuTransactionsBtn = document.getElementById("menu-transactions-btn");
+const menuAddTokensBtn = document.getElementById("menu-addtokens-btn");
+const menuReferBtn = document.getElementById("menu-refer-btn");
+const menuLogoutBtn = document.getElementById("menu-logout-btn");
+const logoutConfirmOverlay = document.getElementById("logout-confirm-overlay");
+const logoutConfirmBtn = document.getElementById("logout-confirm-btn");
+const logoutCancelBtn = document.getElementById("logout-cancel-btn");
+
+// Arena turn-indicator elements (shared across every game type)
+const turnIndicatorText = document.getElementById("turn-indicator-text");
+const turnIndicatorDot = document.getElementById("turn-dot");
+const arenaUserSide = document.getElementById("arena-user-side");
+const arenaOppSide = document.getElementById("arena-opp-side");
+
+// Sets who the arena's "Your Turn / Opponent's Turn" indicator is showing
+// for right now. state: "you" (green, blinking) or "opp" (red, blinking).
+// Also glows/dims the matching avatar so the active player is obvious at
+// a glance, even with sound off or on a small screen.
+function setArenaTurn(state) {
+  if (!turnIndicatorText || !turnIndicatorDot) return;
+  if (state === "opp") {
+    const oppFirstName = (activeOpponent && activeOpponent.name ? activeOpponent.name.split(" ")[0] : "Opponent");
+    turnIndicatorText.textContent = oppFirstName + "'s Turn";
+    turnIndicatorText.className = "turn-text turn-text-opp";
+    turnIndicatorDot.className = "turn-dot turn-dot-opp";
+    arenaUserSide?.classList.remove("side-active");
+    arenaOppSide?.classList.add("side-active");
+  } else {
+    turnIndicatorText.textContent = "Your Turn";
+    turnIndicatorText.className = "turn-text turn-text-you";
+    turnIndicatorDot.className = "turn-dot turn-dot-you";
+    arenaOppSide?.classList.remove("side-active");
+    arenaUserSide?.classList.add("side-active");
+  }
+}
+const ledgerBackBtn = document.getElementById("ledger-back-btn");
+const referBackBtn = document.getElementById("refer-back-btn");
+const addtokenBackBtn = document.getElementById("addtoken-back-btn");
+const myReferralCodeEl = document.getElementById("my-referral-code");
+const copyReferralBtn = document.getElementById("copy-referral-btn");
+const referralInput = document.getElementById("referral-input");
+const submitReferralBtn = document.getElementById("submit-referral-btn");
+const referralStatusMsg = document.getElementById("referral-status-msg");
+const amountChips = document.querySelectorAll(".amount-chip");
+const addtokenInput = document.getElementById("addtoken-input");
+const addtokenSubmitBtn = document.getElementById("addtoken-submit-btn");
+
+// Navigation & Category Elements
+const tabButtons = document.querySelectorAll(".tab-btn");
+const appViews = document.querySelectorAll(".app-view");
+const filterChips = document.querySelectorAll(".filter-chip");
+const gameCards = document.querySelectorAll(".game-card");
+const playButtons = document.querySelectorAll(".play-btn");
+
+// Matchmaking & Arena Overlays
+const matchOverlay = document.getElementById("match-overlay");
+const cancelMatchBtn = document.getElementById("cancel-match-btn");
+const matchTitle = document.getElementById("match-title");
+const matchStatus = document.getElementById("match-status");
+const arenaOverlay = document.getElementById("game-arena-overlay");
+const arenaUserAvatar = document.getElementById("arena-user-avatar");
+const arenaUserName = document.getElementById("arena-user-name");
+const arenaOppAvatar = document.getElementById("arena-opp-avatar");
+const arenaOppName = document.getElementById("arena-opp-name");
+const arenaStage = document.getElementById("arena-stage");
+
+// ----------------------------------------------------
+// 1. Initialization
+// ----------------------------------------------------
+async function initDashboard() {
+  try {
+    const sessionRes = await client.auth.getSession();
+    const session = sessionRes && sessionRes.data ? sessionRes.data.session : null;
+    if (!session) {
+      goToLanding();
+      return;
+    }
+    currentUser = session.user;
+
+    if (profileEmailEl) profileEmailEl.textContent = currentUser.email || "—";
+
+    await loadUserName();
+    await loadWallet();
+    await loadTransactions();
+    await loadMatchHistory();
+    await loadReferralInfo();
+    updateUI();
+    startPresenceHeartbeat();
+  } catch (err) {
+    console.error("Initialization error:", err);
+  } finally {
+    if (loadingEl) loadingEl.classList.add("hidden");
+    if (dashEl) dashEl.classList.remove("hidden");
+  }
+}
+
+// 3-second absolute safety fallback
+setTimeout(() => {
+  if (loadingEl && !loadingEl.classList.contains("hidden")) {
+    loadingEl.classList.add("hidden");
+    if (dashEl) dashEl.classList.remove("hidden");
+  }
+}, 3000);
+
+async function loadUserName() {
+  const meta = currentUser.user_metadata || {};
+  const localName = localStorage.getItem("arena_name_" + currentUser.id);
+  const fallbackName =
+    localName ||
+    meta.full_name ||
+    meta.name ||
+    (currentUser.email ? currentUser.email.split("@")[0] : "Player");
+
+  // public.users is the source of truth other players read from (match.html).
+  // Always trust it over localStorage/auth metadata when it exists.
+  let dbName = null;
+  try {
+    const { data: profileRow } = await client
+      .from("users")
+      .select("full_name")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+    dbName = profileRow?.full_name || null;
+  } catch (err) {
+    console.error("Failed to load profile name:", err);
+  }
+
+  const initialName = dbName || fallbackName;
+  setUserDisplayName(initialName);
+
+  // Keep public.users in sync so opponents always see the current name/avatar,
+  // and backfill it if the signup trigger never populated it.
+  if (dbName !== initialName) {
+    syncProfileToDatabase(initialName);
+  }
+}
+
+async function syncProfileToDatabase(name) {
+  const avatarUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(name);
+  try {
+    await client.from("users").upsert({
+      id: currentUser.id,
+      email: currentUser.email,
+      full_name: name,
+      avatar_url: avatarUrl,
+    });
+  } catch (err) {
+    console.error("Failed to sync profile to database:", err);
+  }
+}
+
+function setUserDisplayName(name) {
+  if (playerNameEl) playerNameEl.textContent = name;
+  if (profileDisplayName) profileDisplayName.textContent = name;
+  const avatarUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(name);
+  if (avatarEl) avatarEl.src = avatarUrl;
+  if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
+}
+
+// ----------------------------------------------------
+// 2. Wallet — always backed by Supabase, never local-only
+// ----------------------------------------------------
+async function loadWallet() {
+  try {
+    const { data: wallet, error } = await client
+      .from("wallet")
+      .select("dummy_token")
+      .eq("user_id", currentUser.id)
+      .single();
+    if (error) throw error;
+    currentBalance = (wallet && typeof wallet.dummy_token === "number") ? wallet.dummy_token : 0;
+  } catch (e) {
+    console.warn("Wallet fetch failed:", e);
+    currentBalance = 0;
+  }
+}
+
+// Applies a delta (+credit / -debit) to the Supabase wallet and keeps currentBalance in sync.
+// This is the single source of truth fix for the "resets on refresh" bug.
+async function persistWalletDelta(delta) {
+  const { data: wallet, error } = await client
+    .from("wallet")
+    .select("dummy_token")
+    .eq("user_id", currentUser.id)
+    .single();
+  if (error || !wallet) throw error || new Error("Wallet not found");
+
+  const newBalance = Math.max(0, (wallet.dummy_token || 0) + delta);
+  const { error: updErr } = await client
+    .from("wallet")
+    .update({ dummy_token: newBalance, updated_at: new Date().toISOString() })
+    .eq("user_id", currentUser.id);
+  if (updErr) throw updErr;
+
+  currentBalance = newBalance;
+  flashBalance();
+  return newBalance;
+}
+
+function flashBalance() {
+  if (!balanceEl) return;
+  balanceEl.classList.remove("balance-flash");
+  void balanceEl.offsetWidth; // restart animation
+  balanceEl.classList.add("balance-flash");
+}
+
+// ----------------------------------------------------
+// 3. Transactions & Match History — persisted, not local-only
+// ----------------------------------------------------
+async function loadTransactions() {
+  try {
+    const { data, error } = await client
+      .from("transactions")
+      .select("description, type, amount, created_at")
+      .eq("user_id", currentUser.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    transactions = (data || []).map((t) => ({
+      desc: t.description,
+      type: t.type,
+      amount: t.amount,
+      date: new Date(t.created_at).toLocaleString()
+    }));
+  } catch (e) {
+    console.warn("Could not load transactions (run schema3.sql to enable the live ledger):", e);
+    transactions = [];
+  }
+}
+
+function showToast(desc, type, amount) {
+  const stack = document.getElementById("toast-stack");
+  if (!stack) return;
+  const isCredit = type === "credit";
+  const toast = document.createElement("div");
+  toast.className = "toast " + (isCredit ? "toast-credit" : "toast-debit");
+  const iconSvg = isCredit
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>';
+  toast.innerHTML =
+    '<span class="toast-icon">' + iconSvg + "</span>" +
+    '<span class="toast-text">' +
+    '<span class="toast-amount ' + (isCredit ? "toast-credit-text" : "toast-debit-text") + '">' +
+    (isCredit ? "+" : "-") + formatRupees(Math.abs(amount)) +
+    "</span>" +
+    '<span class="toast-desc">' + desc + "</span>" +
+    "</span>";
+  stack.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("toast-out");
+    setTimeout(() => toast.remove(), 260);
+  }, 3200);
+}
+
+async function recordTransaction(desc, type, amount) {
+  transactions.unshift({ desc, type, amount, date: new Date().toLocaleString() });
+  updateUI();
+  showToast(desc, type, amount);
+  try {
+    const { error } = await client.from("transactions").insert({
+      user_id: currentUser.id,
+      description: desc,
+      type,
+      amount
+    });
+    if (error) throw error;
+  } catch (e) {
+    console.warn("Transaction not persisted (run schema3.sql):", e);
+  }
+}
+
+async function loadMatchHistory() {
+  try {
+    const { data, error } = await client
+      .from("match_history")
+      .select("game, opponent, result, reward, created_at")
+      .eq("user_id", currentUser.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    matchHistory = (data || []).map((m) => ({
+      game: m.game,
+      opponent: m.opponent,
+      result: m.result,
+      reward: m.reward,
+      date: new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    }));
+  } catch (e) {
+    console.warn("Could not load match history (run schema3.sql to enable this):", e);
+    matchHistory = [];
+  }
+}
+
+async function recordMatch(game, opponent, result, reward) {
+  matchHistory.unshift({
+    game,
+    opponent,
+    result,
+    reward,
+    date: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  });
+  updateUI();
+  try {
+    const { error } = await client.from("match_history").insert({
+      user_id: currentUser.id,
+      game,
+      opponent,
+      result,
+      reward
+    });
+    if (error) throw error;
+  } catch (e) {
+    console.warn("Match result not persisted (run schema3.sql):", e);
+  }
+}
+
+// ----------------------------------------------------
+// 4. UI Rendering
+// ----------------------------------------------------
+function updateUI() {
+  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString("en-IN");
+
+  const progressPercent = Math.min(100, Math.round((currentBalance / 2500) * 100));
+  const progressFill = document.getElementById("progress-fill");
+  const progressText = document.getElementById("progress-text");
+  if (progressFill) progressFill.style.width = progressPercent + "%";
+  if (progressText) {
+    progressText.textContent =
+      formatRupees(currentBalance) + " / " + formatRupees(2500) + " Cashout Threshold";
+  }
+
+  const totalMatches = matchHistory.length;
+  const wins = matchHistory.filter((m) => m.result === "VICTORY").length;
+  const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
+  const totalWonTokens = wins * MATCH_WIN_REWARD;
+
+  const statEarnings = document.getElementById("stat-total-earnings");
+  const statMatches = document.getElementById("stat-matches-played");
+  const statRate = document.getElementById("stat-win-rate");
+  const statWon = document.getElementById("stat-tokens-won");
+  if (statEarnings) statEarnings.textContent = formatRupees(currentBalance);
+  if (statMatches) statMatches.textContent = totalMatches;
+  if (statRate) statRate.textContent = winRate + "%";
+  if (statWon) statWon.textContent = "+" + formatRupees(totalWonTokens);
+
+  renderLedger();
+  renderMatchHistory();
+}
+
+function renderLedger() {
+  const tbody = document.getElementById("ledger-body");
+  if (!tbody) return;
+  if (transactions.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4">No transactions recorded</td></tr>';
+    return;
+  }
+  tbody.innerHTML = transactions
+    .map((tx) => {
+      const isCredit = tx.type === "credit";
+      const sign = isCredit ? "+" : "-";
+      const color = isCredit ? "var(--primary-green)" : "var(--accent-red)";
+      const badgeClass = isCredit ? "badge-credit" : "badge-debit";
+      return (
+        "<tr>" +
+        "<td>" + tx.desc + "</td>" +
+        '<td><span class="' + badgeClass + '">' + tx.type.toUpperCase() + "</span></td>" +
+        '<td style="color:' + color + '">' + sign + formatRupees(tx.amount) + "</td>" +
+        "<td>" + tx.date + "</td>" +
+        "</tr>"
+      );
+    })
+    .join("");
+}
+
+function renderMatchHistory() {
+  const tbody = document.getElementById("matches-body");
+  if (!tbody) return;
+  if (matchHistory.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5">No matches played yet. Choose a game above!</td></tr>';
+    return;
+  }
+  tbody.innerHTML = matchHistory
+    .map((m) => {
+      const isWin = m.result === "VICTORY";
+      const color = isWin ? "var(--primary-green)" : "var(--accent-red)";
+      const badgeClass = isWin ? "badge-credit" : "badge-debit";
+      const rewardText = (m.reward >= 0 ? "+" : "") + formatRupees(m.reward);
+      return (
+        "<tr>" +
+        "<td>" + m.game + "</td>" +
+        "<td>" + m.opponent + "</td>" +
+        '<td><span class="' + badgeClass + '">' + m.result + "</span></td>" +
+        '<td style="color:' + color + '">' + rewardText + "</td>" +
+        "<td>" + m.date + "</td>" +
+        "</tr>"
+      );
+    })
+    .join("");
+}
+
+// ----------------------------------------------------
+// 5. Navigation & Category Filters
+// ----------------------------------------------------
+function switchView(targetId) {
+  tabButtons.forEach((b) => b.classList.remove("active"));
+  appViews.forEach((v) => v.classList.remove("active"));
+  const targetTab = Array.from(tabButtons).find((b) => b.getAttribute("data-target") === targetId);
+  if (targetTab) targetTab.classList.add("active");
+  const targetView = document.getElementById(targetId);
+  if (targetView) targetView.classList.add("active");
+}
+tabButtons.forEach((btn) => {
+  btn.addEventListener("click", () => switchView(btn.getAttribute("data-target")));
+});
+document.getElementById("profile-nav-btn")?.addEventListener("click", () => switchView("view-profile"));
+document.getElementById("nav-brand-logo")?.addEventListener("click", () => switchView("view-earn"));
+
+// Wallet badge (header) opens Token Transactions directly.
+walletBadgeBtn?.addEventListener("click", () => switchView("view-ledger"));
+
+// Profile account menu — these views are only reachable via a click,
+// never shown directly inside the profile section itself.
+menuTransactionsBtn?.addEventListener("click", () => switchView("view-ledger"));
+menuAddTokensBtn?.addEventListener("click", () => switchView("view-addtoken"));
+menuReferBtn?.addEventListener("click", () => switchView("view-refer"));
+// Logging out always asks for confirmation first — logout can only be
+// triggered from the Profile > Account menu, never from the top nav.
+menuLogoutBtn?.addEventListener("click", () => {
+  logoutConfirmOverlay?.classList.remove("hidden");
+});
+logoutCancelBtn?.addEventListener("click", () => {
+  logoutConfirmOverlay?.classList.add("hidden");
+});
+logoutConfirmBtn?.addEventListener("click", async () => {
+  logoutConfirmBtn.disabled = true;
+  if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
+  await client.auth.signOut();
+  logoutConfirmBtn.disabled = false;
+  logoutConfirmOverlay?.classList.add("hidden");
+  currentUser = null;
+  goToLanding();
+});
+ledgerBackBtn?.addEventListener("click", () => switchView("view-profile"));
+referBackBtn?.addEventListener("click", () => switchView("view-profile"));
+addtokenBackBtn?.addEventListener("click", () => switchView("view-profile"));
+
+// ----------------------------------------------------
+// 6b. Refer & Earn
+// ----------------------------------------------------
+// Builds a code like "VISHA859": first 5 letters of the email's local
+// part (uppercased, padded with X if the local part is shorter), plus
+// 3 random digits.
+function generateReferralCode(email) {
+  const local = (email || "player").split("@")[0].replace(/[^a-zA-Z]/g, "").toUpperCase();
+  const prefix = (local + "XXXXX").slice(0, 5);
+  const digits = Math.floor(100 + Math.random() * 900);
+  return prefix + digits;
+}
+
+async function loadReferralInfo() {
+  if (!myReferralCodeEl) return;
+  try {
+    const { data: row, error } = await client
+      .from("users")
+      .select("referral_code")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+    if (error) throw error;
+
+    let code = row && row.referral_code;
+    if (!code) {
+      // First time here — generate and save one. Retry a couple of times
+      // in the rare case of a random collision with an existing code.
+      for (let attempt = 0; attempt < 4 && !code; attempt++) {
+        const candidate = generateReferralCode(currentUser.email);
+        const { error: upErr } = await client
+          .from("users")
+          .update({ referral_code: candidate })
+          .eq("id", currentUser.id);
+        if (!upErr) code = candidate;
+      }
+    }
+    myReferralCodeEl.textContent = code || "—";
+  } catch (e) {
+    console.warn("Could not load referral code (run schema6.sql to enable Refer & Earn):", e);
+    myReferralCodeEl.textContent = "Unavailable";
+  }
+}
+
+copyReferralBtn?.addEventListener("click", async () => {
+  const code = myReferralCodeEl?.textContent || "";
+  if (!code || code === "—" || code === "Unavailable") return;
+  try {
+    await navigator.clipboard.writeText(code);
+    copyReferralBtn.textContent = "Copied!";
+    setTimeout(() => { copyReferralBtn.textContent = "Copy"; }, 1500);
+  } catch (e) {
+    console.warn("Clipboard copy failed:", e);
+  }
+});
+
+submitReferralBtn?.addEventListener("click", async () => {
+  const code = (referralInput?.value || "").trim().toUpperCase();
+  if (!referralStatusMsg) return;
+  referralStatusMsg.className = "refer-status-msg";
+  referralStatusMsg.textContent = "";
+
+  if (!code) {
+    referralStatusMsg.textContent = "Please enter a referral code.";
+    referralStatusMsg.className = "refer-status-msg error";
+    return;
+  }
+
+  submitReferralBtn.disabled = true;
+  try {
+    const { data, error } = await client.rpc("redeem_referral_code", { p_code: code });
+    if (error) throw error;
+
+    if (data && data.success) {
+      referralStatusMsg.textContent = data.message || "Referral applied!";
+      referralStatusMsg.className = "refer-status-msg success";
+      referralInput.value = "";
+      await loadWallet();
+      await loadTransactions();
+      updateUI();
+    } else {
+      referralStatusMsg.textContent = (data && data.message) || "That code couldn't be applied.";
+      referralStatusMsg.className = "refer-status-msg error";
+    }
+  } catch (e) {
+    console.warn("Referral redemption failed (run schema6.sql to enable this):", e);
+    referralStatusMsg.textContent = "Referral program isn't set up yet — please try again later.";
+    referralStatusMsg.className = "refer-status-msg error";
+  } finally {
+    submitReferralBtn.disabled = false;
+  }
+});
+
+// ----------------------------------------------------
+// 6c. Add Tokens — UI only for now, wired up later once a payment
+// provider is connected. Selecting a quick amount fills the custom
+// input; the Add button intentionally does nothing yet.
+// ----------------------------------------------------
+amountChips.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    amountChips.forEach((c) => c.classList.remove("active"));
+    chip.classList.add("active");
+    if (addtokenInput) addtokenInput.value = chip.getAttribute("data-amount");
+  });
+});
+
+filterChips.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    filterChips.forEach((c) => c.classList.remove("active"));
+    chip.classList.add("active");
+    const category = chip.getAttribute("data-category");
+    gameCards.forEach((card) => {
+      if (category === "all" || card.getAttribute("data-category") === category) {
+        card.style.display = "flex";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  });
+});
+
+// ----------------------------------------------------
+// 6. Profile Name Editing
+// ----------------------------------------------------
+editNameBtn?.addEventListener("click", () => {
+  nameInput.value = playerNameEl.textContent;
+  nameEditBox.classList.remove("hidden");
+  nameInput.focus();
+});
+cancelNameBtn?.addEventListener("click", () => {
+  nameEditBox.classList.add("hidden");
+});
+saveNameBtn?.addEventListener("click", async () => {
+  const newName = nameInput.value.trim();
+  if (newName.length < 2) {
+    alert("Name must be at least 2 characters.");
+    return;
+  }
+  setUserDisplayName(newName);
+  nameEditBox.classList.add("hidden");
+
+  if (currentUser) {
+    // Cache locally for instant reload, but the database write below is what
+    // actually makes opponents see the updated name/avatar in match.html.
+    localStorage.setItem("arena_name_" + currentUser.id, newName);
+    saveNameBtn.disabled = true;
+    try {
+      await syncProfileToDatabase(newName);
+    } catch (err) {
+      console.error("Name change didn't save to server:", err);
+    } finally {
+      saveNameBtn.disabled = false;
+    }
+  }
+});
+
+// ----------------------------------------------------
+// 7. Real Matchmaking (live users first, bot after 5s)
+// ----------------------------------------------------
+playButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    activeGame = { name: btn.getAttribute("data-game"), type: btn.getAttribute("data-type") };
+    if (currentBalance < MATCH_ENTRY_FEE) {
+      alert("Insufficient balance. You need " + formatRupees(MATCH_ENTRY_FEE) + " to enter.");
+      return;
+    }
+    beginMatchmaking();
+  });
+});
+
+// Looks for a live opponent already waiting in the queue for this game
+// and, if one exists, atomically claims their queue slot and creates the
+// match. Used both when we first join the queue AND on every poll tick
+// while we wait — this is what lets two real players who queue up within
+// a few seconds of each other actually find one another instead of both
+// timing out to a bot.
+//
+// This calls the "claim_opponent" database function (see schema4.sql)
+// instead of doing the select/delete/insert here in the browser. That's
+// required, not just a style choice: the matchmaking_queue table's RLS
+// policy only allows a user to delete THEIR OWN row, so a client-side
+// delete of the *opponent's* row was always silently blocked by the
+// database, which is why real-vs-real matches never actually formed no
+// matter how the polling was tuned. The database function runs with
+// elevated rights and locks the row (FOR UPDATE SKIP LOCKED), so it can
+// both bypass that restriction safely and guarantee two players polling
+// at the same instant can never claim the same opponent.
+async function findAndClaimOpponent() {
+  const { data: match, error } = await client.rpc("claim_opponent", {
+    p_game_type: activeGame.type,
+    p_entry_fee: MATCH_ENTRY_FEE
+  });
+
+  if (error) {
+    console.error("claim_opponent failed:", error);
+    return null;
+  }
+
+  // When no opponent is waiting, the database function returns NULL,
+  // but because it's typed to return a "matches" row, Supabase/PostgREST
+  // sends that back as an object with every field set to null (e.g.
+  // { id: null, game_type: null, ... }) instead of an actual null value.
+  // Without this check, that object is truthy and gets treated as a
+  // real match with a null id -- which is what sent you to
+  // "match.html?id=null" instead of correctly falling back to a bot.
+  if (!match || !match.id) return null;
+
+  return match;
+}
+
+async function beginMatchmaking() {
+  inQueue = true;
+  if (matchTitle) matchTitle.textContent = "Finding Opponent \u2014 " + activeGame.name;
+  if (matchStatus) matchStatus.textContent = "Deducting entry stake...";
+  if (matchOverlay) matchOverlay.classList.remove("hidden");
+
+  // Stamp our own presence immediately so, the instant we join the
+  // queue below, any other genuinely-online player scanning for us
+  // sees a fresh last_seen right away rather than waiting for the
+  // next scheduled heartbeat tick.
+  touchPresence();
+
+  try {
+    await persistWalletDelta(-MATCH_ENTRY_FEE);
+    await recordTransaction("Stake Entry: " + activeGame.name, "debit", MATCH_ENTRY_FEE);
+  } catch (e) {
+    console.error(e);
+    if (matchOverlay) matchOverlay.classList.add("hidden");
+    alert("Could not process your entry stake. Please try again.");
+    inQueue = false;
+    return;
+  }
+
+  if (matchStatus) matchStatus.textContent = "Scanning live queue for players...";
+
+  // 1. Is someone already waiting for this game?
+  const foundMatch = await findAndClaimOpponent();
+  if (foundMatch) {
+    if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
+    cleanupQueue();
+    setTimeout(() => {
+      if (matchOverlay) matchOverlay.classList.add("hidden");
+      goToMatch(foundMatch.id, activeGame.type);
+    }, 600);
+    return;
+  }
+
+  // 2. No one waiting — join the queue myself and watch for a live opponent
+  await client.from("matchmaking_queue").upsert({ user_id: currentUser.id, game_type: activeGame.type });
+
+  queueChannel = client
+    .channel("queue-watch-" + currentUser.id)
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "matches", filter: "player2_id=eq." + currentUser.id },
+      (payload) => {
+        if (!inQueue) return;
+        cleanupQueue();
+        if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
+        setTimeout(() => {
+          if (matchOverlay) matchOverlay.classList.add("hidden");
+          goToMatch(payload.new.id, activeGame.type);
+        }, 500);
+      }
+    )
+    .subscribe();
+
+  let secondsLeft = BOT_WAIT_SECONDS;
+  if (matchStatus) matchStatus.textContent = "Waiting for a live player... (" + secondsLeft + "s)";
+
+  matchmakingTimer = setInterval(async () => {
+    if (!inQueue) return;
+    secondsLeft -= 1;
+
+    if (secondsLeft > 0) {
+      if (matchStatus) matchStatus.textContent = "Waiting for a live player... (" + secondsLeft + "s)";
+
+      // Actively re-scan the queue for a live opponent who joined after us.
+      // (Previously we only checked once at the very start, so two real
+      // players queueing within the same few seconds would both sit here
+      // and both eventually time out to a bot instead of matching each
+      // other.)
+      const liveMatch = await findAndClaimOpponent();
+      if (liveMatch) {
+        cleanupQueue();
+        if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
+        setTimeout(() => {
+          if (matchOverlay) matchOverlay.classList.add("hidden");
+          goToMatch(liveMatch.id, activeGame.type);
+        }, 400);
+        return;
+      }
+
+      // Poll as a backup in case realtime missed the insert
+      const { data: mine } = await client
+        .from("matches")
+        .select("id")
+        .or("player1_id.eq." + currentUser.id + ",player2_id.eq." + currentUser.id)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (mine && mine.length > 0) {
+        cleanupQueue();
+        if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
+        setTimeout(() => {
+          if (matchOverlay) matchOverlay.classList.add("hidden");
+          goToMatch(mine[0].id, activeGame.type);
+        }, 400);
+      }
+      return;
+    }
+
+    // Timed out — fall back to a bot
+    cleanupQueue();
+    await client.from("matchmaking_queue").delete().eq("user_id", currentUser.id);
+    const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
+    if (matchStatus) matchStatus.textContent = "No live players nearby \u2014 matched with " + bot.name;
+    setTimeout(() => {
+      if (matchOverlay) matchOverlay.classList.add("hidden");
+      launchArena(bot);
+    }, 900);
+  }, 1000);
+}
+
+function cleanupQueue() {
+  inQueue = false;
+  if (matchmakingTimer) {
+    clearInterval(matchmakingTimer);
+    matchmakingTimer = null;
+  }
+  if (queueChannel) {
+    client.removeChannel(queueChannel);
+    queueChannel = null;
+  }
+}
+
+cancelMatchBtn?.addEventListener("click", async () => {
+  const wasInQueue = inQueue;
+  cleanupQueue();
+  if (matchOverlay) matchOverlay.classList.add("hidden");
+  if (currentUser && wasInQueue) {
+    await client.from("matchmaking_queue").delete().eq("user_id", currentUser.id);
+    try {
+      await persistWalletDelta(MATCH_ENTRY_FEE);
+      await recordTransaction("Stake Refunded: " + (activeGame ? activeGame.name : "Match"), "credit", MATCH_ENTRY_FEE);
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+});
+
+// Belt-and-braces cleanup: if the player closes the tab, hits back, or
+// navigates away while still sitting in the queue, try to drop their
+// queue row immediately instead of relying only on the 15s presence
+// timeout in claim_opponent() to catch it. This is best-effort (the
+// request can be interrupted by the unload), which is exactly why the
+// presence timeout above is the real fix and this is just a bonus.
+window.addEventListener("pagehide", () => {
+  if (inQueue && currentUser) {
+    client.from("matchmaking_queue").delete().eq("user_id", currentUser.id).then(() => {}, () => {});
+  }
+});
+
+// ----------------------------------------------------
+// 8. Arena Engine
+// ----------------------------------------------------
+function launchArena(opponent) {
+  activeOpponent = opponent;
+  const myName = playerNameEl.textContent;
+  arenaUserName.textContent = myName;
+  arenaUserAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(myName);
+  arenaOppName.textContent = opponent.name;
+  arenaOppAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + opponent.seed;
+  arenaOverlay.classList.remove("hidden");
+  document.getElementById("arena-turn-indicator")?.classList.remove("hidden");
+  setArenaTurn("you");
+
+  if (activeGame.type === "math") {
+    runCyberMathGame();
+  } else if (activeGame.type === "memory") {
+    runMemoryMatrixGame();
+  } else if (activeGame.type === "color") {
+    runColorClashGame();
+  } else if (activeGame.type === "tictactoe") {
+    runTicTacToeGame();
+  } else {
+    runReactionGame();
+  }
+}
+
+// GAME 1: Reaction Duel
+function runReactionGame() {
+  arenaStage.innerHTML =
+    '<div class="reaction-box reaction-wait" id="reaction-box">' +
+    "<h2>WAIT FOR GREEN...</h2>" +
+    '<p style="margin-top:8px;font-size:0.8rem;opacity:0.85">Click instantly when the box turns green</p>' +
+    "</div>";
+  const box = document.getElementById("reaction-box");
+  let canClick = false;
+  let startTime = 0;
+  let finished = false;
+  const greenDelay = Math.floor(Math.random() * 2200) + 2400;
+  const timeoutId = setTimeout(() => {
+    if (finished) return;
+    canClick = true;
+    startTime = Date.now();
+    box.className = "reaction-box reaction-go";
+    box.querySelector("h2").textContent = "CLICK NOW!";
+  }, greenDelay);
+
+  box.addEventListener("click", () => {
+    if (finished) return;
+    finished = true;
+    if (!canClick) {
+      clearTimeout(timeoutId);
+      endDuel(false, "False Start! You clicked before the signal turned green.");
+    } else {
+      const userReaction = Date.now() - startTime;
+      const botReaction = Math.floor(Math.random() * 120) + 290;
+      if (userReaction < botReaction) {
+        endDuel(true, "Superior speed! Your reaction: " + userReaction + "ms vs Opponent: " + botReaction + "ms");
+      } else {
+        endDuel(false, "Opponent was faster (" + botReaction + "ms). Your speed: " + userReaction + "ms");
+      }
+    }
+  });
+}
+
+// GAME 2: Cyber Math Duel
+function runCyberMathGame() {
+  const n1 = Math.floor(Math.random() * 30) + 12;
+  const n2 = Math.floor(Math.random() * 30) + 12;
+  const correct = n1 + n2;
+  const wrong = correct + (Math.random() > 0.5 ? 4 : -5);
+  const leftIsCorrect = Math.random() > 0.5;
+  const optA = leftIsCorrect ? correct : wrong;
+  const optB = leftIsCorrect ? wrong : correct;
+
+  arenaStage.innerHTML =
+    '<div style="width:100%;text-align:center">' +
+    '<p class="subtitle">Fast Equation Solve</p>' +
+    '<div class="math-problem">' + n1 + " + " + n2 + " = ?</div>" +
+    '<div class="quiz-options">' +
+    '<button class="quiz-option" id="opt-a">' + optA + "</button>" +
+    '<button class="quiz-option" id="opt-b">' + optB + "</button>" +
+    "</div>" +
+    "</div>";
+
+  let answered = false;
+  const botAnswerTimer = setTimeout(() => {
+    if (!answered) {
+      answered = true;
+      endDuel(false, "Opponent calculated and answered correctly first!");
+    }
+  }, botDelay());
+
+  function pickAnswer(val) {
+    if (answered) return;
+    answered = true;
+    clearTimeout(botAnswerTimer);
+    if (val === correct) {
+      endDuel(true, "Accurate calculation solved in lightning time!");
+    } else {
+      endDuel(false, "Incorrect answer calculated.");
+    }
+  }
+  document.getElementById("opt-a")?.addEventListener("click", () => pickAnswer(optA));
+  document.getElementById("opt-b")?.addEventListener("click", () => pickAnswer(optB));
+}
+
+// GAME 3: Color Clash
+function runColorClashGame() {
+  const colors = [
+    { text: "RED", css: "#ef4444" },
+    { text: "BLUE", css: "#38bdf8" },
+    { text: "GREEN", css: "#00e701" }
+  ];
+  const targetWord = colors[Math.floor(Math.random() * colors.length)];
+  const fontColor = colors[Math.floor(Math.random() * colors.length)];
+
+  arenaStage.innerHTML =
+    '<div style="width:100%;text-align:center">' +
+    '<p class="subtitle">Does the word match the font color?</p>' +
+    '<div class="quiz-question" style="color:' + fontColor.css + '">' + targetWord.text + "</div>" +
+    '<div class="quiz-options">' +
+    '<button class="quiz-option" id="match-yes">YES (MATCH)</button>' +
+    '<button class="quiz-option" id="match-no">NO (DIFFERENT)</button>' +
+    "</div>" +
+    "</div>";
+
+  const isMatching = targetWord.text === fontColor.text;
+  let done = false;
+  function evaluate(answer) {
+    if (done) return;
+    done = true;
+    if (answer === isMatching) {
+      endDuel(true, "Correct cognitive color distinction made!");
+    } else {
+      endDuel(false, "Incorrect mismatch selected under pressure.");
+    }
+  }
+  document.getElementById("match-yes")?.addEventListener("click", () => evaluate(true));
+  document.getElementById("match-no")?.addEventListener("click", () => evaluate(false));
+}
+
+// GAME 4: Memory Matrix
+function runMemoryMatrixGame() {
+  let tilesHtml = "";
+  for (let i = 0; i < 9; i++) {
+    tilesHtml += '<div class="matrix-tile" data-idx="' + i + '" style="width:60px;height:60px;background-color:var(--bg-card);border-radius:8px;cursor:pointer;border:1px solid var(--border-color)"></div>';
+  }
+  arenaStage.innerHTML =
+    '<div style="width:100%;text-align:center">' +
+    '<p class="subtitle">Memorize the active green tile</p>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:220px;margin:16px auto">' +
+    tilesHtml +
+    "</div>" +
+    "</div>";
+
+  const tiles = document.querySelectorAll(".matrix-tile");
+  const activeIndex = Math.floor(Math.random() * 9);
+  setTimeout(() => {
+    if (tiles[activeIndex]) tiles[activeIndex].style.backgroundColor = "var(--primary-green)";
+    setTimeout(() => {
+      if (tiles[activeIndex]) tiles[activeIndex].style.backgroundColor = "var(--bg-card)";
+      tiles.forEach((t) => {
+        t.addEventListener("click", () => {
+          const clickedIdx = parseInt(t.getAttribute("data-idx"));
+          if (clickedIdx === activeIndex) {
+            endDuel(true, "Flawless spatial memory recall!");
+          } else {
+            endDuel(false, "Selected incorrect matrix quadrant.");
+          }
+        });
+      });
+    }, 800);
+  }, 400);
+}
+
+// GAME 5: Tic-Tac-Toe Blitz (classic 3x3 — no forced turn clock; the bot
+// "thinks" for a humanized 2-3s before every move, same as other bot games)
+function runTicTacToeGame() {
+  const board = Array(9).fill(null);
+  const WIN_LINES = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6],
+  ];
+  let playerTurn = true; // player is always X and moves first
+  let over = false;
+
+  renderBoard();
+
+  function renderBoard() {
+    if (!over) setArenaTurn(playerTurn ? "you" : "opp");
+    let cellsHtml = "";
+    board.forEach((val, i) => {
+      cellsHtml +=
+        '<div class="ttt-cell' + (val ? " filled" : "") + '" data-idx="' + i + '">' +
+        (val || "") +
+        "</div>";
+    });
+    const statusHtml =
+      !over && !playerTurn
+        ? '<p class="ttt-opp-dots" id="ttt-opp-indicator"><span></span><span></span><span></span></p>'
+        : "";
+
+    arenaStage.innerHTML =
+      '<div style="width:100%;text-align:center">' +
+      '<p class="subtitle">You are X &middot; Opponent is O</p>' +
+      statusHtml +
+      '<div class="ttt-wrapper">' +
+      '<div class="ttt-board" id="ttt-board">' + cellsHtml + "</div>" +
+      '<svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 238 238"></svg>' +
+      "</div>" +
+      "</div>";
+
+    if (playerTurn && !over) {
+      document.querySelectorAll("#ttt-board .ttt-cell").forEach((cell) => {
+        cell.addEventListener("click", () => handlePlayerMove(parseInt(cell.getAttribute("data-idx"), 10)));
+      });
+    }
+  }
+
+  function handlePlayerMove(idx) {
+    if (over || !playerTurn || board[idx]) return;
+    board[idx] = "X";
+    playerTurn = false;
+    renderBoard();
+    if (checkEnd()) return;
+    setTimeout(botMove, botDelay());
+  }
+
+  function botMove() {
+    if (over) return;
+    const idx = pickBotMove();
+    board[idx] = "O";
+    playerTurn = true;
+    renderBoard();
+    checkEnd();
+  }
+
+  function pickBotMove() {
+    const empty = board.map((v, i) => (v ? null : i)).filter((v) => v !== null);
+    for (const i of empty) {
+      board[i] = "O";
+      if (hasWinner("O")) { board[i] = null; return i; }
+      board[i] = null;
+    }
+    for (const i of empty) {
+      board[i] = "X";
+      if (hasWinner("X")) { board[i] = null; return i; }
+      board[i] = null;
+    }
+    if (!board[4]) return 4;
+    const corners = [0, 2, 6, 8].filter((i) => !board[i]);
+    if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
+    return empty[Math.floor(Math.random() * empty.length)];
+  }
+
+  function hasWinner(symbol) {
+    return WIN_LINES.some((line) => line.every((i) => board[i] === symbol));
+  }
+
+  function findWinningLine(symbol) {
+    return WIN_LINES.find((line) => line.every((i) => board[i] === symbol));
+  }
+
+  // Draws an animated line across the winning three cells, same idea as the
+  // real-time multiplayer version in assets/games/tictactoe.js.
+  function drawWinLine(line) {
+    const svg = document.getElementById("ttt-line");
+    if (!svg) return;
+    // Coordinates are in the SVG's own 238x238 unit space (matching the
+    // 74px-cell + 8px-gap board); the SVG scales to fit the CSS box size
+    // at any breakpoint, so this math doesn't need to change on mobile.
+    const cellSize = 74;
+    const gap = 8;
+    const step = cellSize + gap;
+    const centers = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
+      const row = Math.floor(i / 3);
+      const col = i % 3;
+      return [col * step + cellSize / 2, row * step + cellSize / 2];
+    });
+    const [x1, y1] = centers[line[0]];
+    const [x2, y2] = centers[line[2]];
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    path.setAttribute("x1", x1);
+    path.setAttribute("y1", y1);
+    path.setAttribute("x2", x1);
+    path.setAttribute("y2", y1);
+    path.setAttribute("class", "ttt-winline");
+    svg.appendChild(path);
+    requestAnimationFrame(() => {
+      path.style.transition = "x2 0.35s ease, y2 0.35s ease";
+      path.setAttribute("x2", x2);
+      path.setAttribute("y2", y2);
+    });
+  }
+
+  function checkEnd() {
+    const xLine = findWinningLine("X");
+    if (xLine) {
+      over = true;
+      renderBoard();
+      drawWinLine(xLine);
+      setTimeout(() => endDuel(true, "Completed a winning line before your opponent!"), 650);
+      return true;
+    }
+    const oLine = findWinningLine("O");
+    if (oLine) {
+      over = true;
+      renderBoard();
+      drawWinLine(oLine);
+      setTimeout(() => endDuel(false, "Opponent completed a winning line first."), 650);
+      return true;
+    }
+    if (board.every((c) => c)) {
+      over = true;
+      setTimeout(endDrawnMatch, 400);
+      return true;
+    }
+    return false;
+  }
+
+  async function endDrawnMatch() {
+    try {
+      await persistWalletDelta(MATCH_ENTRY_FEE);
+      await recordTransaction("Stake Refunded: " + activeGame.name, "credit", MATCH_ENTRY_FEE);
+      await recordMatch(activeGame.name, activeOpponent.name, "DRAW", 0);
+    } catch (e) {
+      console.warn(e);
+    }
+    updateUI();
+    document.getElementById("arena-turn-indicator")?.classList.add("hidden");
+
+    arenaStage.innerHTML =
+      '<div class="result-card">' +
+      '<h2 style="color:var(--text-main)">DRAW</h2>' +
+      '<p style="font-weight:700;color:var(--text-muted)">Stake Refunded</p>' +
+      '<div class="result-analytics">' +
+      '<div style="font-weight:700;color:var(--text-main);margin-bottom:4px">Performance Analytics:</div>' +
+      "<div>Full board stalemate \u2014 neither player completed a line. Entry fee refunded.</div>" +
+      "</div>" +
+      '<div class="result-btn-row">' +
+      '<button class="btn-secondary" id="rematch-btn">Rematch</button>' +
+      '<button class="btn-primary" id="return-dash-btn">Dashboard</button>' +
+      "</div>" +
+      "</div>";
+
+    document.getElementById("rematch-btn")?.addEventListener("click", () => {
+      arenaOverlay.classList.add("hidden");
+      if (currentBalance < MATCH_ENTRY_FEE) {
+        alert("Insufficient balance. You need " + formatRupees(MATCH_ENTRY_FEE) + " to enter.");
+        return;
+      }
+      beginMatchmaking();
+    });
+    document.getElementById("return-dash-btn")?.addEventListener("click", () => {
+      arenaOverlay.classList.add("hidden");
+    });
+  }
+}
+
+// ----------------------------------------------------
+// 9. Post-Match Resolution — now fully persisted
+// ----------------------------------------------------
+async function endDuel(won, analysisText) {
+  let reward = -MATCH_ENTRY_FEE;
+
+  if (won) {
+    try {
+      await persistWalletDelta(MATCH_WIN_REWARD);
+      await recordTransaction("Duel Victory: " + activeGame.name, "credit", MATCH_WIN_REWARD);
+      reward = MATCH_WIN_REWARD;
+    } catch (e) {
+      console.error("Failed to credit winnings:", e);
+    }
+  }
+
+  await recordMatch(activeGame.name, activeOpponent.name, won ? "VICTORY" : "DEFEAT", reward);
+  updateUI();
+  document.getElementById("arena-turn-indicator")?.classList.add("hidden");
+
+  const rewardLine = won
+    ? "+" + formatRupees(MATCH_WIN_REWARD) + " Awarded"
+    : formatRupees(-MATCH_ENTRY_FEE) + " Stake Lost";
+
+  arenaStage.innerHTML =
+    '<div class="result-card">' +
+    '<h2 class="' + (won ? "win-text" : "lose-text") + '">' + (won ? "VICTORY" : "DEFEAT") + "</h2>" +
+    '<p style="font-weight:700;color:var(--text-muted)">' + rewardLine + "</p>" +
+    '<div class="result-analytics">' +
+    '<div style="font-weight:700;color:var(--text-main);margin-bottom:4px">Performance Analytics:</div>' +
+    "<div>" + analysisText + "</div>" +
+    "</div>" +
+    '<div class="result-btn-row">' +
+    '<button class="btn-secondary" id="rematch-btn">Rematch</button>' +
+    '<button class="btn-primary" id="return-dash-btn">Dashboard</button>' +
+    "</div>" +
+    "</div>";
+
+  document.getElementById("rematch-btn")?.addEventListener("click", () => {
+    arenaOverlay.classList.add("hidden");
+    if (currentBalance < MATCH_ENTRY_FEE) {
+      alert("Insufficient balance. You need " + formatRupees(MATCH_ENTRY_FEE) + " to enter.");
+      return;
+    }
+    beginMatchmaking();
+  });
+  document.getElementById("return-dash-btn")?.addEventListener("click", () => {
+    arenaOverlay.classList.add("hidden");
+  });
+}
+
+
+// ==== assets/match-common.js ====
+const MatchRoom = (() => {
+  let match = null;
+  let myId = null;
+  let opponentId = null;
+  let iAmPlayer1 = false;
+  let channel = null;
+  let finished = false;
+  const handlers = {};
+  async function init(matchId, userId) {
+    myId = userId;
+    const { data, error } = await client
+      .from("matches")
+      .select("*")
+      .eq("id", matchId)
+      .single();
+    if (error || !data) {
+      throw new Error("Match not found");
+    }
+    match = data;
+    iAmPlayer1 = match.player1_id === myId;
+    opponentId = iAmPlayer1 ? match.player2_id : match.player1_id;
+    channel = client.channel(`match-${matchId}`, {
+      config: { broadcast: { self: false } },
+    });
+    channel.on("broadcast", { event: "move" }, (payload) => {
+      const { type, data } = payload.payload;
+      if (handlers[type]) handlers[type](data);
+    });
+    await new Promise((resolve) => {
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") resolve();
+      });
+    });
+    return { match, opponentId, iAmPlayer1 };
+  }
+  function send(type, data) {
+    channel.send({ type: "broadcast", event: "move", payload: { type, data } });
+  }
+  function onMessage(type, handler) {
+    handlers[type] = handler;
+  }
+  async function finish(result) {
+    if (finished) return;
+    finished = true;
+    await client
+      .from("matches")
+      .update({
+        status: "finished",
+        winner_id: result === "win" ? myId : result === "lose" ? opponentId : null,
+        finished_at: new Date().toISOString(),
+      })
+      .eq("id", match.id)
+      .eq("status", "active");
+    if (result === "win") {
+      const payout = Math.round(match.entry_fee * 1.8);
+      const { data: wallet } = await client
+        .from("wallet")
+        .select("dummy_token")
+        .eq("user_id", myId)
+        .single();
+      await client
+        .from("wallet")
+        .update({
+          dummy_token: (wallet?.dummy_token || 0) + payout,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", myId);
+      return payout;
+    }
+    if (result === "draw") {
+      const { data: wallet } = await client
+        .from("wallet")
+        .select("dummy_token")
+        .eq("user_id", myId)
+        .single();
+      await client
+        .from("wallet")
+        .update({
+          dummy_token: (wallet?.dummy_token || 0) + match.entry_fee,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", myId);
+    }
+    return 0;
+  }
+  function cleanup() {
+    if (channel) client.removeChannel(channel);
+  }
+  return { init, send, onMessage, finish, cleanup, get match() { return match; } };
+})();
+function hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+// Deterministic PRNG (mulberry32) — used so both players in a live match
+// generate the exact same puzzle/sequence/word without any extra network
+// round trip. Seed it from the match id (+ an optional salt per game).
+function makeRng(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function matchRng(salt) {
+  const id = (MatchRoom.match && MatchRoom.match.id) || "seed";
+  return makeRng(hashString(id + (salt || "")));
+}
+
+// Generic judge for "race" style games — both players play an identical
+// (seeded) challenge independently and report a single finishing metric.
+// higherIsBetter=false means lowest metric (e.g. time in ms) wins.
+function createRaceJudge(stageEl, higherIsBetter, fmt) {
+  let mine = null;
+  let theirs = null;
+  let done = false;
+  function note(text) {
+    let el = document.getElementById("race-wait-note");
+    if (!el) {
+      el = document.createElement("p");
+      el.id = "race-wait-note";
+      el.className = "subtitle";
+      stageEl.appendChild(el);
+    }
+    el.textContent = text;
+  }
+  function check() {
+    if (done || mine === null || theirs === null) return;
+    done = true;
+    let result;
+    if (mine === theirs) result = "draw";
+    else if (higherIsBetter) result = mine > theirs ? "win" : "lose";
+    else result = mine < theirs ? "win" : "lose";
+    showResult(stageEl, result, { mine: fmt(mine), theirs: fmt(theirs) });
+  }
+  MatchRoom.onMessage("race_finish", (data) => {
+    theirs = data.metric;
+    if (mine === null) note("Opponent finished \u2014 your turn to complete it!");
+    check();
+  });
+  return {
+    finish(metric) {
+      if (mine !== null) return;
+      mine = metric;
+      MatchRoom.send("race_finish", { metric });
+      if (theirs === null) note("Waiting for opponent to finish...");
+      check();
+    },
+  };
+}
+
+// Small confetti burst used to celebrate a win, both in live matches
+// (via showResult) and bot matches (via dashboard.js's endDuel).
+function celebrateWin(container) {
+  if (!container) return;
+  const layer = document.createElement("div");
+  layer.className = "confetti-layer";
+  const colors = ["#00e701", "#38bdf8", "#f59e0b", "#f16464", "#a78bfa"];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.style.left = Math.random() * 100 + "%";
+    piece.style.background = colors[i % colors.length];
+    piece.style.animationDelay = Math.random() * 0.4 + "s";
+    piece.style.animationDuration = 1.6 + Math.random() * 1.2 + "s";
+    piece.style.transform = "rotate(" + Math.floor(Math.random() * 360) + "deg)";
+    layer.appendChild(piece);
+  }
+  container.appendChild(layer);
+  setTimeout(() => layer.remove(), 3000);
+}
+async function showResult(stageEl, result, detail) {
+  const payout = await MatchRoom.finish(result);
+  const label = result === "win" ? "You won!" : result === "lose" ? "You lost" : "Draw";
+  const cls = result === "win" ? "win" : result === "lose" ? "lose" : "draw";
+  const tokenLine =
+    result === "win"
+      ? `<p>+${formatRupees(payout)}</p>`
+      : result === "draw"
+      ? `<p>Entry fee refunded</p>`
+      : `<p>-${formatRupees(MatchRoom.match.entry_fee)}</p>`;
+  const detailLine = detail
+    ? `<p class="subtitle">You: ${detail.mine} · Opponent: ${detail.theirs}</p>`
+    : "";
+  stageEl.innerHTML = `
+    <p class="result-banner ${cls}">${label}</p>
+    ${detailLine}
+    ${tokenLine}
+    <button id="back-to-lobby-btn" class="btn" type="button">Back to Lobby</button>
+  `;
+  if (result === "win") celebrateWin(stageEl);
+  document.getElementById("back-to-lobby-btn")?.addEventListener("click", () => returnToDashboardFromMatch());
+}
+function formatRupees(amount) {
+  const n = Number(amount) || 0;
+  return "\u20b9" + n.toLocaleString("en-IN");
+}
+
+// ==== assets/games/reaction.js ====
+function initReactionDuel(stageEl, iAmPlayer1) {
+  stageEl.innerHTML = `
+    <p class="loading-text">Waiting for both players to be ready...</p>
+    <div class="reaction-pad" id="pad">Get ready...</div>
+  `;
+
+  const pad = () => document.getElementById("pad");
+  let goTime = null;
+  let myTime = null;
+  let opponentTime = null;
+  let armed = false;
+
+  function startRound() {
+    armed = true;
+    pad().className = "reaction-pad";
+    pad().textContent = "Wait for green...";
+
+    const delay = 1500 + Math.random() * 3000;
+    setTimeout(() => {
+      if (!armed) return;
+      goTime = performance.now();
+      pad().className = "reaction-pad go";
+      pad().textContent = "CLICK NOW!";
+    }, delay);
+  }
+
+  stageEl.addEventListener("click", (e) => {
+    if (!e.target.closest("#pad") || myTime !== null) return;
+
+    if (!goTime) {
+      pad().className = "reaction-pad early";
+      pad().textContent = "Too early! You lose this round.";
+      myTime = 99999;
+      MatchRoom.send("reaction_result", { time: myTime });
+      checkOutcome();
+      return;
+    }
+
+    myTime = performance.now() - goTime;
+    pad().textContent = `You: ${myTime.toFixed(0)}ms`;
+    MatchRoom.send("reaction_result", { time: myTime });
+    checkOutcome();
+  });
+
+  MatchRoom.onMessage("reaction_result", (data) => {
+    opponentTime = data.time;
+    checkOutcome();
+  });
+
+  MatchRoom.onMessage("start_round", () => startRound());
+
+  function checkOutcome() {
+    if (myTime === null || opponentTime === null) return;
+
+    let result;
+    if (myTime < opponentTime) result = "win";
+    else if (myTime > opponentTime) result = "lose";
+    else result = "draw";
+
+    showResult(stageEl, result, {
+      mine: myTime >= 99999 ? "Too early" : `${myTime.toFixed(0)}ms`,
+      theirs: opponentTime >= 99999 ? "Too early" : `${opponentTime.toFixed(0)}ms`,
+    });
+  }
+
+  if (iAmPlayer1) {
+    MatchRoom.send("start_round", {});
+    startRound();
+  }
+}
+
+// ==== assets/games/tictactoe.js ====
+function initTicTacToe(stageEl, iAmPlayer1) {
+  // Inject styles once
+  if (!document.getElementById("ttt-styles")) {
+    const style = document.createElement("style");
+    style.id = "ttt-styles";
+    style.textContent = `
+      .ttt-wrapper {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        margin: 0 auto;
+      }
+      .ttt-board {
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        grid-template-rows: repeat(3, 100px);
+        width: 300px;
+        height: 300px;
+      }
+      .ttt-cell {
+        background: #cfe4f2;
+        border: 2px solid #555;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        font-weight: bold;
+        cursor: pointer;
+        user-select: none;
+        box-sizing: border-box;
+        color: #222;
+      }
+      .ttt-cell.filled { cursor: default; }
+      .ttt-line-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 300px;
+        height: 300px;
+        pointer-events: none;
+      }
+      .ttt-winline {
+        stroke: #e63946;
+        stroke-width: 6;
+        stroke-linecap: round;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  const mySymbol = iAmPlayer1 ? "X" : "O";
+  const theirSymbol = iAmPlayer1 ? "O" : "X";
+  let board = Array(9).fill(null);
+  let myTurn = iAmPlayer1;
+  let over = false;
+
+  const WIN_LINES = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6],
+  ];
+
+  render();
+
+  function render() {
+    stageEl.innerHTML = `
+      <p class="subtitle">You are <strong>${mySymbol}</strong></p>
+      <p class="loading-text" id="turn-label">${myTurn ? "Your move" : "Opponent's move"}</p>
+      <div class="ttt-wrapper">
+        <div class="ttt-board" id="board"></div>
+        <svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 300 300"></svg>
+      </div>
+    `;
+    const boardEl = document.getElementById("board");
+    board.forEach((val, i) => {
+      const cell = document.createElement("div");
+      cell.className = "ttt-cell" + (val ? " filled" : "");
+      cell.textContent = val || "";
+      cell.addEventListener("click", () => handleClick(i));
+      boardEl.appendChild(cell);
+    });
+  }
+
+  function handleClick(i) {
+    if (over || !myTurn || board[i]) return;
+    playMove(i, mySymbol);
+    MatchRoom.send("ttt_move", { index: i });
+  }
+
+  MatchRoom.onMessage("ttt_move", (data) => {
+    playMove(data.index, theirSymbol);
+  });
+
+  function playMove(index, symbol) {
+    board[index] = symbol;
+    myTurn = symbol !== mySymbol;
+    render();
+    checkEnd();
+  }
+
+  function checkEnd() {
+    const winner = WIN_LINES.find(
+      (line) => board[line[0]] && board[line[0]] === board[line[1]] && board[line[1]] === board[line[2]]
+    );
+    if (winner) {
+      over = true;
+      drawWinLine(winner);
+      const winSymbol = board[winner[0]];
+      setTimeout(() => {
+        showResult(stageEl, winSymbol === mySymbol ? "win" : "lose");
+      }, 600);
+      return;
+    }
+    if (board.every((c) => c)) {
+      over = true;
+      showResult(stageEl, "draw");
+    }
+  }
+
+  function drawWinLine(line) {
+    const svg = document.getElementById("ttt-line");
+    if (!svg) return;
+    const centers = [
+      [50, 50], [150, 50], [250, 50],
+      [50, 150], [150, 150], [250, 150],
+      [50, 250], [150, 250], [250, 250],
+    ];
+    const [x1, y1] = centers[line[0]];
+    const [x2, y2] = centers[line[2]];
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    path.setAttribute("x1", x1);
+    path.setAttribute("y1", y1);
+    path.setAttribute("x2", x1);
+    path.setAttribute("y2", y1);
+    path.setAttribute("class", "ttt-winline");
+    svg.appendChild(path);
+    requestAnimationFrame(() => {
+      path.style.transition = "x2 0.4s ease, y2 0.4s ease";
+      path.setAttribute("x2", x2);
+      path.setAttribute("y2", y2);
+    });
+  }
+}
+
+// ==== assets/games/quiz.js ====
+const QUIZ_POOL = [
+  { q: "What is the capital of Japan?", options: ["Seoul", "Tokyo", "Beijing", "Bangkok"], correct: 1 },
+  { q: "How many continents are there?", options: ["5", "6", "7", "8"], correct: 2 },
+  { q: "What is the largest planet?", options: ["Earth", "Mars", "Jupiter", "Saturn"], correct: 2 },
+  { q: "Who wrote Romeo and Juliet?", options: ["Dickens", "Shakespeare", "Austen", "Twain"], correct: 1 },
+  { q: "What is H2O commonly known as?", options: ["Salt", "Oxygen", "Water", "Hydrogen"], correct: 2 },
+  { q: "How many players on a football team?", options: ["9", "10", "11", "12"], correct: 2 },
+  { q: "What is the fastest land animal?", options: ["Lion", "Cheetah", "Horse", "Leopard"], correct: 1 },
+  { q: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter", "Mercury"], correct: 1 },
+  { q: "What is the smallest prime number?", options: ["0", "1", "2", "3"], correct: 2 },
+  { q: "How many strings does a standard guitar have?", options: ["4", "5", "6", "7"], correct: 2 },
+];
+
+function seededShuffle(arr, seed) {
+  const a = [...arr];
+  let s = seed;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 9301 + 49297) % 233280;
+    const j = Math.floor((s / 233280) * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initQuizBattle(stageEl, iAmPlayer1, matchId) {
+  const seed = hashString(matchId);
+  const questions = seededShuffle(QUIZ_POOL, seed).slice(0, 5);
+
+  let qIndex = 0;
+  let myScore = 0;
+  let opponentScore = 0;
+  let answered = false;
+  let questionStart = 0;
+
+  showQuestion();
+
+  function showQuestion() {
+    if (qIndex >= questions.length) return finishQuiz();
+
+    answered = false;
+    questionStart = performance.now();
+    const q = questions[qIndex];
+
+    stageEl.innerHTML = `
+      <div class="score-row">
+        <span class="me">You: ${myScore}</span>
+        <span>Opponent: ${opponentScore}</span>
+      </div>
+      <p class="loading-text">Question ${qIndex + 1} of ${questions.length}</p>
+      <p class="quiz-question">${q.q}</p>
+      <div class="quiz-options" id="options"></div>
+    `;
+
+    const optsEl = document.getElementById("options");
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement("div");
+      btn.className = "quiz-option";
+      btn.textContent = opt;
+      btn.addEventListener("click", () => selectAnswer(i));
+      optsEl.appendChild(btn);
+    });
+  }
+
+  function selectAnswer(i) {
+    if (answered) return;
+    answered = true;
+    const q = questions[qIndex];
+    const correct = i === q.correct;
+    const timeMs = performance.now() - questionStart;
+
+    document.querySelectorAll(".quiz-option").forEach((el, idx) => {
+      if (idx === q.correct) el.classList.add("correct");
+      else if (idx === i) el.classList.add("wrong");
+    });
+
+    if (correct) {
+      myScore += 1;
+      MatchRoom.send("quiz_point", { qIndex, timeMs });
+    }
+
+    setTimeout(nextQuestion, 900);
+  }
+
+  MatchRoom.onMessage("quiz_point", (data) => {
+    if (data.qIndex >= qIndex) opponentScore += 1;
+  });
+
+  function nextQuestion() {
+    qIndex += 1;
+    showQuestion();
+  }
+
+  function finishQuiz() {
+    let result;
+    if (myScore > opponentScore) result = "win";
+    else if (myScore < opponentScore) result = "lose";
+    else result = "draw";
+
+    showResult(stageEl, result, { mine: `${myScore} pts`, theirs: `${opponentScore} pts` });
+  }
+}
+
+// ==== assets/games/math.js ====
+function initMathDuel(stageEl, iAmPlayer1, matchId) {
+  let round = 0;
+  let myWins = 0;
+  let opponentWins = 0;
+  let roundOver = false;
+  let currentAnswer = null;
+
+  nextRound();
+
+  function seededRandom(seed) {
+    let s = seed;
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  }
+
+  function generateProblem(roundNum) {
+    const seed = hashString(matchId) + roundNum * 7919;
+    const r1 = seededRandom(seed);
+    const r2 = seededRandom(seed + 1);
+    const r3 = seededRandom(seed + 2);
+
+    const ops = ["+", "-", "\u00d7"];
+    const op = ops[Math.floor(r3 * ops.length)];
+    let a = Math.floor(r1 * 20) + 1;
+    let b = Math.floor(r2 * 12) + 1;
+
+    if (op === "\u00d7") {
+      a = Math.floor(r1 * 9) + 2;
+      b = Math.floor(r2 * 9) + 2;
+    }
+    if (op === "-" && b > a) [a, b] = [b, a];
+
+    const answer = op === "+" ? a + b : op === "-" ? a - b : a * b;
+    return { text: `${a} ${op} ${b}`, answer };
+  }
+
+  function nextRound() {
+    if (round >= 3 || myWins === 2 || opponentWins === 2) return finishMatch();
+
+    roundOver = false;
+    const problem = generateProblem(round);
+    currentAnswer = problem.answer;
+
+    stageEl.innerHTML = `
+      <div class="score-row">
+        <span class="me">You: ${myWins}</span>
+        <span>Opponent: ${opponentWins}</span>
+      </div>
+      <p class="loading-text">Round ${round + 1} of 3 - first correct answer wins</p>
+      <p class="math-problem">${problem.text} = ?</p>
+      <input type="number" class="math-input" id="math-answer" autofocus />
+    `;
+
+    const input = document.getElementById("math-answer");
+    input.focus();
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submitAnswer(input.value);
+    });
+  }
+
+  function submitAnswer(value) {
+    if (roundOver) return;
+    const num = parseFloat(value);
+    if (num === currentAnswer) {
+      roundOver = true;
+      myWins += 1;
+      MatchRoom.send("math_round_won", { round });
+      setTimeout(nextRound, 800);
+    }
+  }
+
+  MatchRoom.onMessage("math_round_won", (data) => {
+    if (data.round === round && !roundOver) {
+      roundOver = true;
+      opponentWins += 1;
+      setTimeout(nextRound, 800);
+    }
+  });
+
+  function finishMatch() {
+    let result;
+    if (myWins > opponentWins) result = "win";
+    else if (myWins < opponentWins) result = "lose";
+    else result = "draw";
+
+    showResult(stageEl, result, { mine: `${myWins} rounds`, theirs: `${opponentWins} rounds` });
+  }
+}
+
+
+// ----------------------------------------------------
+// Single-file router — replaces the old separate index.html /
+// dashboard.html / match.html navigation with in-page section
+// switching, so nothing here ever depends on a second file existing.
+// ----------------------------------------------------
+async function goToMatch(matchId, gameType) {
+  document.getElementById("dashboard")?.classList.add("hidden");
+  document.getElementById("page-match")?.classList.remove("hidden");
+  const matchLoading = document.getElementById("match-loading");
+  const matchRoot = document.getElementById("match-root");
+  if (matchLoading) {
+    matchLoading.textContent = "Loading match...";
+    matchLoading.classList.remove("hidden");
+  }
+  if (matchRoot) matchRoot.classList.add("hidden");
+
+  let roomInfo;
+  try {
+    roomInfo = await MatchRoom.init(matchId, currentUser.id);
+  } catch (e) {
+    if (matchLoading) matchLoading.textContent = "Couldn't load this match. It may have expired.";
+    return;
+  }
+
+  const { data: profiles } = await client
+    .from("users")
+    .select("id, full_name, avatar_url")
+    .in("id", [roomInfo.match.player1_id, roomInfo.match.player2_id]);
+
+  const me = profiles.find((p) => p.id === currentUser.id);
+  const opp = profiles.find((p) => p.id === roomInfo.opponentId);
+
+  const meNameEl = document.getElementById("me-name");
+  const meAvatarEl = document.getElementById("me-avatar");
+  const oppNameEl = document.getElementById("opp-name");
+  const oppAvatarEl = document.getElementById("opp-avatar");
+  if (meNameEl) meNameEl.textContent = me?.full_name || "You";
+  if (meAvatarEl) meAvatarEl.src = me?.avatar_url || "";
+  if (oppNameEl) oppNameEl.textContent = opp?.full_name || "Opponent";
+  if (oppAvatarEl) oppAvatarEl.src = opp?.avatar_url || "";
+
+  if (matchLoading) matchLoading.classList.add("hidden");
+  if (matchRoot) matchRoot.classList.remove("hidden");
+
+  const stage = document.getElementById("stage");
+  stage.innerHTML = "";
+
+  switch (gameType) {
+    case "reaction":
+      initReactionDuel(stage, roomInfo.iAmPlayer1);
+      break;
+    case "tictactoe":
+      initTicTacToe(stage, roomInfo.iAmPlayer1);
+      break;
+    case "quiz":
+      initQuizBattle(stage, roomInfo.iAmPlayer1, matchId);
+      break;
+    case "math":
+      initMathDuel(stage, roomInfo.iAmPlayer1, matchId);
+      break;
+    default:
+      stage.innerHTML = "<p>Unknown game type.</p>";
+  }
+}
+
+// Leaving a live match (Back to Lobby): tear down the realtime channel and
+// refresh wallet/history from the DB, since a live match writes directly to
+// Supabase and the dashboard's in-memory numbers won't reflect that on their
+// own without a full page reload (which we intentionally no longer do).
+async function returnToDashboardFromMatch() {
+  MatchRoom.cleanup();
+  document.getElementById("page-match")?.classList.add("hidden");
+  document.getElementById("dashboard")?.classList.remove("hidden");
+  try {
+    await loadWallet();
+    await loadTransactions();
+    await loadMatchHistory();
+    updateUI();
+  } catch (e) {
+    console.warn("Post-match refresh failed:", e);
+  }
+}
+
+function goToLanding() {
+  document.getElementById("page-landing")?.classList.remove("hidden");
+  document.getElementById("loading")?.classList.add("hidden");
+  document.getElementById("dashboard")?.classList.add("hidden");
+  document.getElementById("page-match")?.classList.add("hidden");
+}
+
+async function routeOnLoad() {
+  const { data: { session } } = await client.auth.getSession();
+  if (session) {
+    document.getElementById("page-landing")?.classList.add("hidden");
+    document.getElementById("loading")?.classList.remove("hidden");
+    await initDashboard();
+  } else {
+    goToLanding();
+  }
+}
+
+window.addEventListener("beforeunload", () => MatchRoom.cleanup());
+routeOnLoad();
+
+  </script>
 </body>
 </html>
