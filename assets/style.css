@@ -174,12 +174,6 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
   font-size: 0.85rem; font-weight: 600; color: var(--text-main); max-width: 100px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.logout-btn {
-  background: transparent; color: var(--text-muted); border: 1px solid var(--border-color);
-  padding: 6px 10px; border-radius: var(--radius-sm); display: flex; align-items: center; cursor: pointer;
-}
-.logout-btn:hover { color: var(--accent-red); border-color: var(--accent-red); }
-
 /* ====================================================================== */
 .app-main { max-width: 1240px; width: 100%; margin: 0 auto; padding: 24px 20px 60px; flex: 1; }
 .app-view { display: none; }
@@ -614,6 +608,87 @@ body::before {
   .toast-stack { left: 14px; right: 14px; align-items: stretch; }
   .toast { max-width: none; }
 }
+
+/* ======================================================================
+==== Turn Indicator (Your Turn / Opponent's Turn)
+====================================================================== ==== */
+.arena-turn-indicator {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: -6px 0 18px; padding: 8px 16px; border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color);
+  width: fit-content; margin-left: auto; margin-right: auto;
+}
+.turn-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.turn-dot-you { background-color: var(--primary-green); box-shadow: 0 0 8px var(--primary-green); animation: turnDotPulse 1.4s ease-in-out infinite; }
+.turn-dot-opp { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); animation: turnDotPulse 1.4s ease-in-out infinite; }
+@keyframes turnDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+.turn-text { font-family: var(--font-heading); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.01em; }
+.turn-text-you { color: var(--primary-green); animation: turnTextGlowGreen 1.4s ease-in-out infinite; }
+.turn-text-opp { color: var(--accent-red); animation: turnTextGlowRed 1.4s ease-in-out infinite; }
+@keyframes turnTextGlowGreen {
+  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(0, 231, 1, 0.55); }
+  50% { opacity: 0.55; text-shadow: 0 0 2px rgba(0, 231, 1, 0); }
+}
+@keyframes turnTextGlowRed {
+  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(241, 100, 100, 0.55); }
+  50% { opacity: 0.55; text-shadow: 0 0 2px rgba(241, 100, 100, 0); }
+}
+/* Whichever side currently has the turn gets a glowing ring + slightly
+   raised look; the inactive side visibly dims so it always reads clearly
+   at a glance, on any game type. */
+.player-stat { transition: opacity 0.25s ease; opacity: 0.55; }
+.player-stat.side-active { opacity: 1; }
+.player-stat.side-active .arena-avatar { box-shadow: 0 0 0 3px rgba(0, 231, 1, 0.18); }
+.player-stat.side-active.opp-side .arena-avatar { box-shadow: 0 0 0 3px rgba(241, 100, 100, 0.18); border-color: var(--accent-red); }
+.player-stat:not(.side-active) .arena-avatar { border-color: var(--border-color); }
+
+/* ======================================================================
+==== Live / High-Tech Chips & Matchmaking Polish
+====================================================================== ==== */
+.live-chip {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 0.66rem; font-weight: 800;
+  letter-spacing: 0.08em; color: var(--primary-green); background-color: rgba(0, 231, 1, 0.1);
+  border: 1px solid rgba(0, 231, 1, 0.28); padding: 4px 10px; border-radius: 999px; margin: 0 auto 14px;
+}
+.live-chip-dot { width: 6px; height: 6px; border-radius: 50%; background-color: var(--primary-green); box-shadow: 0 0 6px var(--primary-green); animation: turnDotPulse 1.2s ease-in-out infinite; }
+.arena-live-chip { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); margin: 0; }
+.arena-card { position: relative; }
+.modal-scan-bar { width: 100%; height: 3px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; margin: 4px 0 18px; }
+.modal-scan-bar-fill { width: 40%; height: 100%; background: linear-gradient(90deg, transparent, var(--primary-green), transparent); animation: scanSweep 1.3s ease-in-out infinite; }
+@keyframes scanSweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+
+/* Modal cards get a subtle glowing gradient border for a premium feel */
+.modal-card, .arena-card {
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.08), 0 24px 60px -20px rgba(0, 0, 0, 0.65);
+}
+
+/* Logout / destructive confirmation dialog */
+.confirm-card { max-width: 360px; }
+.confirm-icon-wrap {
+  width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; color: var(--accent-red); background-color: rgba(241, 100, 100, 0.12);
+  border: 1px solid rgba(241, 100, 100, 0.3);
+}
+.confirm-btn-row { display: flex; gap: 10px; margin-top: 20px; }
+.confirm-btn-row .btn-cancel { width: auto; flex: 1; margin: 0; }
+.btn-danger {
+  flex: 1; background: linear-gradient(135deg, #f16464, #d43f3f); color: #fff; border: none;
+  padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.85rem;
+  cursor: pointer; min-height: 44px;
+}
+.btn-danger:hover { box-shadow: 0 10px 24px -10px rgba(241, 100, 100, 0.5); transform: translateY(-1px); }
+
+/* Menu row danger state gets a touch more presence to signal it's the
+   sign-out action, not just another settings link */
+.menu-row-danger .menu-row-icon { color: var(--accent-red); }
+.menu-row-danger:hover { border-color: rgba(241, 100, 100, 0.35); }
 
 /* ======================================================================
 ==== Mobile-friendly refinements
