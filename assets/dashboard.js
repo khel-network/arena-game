@@ -1,6 +1,64 @@
 const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
 const BOT_WAIT_SECONDS = 5; // how long to wait for a real opponent before matching with a bot
+const BOT_MOVE_MIN_MS = 2000; // bot opponents always "think" for 2-3s, never instant
+const BOT_MOVE_MAX_MS = 3000;
+function botDelay() {
+  return Math.floor(Math.random() * (BOT_MOVE_MAX_MS - BOT_MOVE_MIN_MS + 1)) + BOT_MOVE_MIN_MS;
+}
+
+// ----------------------------------------------------
+// Game Catalog — single source of truth for the dashboard grid,
+// bot-arena dispatch (launchArena) and the live match.html dispatch.
+// icon = one emoji shown on the card banner; badge = small pill label.
+// ----------------------------------------------------
+const GAME_CATALOG = [
+  { type: "tictactoe", name: "Tic-Tac-Toe Blitz", desc: "Classic 3x3 grid combat — get three in a row to win.", icon: "\u2716\uFE0F", badge: "CLASSIC", category: "brain" },
+  { type: "rps", name: "RPS Duel", desc: "Best-of-5 rock, paper, scissors against your opponent.", icon: "\u270A", badge: "CLASSIC", category: "strategy" },
+  { type: "connect4", name: "Connect 4", desc: "Drop discs and connect four in a row before they do.", icon: "\uD83D\uDD34", badge: "STRATEGY", category: "strategy" },
+  { type: "memory", name: "Memory Match", desc: "Flip pairs and clear the board faster than your opponent.", icon: "\uD83E\uDDE0", badge: "BRAIN", category: "brain" },
+  { type: "scramble", name: "Word Scramble", desc: "Unscramble the word before your opponent figures it out.", icon: "\uD83D\uDD24", badge: "WORD", category: "brain" },
+  { type: "typing", name: "Typing Race", desc: "Type the sentence exactly, first to finish wins.", icon: "\u2328\uFE0F", badge: "SPEED", category: "reflex" },
+  { type: "higherlower", name: "Higher-Lower Duel", desc: "Guess the secret number in the fewest tries.", icon: "\uD83C\uDFAF", badge: "LOGIC", category: "brain" },
+  { type: "snake", name: "Snake Duel", desc: "Eat, grow, survive — highest score before crashing wins.", icon: "\uD83D\uDC0D", badge: "ARCADE", category: "reflex" },
+  { type: "simon", name: "Simon Says", desc: "Repeat the growing color pattern, go furthest to win.", icon: "\uD83C\uDFB5", badge: "MEMORY", category: "brain" },
+  { type: "dice", name: "Dice Battle", desc: "Push your luck rolling dice, bank before you bust.", icon: "\uD83C\uDFB2", badge: "LUCK", category: "strategy" },
+  { type: "tap", name: "Tap Race", desc: "Most taps in 5 seconds takes the win.", icon: "\uD83D\uDC46", badge: "SPEED", category: "reflex" },
+  { type: "whack", name: "Whack-a-Mole", desc: "First to 15 correct hits wins the duel.", icon: "\uD83D\uDD28", badge: "REFLEX", category: "reflex" },
+  { type: "recall", name: "Sequence Recall", desc: "Numbers flash briefly — tap them back in order.", icon: "\uD83D\uDD22", badge: "MEMORY", category: "brain" },
+  { type: "superttt", name: "Tic-Tac-Toe Ultimate", desc: "A 3x3 grid of tic-tac-toe boards — win the meta-board.", icon: "\uD83D\uDD32", badge: "STRATEGY", category: "strategy" },
+  { type: "slide", name: "Slide Puzzle Race", desc: "Solve the shuffled 15-puzzle before your opponent.", icon: "\uD83E\uDDE9", badge: "PUZZLE", category: "brain" },
+  { type: "stroop", name: "Color Match Rush", desc: "Fewest mistakes wins this color-word speed test.", icon: "\uD83C\uDFA8", badge: "REFLEX", category: "reflex" },
+  { type: "reflex", name: "Reflex Grid", desc: "Tap the lit tile before it fades — first to 10.", icon: "\u26A1", badge: "REFLEX", category: "reflex" },
+  { type: "mathduel", name: "Math Duel", desc: "Solve 5 equations fastest to win the duel.", icon: "\u2795", badge: "MATH", category: "math" },
+  { type: "battleship", name: "Battleship Mini", desc: "Sink the hidden fleet in the fewest shots.", icon: "\uD83D\uDEA2", badge: "STRATEGY", category: "strategy" },
+  { type: "emojisprint", name: "Emoji Memory Sprint", desc: "Memory match with a growing grid each round.", icon: "\uD83C\uDF1F", badge: "MEMORY", category: "brain" },
+  { type: "mathchain", name: "Fast Math Chain", desc: "Solve 5 quick sums back-to-back, fastest wins.", icon: "\u2795", badge: "MATH", category: "math" },
+];
+const BANNER_CLASSES = ["banner-reaction", "banner-math", "banner-memory", "banner-color", "banner-tictactoe", "banner-trivia"];
+
+function renderGameCards() {
+  const grid = document.getElementById("gamesGrid");
+  if (!grid) return;
+  grid.innerHTML = GAME_CATALOG.map((g, i) => {
+    const banner = BANNER_CLASSES[i % BANNER_CLASSES.length];
+    return (
+      '<article class="game-card" data-category="' + g.category + '">' +
+      '<div class="card-media ' + banner + '">' +
+      '<span class="card-badge">' + g.badge + "</span>" +
+      '<span style="font-size:44px;line-height:1">' + g.icon + "</span>" +
+      "</div>" +
+      '<div class="card-content">' +
+      '<h3 class="card-title">' + g.name + "</h3>" +
+      '<p class="card-desc">' + g.desc + "</p>" +
+      '<div class="card-meta"><span class="meta-fee">Fee: \u20B950</span><span class="meta-win">+\u20B990 Reward</span></div>' +
+      '<button class="play-btn" data-game="' + g.name + '" data-type="' + g.type + '" type="button">Play Match</button>' +
+      "</div>" +
+      "</article>"
+    );
+  }).join("");
+}
+renderGameCards();
 
 // Indian Names Pool for Bot Fallback (boys & girls)
 const INDIAN_BOT_POOL = [
