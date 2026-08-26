@@ -66,10 +66,10 @@
 
         <!-- Right Side: Wallet & User Profile Button -->
         <div class="user-stats-bar">
-          <div class="token-badge" title="Token Balance">
+          <button id="wallet-badge-btn" class="token-badge" title="View Token Transactions" type="button">
             <span class="token-icon-wrap">₹</span>
             <span id="balance-value" class="token-count">1,200</span>
-          </div>
+          </button>
 
           <button id="profile-nav-btn" class="user-profile-chip" type="button" title="View Profile">
             <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=vishal" alt="Avatar" />
@@ -168,13 +168,75 @@
           </div>
         </div>
 
-        <!-- Ledger -->
-        <div class="ledger-section">
-          <div class="ledger-header">
-            <h3>Token Transactions & Match Ledger</h3>
-            <span class="ledger-sub">Live record of credit and debit events</span>
-          </div>
+        <!-- Account Menu -->
+        <div class="section-card">
+          <h3>Account</h3>
+          <p class="section-sub">Manage your wallet, profile and referral program</p>
 
+          <div class="profile-menu-list">
+            <div class="menu-row menu-row-static">
+              <div class="menu-row-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"></path><path d="M22 6l-10 7L2 6"></path><path d="M2 6h20v12H2z"></path></svg>
+              </div>
+              <div class="menu-row-text">
+                <span class="menu-row-title">Signed in as</span>
+                <span class="menu-row-sub" id="profile-email">—</span>
+              </div>
+            </div>
+
+            <button class="menu-row" id="menu-transactions-btn" type="button">
+              <div class="menu-row-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              </div>
+              <div class="menu-row-text">
+                <span class="menu-row-title">Token Transactions</span>
+                <span class="menu-row-sub">View your full credit &amp; debit history</span>
+              </div>
+              <span class="menu-row-arrow">›</span>
+            </button>
+
+            <button class="menu-row" id="menu-addtokens-btn" type="button">
+              <div class="menu-row-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+              </div>
+              <div class="menu-row-text">
+                <span class="menu-row-title">Add Tokens</span>
+                <span class="menu-row-sub">Top up your wallet balance</span>
+              </div>
+              <span class="menu-row-arrow">›</span>
+            </button>
+
+            <button class="menu-row" id="menu-refer-btn" type="button">
+              <div class="menu-row-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+              <div class="menu-row-text">
+                <span class="menu-row-title">Refer &amp; Earn</span>
+                <span class="menu-row-sub">Invite friends, earn bonus tokens</span>
+              </div>
+              <span class="menu-row-arrow">›</span>
+            </button>
+
+            <button class="menu-row menu-row-danger" id="menu-logout-btn" type="button">
+              <div class="menu-row-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              </div>
+              <div class="menu-row-text">
+                <span class="menu-row-title">Log Out</span>
+                <span class="menu-row-sub">Sign out of your Arena account</span>
+              </div>
+              <span class="menu-row-arrow">›</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: TOKEN TRANSACTIONS (Ledger) -->
+      <section id="view-ledger" class="app-view">
+        <div class="section-card">
+          <button class="back-link" id="ledger-back-btn" type="button">‹ Back to Profile</button>
+          <h3>Token Transactions</h3>
+          <p class="section-sub">Live record of credit and debit events</p>
           <div class="table-wrap">
             <table class="ledger-table">
               <thead>
@@ -187,6 +249,68 @@
               </thead>
               <tbody id="ledger-body"></tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: REFER & EARN -->
+      <section id="view-refer" class="app-view">
+        <div class="section-card">
+          <button class="back-link" id="refer-back-btn" type="button">‹ Back to Profile</button>
+          <h3>Refer &amp; Earn</h3>
+          <p class="section-sub">Invite friends to Arena and earn free tokens together</p>
+
+          <div class="refer-info-grid">
+            <div class="refer-info-box">
+              <span class="refer-info-num">₹100</span>
+              <span class="refer-info-lbl">You get, per friend who joins</span>
+            </div>
+            <div class="refer-info-box">
+              <span class="refer-info-num">₹300</span>
+              <span class="refer-info-lbl">Your friend gets, on signup</span>
+            </div>
+          </div>
+          <p class="refer-explainer">Share your referral code below. When a friend enters it, they instantly receive ₹300 in tokens and you receive ₹100 — for every friend you refer, with no limit.</p>
+
+          <div class="refer-code-box">
+            <span class="refer-code-lbl">Your Referral Code</span>
+            <div class="refer-code-row">
+              <span id="my-referral-code" class="refer-code-value">—</span>
+              <button id="copy-referral-btn" class="btn-secondary" type="button">Copy</button>
+            </div>
+          </div>
+
+          <div class="refer-redeem-box">
+            <span class="refer-code-lbl">Have a Referral Code?</span>
+            <div class="refer-redeem-row">
+              <input type="text" id="referral-input" class="name-input" maxlength="12" placeholder="Enter code e.g. VISHA859" />
+              <button id="submit-referral-btn" class="btn-primary" type="button">Submit</button>
+            </div>
+            <p id="referral-status-msg" class="refer-status-msg"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: ADD TOKENS -->
+      <section id="view-addtoken" class="app-view">
+        <div class="section-card">
+          <button class="back-link" id="addtoken-back-btn" type="button">‹ Back to Profile</button>
+          <h3>Add Tokens</h3>
+          <p class="section-sub">Top up your wallet balance</p>
+
+          <div class="addtoken-amount-grid">
+            <button class="amount-chip" data-amount="20" type="button">₹20</button>
+            <button class="amount-chip" data-amount="50" type="button">₹50</button>
+            <button class="amount-chip" data-amount="100" type="button">₹100</button>
+            <button class="amount-chip" data-amount="200" type="button">₹200</button>
+          </div>
+
+          <div class="refer-redeem-box">
+            <span class="refer-code-lbl">Or Enter a Custom Amount</span>
+            <div class="refer-redeem-row">
+              <input type="number" id="addtoken-input" class="name-input" min="1" placeholder="Enter amount (₹)" />
+              <button id="addtoken-submit-btn" class="btn-primary" type="button">Add</button>
+            </div>
           </div>
         </div>
       </section>
