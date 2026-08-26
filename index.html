@@ -875,10 +875,6 @@ html, body { overflow-x: hidden; }
             <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=vishal" alt="Avatar" />
             <span id="player-name" class="user-name">Vishal</span>
           </button>
-
-          <button id="logout-btn" class="logout-btn" type="button" title="Sign out">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          </button>
         </div>
       </div>
     </header>
@@ -1251,10 +1247,6 @@ html, body { overflow-x: hidden; }
       </div>
     </footer>
   </div>
-
-  <!-- CDN Script -->
-<!-- Dashboard Engine (single source of truth — no more inline duplicate script) -->
-<rect width='64' height='64' rx='14' fill='%230e131f'/><path d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/></svg>" />
 
   <div id="page-match" class="hidden">
 <p id="match-loading" class="center-screen loading-text">Loading match...</p>
@@ -1901,7 +1893,8 @@ menuTransactionsBtn?.addEventListener("click", () => switchView("view-ledger"));
 menuAddTokensBtn?.addEventListener("click", () => switchView("view-addtoken"));
 menuReferBtn?.addEventListener("click", () => switchView("view-refer"));
 // Logging out always asks for confirmation first — logout can only be
-// triggered from the Profile > Account menu, never from the top nav.
+// triggered from the Profile > Account menu (the top-nav no longer has
+// its own logout icon, so there is exactly one entry point).
 menuLogoutBtn?.addEventListener("click", () => {
   logoutConfirmOverlay?.classList.remove("hidden");
 });
