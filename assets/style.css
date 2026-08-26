@@ -7,21 +7,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --bg-dark: #07090e;
-  --bg-surface: #0e131f;
-  --bg-card: #141b2b;
-  --bg-card-hover: #1b253b;
+  --bg-dark: #12161f;
+  --bg-surface: #1a2130;
+  --bg-card: #232c40;
+  --bg-card-hover: #2c3650;
   --primary-green: #00e701;
   --primary-green-hover: #00c601;
   --primary-glow: rgba(0, 231, 1, 0.22);
   --accent-blue: #38bdf8;
   --accent-gold: #f59e0b;
-  --accent-red: #ef4444;
-  --text-main: #f8fafc;
-  --text-muted: #8e9fb5;
-  --text-dim: #54647c;
-  --border-color: #1e283d;
-  --border-highlight: #283752;
+  --accent-red: #f16464;
+  --text-main: #ffffff;
+  --text-muted: #b3bfd6;
+  --text-dim: #8492ac;
+  --border-color: #313d58;
+  --border-highlight: #455274;
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-heading: 'Space Grotesk', var(--font-family);
   --radius-sm: 6px;
@@ -261,7 +261,7 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 .badge-debit { background-color: rgba(239, 68, 68, 0.1); color: var(--accent-red); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
 
 /* ====================================================================== */
-.modal-overlay { position: fixed; inset: 0; background-color: rgba(7, 9, 14, 0.92); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; animation: fadeSlideUp 0.25s ease; }
+.modal-overlay { position: fixed; inset: 0; background-color: rgba(10, 13, 20, 0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; animation: fadeSlideUp 0.25s ease; }
 .modal-card, .arena-card { background-color: var(--bg-surface); border: 1px solid var(--border-highlight); border-radius: var(--radius-lg); padding: 32px 24px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75); animation: fadeSlideUp 0.35s var(--ease-smooth); }
 .radar-pulse { position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--primary-green); }
 .pulse-circle { position: absolute; inset: 0; border-radius: 50%; background: var(--primary-green); opacity: 0.25; animation: pulse 1.6s ease-out infinite; }
@@ -358,10 +358,24 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 .reaction-pad { width: 100%; height: 200px; border-radius: var(--radius-md); background-color: #7f1d1d; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; cursor: pointer; user-select: none; }
 .reaction-pad.go { background-color: var(--primary-green); color: #000; }
 .reaction-pad.early { background-color: var(--accent-red); }
+.ttt-wrapper { position: relative; width: 238px; margin: 0 auto; }
 .ttt-board { display: grid; grid-template-columns: repeat(3, 74px); grid-template-rows: repeat(3, 74px); gap: 8px; margin-top: 8px; }
 .ttt-cell { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; cursor: pointer; }
 .ttt-cell:hover:not(.filled) { background-color: var(--bg-card-hover); }
 .ttt-cell.filled { cursor: default; }
+.ttt-line-overlay { position: absolute; top: 8px; left: 0; width: 238px; height: 238px; pointer-events: none; }
+.ttt-winline { stroke: var(--primary-green); stroke-width: 6; stroke-linecap: round; filter: drop-shadow(0 0 6px var(--primary-glow)); }
+.ttt-turn-timer { font-weight: 700; color: var(--accent-red); margin-bottom: 6px; min-height: 20px; font-size: 0.95rem; }
+.ttt-opp-dots { display: inline-flex; gap: 4px; margin-bottom: 6px; min-height: 20px; align-items: center; justify-content: center; }
+.ttt-opp-dots span { width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-dim); animation: tttDotBounce 1s ease-in-out infinite; }
+.ttt-opp-dots span:nth-child(2) { animation-delay: 0.15s; }
+.ttt-opp-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes tttDotBounce { 0%, 80%, 100% { opacity: 0.35; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+@media (max-width: 380px) {
+  .ttt-wrapper, .ttt-line-overlay { width: 204px; }
+  .ttt-board { grid-template-columns: repeat(3, 62px); grid-template-rows: repeat(3, 62px); gap: 8px; }
+  .ttt-cell { font-size: 1.5rem; }
+}
 .score-row { display: flex; gap: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: var(--text-muted); }
 .score-row .me { color: var(--primary-green); }
 .quiz-question, .math-problem { font-size: 1.3rem; font-weight: 700; margin: 8px 0 20px; }
@@ -490,3 +504,55 @@ body::before {
 }
 .ledger-table tbody tr:first-child td,
 #matches-body tr:first-child td { animation: rowIn 1.2s ease-out; }
+
+/* ======================================================================
+==== Minimal Toast Notifications (wallet credit/debit)
+====================================================================== ==== */
+.toast-stack {
+  position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 99998;
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
+  pointer-events: none; max-width: calc(100vw - 28px);
+}
+.toast {
+  pointer-events: auto;
+  display: flex; align-items: center; gap: 10px;
+  background-color: var(--bg-surface); border: 1px solid var(--border-highlight);
+  border-left: 3px solid var(--primary-green);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+  font-size: 0.82rem; font-weight: 600; color: var(--text-main);
+  max-width: 320px; animation: toastIn 0.3s var(--ease-smooth);
+}
+.toast.toast-debit { border-left-color: var(--accent-red); }
+.toast-icon { flex: none; display: flex; }
+.toast.toast-credit .toast-icon { color: var(--primary-green); }
+.toast.toast-debit .toast-icon { color: var(--accent-red); }
+.toast-text { display: flex; flex-direction: column; gap: 1px; }
+.toast-amount.toast-credit-text { color: var(--primary-green); }
+.toast-amount.toast-debit-text { color: var(--accent-red); }
+.toast-desc { color: var(--text-muted); font-weight: 500; font-size: 0.74rem; }
+.toast.toast-out { animation: toastOut 0.25s ease forwards; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(24px); } }
+@media (max-width: 480px) {
+  .toast-stack { left: 14px; right: 14px; align-items: stretch; }
+  .toast { max-width: none; }
+}
+
+/* ======================================================================
+==== Mobile-friendly refinements
+====================================================================== ==== */
+@media (max-width: 480px) {
+  .app-main { padding-left: 14px; padding-right: 14px; }
+  .nav-container { padding-left: 14px; padding-right: 14px; gap: 10px; }
+  .hero-banner { padding: 18px 16px; }
+  .modal-card, .arena-card { padding: 24px 16px; }
+  .footer-links-group { grid-template-columns: repeat(2, 1fr); gap: 18px 16px; }
+  .footer-bottom { justify-content: center; text-align: center; }
+  .arena-header { gap: 6px; }
+  .arena-name { max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .quiz-options { grid-template-columns: 1fr; }
+  .hero-stats-row { gap: 20px; }
+  .card-title { font-size: 1rem; }
+}
+html, body { overflow-x: hidden; }
