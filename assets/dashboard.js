@@ -103,7 +103,6 @@ const dashEl = document.getElementById("dashboard");
 const balanceEl = document.getElementById("balance-value");
 const playerNameEl = document.getElementById("player-name");
 const avatarEl = document.getElementById("avatar");
-const logoutBtn = document.getElementById("logout-btn");
 
 // Profile View Elements
 const profileDisplayName = document.getElementById("profile-display-name");
@@ -121,6 +120,37 @@ const menuTransactionsBtn = document.getElementById("menu-transactions-btn");
 const menuAddTokensBtn = document.getElementById("menu-addtokens-btn");
 const menuReferBtn = document.getElementById("menu-refer-btn");
 const menuLogoutBtn = document.getElementById("menu-logout-btn");
+const logoutConfirmOverlay = document.getElementById("logout-confirm-overlay");
+const logoutConfirmBtn = document.getElementById("logout-confirm-btn");
+const logoutCancelBtn = document.getElementById("logout-cancel-btn");
+
+// Arena turn-indicator elements (shared across every game type)
+const turnIndicatorText = document.getElementById("turn-indicator-text");
+const turnIndicatorDot = document.getElementById("turn-dot");
+const arenaUserSide = document.getElementById("arena-user-side");
+const arenaOppSide = document.getElementById("arena-opp-side");
+
+// Sets who the arena's "Your Turn / Opponent's Turn" indicator is showing
+// for right now. state: "you" (green, blinking) or "opp" (red, blinking).
+// Also glows/dims the matching avatar so the active player is obvious at
+// a glance, even with sound off or on a small screen.
+function setArenaTurn(state) {
+  if (!turnIndicatorText || !turnIndicatorDot) return;
+  if (state === "opp") {
+    const oppFirstName = (activeOpponent && activeOpponent.name ? activeOpponent.name.split(" ")[0] : "Opponent");
+    turnIndicatorText.textContent = oppFirstName + "'s Turn";
+    turnIndicatorText.className = "turn-text turn-text-opp";
+    turnIndicatorDot.className = "turn-dot turn-dot-opp";
+    arenaUserSide?.classList.remove("side-active");
+    arenaOppSide?.classList.add("side-active");
+  } else {
+    turnIndicatorText.textContent = "Your Turn";
+    turnIndicatorText.className = "turn-text turn-text-you";
+    turnIndicatorDot.className = "turn-dot turn-dot-you";
+    arenaOppSide?.classList.remove("side-active");
+    arenaUserSide?.classList.add("side-active");
+  }
+}
 const ledgerBackBtn = document.getElementById("ledger-back-btn");
 const referBackBtn = document.getElementById("refer-back-btn");
 const addtokenBackBtn = document.getElementById("addtoken-back-btn");
@@ -510,7 +540,16 @@ walletBadgeBtn?.addEventListener("click", () => switchView("view-ledger"));
 menuTransactionsBtn?.addEventListener("click", () => switchView("view-ledger"));
 menuAddTokensBtn?.addEventListener("click", () => switchView("view-addtoken"));
 menuReferBtn?.addEventListener("click", () => switchView("view-refer"));
-menuLogoutBtn?.addEventListener("click", async () => {
+// Logging out always asks for confirmation first — logout can only be
+// triggered from the Profile > Account menu, never from the top nav.
+menuLogoutBtn?.addEventListener("click", () => {
+  logoutConfirmOverlay?.classList.remove("hidden");
+});
+logoutCancelBtn?.addEventListener("click", () => {
+  logoutConfirmOverlay?.classList.add("hidden");
+});
+logoutConfirmBtn?.addEventListener("click", async () => {
+  logoutConfirmBtn.disabled = true;
   await client.auth.signOut();
   window.location.href = "index.html";
 });
@@ -869,6 +908,8 @@ function launchArena(opponent) {
   arenaOppName.textContent = opponent.name;
   arenaOppAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + opponent.seed;
   arenaOverlay.classList.remove("hidden");
+  document.getElementById("arena-turn-indicator")?.classList.remove("hidden");
+  setArenaTurn("you");
 
   if (activeGame.type === "math") {
     runCyberMathGame();
@@ -1047,6 +1088,7 @@ function runTicTacToeGame() {
   renderBoard();
 
   function renderBoard() {
+    if (!over) setArenaTurn(playerTurn ? "you" : "opp");
     let cellsHtml = "";
     board.forEach((val, i) => {
       cellsHtml +=
@@ -1062,9 +1104,6 @@ function runTicTacToeGame() {
     arenaStage.innerHTML =
       '<div style="width:100%;text-align:center">' +
       '<p class="subtitle">You are X &middot; Opponent is O</p>' +
-      '<p class="loading-text" id="ttt-turn-label">' +
-      (over ? "" : playerTurn ? "Your move" : "Opponent's move") +
-      "</p>" +
       statusHtml +
       '<div class="ttt-wrapper">' +
       '<div class="ttt-board" id="ttt-board">' + cellsHtml + "</div>" +
@@ -1189,6 +1228,7 @@ function runTicTacToeGame() {
       console.warn(e);
     }
     updateUI();
+    document.getElementById("arena-turn-indicator")?.classList.add("hidden");
 
     arenaStage.innerHTML =
       '<div class="result-card">' +
@@ -1236,6 +1276,7 @@ async function endDuel(won, analysisText) {
 
   await recordMatch(activeGame.name, activeOpponent.name, won ? "VICTORY" : "DEFEAT", reward);
   updateUI();
+  document.getElementById("arena-turn-indicator")?.classList.add("hidden");
 
   const rewardLine = won
     ? "+" + formatRupees(MATCH_WIN_REWARD) + " Awarded"
@@ -1267,10 +1308,5 @@ async function endDuel(won, analysisText) {
     arenaOverlay.classList.add("hidden");
   });
 }
-
-logoutBtn?.addEventListener("click", async () => {
-  await client.auth.signOut();
-  window.location.href = "index.html";
-});
 
 init();
