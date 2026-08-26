@@ -165,10 +165,13 @@ async function init() {
     }
     currentUser = session.user;
 
+    if (profileEmailEl) profileEmailEl.textContent = currentUser.email || "—";
+
     await loadUserName();
     await loadWallet();
     await loadTransactions();
     await loadMatchHistory();
+    await loadReferralInfo();
     updateUI();
   } catch (err) {
     console.error("Initialization error:", err);
