@@ -43,6 +43,7 @@ html {
   text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   overflow-y: auto;
+  height: auto;
 }
 
 body {
@@ -50,11 +51,13 @@ body {
   color: var(--text-main);
   min-height: 100vh;
   min-height: 100dvh;
+  height: auto;
   display: flex;
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overscroll-behavior-y: contain;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Keep double-tap-to-zoom disabled on buttons/links (the original intent of
@@ -149,7 +152,9 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 .token-badge {
   background-color: var(--bg-card); border: 1px solid var(--border-highlight);
   padding: 5px 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px;
+  cursor: pointer; font: inherit; color: inherit;
 }
+.token-badge:hover { border-color: var(--primary-green); }
 .token-icon-wrap { color: var(--accent-gold); display: flex; align-items: center; font-weight: 800; font-size: 0.9rem; font-family: var(--font-heading); }
 .token-count { font-size: 0.95rem; font-weight: 700; color: var(--accent-gold); display: inline-block; }
 @keyframes balancePulse {
@@ -260,6 +265,59 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 .stat-box-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
 
 .ledger-section, .section-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; }
+
+/* ====================================================================== */
+/* Profile Account Menu */
+.profile-menu-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.menu-row {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  padding: 14px 16px; cursor: pointer; color: var(--text-main);
+}
+button.menu-row { font: inherit; }
+.menu-row:hover { border-color: var(--border-highlight); background-color: var(--bg-card-hover); }
+.menu-row-static { cursor: default; }
+.menu-row-static:hover { border-color: var(--border-color); background-color: var(--bg-card); }
+.menu-row-icon {
+  width: 36px; height: 36px; min-width: 36px; border-radius: 50%; background-color: var(--bg-surface);
+  color: var(--primary-green); display: flex; align-items: center; justify-content: center;
+}
+.menu-row-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.menu-row-title { font-size: 0.92rem; font-weight: 700; }
+.menu-row-sub { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.menu-row-arrow { color: var(--text-dim); font-size: 1.2rem; font-weight: 700; }
+.menu-row-danger .menu-row-icon { color: var(--accent-red); }
+.menu-row-danger:hover { border-color: var(--accent-red); }
+
+.back-link {
+  background: transparent; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; padding: 0; margin-bottom: 14px; display: inline-block;
+}
+.back-link:hover { color: var(--primary-green); }
+
+/* Refer & Earn */
+.refer-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.refer-info-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+.refer-info-num { font-size: 1.4rem; font-weight: 800; color: var(--primary-green); font-family: var(--font-heading); }
+.refer-info-lbl { font-size: 0.78rem; color: var(--text-muted); }
+.refer-explainer { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+.refer-code-box, .refer-redeem-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; }
+.refer-code-lbl { font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+.refer-code-row, .refer-redeem-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.refer-code-value { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--text-main); letter-spacing: 0.06em; background-color: var(--bg-surface); border: 1px dashed var(--border-highlight); border-radius: var(--radius-sm); padding: 8px 14px; flex: 1; min-width: 140px; }
+.refer-redeem-row .name-input { flex: 1; min-width: 160px; }
+.refer-status-msg { font-size: 0.82rem; font-weight: 600; margin-top: 10px; min-height: 1em; }
+.refer-status-msg.success { color: var(--primary-green); }
+.refer-status-msg.error { color: var(--accent-red); }
+
+/* Add Tokens */
+.addtoken-amount-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 20px; }
+@media (min-width: 480px) { .addtoken-amount-grid { grid-template-columns: repeat(4, 1fr); } }
+.amount-chip {
+  background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);
+  padding: 14px 10px; border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center;
+}
+.amount-chip:hover, .amount-chip.active { background-color: var(--primary-green); color: #000; border-color: var(--primary-green); }
 .ledger-header h3, .section-card h3 { font-size: 1.15rem; font-weight: 700; }
 .ledger-sub, .section-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px; }
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
