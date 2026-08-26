@@ -199,9 +199,34 @@ async function loadTransactions() {
   }
 }
 
+function showToast(desc, type, amount) {
+  const stack = document.getElementById("toast-stack");
+  if (!stack) return;
+  const isCredit = type === "credit";
+  const toast = document.createElement("div");
+  toast.className = "toast " + (isCredit ? "toast-credit" : "toast-debit");
+  const iconSvg = isCredit
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>';
+  toast.innerHTML =
+    '<span class="toast-icon">' + iconSvg + "</span>" +
+    '<span class="toast-text">' +
+    '<span class="toast-amount ' + (isCredit ? "toast-credit-text" : "toast-debit-text") + '">' +
+    (isCredit ? "+" : "-") + formatRupees(Math.abs(amount)) +
+    "</span>" +
+    '<span class="toast-desc">' + desc + "</span>" +
+    "</span>";
+  stack.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("toast-out");
+    setTimeout(() => toast.remove(), 260);
+  }, 3200);
+}
+
 async function recordTransaction(desc, type, amount) {
   transactions.unshift({ desc, type, amount, date: new Date().toLocaleString() });
   updateUI();
+  showToast(desc, type, amount);
   try {
     const { error } = await client.from("transactions").insert({
       user_id: currentUser.id,
@@ -748,16 +773,23 @@ function runTicTacToeGame() {
         (val || "") +
         "</div>";
     });
+    const statusHtml = over
+      ? '<p class="ttt-turn-timer" style="min-height:20px"></p>'
+      : playerTurn
+      ? '<p class="ttt-turn-timer" id="ttt-timer">\u23F1 ' + timeLeft + "s</p>"
+      : '<p class="ttt-opp-dots" id="ttt-opp-indicator"><span></span><span></span><span></span></p>';
+
     arenaStage.innerHTML =
       '<div style="width:100%;text-align:center">' +
       '<p class="subtitle">You are X &middot; Opponent is O</p>' +
       '<p class="loading-text" id="ttt-turn-label">' +
       (over ? "" : playerTurn ? "Your move" : "Opponent's move") +
       "</p>" +
-      '<p style="font-weight:700;color:var(--accent-red);margin-bottom:6px;min-height:20px" id="ttt-timer">' +
-      (playerTurn && !over ? "\u23F1 " + timeLeft + "s" : "") +
-      "</p>" +
+      statusHtml +
+      '<div class="ttt-wrapper">' +
       '<div class="ttt-board" id="ttt-board">' + cellsHtml + "</div>" +
+      '<svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 238 238"></svg>' +
+      "</div>" +
       "</div>";
 
     if (playerTurn && !over) {
@@ -827,15 +859,57 @@ function runTicTacToeGame() {
     return WIN_LINES.some((line) => line.every((i) => board[i] === symbol));
   }
 
+  function findWinningLine(symbol) {
+    return WIN_LINES.find((line) => line.every((i) => board[i] === symbol));
+  }
+
+  // Draws an animated line across the winning three cells, same idea as the
+  // real-time multiplayer version in assets/games/tictactoe.js.
+  function drawWinLine(line) {
+    const svg = document.getElementById("ttt-line");
+    if (!svg) return;
+    // Coordinates are in the SVG's own 238x238 unit space (matching the
+    // 74px-cell + 8px-gap board); the SVG scales to fit the CSS box size
+    // at any breakpoint, so this math doesn't need to change on mobile.
+    const cellSize = 74;
+    const gap = 8;
+    const step = cellSize + gap;
+    const centers = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
+      const row = Math.floor(i / 3);
+      const col = i % 3;
+      return [col * step + cellSize / 2, row * step + cellSize / 2];
+    });
+    const [x1, y1] = centers[line[0]];
+    const [x2, y2] = centers[line[2]];
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    path.setAttribute("x1", x1);
+    path.setAttribute("y1", y1);
+    path.setAttribute("x2", x1);
+    path.setAttribute("y2", y1);
+    path.setAttribute("class", "ttt-winline");
+    svg.appendChild(path);
+    requestAnimationFrame(() => {
+      path.style.transition = "x2 0.35s ease, y2 0.35s ease";
+      path.setAttribute("x2", x2);
+      path.setAttribute("y2", y2);
+    });
+  }
+
   function checkEnd() {
-    if (hasWinner("X")) {
+    const xLine = findWinningLine("X");
+    if (xLine) {
       over = true;
-      setTimeout(() => endDuel(true, "Completed a winning line before your opponent!"), 400);
+      renderBoard();
+      drawWinLine(xLine);
+      setTimeout(() => endDuel(true, "Completed a winning line before your opponent!"), 650);
       return true;
     }
-    if (hasWinner("O")) {
+    const oLine = findWinningLine("O");
+    if (oLine) {
       over = true;
-      setTimeout(() => endDuel(false, "Opponent completed a winning line first."), 400);
+      renderBoard();
+      drawWinLine(oLine);
+      setTimeout(() => endDuel(false, "Opponent completed a winning line first."), 650);
       return true;
     }
     if (board.every((c) => c)) {
