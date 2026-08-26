@@ -146,7 +146,7 @@ async function init() {
     }
     currentUser = session.user;
 
-    loadUserName();
+    await loadUserName();
     await loadWallet();
     await loadTransactions();
     await loadMatchHistory();
@@ -167,15 +167,51 @@ setTimeout(() => {
   }
 }, 3000);
 
-function loadUserName() {
-  const savedName = localStorage.getItem("arena_name_" + currentUser.id);
+async function loadUserName() {
   const meta = currentUser.user_metadata || {};
-  const initialName =
-    savedName ||
+  const localName = localStorage.getItem("arena_name_" + currentUser.id);
+  const fallbackName =
+    localName ||
     meta.full_name ||
     meta.name ||
     (currentUser.email ? currentUser.email.split("@")[0] : "Player");
+
+  // public.users is the source of truth other players read from (match.html).
+  // Always trust it over localStorage/auth metadata when it exists.
+  let dbName = null;
+  try {
+    const { data: profileRow } = await client
+      .from("users")
+      .select("full_name")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+    dbName = profileRow?.full_name || null;
+  } catch (err) {
+    console.error("Failed to load profile name:", err);
+  }
+
+  const initialName = dbName || fallbackName;
   setUserDisplayName(initialName);
+
+  // Keep public.users in sync so opponents always see the current name/avatar,
+  // and backfill it if the signup trigger never populated it.
+  if (dbName !== initialName) {
+    syncProfileToDatabase(initialName);
+  }
+}
+
+async function syncProfileToDatabase(name) {
+  const avatarUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(name);
+  try {
+    await client.from("users").upsert({
+      id: currentUser.id,
+      email: currentUser.email,
+      full_name: name,
+      avatar_url: avatarUrl,
+    });
+  } catch (err) {
+    console.error("Failed to sync profile to database:", err);
+  }
 }
 
 function setUserDisplayName(name) {
@@ -470,17 +506,28 @@ editNameBtn?.addEventListener("click", () => {
 cancelNameBtn?.addEventListener("click", () => {
   nameEditBox.classList.add("hidden");
 });
-saveNameBtn?.addEventListener("click", () => {
+saveNameBtn?.addEventListener("click", async () => {
   const newName = nameInput.value.trim();
   if (newName.length < 2) {
     alert("Name must be at least 2 characters.");
     return;
   }
-  if (currentUser) {
-    localStorage.setItem("arena_name_" + currentUser.id, newName);
-  }
   setUserDisplayName(newName);
   nameEditBox.classList.add("hidden");
+
+  if (currentUser) {
+    // Cache locally for instant reload, but the database write below is what
+    // actually makes opponents see the updated name/avatar in match.html.
+    localStorage.setItem("arena_name_" + currentUser.id, newName);
+    saveNameBtn.disabled = true;
+    try {
+      await syncProfileToDatabase(newName);
+    } catch (err) {
+      console.error("Name change didn't save to server:", err);
+    } finally {
+      saveNameBtn.disabled = false;
+    }
+  }
 });
 
 // ----------------------------------------------------
