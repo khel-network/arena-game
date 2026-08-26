@@ -1179,15 +1179,19 @@ html, body { overflow-x: hidden; }
     <div id="game-arena-overlay" class="modal-overlay hidden">
       <div class="arena-card">
         <div class="arena-header">
-          <div class="player-stat user-side">
+          <div class="player-stat user-side" id="arena-user-side">
             <img id="arena-user-avatar" class="arena-avatar" src="" alt="You" />
             <span id="arena-user-name" class="arena-name">You</span>
           </div>
           <div class="vs-badge">VS</div>
-          <div class="player-stat opp-side">
+          <div class="player-stat opp-side" id="arena-opp-side">
             <img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
             <span id="arena-opp-name" class="arena-name">Opponent</span>
           </div>
+        </div>
+        <div class="arena-turn-indicator hidden" id="arena-turn-indicator">
+          <span class="turn-dot turn-dot-you" id="turn-dot"></span>
+          <span class="turn-text turn-text-you" id="turn-indicator-text">Your Turn</span>
         </div>
         <div id="arena-stage" class="arena-stage"></div>
       </div>
@@ -1321,6 +1325,13 @@ function botDelay() {
   return Math.floor(Math.random() * (BOT_MOVE_MAX_MS - BOT_MOVE_MIN_MS + 1)) + BOT_MOVE_MIN_MS;
 }
 
+// Only these catalog game types have a real live-multiplayer implementation
+// wired up in goToMatch()/page-match. Every other card still "plays" (vs a
+// bot) but must never enter the real matchmaking_queue table, since a live
+// match for an unsupported type has nowhere to route to and used to
+// dead-end on an "Unknown game type." screen when paired with a real human.
+const LIVE_ENABLED_TYPES = ["tictactoe"];
+
 // ----------------------------------------------------
 // Presence Heartbeat (requires schema7.sql)
 // ----------------------------------------------------
@@ -1332,10 +1343,11 @@ function botDelay() {
 //
 // Fix: while the dashboard is open we send a heartbeat every few
 // seconds that stamps public.users.last_seen for this account.
-// claim_opponent() (see schema7.sql) only ever offers an opponent
-// whose last_seen is fresh, and purges any queue row that has gone
-// stale — so only a genuinely-online player can be matched with
-// inside the 5-second window; everyone else falls through to a bot,
+// claim_opponent() (see schema7.sql / schema_fix_stale_matchmaking.sql)
+// only ever offers an opponent whose last_seen is fresh, and purges
+// any queue row that has gone stale — across ALL game types, not just
+// the one currently being searched for — so a leftover row from a
+// closed/crashed tab can't sit around and get matched against later,
 // exactly as the "Waiting for a live player... (5s)" timer intends.
 const PRESENCE_HEARTBEAT_MS = 8000;
 let presenceHeartbeatTimer = null;
@@ -2090,16 +2102,17 @@ playButtons.forEach((btn) => {
 // a few seconds of each other actually find one another instead of both
 // timing out to a bot.
 //
-// This calls the "claim_opponent" database function (see schema4.sql)
-// instead of doing the select/delete/insert here in the browser. That's
-// required, not just a style choice: the matchmaking_queue table's RLS
-// policy only allows a user to delete THEIR OWN row, so a client-side
-// delete of the *opponent's* row was always silently blocked by the
-// database, which is why real-vs-real matches never actually formed no
-// matter how the polling was tuned. The database function runs with
-// elevated rights and locks the row (FOR UPDATE SKIP LOCKED), so it can
-// both bypass that restriction safely and guarantee two players polling
-// at the same instant can never claim the same opponent.
+// This calls the "claim_opponent" database function (see schema4.sql /
+// schema_fix_stale_matchmaking.sql) instead of doing the select/delete/
+// insert here in the browser. That's required, not just a style choice:
+// the matchmaking_queue table's RLS policy only allows a user to delete
+// THEIR OWN row, so a client-side delete of the *opponent's* row was
+// always silently blocked by the database, which is why real-vs-real
+// matches never actually formed no matter how the polling was tuned.
+// The database function runs with elevated rights and locks the row
+// (FOR UPDATE SKIP LOCKED), so it can both bypass that restriction
+// safely and guarantee two players polling at the same instant can
+// never claim the same opponent.
 async function findAndClaimOpponent() {
   const { data: match, error } = await client.rpc("claim_opponent", {
     p_game_type: activeGame.type,
@@ -2143,6 +2156,24 @@ async function beginMatchmaking() {
     if (matchOverlay) matchOverlay.classList.add("hidden");
     alert("Could not process your entry stake. Please try again.");
     inQueue = false;
+    return;
+  }
+
+  // Games without a real live-match implementation always play a bot —
+  // they must never touch matchmaking_queue/claim_opponent, or a real
+  // opponent could get paired into a game screen that doesn't know how
+  // to render their game type ("Unknown game type.").
+  if (!LIVE_ENABLED_TYPES.includes(activeGame.type)) {
+    if (matchStatus) matchStatus.textContent = "Matching you with an opponent...";
+    setTimeout(() => {
+      const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
+      if (matchStatus) matchStatus.textContent = "Matched with " + bot.name;
+      setTimeout(() => {
+        if (matchOverlay) matchOverlay.classList.add("hidden");
+        inQueue = false;
+        launchArena(bot);
+      }, 700);
+    }, 900);
     return;
   }
 
@@ -2266,10 +2297,10 @@ cancelMatchBtn?.addEventListener("click", async () => {
 
 // Belt-and-braces cleanup: if the player closes the tab, hits back, or
 // navigates away while still sitting in the queue, try to drop their
-// queue row immediately instead of relying only on the 15s presence
-// timeout in claim_opponent() to catch it. This is best-effort (the
-// request can be interrupted by the unload), which is exactly why the
-// presence timeout above is the real fix and this is just a bonus.
+// queue row immediately instead of relying only on the presence timeout
+// in claim_opponent() to catch it. This is best-effort (the request can
+// be interrupted by the unload), which is exactly why the presence
+// timeout above is the real fix and this is just a bonus.
 window.addEventListener("pagehide", () => {
   if (inQueue && currentUser) {
     client.from("matchmaking_queue").delete().eq("user_id", currentUser.id).then(() => {}, () => {});
@@ -3365,7 +3396,10 @@ async function goToMatch(matchId, gameType) {
       initMathDuel(stage, roomInfo.iAmPlayer1, matchId);
       break;
     default:
-      stage.innerHTML = "<p>Unknown game type.</p>";
+      stage.innerHTML =
+        '<p class="loading-text">This game type isn\'t available in live matches yet.</p>' +
+        '<button id="back-to-lobby-btn" class="btn" type="button">Back to Lobby</button>';
+      document.getElementById("back-to-lobby-btn")?.addEventListener("click", () => returnToDashboardFromMatch());
   }
 }
 
