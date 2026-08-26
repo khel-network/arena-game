@@ -8,6 +8,43 @@ function botDelay() {
 }
 
 // ----------------------------------------------------
+// Presence Heartbeat (requires schema7.sql)
+// ----------------------------------------------------
+// A queue row in matchmaking_queue used to be treated as "a live
+// player waiting" forever, even if that account had closed the tab
+// (or was a different account of yours that queued once and never
+// came back). That let matchmaking hand out "live opponent" matches
+// to accounts that weren't actually online.
+//
+// Fix: while the dashboard is open we send a heartbeat every few
+// seconds that stamps public.users.last_seen for this account.
+// claim_opponent() (see schema7.sql) only ever offers an opponent
+// whose last_seen is fresh, and purges any queue row that has gone
+// stale — so only a genuinely-online player can be matched with
+// inside the 5-second window; everyone else falls through to a bot,
+// exactly as the "Waiting for a live player... (5s)" timer intends.
+const PRESENCE_HEARTBEAT_MS = 8000;
+let presenceHeartbeatTimer = null;
+
+async function touchPresence() {
+  if (!currentUser) return;
+  try {
+    await client
+      .from("users")
+      .update({ last_seen: new Date().toISOString() })
+      .eq("id", currentUser.id);
+  } catch (err) {
+    console.warn("Presence heartbeat failed:", err);
+  }
+}
+
+function startPresenceHeartbeat() {
+  touchPresence();
+  if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
+  presenceHeartbeatTimer = setInterval(touchPresence, PRESENCE_HEARTBEAT_MS);
+}
+
+// ----------------------------------------------------
 // Game Catalog — single source of truth for the dashboard grid,
 // bot-arena dispatch (launchArena) and the live match.html dispatch.
 // icon = one emoji shown on the card banner; badge = small pill label.
@@ -203,6 +240,7 @@ async function init() {
     await loadMatchHistory();
     await loadReferralInfo();
     updateUI();
+    startPresenceHeartbeat();
   } catch (err) {
     console.error("Initialization error:", err);
   } finally {
@@ -772,6 +810,12 @@ async function beginMatchmaking() {
   if (matchStatus) matchStatus.textContent = "Deducting entry stake...";
   if (matchOverlay) matchOverlay.classList.remove("hidden");
 
+  // Stamp our own presence immediately so, the instant we join the
+  // queue below, any other genuinely-online player scanning for us
+  // sees a fresh last_seen right away rather than waiting for the
+  // next scheduled heartbeat tick.
+  touchPresence();
+
   try {
     await persistWalletDelta(-MATCH_ENTRY_FEE);
     await recordTransaction("Stake Entry: " + activeGame.name, "debit", MATCH_ENTRY_FEE);
@@ -894,6 +938,18 @@ cancelMatchBtn?.addEventListener("click", async () => {
     } catch (e) {
       console.warn(e);
     }
+  }
+});
+
+// Belt-and-braces cleanup: if the player closes the tab, hits back, or
+// navigates away while still sitting in the queue, try to drop their
+// queue row immediately instead of relying only on the 15s presence
+// timeout in claim_opponent() to catch it. This is best-effort (the
+// request can be interrupted by the unload), which is exactly why the
+// presence timeout above is the real fix and this is just a bonus.
+window.addEventListener("pagehide", () => {
+  if (inQueue && currentUser) {
+    client.from("matchmaking_queue").delete().eq("user_id", currentUser.id).then(() => {}, () => {});
   }
 });
 
