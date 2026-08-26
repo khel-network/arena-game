@@ -525,7 +525,16 @@ async function findAndClaimOpponent() {
     return null;
   }
 
-  return match || null;
+  // When no opponent is waiting, the database function returns NULL,
+  // but because it's typed to return a "matches" row, Supabase/PostgREST
+  // sends that back as an object with every field set to null (e.g.
+  // { id: null, game_type: null, ... }) instead of an actual null value.
+  // Without this check, that object is truthy and gets treated as a
+  // real match with a null id -- which is what sent you to
+  // "match.html?id=null" instead of correctly falling back to a bot.
+  if (!match || !match.id) return null;
+
+  return match;
 }
 
 async function beginMatchmaking() {
