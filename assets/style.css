@@ -39,10 +39,10 @@
 }
 
 html {
-  touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
+  overflow-y: auto;
 }
 
 body {
@@ -54,7 +54,16 @@ body {
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: contain;
+}
+
+/* Keep double-tap-to-zoom disabled on buttons/links (the original intent of
+   the removed html { touch-action: manipulation } rule) without applying it
+   to <html> itself -- that global rule was what silently blocked two-finger
+   trackpad scrolling in desktop Chrome (pinch-zoom still worked because
+   "manipulation" explicitly allows it, only panning/scroll got eaten). */
+button, a, .play-btn, .tab-btn, .filter-chip, .game-card, .quiz-option, .ttt-cell {
+  touch-action: manipulation;
 }
 
 h1, h2, h3, .logo-text, .card-title, .stat-box-num, .token-count, .modal-card h3,
