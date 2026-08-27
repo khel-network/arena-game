@@ -1,5 +1,5 @@
 -- ============================================================
--- Arena - MASTER SCHEMA (Complete single-file database setup)
+-- Arena - MASTER SCHEMA (Instant Wallet & Realtime Payments)
 -- ============================================================
 
 -- 1. USERS / PROFILES
