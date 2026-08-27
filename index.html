@@ -73,11 +73,6 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Keep double-tap-to-zoom disabled on buttons/links (the original intent of
-   the removed html { touch-action: manipulation } rule) without applying it
-   to <html> itself -- that global rule was what silently blocked two-finger
-   trackpad scrolling in desktop Chrome (pinch-zoom still worked because
-   "manipulation" explicitly allows it, only panning/scroll got eaten). */
 button, a, .play-btn, .tab-btn, .filter-chip, .game-card, .quiz-option, .ttt-cell {
   touch-action: manipulation;
 }
@@ -317,7 +312,7 @@ button.menu-row { font: inherit; }
 .refer-status-msg.success { color: var(--primary-green); }
 .refer-status-msg.error { color: var(--accent-red); }
 
-/* Add Tokens */
+/* Add Tokens & QR Scanner Box */
 .addtoken-amount-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 20px; }
 @media (min-width: 480px) { .addtoken-amount-grid { grid-template-columns: repeat(4, 1fr); } }
 .amount-chip {
@@ -325,6 +320,14 @@ button.menu-row { font: inherit; }
   padding: 14px 10px; border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center;
 }
 .amount-chip:hover, .amount-chip.active { background-color: var(--primary-green); color: #000; border-color: var(--primary-green); }
+
+.qr-box-wrap {
+  background: #fff; color: #000; width: 150px; height: 150px; border-radius: 8px;
+  margin: 14px auto; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.78rem; border: 4px solid #fff;
+}
+.qr-box-wrap svg { width: 90px; height: 90px; }
+
 .ledger-header h3, .section-card h3 { font-size: 1.15rem; font-weight: 700; }
 .ledger-sub, .section-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px; }
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -474,136 +477,34 @@ button.menu-row { font: inherit; }
 .result-banner.draw { color: var(--accent-gold); }
 .btn { display: inline-block; margin-top: 18px; background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 12px 22px; border-radius: var(--radius-sm); text-decoration: none; min-height: 44px; }
 
-/* ======================================================================
-==== NEW: High-Tech Visual Polish & Animations (added)
-====================================================================== ==== */
-
-/* Subtle animated grid backdrop for a "high-tech" feel behind the app */
+/* Visual Polish & Animations */
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(0, 231, 1, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 231, 1, 0.05) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%);
-  opacity: 0.6;
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(rgba(0, 231, 1, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 231, 1, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px; mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%); opacity: 0.6;
 }
-
-/* Neon glow + shine sweep on primary call-to-action buttons */
 .play-btn::after, .btn-primary::after, .google-auth-btn::after {
-  content: "";
-  position: absolute;
-  top: 0; left: -60%;
-  width: 40%; height: 100%;
+  content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
   background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  transform: skewX(-20deg);
-  transition: left 0.6s ease;
-  pointer-events: none;
+  transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none;
 }
 .play-btn:hover::after, .btn-primary:hover::after { left: 130%; }
-
-.play-btn:hover, .btn-primary:hover {
-  box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.15), 0 10px 26px -10px var(--primary-glow);
-  transform: translateY(-1px);
-}
-
-/* Glowing active nav tab underline */
+.play-btn:hover, .btn-primary:hover { box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.15), 0 10px 26px -10px var(--primary-glow); transform: translateY(-1px); }
 .tab-btn.active { position: relative; }
-.tab-btn.active::after {
-  content: "";
-  position: absolute;
-  left: 14px; right: 14px; bottom: -2px;
-  height: 2px;
-  background: var(--primary-green);
-  box-shadow: 0 0 8px var(--primary-green);
-  border-radius: 2px;
-}
+.tab-btn.active::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -2px; height: 2px; background: var(--primary-green); box-shadow: 0 0 8px var(--primary-green); border-radius: 2px; }
 
-/* Shimmer sweep across card media on hover — high-tech card feel */
-.card-media::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
-  transform: translateX(-100%);
-  transition: transform 0.7s ease;
-}
-.game-card:hover .card-media::before { transform: translateX(100%); }
-
-/* Animated gradient sheen on the hero banner border */
-.hero-banner::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  z-index: -1;
-  border-radius: inherit;
-  background: linear-gradient(120deg, rgba(0, 231, 1, 0.35), rgba(56, 189, 248, 0.15), rgba(0, 231, 1, 0.35));
-  background-size: 200% 200%;
-  animation: gradientShift 6s ease infinite;
-  opacity: 0.5;
-}
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Badge pill breathing glow (used for "live" / matchmaking indicators) */
-.badge-pill { animation: badgeGlow 2.4s ease-in-out infinite; }
-@keyframes badgeGlow {
-  0%, 100% { box-shadow: 0 0 0 rgba(0, 231, 1, 0); }
-  50% { box-shadow: 0 0 14px rgba(0, 231, 1, 0.35); }
-}
-
-/* Smoother, more "arcade" result reveal */
-.result-card h2 { animation: resultPop 0.45s var(--ease-smooth); }
-@keyframes resultPop {
-  0% { transform: scale(0.7); opacity: 0; }
-  60% { transform: scale(1.08); opacity: 1; }
-  100% { transform: scale(1); }
-}
-
-/* Radar pulse gets a second, offset ring for a richer scanning effect */
-.radar-pulse::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: var(--primary-green);
-  opacity: 0.15;
-  animation: pulse 1.6s ease-out infinite;
-  animation-delay: 0.5s;
-}
-
-/* Table rows get a soft highlight sweep when new ledger/match rows arrive */
-@keyframes rowIn {
-  from { background-color: rgba(0, 231, 1, 0.14); }
-  to { background-color: transparent; }
-}
-.ledger-table tbody tr:first-child td,
-#matches-body tr:first-child td { animation: rowIn 1.2s ease-out; }
-
-/* ======================================================================
-==== Minimal Toast Notifications (wallet credit/debit)
-====================================================================== ==== */
+/* Toast Notifications */
 .toast-stack {
   position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 99998;
   display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
   pointer-events: none; max-width: calc(100vw - 28px);
 }
 .toast {
-  pointer-events: auto;
-  display: flex; align-items: center; gap: 10px;
+  pointer-events: auto; display: flex; align-items: center; gap: 10px;
   background-color: var(--bg-surface); border: 1px solid var(--border-highlight);
-  border-left: 3px solid var(--primary-green);
-  border-radius: var(--radius-sm); padding: 10px 14px;
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
-  font-size: 0.82rem; font-weight: 600; color: var(--text-main);
+  border-left: 3px solid var(--primary-green); border-radius: var(--radius-sm); padding: 10px 14px;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5); font-size: 0.82rem; font-weight: 600; color: var(--text-main);
   max-width: 320px; animation: toastIn 0.3s var(--ease-smooth);
 }
 .toast.toast-debit { border-left-color: var(--accent-red); }
@@ -622,9 +523,7 @@ body::before {
   .toast { max-width: none; }
 }
 
-/* ======================================================================
-==== Turn Indicator (Your Turn / Opponent's Turn)
-====================================================================== ==== */
+/* Arena Turn Indicator */
 .arena-turn-indicator {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   margin: -6px 0 18px; padding: 8px 16px; border-radius: 999px;
@@ -634,78 +533,16 @@ body::before {
 .turn-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .turn-dot-you { background-color: var(--primary-green); box-shadow: 0 0 8px var(--primary-green); animation: turnDotPulse 1.4s ease-in-out infinite; }
 .turn-dot-opp { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); animation: turnDotPulse 1.4s ease-in-out infinite; }
-@keyframes turnDotPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.8); }
-}
+@keyframes turnDotPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
 .turn-text { font-family: var(--font-heading); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.01em; }
-.turn-text-you { color: var(--primary-green); animation: turnTextGlowGreen 1.4s ease-in-out infinite; }
-.turn-text-opp { color: var(--accent-red); animation: turnTextGlowRed 1.4s ease-in-out infinite; }
-@keyframes turnTextGlowGreen {
-  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(0, 231, 1, 0.55); }
-  50% { opacity: 0.55; text-shadow: 0 0 2px rgba(0, 231, 1, 0); }
-}
-@keyframes turnTextGlowRed {
-  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(241, 100, 100, 0.55); }
-  50% { opacity: 0.55; text-shadow: 0 0 2px rgba(241, 100, 100, 0); }
-}
-/* Whichever side currently has the turn gets a glowing ring + slightly
-   raised look; the inactive side visibly dims so it always reads clearly
-   at a glance, on any game type. */
+.turn-text-you { color: var(--primary-green); }
+.turn-text-opp { color: var(--accent-red); }
 .player-stat { transition: opacity 0.25s ease; opacity: 0.55; }
 .player-stat.side-active { opacity: 1; }
 .player-stat.side-active .arena-avatar { box-shadow: 0 0 0 3px rgba(0, 231, 1, 0.18); }
 .player-stat.side-active.opp-side .arena-avatar { box-shadow: 0 0 0 3px rgba(241, 100, 100, 0.18); border-color: var(--accent-red); }
 .player-stat:not(.side-active) .arena-avatar { border-color: var(--border-color); }
 
-/* ======================================================================
-==== Live / High-Tech Chips & Matchmaking Polish
-====================================================================== ==== */
-.live-chip {
-  display: inline-flex; align-items: center; gap: 6px; font-size: 0.66rem; font-weight: 800;
-  letter-spacing: 0.08em; color: var(--primary-green); background-color: rgba(0, 231, 1, 0.1);
-  border: 1px solid rgba(0, 231, 1, 0.28); padding: 4px 10px; border-radius: 999px; margin: 0 auto 14px;
-}
-.live-chip-dot { width: 6px; height: 6px; border-radius: 50%; background-color: var(--primary-green); box-shadow: 0 0 6px var(--primary-green); animation: turnDotPulse 1.2s ease-in-out infinite; }
-.arena-live-chip { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); margin: 0; }
-.arena-card { position: relative; }
-.modal-scan-bar { width: 100%; height: 3px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; margin: 4px 0 18px; }
-.modal-scan-bar-fill { width: 40%; height: 100%; background: linear-gradient(90deg, transparent, var(--primary-green), transparent); animation: scanSweep 1.3s ease-in-out infinite; }
-@keyframes scanSweep {
-  0% { transform: translateX(-120%); }
-  100% { transform: translateX(320%); }
-}
-
-/* Modal cards get a subtle glowing gradient border for a premium feel */
-.modal-card, .arena-card {
-  position: relative;
-  box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.08), 0 24px 60px -20px rgba(0, 0, 0, 0.65);
-}
-
-/* Logout / destructive confirmation dialog */
-.confirm-card { max-width: 360px; }
-.confirm-icon-wrap {
-  width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 16px; color: var(--accent-red); background-color: rgba(241, 100, 100, 0.12);
-  border: 1px solid rgba(241, 100, 100, 0.3);
-}
-.confirm-btn-row { display: flex; gap: 10px; margin-top: 20px; }
-.confirm-btn-row .btn-cancel { width: auto; flex: 1; margin: 0; }
-.btn-danger {
-  flex: 1; background: linear-gradient(135deg, #f16464, #d43f3f); color: #fff; border: none;
-  padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.85rem;
-  cursor: pointer; min-height: 44px;
-}
-.btn-danger:hover { box-shadow: 0 10px 24px -10px rgba(241, 100, 100, 0.5); transform: translateY(-1px); }
-
-/* Menu row danger state gets a touch more presence to signal it's the
-   sign-out action, not just another settings link */
-.menu-row-danger .menu-row-icon { color: var(--accent-red); }
-.menu-row-danger:hover { border-color: rgba(241, 100, 100, 0.35); }
-
-/* ======================================================================
-==== Mobile-friendly refinements
-====================================================================== ==== */
 @media (max-width: 480px) {
   .app-main { padding-left: 14px; padding-right: 14px; }
   .nav-container { padding-left: 14px; padding-right: 14px; gap: 10px; }
@@ -720,105 +557,105 @@ body::before {
   .card-title { font-size: 1rem; }
 }
 html, body { overflow-x: hidden; }
-
   </style>
 </head>
 <body class="app-body">
   <div id="page-landing">
-<!-- Top Navigation -->
-  <header class="top-nav">
-    <div class="nav-container">
-      <div class="brand-logo">
-        <svg class="logo-svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-        </svg>
-        <span class="logo-text">ARENA</span>
-      </div>
-      <div class="nav-links">
-        <a href="#games" class="nav-link active">Games</a>
-        <a href="#rewards" class="nav-link">Rewards</a>
-        <a href="#leaderboard" class="nav-link">Leaderboard</a>
-      </div>
-      <div class="nav-actions">
-        <button id="nav-login-btn" class="btn-secondary" type="button">Sign In</button>
-        <button id="nav-signup-btn" class="btn-primary" type="button">Get Started</button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Hero Section -->
-  <main class="hero-section">
-    <div class="hero-container">
-      <!-- Left Column: Value Proposition -->
-      <div class="hero-left">
-        <div class="badge-pill">
-          <span class="badge-dot"></span>
-          <span>Verified 1v1 Skill Arenas</span>
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <div class="nav-container">
+        <div class="brand-logo">
+          <svg class="logo-svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span class="logo-text">ARENA</span>
         </div>
-        <h1 class="hero-title">
-          Play Skill Games. <br/><span class="highlight-green">Win Real Tokens.</span>
-        </h1>
-        <p class="hero-subtitle">
-          Compete against players in fast-paced skill duels. Instant matchmaking, fair matchmaking algorithms, and immediate token rewards.
-        </p>
-
-        <div class="hero-stats-row">
-          <div class="stat-item">
-            <span class="stat-number">1,000</span>
-            <span class="stat-label">Welcome Tokens</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">&lt; 10s</span>
-            <span class="stat-label">Match Queues</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">100%</span>
-            <span class="stat-label">Skill-Based</span>
-          </div>
+        <div class="nav-links">
+          <a href="#games" class="nav-link active">Games</a>
+          <a href="#rewards" class="nav-link">Rewards</a>
+          <a href="#leaderboard" class="nav-link">Leaderboard</a>
+        </div>
+        <div class="nav-actions">
+          <button id="nav-login-btn" class="btn-secondary" type="button">Sign In</button>
+          <button id="nav-signup-btn" class="btn-primary" type="button">Get Started</button>
         </div>
       </div>
+    </header>
 
-      <!-- Right Column: Auth Card -->
-      <div class="hero-right">
-        <div class="auth-card">
-          <div class="auth-header">
-            <h3>Create an Account</h3>
-            <p>Sign in to claim your 1,000 tokens and enter live matches</p>
+    <!-- Hero Section -->
+    <main class="hero-section">
+      <div class="hero-container">
+        <!-- Left Column: Value Proposition -->
+        <div class="hero-left">
+          <div class="badge-pill">
+            <span class="badge-dot"></span>
+            <span>Verified 1v1 Skill Arenas</span>
           </div>
+          <h1 class="hero-title">
+            Play Skill Games. <br/><span class="highlight-green">Win Real Tokens.</span>
+          </h1>
+          <p class="hero-subtitle">
+            Compete against players in fast-paced skill duels. Instant matchmaking, fair matchmaking algorithms, and immediate token rewards.
+          </p>
 
-          <div class="auth-perks">
-            <div class="perk-item">
-              <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
-              <span><strong>1,000 Tokens</strong> instantly credited</span>
+          <div class="hero-stats-row">
+            <div class="stat-item">
+              <span class="stat-number">1,000</span>
+              <span class="stat-label">Welcome Tokens</span>
             </div>
-            <div class="perk-item">
-              <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-              <span>Encrypted &amp; secure authentication</span>
+            <div class="stat-item">
+              <span class="stat-number">&lt; 10s</span>
+              <span class="stat-label">Match Queues</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">Skill-Based</span>
             </div>
           </div>
+        </div>
 
-          <button id="google-login-btn" class="google-auth-btn" type="button">
-            <svg width="20" height="20" viewBox="0 0 48 48">
-              <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
-              <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
-              <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
-              <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/>
-            </svg>
-            <span>Continue with Google</span>
-          </button>
+        <!-- Right Column: Auth Card -->
+        <div class="hero-right">
+          <div class="auth-card">
+            <div class="auth-header">
+              <h3>Create an Account</h3>
+              <p>Sign in to claim your 1,000 tokens and enter live matches</p>
+            </div>
 
-          <p class="auth-footnote">By continuing, you agree to the Arena Terms of Service.</p>
+            <div class="auth-perks">
+              <div class="perk-item">
+                <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span><strong>1,000 Tokens</strong> instantly credited</span>
+              </div>
+              <div class="perk-item">
+                <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span>Encrypted &amp; secure authentication</span>
+              </div>
+            </div>
+
+            <button id="google-login-btn" class="google-auth-btn" type="button">
+              <svg width="20" height="20" viewBox="0 0 48 48">
+                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
+                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
+                <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
+                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/>
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+
+            <p class="auth-footnote">By continuing, you agree to the Arena Terms of Service.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </main>
+    </main>
   </div>
 
-<div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+  <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+
   <!-- Loading Screen (Auto-dismisses in 400ms) -->
   <div id="loading" class="center-screen hidden">
     <div class="loader-container">
@@ -908,7 +745,7 @@ html, body { overflow-x: hidden; }
           <button class="filter-chip active" data-category="all" type="button">All Games</button>
           <button class="filter-chip" data-category="reflex" type="button">Reflex Speed</button>
           <button class="filter-chip" data-category="math" type="button">Math Calculations</button>
-          <button class="filter-chip" data-category="brain" type="button">Memory & Brain</button>
+          <button class="filter-chip" data-category="brain" type="button">Memory &amp; Brain</button>
           <button class="filter-chip" data-category="strategy" type="button">Strategy</button>
         </div>
 
@@ -1087,26 +924,39 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
-      <!-- VIEW: ADD TOKENS -->
+      <!-- VIEW: ADD TOKENS (Paytm / UPI Live QR Integration) -->
       <section id="view-addtoken" class="app-view">
         <div class="section-card">
           <button class="back-link" id="addtoken-back-btn" type="button">‹ Back to Profile</button>
-          <h3>Add Tokens</h3>
-          <p class="section-sub">Top up your wallet balance</p>
+          <h3>Add Tokens via Paytm / UPI</h3>
+          <p class="section-sub">Scan the QR scanner, complete the payment, and submit your 12-digit UTR ID to top up your balance.</p>
+
+          <!-- Paytm QR Box -->
+          <div class="qr-box-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
+              <rect x="3" y="3" width="6" height="6" rx="1"></rect>
+              <rect x="15" y="3" width="6" height="6" rx="1"></rect>
+              <rect x="3" y="15" width="6" height="6" rx="1"></rect>
+              <path d="M15 15h3v3h-3zM18 18h3v3h-3zM15 21h3v-3M21 15v3"></path>
+            </svg>
+            <span>PAYTM / UPI QR</span>
+          </div>
 
           <div class="addtoken-amount-grid">
             <button class="amount-chip" data-amount="20" type="button">₹20</button>
-            <button class="amount-chip" data-amount="50" type="button">₹50</button>
+            <button class="amount-chip active" data-amount="50" type="button">₹50</button>
             <button class="amount-chip" data-amount="100" type="button">₹100</button>
             <button class="amount-chip" data-amount="200" type="button">₹200</button>
           </div>
 
           <div class="refer-redeem-box">
-            <span class="refer-code-lbl">Or Enter a Custom Amount</span>
-            <div class="refer-redeem-row">
-              <input type="number" id="addtoken-input" class="name-input" min="1" placeholder="Enter amount (₹)" />
-              <button id="addtoken-submit-btn" class="btn-primary" type="button">Add</button>
+            <span class="refer-code-lbl">Enter Deposit Amount &amp; 12-Digit Transaction (UTR) ID</span>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <input type="number" id="addtoken-input" class="name-input" min="1" value="50" placeholder="Enter amount (₹)" />
+              <input type="text" id="addtoken-utr-input" class="name-input" maxlength="16" placeholder="Paste 12-digit UTR ID (e.g. 481920384719)" />
+              <button id="addtoken-submit-btn" class="btn-primary" type="button">Submit UTR for Verification</button>
             </div>
+            <p id="addtoken-status-msg" class="refer-status-msg"></p>
           </div>
         </div>
       </section>
@@ -1198,8 +1048,7 @@ html, body { overflow-x: hidden; }
     </div>
 
 
-    <!-- Logout Confirmation Modal (this markup was missing from the project;
-         without it, clicking "Log Out" in the profile menu did nothing) -->
+    <!-- Logout Confirmation Modal -->
     <div id="logout-confirm-overlay" class="modal-overlay hidden">
       <div class="modal-card">
         <h3>Log Out?</h3>
@@ -1253,26 +1102,26 @@ html, body { overflow-x: hidden; }
   </div>
 
   <div id="page-match" class="hidden">
-<p id="match-loading" class="center-screen loading-text">Loading match...</p>
+    <p id="match-loading" class="center-screen loading-text">Loading match...</p>
 
-  <div id="match-root" class="match-wrap hidden">
-    <div class="vs-bar">
-      <div class="vs-player">
-        <img id="me-avatar" src="" alt="You" />
-        <span id="me-name">You</span>
+    <div id="match-root" class="match-wrap hidden">
+      <div class="vs-bar">
+        <div class="vs-player">
+          <img id="me-avatar" src="" alt="You" />
+          <span id="me-name">You</span>
+        </div>
+        <span class="vs-label">VS</span>
+        <div class="vs-player">
+          <span id="opp-name">Opponent</span>
+          <img id="opp-avatar" src="" alt="Opponent" />
+        </div>
       </div>
-      <span class="vs-label">VS</span>
-      <div class="vs-player">
-        <span id="opp-name">Opponent</span>
-        <img id="opp-avatar" src="" alt="Opponent" />
-      </div>
+
+      <div class="game-stage" id="stage"></div>
     </div>
-
-    <div class="game-stage" id="stage"></div>
-  </div>
   </div>
 
-  <!-- Supabase client library (external CDN — this is the one piece that can't be inlined) -->
+  <!-- Supabase client library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
 // ==== assets/supabaseClient.js ====
@@ -1280,8 +1129,7 @@ const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5Zm1iaWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDE3NDIsImV4cCI6MjEwMzIxNzc0Mn0.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ==== assets/auth.js (login handlers only — redirect logic replaced by the router below) ====
-// Check for existing session and redirect if already logged in
+// ==== assets/auth.js ====
 const googleLoginBtn = document.getElementById("google-login-btn");
 const navLoginBtn = document.getElementById("nav-login-btn");
 const navSignupBtn = document.getElementById("nav-signup-btn");
@@ -1318,57 +1166,25 @@ if (navSignupBtn) navSignupBtn.addEventListener("click", triggerGoogleLogin);
 // ==== assets/dashboard.js ====
 const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
-const BOT_WAIT_SECONDS = 5; // how long to wait for a real opponent before matching with a bot
-const BOT_MOVE_MIN_MS = 2000; // bot opponents always "think" for 2-3s, never instant
+const BOT_WAIT_SECONDS = 5;
+const BOT_MOVE_MIN_MS = 2000;
 const BOT_MOVE_MAX_MS = 3000;
 function botDelay() {
   return Math.floor(Math.random() * (BOT_MOVE_MAX_MS - BOT_MOVE_MIN_MS + 1)) + BOT_MOVE_MIN_MS;
 }
 
-// Only these catalog game types have a real live-multiplayer implementation
-// wired up in goToMatch()/page-match. Every other card still "plays" (vs a
-// bot) but must never enter the real matchmaking_queue table, since a live
-// match for an unsupported type has nowhere to route to and used to
-// dead-end on an "Unknown game type." screen when paired with a real human.
 const LIVE_ENABLED_TYPES = ["tictactoe"];
 
-// ----------------------------------------------------
-// Presence Heartbeat (requires schema7.sql)
-// ----------------------------------------------------
-// A queue row in matchmaking_queue used to be treated as "a live
-// player waiting" forever, even if that account had closed the tab
-// (or was a different account of yours that queued once and never
-// came back). That let matchmaking hand out "live opponent" matches
-// to accounts that weren't actually online.
-//
-// Fix: while the dashboard is open AND the tab is actually visible
-// and focused, we send a heartbeat every few seconds that stamps
-// public.users.last_seen for this account. The moment the tab is
-// backgrounded (switched away, minimized, screen off), heartbeats
-// stop entirely -- so last_seen naturally ages out and
-// claim_opponent() (see schema7.sql / schema_fix_stale_matchmaking.sql)
-// stops offering that account as a live opponent, and purges its
-// stale queue row -- across ALL game types, not just the one
-// currently being searched for -- so a leftover row from a
-// backgrounded/closed/crashed tab can't sit around and get matched
-// against later, exactly as the "Waiting for a live player... (5s)"
-// timer intends.
 const PRESENCE_HEARTBEAT_MS = 8000;
 let presenceHeartbeatTimer = null;
 
-// A tab only counts as "actually online" when it's both the visible
-// tab AND has window focus. Either alone isn't enough: a tab can be
-// technically visible but sit behind another focused app on desktop,
-// or (rarely) report focus while backgrounded on some mobile browsers.
-// Requiring both is the strict, safe check for "a person is really
-// looking at this right now."
 function isTabActive() {
   return document.visibilityState === "visible" && document.hasFocus();
 }
 
 async function touchPresence() {
   if (!currentUser) return;
-  if (!isTabActive()) return; // never refresh presence while backgrounded
+  if (!isTabActive()) return;
   try {
     await client
       .from("users")
@@ -1384,10 +1200,6 @@ function startPresenceHeartbeat() {
   if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
   presenceHeartbeatTimer = setInterval(touchPresence, PRESENCE_HEARTBEAT_MS);
 
-  // Fire an immediate heartbeat the instant the tab becomes visible/
-  // focused again, instead of waiting up to PRESENCE_HEARTBEAT_MS for
-  // the next tick -- this matters most right when someone switches back
-  // into a tab that's sitting in the matchmaking queue.
   document.addEventListener("visibilitychange", () => {
     if (isTabActive()) touchPresence();
   });
@@ -1396,11 +1208,6 @@ function startPresenceHeartbeat() {
   });
 }
 
-// ----------------------------------------------------
-// Game Catalog — single source of truth for the dashboard grid,
-// bot-arena dispatch (launchArena) and the live match.html dispatch.
-// icon = one emoji shown on the card banner; badge = small pill label.
-// ----------------------------------------------------
 const GAME_CATALOG = [
   { type: "tictactoe", name: "Tic-Tac-Toe Blitz", desc: "Classic 3x3 grid combat — get three in a row to win.", icon: "\u2716\uFE0F", badge: "CLASSIC", category: "brain" },
   { type: "rps", name: "RPS Duel", desc: "Best-of-5 rock, paper, scissors against your opponent.", icon: "\u270A", badge: "CLASSIC", category: "strategy" },
@@ -1449,7 +1256,6 @@ function renderGameCards() {
 }
 renderGameCards();
 
-// Indian Names Pool for Bot Fallback (boys & girls)
 const INDIAN_BOT_POOL = [
   { name: "Aarav Sharma", seed: "aarav" },
   { name: "Priya Patel", seed: "priya" },
@@ -1475,7 +1281,6 @@ function formatRupees(amount) {
   return sign + "\u20b9" + Math.abs(n).toLocaleString("en-IN");
 }
 
-// App State
 let currentUser = null;
 let currentBalance = 0;
 let matchHistory = [];
@@ -1486,14 +1291,12 @@ let matchmakingTimer = null;
 let queueChannel = null;
 let inQueue = false;
 
-// DOM Elements
 const loadingEl = document.getElementById("loading");
 const dashEl = document.getElementById("dashboard");
 const balanceEl = document.getElementById("balance-value");
 const playerNameEl = document.getElementById("player-name");
 const avatarEl = document.getElementById("avatar");
 
-// Profile View Elements
 const profileDisplayName = document.getElementById("profile-display-name");
 const profileViewAvatar = document.getElementById("profile-view-avatar");
 const editNameBtn = document.getElementById("edit-name-btn");
@@ -1503,7 +1306,6 @@ const saveNameBtn = document.getElementById("save-name-btn");
 const cancelNameBtn = document.getElementById("cancel-name-btn");
 const profileEmailEl = document.getElementById("profile-email");
 
-// Account Menu / Wallet / Refer & Earn / Add Tokens Elements
 const walletBadgeBtn = document.getElementById("wallet-badge-btn");
 const menuTransactionsBtn = document.getElementById("menu-transactions-btn");
 const menuAddTokensBtn = document.getElementById("menu-addtokens-btn");
@@ -1513,16 +1315,11 @@ const logoutConfirmOverlay = document.getElementById("logout-confirm-overlay");
 const logoutConfirmBtn = document.getElementById("logout-confirm-btn");
 const logoutCancelBtn = document.getElementById("logout-cancel-btn");
 
-// Arena turn-indicator elements (shared across every game type)
 const turnIndicatorText = document.getElementById("turn-indicator-text");
 const turnIndicatorDot = document.getElementById("turn-dot");
 const arenaUserSide = document.getElementById("arena-user-side");
 const arenaOppSide = document.getElementById("arena-opp-side");
 
-// Sets who the arena's "Your Turn / Opponent's Turn" indicator is showing
-// for right now. state: "you" (green, blinking) or "opp" (red, blinking).
-// Also glows/dims the matching avatar so the active player is obvious at
-// a glance, even with sound off or on a small screen.
 function setArenaTurn(state) {
   if (!turnIndicatorText || !turnIndicatorDot) return;
   if (state === "opp") {
@@ -1540,6 +1337,7 @@ function setArenaTurn(state) {
     arenaUserSide?.classList.add("side-active");
   }
 }
+
 const ledgerBackBtn = document.getElementById("ledger-back-btn");
 const referBackBtn = document.getElementById("refer-back-btn");
 const addtokenBackBtn = document.getElementById("addtoken-back-btn");
@@ -1550,16 +1348,16 @@ const submitReferralBtn = document.getElementById("submit-referral-btn");
 const referralStatusMsg = document.getElementById("referral-status-msg");
 const amountChips = document.querySelectorAll(".amount-chip");
 const addtokenInput = document.getElementById("addtoken-input");
+const addtokenUtrInput = document.getElementById("addtoken-utr-input");
 const addtokenSubmitBtn = document.getElementById("addtoken-submit-btn");
+const addtokenStatusMsg = document.getElementById("addtoken-status-msg");
 
-// Navigation & Category Elements
 const tabButtons = document.querySelectorAll(".tab-btn");
 const appViews = document.querySelectorAll(".app-view");
 const filterChips = document.querySelectorAll(".filter-chip");
 const gameCards = document.querySelectorAll(".game-card");
 const playButtons = document.querySelectorAll(".play-btn");
 
-// Matchmaking & Arena Overlays
 const matchOverlay = document.getElementById("match-overlay");
 const cancelMatchBtn = document.getElementById("cancel-match-btn");
 const matchTitle = document.getElementById("match-title");
@@ -1571,9 +1369,6 @@ const arenaOppAvatar = document.getElementById("arena-opp-avatar");
 const arenaOppName = document.getElementById("arena-opp-name");
 const arenaStage = document.getElementById("arena-stage");
 
-// ----------------------------------------------------
-// 1. Initialization
-// ----------------------------------------------------
 async function initDashboard() {
   try {
     const sessionRes = await client.auth.getSession();
@@ -1601,7 +1396,6 @@ async function initDashboard() {
   }
 }
 
-// 3-second absolute safety fallback
 setTimeout(() => {
   if (loadingEl && !loadingEl.classList.contains("hidden")) {
     loadingEl.classList.add("hidden");
@@ -1618,8 +1412,6 @@ async function loadUserName() {
     meta.name ||
     (currentUser.email ? currentUser.email.split("@")[0] : "Player");
 
-  // public.users is the source of truth other players read from (match.html).
-  // Always trust it over localStorage/auth metadata when it exists.
   let dbName = null;
   try {
     const { data: profileRow } = await client
@@ -1635,8 +1427,6 @@ async function loadUserName() {
   const initialName = dbName || fallbackName;
   setUserDisplayName(initialName);
 
-  // Keep public.users in sync so opponents always see the current name/avatar,
-  // and backfill it if the signup trigger never populated it.
   if (dbName !== initialName) {
     syncProfileToDatabase(initialName);
   }
@@ -1664,9 +1454,6 @@ function setUserDisplayName(name) {
   if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
 }
 
-// ----------------------------------------------------
-// 2. Wallet — always backed by Supabase, never local-only
-// ----------------------------------------------------
 async function loadWallet() {
   try {
     const { data: wallet, error } = await client
@@ -1682,8 +1469,6 @@ async function loadWallet() {
   }
 }
 
-// Applies a delta (+credit / -debit) to the Supabase wallet and keeps currentBalance in sync.
-// This is the single source of truth fix for the "resets on refresh" bug.
 async function persistWalletDelta(delta) {
   const { data: wallet, error } = await client
     .from("wallet")
@@ -1707,13 +1492,10 @@ async function persistWalletDelta(delta) {
 function flashBalance() {
   if (!balanceEl) return;
   balanceEl.classList.remove("balance-flash");
-  void balanceEl.offsetWidth; // restart animation
+  void balanceEl.offsetWidth;
   balanceEl.classList.add("balance-flash");
 }
 
-// ----------------------------------------------------
-// 3. Transactions & Match History — persisted, not local-only
-// ----------------------------------------------------
 async function loadTransactions() {
   try {
     const { data, error } = await client
@@ -1821,9 +1603,6 @@ async function recordMatch(game, opponent, result, reward) {
   }
 }
 
-// ----------------------------------------------------
-// 4. UI Rendering
-// ----------------------------------------------------
 function updateUI() {
   if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString("en-IN");
 
@@ -1905,9 +1684,6 @@ function renderMatchHistory() {
     .join("");
 }
 
-// ----------------------------------------------------
-// 5. Navigation & Category Filters
-// ----------------------------------------------------
 function switchView(targetId) {
   tabButtons.forEach((b) => b.classList.remove("active"));
   appViews.forEach((v) => v.classList.remove("active"));
@@ -1922,17 +1698,11 @@ tabButtons.forEach((btn) => {
 document.getElementById("profile-nav-btn")?.addEventListener("click", () => switchView("view-profile"));
 document.getElementById("nav-brand-logo")?.addEventListener("click", () => switchView("view-earn"));
 
-// Wallet badge (header) opens Token Transactions directly.
 walletBadgeBtn?.addEventListener("click", () => switchView("view-ledger"));
-
-// Profile account menu — these views are only reachable via a click,
-// never shown directly inside the profile section itself.
 menuTransactionsBtn?.addEventListener("click", () => switchView("view-ledger"));
 menuAddTokensBtn?.addEventListener("click", () => switchView("view-addtoken"));
 menuReferBtn?.addEventListener("click", () => switchView("view-refer"));
-// Logging out always asks for confirmation first — logout can only be
-// triggered from the Profile > Account menu (the top-nav no longer has
-// its own logout icon, so there is exactly one entry point).
+
 menuLogoutBtn?.addEventListener("click", () => {
   logoutConfirmOverlay?.classList.remove("hidden");
 });
@@ -1952,12 +1722,6 @@ ledgerBackBtn?.addEventListener("click", () => switchView("view-profile"));
 referBackBtn?.addEventListener("click", () => switchView("view-profile"));
 addtokenBackBtn?.addEventListener("click", () => switchView("view-profile"));
 
-// ----------------------------------------------------
-// 6b. Refer & Earn
-// ----------------------------------------------------
-// Builds a code like "VISHA859": first 5 letters of the email's local
-// part (uppercased, padded with X if the local part is shorter), plus
-// 3 random digits.
 function generateReferralCode(email) {
   const local = (email || "player").split("@")[0].replace(/[^a-zA-Z]/g, "").toUpperCase();
   const prefix = (local + "XXXXX").slice(0, 5);
@@ -1977,8 +1741,6 @@ async function loadReferralInfo() {
 
     let code = row && row.referral_code;
     if (!code) {
-      // First time here — generate and save one. Retry a couple of times
-      // in the rare case of a random collision with an existing code.
       for (let attempt = 0; attempt < 4 && !code; attempt++) {
         const candidate = generateReferralCode(currentUser.email);
         const { error: upErr } = await client
@@ -2045,9 +1807,7 @@ submitReferralBtn?.addEventListener("click", async () => {
 });
 
 // ----------------------------------------------------
-// 6c. Add Tokens — UI only for now, wired up later once a payment
-// provider is connected. Selecting a quick amount fills the custom
-// input; the Add button intentionally does nothing yet.
+// PAYTM / UPI ADD TOKENS FEATURE (Top up wallet)
 // ----------------------------------------------------
 amountChips.forEach((chip) => {
   chip.addEventListener("click", () => {
@@ -2055,6 +1815,62 @@ amountChips.forEach((chip) => {
     chip.classList.add("active");
     if (addtokenInput) addtokenInput.value = chip.getAttribute("data-amount");
   });
+});
+
+addtokenSubmitBtn?.addEventListener("click", async () => {
+  const amount = parseFloat(addtokenInput?.value);
+  const utr = (addtokenUtrInput?.value || "").trim();
+
+  if (!addtokenStatusMsg) return;
+  addtokenStatusMsg.className = "refer-status-msg";
+  addtokenStatusMsg.textContent = "";
+
+  if (isNaN(amount) || amount <= 0) {
+    addtokenStatusMsg.textContent = "Please enter a valid deposit amount.";
+    addtokenStatusMsg.className = "refer-status-msg error";
+    return;
+  }
+
+  if (!utr || utr.length < 8) {
+    addtokenStatusMsg.textContent = "Please enter a valid 12-digit UPI / Paytm UTR number.";
+    addtokenStatusMsg.className = "refer-status-msg error";
+    return;
+  }
+
+  addtokenSubmitBtn.disabled = true;
+  addtokenStatusMsg.textContent = "Submitting verification request...";
+
+  try {
+    const { error } = await client
+      .from("payment_requests")
+      .insert({
+        user_id: currentUser.id,
+        txn_id: utr,
+        amount_inr: amount,
+        tokens_to_credit: Math.floor(amount),
+        status: "pending"
+      });
+
+    if (error) {
+      if (error.code === "23505") {
+        addtokenStatusMsg.textContent = "This Transaction ID has already been submitted.";
+      } else {
+        addtokenStatusMsg.textContent = "Submission error: " + error.message;
+      }
+      addtokenStatusMsg.className = "refer-status-msg error";
+      return;
+    }
+
+    addtokenStatusMsg.textContent = `Deposit request for ₹${amount} submitted! Your wallet balance will automatically update once verified.`;
+    addtokenStatusMsg.className = "refer-status-msg success";
+    if (addtokenUtrInput) addtokenUtrInput.value = "";
+  } catch (err) {
+    console.error("Payment submission failed:", err);
+    addtokenStatusMsg.textContent = "Failed to submit request. Please try again.";
+    addtokenStatusMsg.className = "refer-status-msg error";
+  } finally {
+    addtokenSubmitBtn.disabled = false;
+  }
 });
 
 filterChips.forEach((chip) => {
@@ -2072,9 +1888,6 @@ filterChips.forEach((chip) => {
   });
 });
 
-// ----------------------------------------------------
-// 6. Profile Name Editing
-// ----------------------------------------------------
 editNameBtn?.addEventListener("click", () => {
   nameInput.value = playerNameEl.textContent;
   nameEditBox.classList.remove("hidden");
@@ -2093,8 +1906,6 @@ saveNameBtn?.addEventListener("click", async () => {
   nameEditBox.classList.add("hidden");
 
   if (currentUser) {
-    // Cache locally for instant reload, but the database write below is what
-    // actually makes opponents see the updated name/avatar in match.html.
     localStorage.setItem("arena_name_" + currentUser.id, newName);
     saveNameBtn.disabled = true;
     try {
@@ -2107,9 +1918,6 @@ saveNameBtn?.addEventListener("click", async () => {
   }
 });
 
-// ----------------------------------------------------
-// 7. Real Matchmaking (live users first, bot after 5s)
-// ----------------------------------------------------
 playButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     activeGame = { name: btn.getAttribute("data-game"), type: btn.getAttribute("data-type") };
@@ -2121,24 +1929,6 @@ playButtons.forEach((btn) => {
   });
 });
 
-// Looks for a live opponent already waiting in the queue for this game
-// and, if one exists, atomically claims their queue slot and creates the
-// match. Used both when we first join the queue AND on every poll tick
-// while we wait — this is what lets two real players who queue up within
-// a few seconds of each other actually find one another instead of both
-// timing out to a bot.
-//
-// This calls the "claim_opponent" database function (see schema4.sql /
-// schema_fix_stale_matchmaking.sql) instead of doing the select/delete/
-// insert here in the browser. That's required, not just a style choice:
-// the matchmaking_queue table's RLS policy only allows a user to delete
-// THEIR OWN row, so a client-side delete of the *opponent's* row was
-// always silently blocked by the database, which is why real-vs-real
-// matches never actually formed no matter how the polling was tuned.
-// The database function runs with elevated rights and locks the row
-// (FOR UPDATE SKIP LOCKED), so it can both bypass that restriction
-// safely and guarantee two players polling at the same instant can
-// never claim the same opponent.
 async function findAndClaimOpponent() {
   const { data: match, error } = await client.rpc("claim_opponent", {
     p_game_type: activeGame.type,
@@ -2150,13 +1940,6 @@ async function findAndClaimOpponent() {
     return null;
   }
 
-  // When no opponent is waiting, the database function returns NULL,
-  // but because it's typed to return a "matches" row, Supabase/PostgREST
-  // sends that back as an object with every field set to null (e.g.
-  // { id: null, game_type: null, ... }) instead of an actual null value.
-  // Without this check, that object is truthy and gets treated as a
-  // real match with a null id -- which is what sent you to
-  // "match.html?id=null" instead of correctly falling back to a bot.
   if (!match || !match.id) return null;
 
   return match;
@@ -2168,10 +1951,6 @@ async function beginMatchmaking() {
   if (matchStatus) matchStatus.textContent = "Deducting entry stake...";
   if (matchOverlay) matchOverlay.classList.remove("hidden");
 
-  // Stamp our own presence immediately so, the instant we join the
-  // queue below, any other genuinely-online player scanning for us
-  // sees a fresh last_seen right away rather than waiting for the
-  // next scheduled heartbeat tick.
   touchPresence();
 
   try {
@@ -2185,10 +1964,6 @@ async function beginMatchmaking() {
     return;
   }
 
-  // Games without a real live-match implementation always play a bot —
-  // they must never touch matchmaking_queue/claim_opponent, or a real
-  // opponent could get paired into a game screen that doesn't know how
-  // to render their game type ("Unknown game type.").
   if (!LIVE_ENABLED_TYPES.includes(activeGame.type)) {
     if (matchStatus) matchStatus.textContent = "Matching you with an opponent...";
     setTimeout(() => {
@@ -2205,7 +1980,6 @@ async function beginMatchmaking() {
 
   if (matchStatus) matchStatus.textContent = "Scanning live queue for players...";
 
-  // 1. Is someone already waiting for this game?
   const foundMatch = await findAndClaimOpponent();
   if (foundMatch) {
     if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
@@ -2217,7 +1991,6 @@ async function beginMatchmaking() {
     return;
   }
 
-  // 2. No one waiting — join the queue myself and watch for a live opponent
   await client.from("matchmaking_queue").upsert({ user_id: currentUser.id, game_type: activeGame.type });
 
   queueChannel = client
@@ -2247,11 +2020,6 @@ async function beginMatchmaking() {
     if (secondsLeft > 0) {
       if (matchStatus) matchStatus.textContent = "Waiting for a live player... (" + secondsLeft + "s)";
 
-      // Actively re-scan the queue for a live opponent who joined after us.
-      // (Previously we only checked once at the very start, so two real
-      // players queueing within the same few seconds would both sit here
-      // and both eventually time out to a bot instead of matching each
-      // other.)
       const liveMatch = await findAndClaimOpponent();
       if (liveMatch) {
         cleanupQueue();
@@ -2263,7 +2031,6 @@ async function beginMatchmaking() {
         return;
       }
 
-      // Poll as a backup in case realtime missed the insert
       const { data: mine } = await client
         .from("matches")
         .select("id")
@@ -2282,7 +2049,6 @@ async function beginMatchmaking() {
       return;
     }
 
-    // Timed out — fall back to a bot
     cleanupQueue();
     await client.from("matchmaking_queue").delete().eq("user_id", currentUser.id);
     const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
@@ -2321,21 +2087,12 @@ cancelMatchBtn?.addEventListener("click", async () => {
   }
 });
 
-// Belt-and-braces cleanup: if the player closes the tab, hits back, or
-// navigates away while still sitting in the queue, try to drop their
-// queue row immediately instead of relying only on the presence timeout
-// in claim_opponent() to catch it. This is best-effort (the request can
-// be interrupted by the unload), which is exactly why the presence
-// timeout above is the real fix and this is just a bonus.
 window.addEventListener("pagehide", () => {
   if (inQueue && currentUser) {
     client.from("matchmaking_queue").delete().eq("user_id", currentUser.id).then(() => {}, () => {});
   }
 });
 
-// ----------------------------------------------------
-// 8. Arena Engine
-// ----------------------------------------------------
 function launchArena(opponent) {
   activeOpponent = opponent;
   const myName = playerNameEl.textContent;
@@ -2360,7 +2117,6 @@ function launchArena(opponent) {
   }
 }
 
-// GAME 1: Reaction Duel
 function runReactionGame() {
   arenaStage.innerHTML =
     '<div class="reaction-box reaction-wait" id="reaction-box">' +
@@ -2398,7 +2154,6 @@ function runReactionGame() {
   });
 }
 
-// GAME 2: Cyber Math Duel
 function runCyberMathGame() {
   const n1 = Math.floor(Math.random() * 30) + 12;
   const n2 = Math.floor(Math.random() * 30) + 12;
@@ -2440,7 +2195,6 @@ function runCyberMathGame() {
   document.getElementById("opt-b")?.addEventListener("click", () => pickAnswer(optB));
 }
 
-// GAME 3: Color Clash
 function runColorClashGame() {
   const colors = [
     { text: "RED", css: "#ef4444" },
@@ -2475,7 +2229,6 @@ function runColorClashGame() {
   document.getElementById("match-no")?.addEventListener("click", () => evaluate(false));
 }
 
-// GAME 4: Memory Matrix
 function runMemoryMatrixGame() {
   let tilesHtml = "";
   for (let i = 0; i < 9; i++) {
@@ -2509,8 +2262,6 @@ function runMemoryMatrixGame() {
   }, 400);
 }
 
-// GAME 5: Tic-Tac-Toe Blitz (classic 3x3 — no forced turn clock; the bot
-// "thinks" for a humanized 2-3s before every move, same as other bot games)
 function runTicTacToeGame() {
   const board = Array(9).fill(null);
   const WIN_LINES = [
@@ -2518,7 +2269,7 @@ function runTicTacToeGame() {
     [0, 3, 6], [1, 4, 7], [2, 5, 8],
     [0, 4, 8], [2, 4, 6],
   ];
-  let playerTurn = true; // player is always X and moves first
+  let playerTurn = true;
   let over = false;
 
   renderBoard();
@@ -2598,14 +2349,9 @@ function runTicTacToeGame() {
     return WIN_LINES.find((line) => line.every((i) => board[i] === symbol));
   }
 
-  // Draws an animated line across the winning three cells, same idea as the
-  // real-time multiplayer version in assets/games/tictactoe.js.
   function drawWinLine(line) {
     const svg = document.getElementById("ttt-line");
     if (!svg) return;
-    // Coordinates are in the SVG's own 238x238 unit space (matching the
-    // 74px-cell + 8px-gap board); the SVG scales to fit the CSS box size
-    // at any breakpoint, so this math doesn't need to change on mobile.
     const cellSize = 74;
     const gap = 8;
     const step = cellSize + gap;
@@ -2694,9 +2440,6 @@ function runTicTacToeGame() {
   }
 }
 
-// ----------------------------------------------------
-// 9. Post-Match Resolution — now fully persisted
-// ----------------------------------------------------
 async function endDuel(won, analysisText) {
   let reward = -MATCH_ENTRY_FEE;
 
@@ -2744,7 +2487,6 @@ async function endDuel(won, analysisText) {
     arenaOverlay.classList.add("hidden");
   });
 }
-
 
 // ==== assets/match-common.js ====
 const MatchRoom = (() => {
@@ -2843,9 +2585,6 @@ function hashString(str) {
   return h;
 }
 
-// Deterministic PRNG (mulberry32) — used so both players in a live match
-// generate the exact same puzzle/sequence/word without any extra network
-// round trip. Seed it from the match id (+ an optional salt per game).
 function makeRng(seed) {
   let a = seed >>> 0;
   return function () {
@@ -2861,9 +2600,6 @@ function matchRng(salt) {
   return makeRng(hashString(id + (salt || "")));
 }
 
-// Generic judge for "race" style games — both players play an identical
-// (seeded) challenge independently and report a single finishing metric.
-// higherIsBetter=false means lowest metric (e.g. time in ms) wins.
 function createRaceJudge(stageEl, higherIsBetter, fmt) {
   let mine = null;
   let theirs = null;
@@ -2903,8 +2639,6 @@ function createRaceJudge(stageEl, higherIsBetter, fmt) {
   };
 }
 
-// Small confetti burst used to celebrate a win, both in live matches
-// (via showResult) and bot matches (via dashboard.js's endDuel).
 function celebrateWin(container) {
   if (!container) return;
   const layer = document.createElement("div");
@@ -2944,10 +2678,6 @@ async function showResult(stageEl, result, detail) {
   `;
   if (result === "win") celebrateWin(stageEl);
   document.getElementById("back-to-lobby-btn")?.addEventListener("click", () => returnToDashboardFromMatch());
-}
-function formatRupees(amount) {
-  const n = Number(amount) || 0;
-  return "\u20b9" + n.toLocaleString("en-IN");
 }
 
 // ==== assets/games/reaction.js ====
@@ -3024,7 +2754,6 @@ function initReactionDuel(stageEl, iAmPlayer1) {
 
 // ==== assets/games/tictactoe.js ====
 function initTicTacToe(stageEl, iAmPlayer1) {
-  // Inject styles once
   if (!document.getElementById("ttt-styles")) {
     const style = document.createElement("style");
     style.id = "ttt-styles";
@@ -3360,11 +3089,8 @@ function initMathDuel(stageEl, iAmPlayer1, matchId) {
   }
 }
 
-
 // ----------------------------------------------------
-// Single-file router — replaces the old separate index.html /
-// dashboard.html / match.html navigation with in-page section
-// switching, so nothing here ever depends on a second file existing.
+// Single-file router
 // ----------------------------------------------------
 async function goToMatch(matchId, gameType) {
   document.getElementById("dashboard")?.classList.add("hidden");
@@ -3429,10 +3155,6 @@ async function goToMatch(matchId, gameType) {
   }
 }
 
-// Leaving a live match (Back to Lobby): tear down the realtime channel and
-// refresh wallet/history from the DB, since a live match writes directly to
-// Supabase and the dashboard's in-memory numbers won't reflect that on their
-// own without a full page reload (which we intentionally no longer do).
 async function returnToDashboardFromMatch() {
   MatchRoom.cleanup();
   document.getElementById("page-match")?.classList.add("hidden");
