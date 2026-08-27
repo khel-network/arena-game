@@ -282,3 +282,57 @@ end;
 $$;
 
 grant execute on function public.redeem_referral_code(text) to authenticated;
+
+-- ------------------------------------------------------------
+-- PAYTM / UPI PAYMENT REQUESTS & AUTO-APPROVAL TRIGGER
+-- ------------------------------------------------------------
+create table if not exists public.payment_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users (id) on delete cascade,
+  txn_id text not null unique,
+  amount_inr numeric not null check (amount_inr > 0),
+  tokens_to_credit integer not null,
+  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  created_at timestamptz not null default now(),
+  reviewed_at timestamptz
+);
+alter table public.payment_requests enable row level security;
+
+drop policy if exists "Users can view own payments" on public.payment_requests;
+create policy "Users can view own payments"
+  on public.payment_requests for select using (auth.uid() = user_id);
+
+drop policy if exists "Users can submit payment" on public.payment_requests;
+create policy "Users can submit payment"
+  on public.payment_requests for insert with check (auth.uid() = user_id);
+
+drop policy if exists "Users can update own payments" on public.payment_requests;
+create policy "Users can update own payments"
+  on public.payment_requests for update using (auth.uid() = user_id);
+
+create or replace function public.process_payment_approval()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.status = 'approved' and old.status = 'pending' then
+    update public.wallet
+    set dummy_token = dummy_token + new.tokens_to_credit,
+        updated_at = now()
+    where user_id = new.user_id;
+
+    insert into public.transactions (user_id, description, type, amount)
+    values (new.user_id, 'Top-up: Paytm/UPI UTR ' || new.txn_id, 'credit', new.tokens_to_credit);
+
+    new.reviewed_at = now();
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_payment_approved on public.payment_requests;
+create trigger on_payment_approved
+  before update on public.payment_requests
+  for each row execute procedure public.process_payment_approval();
