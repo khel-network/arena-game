@@ -1,8 +1,8 @@
 -- ============================================================
--- Arena Master Schema (Hardened Security & Payment Verification)
+-- Arena - Master Schema (Secure Automated UPI Verification)
 -- ============================================================
 
--- 1. USERS
+-- 1. USERS TABLE
 create table if not exists public.users (
   id uuid primary key references auth.users (id) on delete cascade,
   email text,
@@ -25,7 +25,7 @@ create policy "Users can update their own profile" on public.users for update us
 drop policy if exists "Users can insert their own profile" on public.users;
 create policy "Users can insert their own profile" on public.users for insert with check (auth.uid() = id);
 
--- 2. WALLET (READ-ONLY FOR CLIENTS)
+-- 2. WALLET (Protected Server-Side Balance)
 create table if not exists public.wallet (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.users (id) on delete cascade,
@@ -33,14 +33,11 @@ create table if not exists public.wallet (
   updated_at timestamptz not null default now()
 );
 alter table public.wallet enable row level security;
-
 drop policy if exists "Users can view their own wallet" on public.wallet;
 create policy "Users can view their own wallet" on public.wallet for select using (auth.uid() = user_id);
-
--- Drop client update policy so users cannot manipulate token balance from browser console
 drop policy if exists "Users can update their own wallet" on public.wallet;
 
--- 3. MATCHMAKING QUEUE & MATCHES
+-- 3. MATCHMAKING & MATCHES
 create table if not exists public.matchmaking_queue (
   user_id uuid primary key references public.users (id) on delete cascade,
   game_type text not null,
@@ -99,7 +96,7 @@ alter table public.match_history enable row level security;
 drop policy if exists "Users can view their own match history" on public.match_history;
 create policy "Users can view their own match history" on public.match_history for select using (auth.uid() = user_id);
 
--- 5. PAYMENT REQUESTS (Strict RLS: Insert only with status='pending')
+-- 5. PAYMENT REQUESTS & RECEIVED BANK PAYMENTS
 create table if not exists public.payment_requests (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.users (id) on delete cascade,
@@ -111,36 +108,73 @@ create table if not exists public.payment_requests (
   reviewed_at timestamptz
 );
 alter table public.payment_requests enable row level security;
-
 drop policy if exists "Users can view own payments" on public.payment_requests;
 create policy "Users can view own payments" on public.payment_requests for select using (auth.uid() = user_id);
-
 drop policy if exists "Users can submit payment" on public.payment_requests;
-create policy "Users can submit payment" on public.payment_requests for insert with check (auth.uid() = user_id and status = 'pending');
+create policy "Users can submit payment" on public.payment_requests for insert with check (auth.uid() = user_id);
 
--- 6. AUTOMATED WALLET APPROVAL TRIGGER
-create or replace function public.process_payment_approval()
-returns trigger language plpgsql security definer set search_path = public as $$
+create table if not exists public.received_bank_payments (
+  id uuid primary key default gen_random_uuid(),
+  utr text not null unique,
+  amount numeric not null check (amount > 0),
+  is_used boolean not null default false,
+  created_at timestamptz not null default now()
+);
+alter table public.received_bank_payments enable row level security;
+
+-- 6. RPC: SECURE AUTOMATED UTR & AMOUNT VERIFICATION
+create or replace function public.verify_and_credit_deposit(p_utr text, p_amount numeric)
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_bank_record public.received_bank_payments;
+  v_user_id uuid := auth.uid();
+  v_cleaned_utr text := trim(p_utr);
+  v_tokens integer := floor(p_amount)::integer;
 begin
-  if new.status = 'approved' and old.status = 'pending' then
-    update public.wallet
-    set dummy_token = dummy_token + new.tokens_to_credit,
-        updated_at = now()
-    where user_id = new.user_id;
-
-    insert into public.transactions (user_id, description, type, amount)
-    values (new.user_id, 'Top-up: Paytm/UPI UTR ' || new.txn_id, 'credit', new.tokens_to_credit);
-
-    new.reviewed_at = now();
+  if v_user_id is null then
+    return json_build_object('success', false, 'message', 'User session expired.');
   end if;
-  return new;
+
+  if exists (select 1 from public.payment_requests where txn_id = v_cleaned_utr and status = 'approved') then
+    return json_build_object('success', false, 'message', 'This UTR has already been redeemed.');
+  end if;
+
+  -- Search bank records for exact matching UTR AND exact matching amount
+  select * into v_bank_record
+  from public.received_bank_payments
+  where utr = v_cleaned_utr
+    and amount = p_amount
+    and is_used = false
+  for update;
+
+  if v_bank_record.id is not null then
+    -- Mark as used
+    update public.received_bank_payments set is_used = true where id = v_bank_record.id;
+
+    -- Record approved payment request
+    insert into public.payment_requests (user_id, txn_id, amount_inr, tokens_to_credit, status, reviewed_at)
+    values (v_user_id, v_cleaned_utr, p_amount, v_tokens, 'approved', now())
+    on conflict (txn_id) do update set status = 'approved', reviewed_at = now();
+
+    -- Credit user wallet & log transaction
+    update public.wallet set dummy_token = dummy_token + v_tokens, updated_at = now() where user_id = v_user_id;
+    insert into public.transactions (user_id, description, type, amount)
+    values (v_user_id, 'Top-up: Paytm/UPI UTR ' || v_cleaned_utr, 'credit', v_tokens);
+
+    return json_build_object('success', true, 'status', 'approved', 'amount', v_tokens, 'message', 'Payment verified! ₹' || v_tokens || ' added to wallet.');
+  else
+    -- If no bank record matches the exact UTR + Amount combination, reject or hold as pending
+    return json_build_object('success', false, 'message', 'Invalid Transaction ID or amount mismatch. Please check your UTR and paid amount.');
+  end if;
 end;
 $$;
+grant execute on function public.verify_and_credit_deposit(text, numeric) to authenticated;
 
-drop trigger if exists on_payment_approved on public.payment_requests;
-create trigger on_payment_approved before update on public.payment_requests for each row execute procedure public.process_payment_approval();
-
--- 7. GAME STAKE & REWARD FUNCTIONS
+-- 7. GAME STAKE & SETTLEMENT FUNCTIONS
 create or replace function public.process_game_stake(p_fee integer, p_desc text)
 returns integer language plpgsql security definer set search_path = public as $$
 declare
@@ -178,7 +212,25 @@ end;
 $$;
 grant execute on function public.process_game_loss(text, text, integer) to authenticated;
 
--- 8. REFERRAL & CLAIM OPPONENT FUNCTIONS
+-- 8. INITIALIZATION & REFERRAL FUNCTIONS
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.users (id, email, full_name, avatar_url)
+  values (new.id, new.email, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url')
+  on conflict (id) do nothing;
+
+  insert into public.wallet (user_id, dummy_token)
+  values (new.id, 1000)
+  on conflict (user_id) do nothing;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users for each row execute procedure public.handle_new_user();
+
 create or replace function public.claim_opponent(p_game_type text, p_entry_fee integer default 50)
 returns public.matches language plpgsql security definer set search_path = public as $$
 declare
