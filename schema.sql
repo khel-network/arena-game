@@ -1,12 +1,8 @@
 -- ============================================================
--- Arena - MASTER SCHEMA v2 (safe to re-run, never deletes data)
--- Matches the new single-file index.html (presence-based
--- matchmaking, transaction ledger, match history, referrals).
+-- Arena - MASTER SCHEMA (Complete single-file database setup)
 -- ============================================================
 
--- ------------------------------------------------------------
--- USERS
--- ------------------------------------------------------------
+-- 1. USERS / PROFILES
 create table if not exists public.users (
   id uuid primary key references auth.users (id) on delete cascade,
   email text,
@@ -24,7 +20,6 @@ create unique index if not exists users_referral_code_key
 
 alter table public.users enable row level security;
 
-drop policy if exists "Users can view their own profile" on public.users;
 drop policy if exists "Authenticated users can view profiles" on public.users;
 create policy "Authenticated users can view profiles"
   on public.users for select
@@ -38,9 +33,7 @@ drop policy if exists "Users can insert their own profile" on public.users;
 create policy "Users can insert their own profile"
   on public.users for insert with check (auth.uid() = id);
 
--- ------------------------------------------------------------
--- WALLET
--- ------------------------------------------------------------
+-- 2. WALLET
 create table if not exists public.wallet (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.users (id) on delete cascade,
@@ -59,9 +52,7 @@ create policy "Users can update their own wallet"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
--- ------------------------------------------------------------
--- MATCHMAKING QUEUE
--- ------------------------------------------------------------
+-- 3. MATCHMAKING QUEUE
 create table if not exists public.matchmaking_queue (
   user_id uuid primary key references public.users (id) on delete cascade,
   game_type text not null,
@@ -81,9 +72,7 @@ drop policy if exists "Users can leave the queue" on public.matchmaking_queue;
 create policy "Users can leave the queue"
   on public.matchmaking_queue for delete using (auth.uid() = user_id);
 
--- ------------------------------------------------------------
--- MATCHES
--- ------------------------------------------------------------
+-- 4. MATCHES
 create table if not exists public.matches (
   id uuid primary key default gen_random_uuid(),
   game_type text not null,
@@ -112,9 +101,7 @@ create policy "Players can update their own matches"
   on public.matches for update
   using (auth.uid() = player1_id or auth.uid() = player2_id);
 
--- ------------------------------------------------------------
--- TRANSACTIONS (token ledger)
--- ------------------------------------------------------------
+-- 5. TRANSACTIONS (Token Ledger)
 create table if not exists public.transactions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.users (id) on delete cascade,
@@ -133,9 +120,7 @@ drop policy if exists "Users can insert their own transactions" on public.transa
 create policy "Users can insert their own transactions"
   on public.transactions for insert with check (auth.uid() = user_id);
 
--- ------------------------------------------------------------
--- MATCH HISTORY
--- ------------------------------------------------------------
+-- 6. MATCH HISTORY
 create table if not exists public.match_history (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.users (id) on delete cascade,
@@ -155,9 +140,32 @@ drop policy if exists "Users can insert their own match history" on public.match
 create policy "Users can insert their own match history"
   on public.match_history for insert with check (auth.uid() = user_id);
 
--- ------------------------------------------------------------
--- AUTO-PROVISION NEW USERS
--- ------------------------------------------------------------
+-- 7. PAYTM / UPI PAYMENT REQUESTS
+create table if not exists public.payment_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users (id) on delete cascade,
+  txn_id text not null unique,
+  amount_inr numeric not null check (amount_inr > 0),
+  tokens_to_credit integer not null,
+  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  created_at timestamptz not null default now(),
+  reviewed_at timestamptz
+);
+alter table public.payment_requests enable row level security;
+
+drop policy if exists "Users can view own payments" on public.payment_requests;
+create policy "Users can view own payments"
+  on public.payment_requests for select using (auth.uid() = user_id);
+
+drop policy if exists "Users can submit payment" on public.payment_requests;
+create policy "Users can submit payment"
+  on public.payment_requests for insert with check (auth.uid() = user_id);
+
+drop policy if exists "Users can update own payments" on public.payment_requests;
+create policy "Users can update own payments"
+  on public.payment_requests for update using (auth.uid() = user_id);
+
+-- 8. AUTO-PROVISION NEW USERS
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -186,10 +194,35 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
--- ------------------------------------------------------------
--- CLAIM_OPPONENT: atomically pairs you with a genuinely-online
--- waiting player, or returns null if none exist.
--- ------------------------------------------------------------
+-- 9. PROCESS PAYMENT APPROVAL
+create or replace function public.process_payment_approval()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.status = 'approved' and old.status = 'pending' then
+    update public.wallet
+    set dummy_token = dummy_token + new.tokens_to_credit,
+        updated_at = now()
+    where user_id = new.user_id;
+
+    insert into public.transactions (user_id, description, type, amount)
+    values (new.user_id, 'Top-up: Paytm/UPI UTR ' || new.txn_id, 'credit', new.tokens_to_credit);
+
+    new.reviewed_at = now();
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_payment_approved on public.payment_requests;
+create trigger on_payment_approved
+  before update on public.payment_requests
+  for each row execute procedure public.process_payment_approval();
+
+-- 10. CLAIM_OPPONENT FUNCTION
 create or replace function public.claim_opponent(p_game_type text, p_entry_fee integer default 50)
 returns public.matches
 language plpgsql
@@ -233,9 +266,7 @@ $$;
 
 grant execute on function public.claim_opponent(text, integer) to authenticated;
 
--- ------------------------------------------------------------
--- REDEEM_REFERRAL_CODE
--- ------------------------------------------------------------
+-- 11. REDEEM_REFERRAL_CODE FUNCTION
 create or replace function public.redeem_referral_code(p_code text)
 returns json
 language plpgsql
@@ -282,57 +313,3 @@ end;
 $$;
 
 grant execute on function public.redeem_referral_code(text) to authenticated;
-
--- ------------------------------------------------------------
--- PAYTM / UPI PAYMENT REQUESTS & AUTO-APPROVAL TRIGGER
--- ------------------------------------------------------------
-create table if not exists public.payment_requests (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.users (id) on delete cascade,
-  txn_id text not null unique,
-  amount_inr numeric not null check (amount_inr > 0),
-  tokens_to_credit integer not null,
-  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
-  created_at timestamptz not null default now(),
-  reviewed_at timestamptz
-);
-alter table public.payment_requests enable row level security;
-
-drop policy if exists "Users can view own payments" on public.payment_requests;
-create policy "Users can view own payments"
-  on public.payment_requests for select using (auth.uid() = user_id);
-
-drop policy if exists "Users can submit payment" on public.payment_requests;
-create policy "Users can submit payment"
-  on public.payment_requests for insert with check (auth.uid() = user_id);
-
-drop policy if exists "Users can update own payments" on public.payment_requests;
-create policy "Users can update own payments"
-  on public.payment_requests for update using (auth.uid() = user_id);
-
-create or replace function public.process_payment_approval()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  if new.status = 'approved' and old.status = 'pending' then
-    update public.wallet
-    set dummy_token = dummy_token + new.tokens_to_credit,
-        updated_at = now()
-    where user_id = new.user_id;
-
-    insert into public.transactions (user_id, description, type, amount)
-    values (new.user_id, 'Top-up: Paytm/UPI UTR ' || new.txn_id, 'credit', new.tokens_to_credit);
-
-    new.reviewed_at = now();
-  end if;
-  return new;
-end;
-$$;
-
-drop trigger if exists on_payment_approved on public.payment_requests;
-create trigger on_payment_approved
-  before update on public.payment_requests
-  for each row execute procedure public.process_payment_approval();
