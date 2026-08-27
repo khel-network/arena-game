@@ -37,7 +37,7 @@ alter table public.wallet enable row level security;
 drop policy if exists "Users can view their own wallet" on public.wallet;
 create policy "Users can view their own wallet" on public.wallet for select using (auth.uid() = user_id);
 
--- IMPORTANT: Drop client update policy so users cannot manipulate token balance from browser console
+-- Drop client update policy so users cannot manipulate token balance from browser console
 drop policy if exists "Users can update their own wallet" on public.wallet;
 
 -- 3. MATCHMAKING QUEUE & MATCHES
@@ -140,7 +140,7 @@ $$;
 drop trigger if exists on_payment_approved on public.payment_requests;
 create trigger on_payment_approved before update on public.payment_requests for each row execute procedure public.process_payment_approval();
 
--- 7. BOT & GAME PLAY TRIGGERS / FUNCTIONS
+-- 7. GAME STAKE & REWARD FUNCTIONS
 create or replace function public.process_game_stake(p_fee integer, p_desc text)
 returns integer language plpgsql security definer set search_path = public as $$
 declare
