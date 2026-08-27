@@ -8,15 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Favicon embedded directly as a data URI so it can never go missing from a separate file again -->
+  <!-- Favicon embedded directly as a data URI -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e131f'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
   <style>
 /* ======================================================================
 ==== Arena Design System
 ====================================================================== ==== */
 
-/* Professional font pairing — loaded here so it works even if the
-   HTML <head> doesn't have a Google Fonts <link> tag. */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
@@ -182,6 +180,7 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
   font-size: 0.85rem; font-weight: 600; color: var(--text-main); max-width: 100px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
 /* ====================================================================== */
 .app-main { max-width: 1240px; width: 100%; margin: 0 auto; padding: 24px 20px 60px; flex: 1; }
 .app-view { display: none; }
@@ -268,7 +267,6 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 
 .ledger-section, .section-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; }
 
-/* ====================================================================== */
 /* Profile Account Menu */
 .profile-menu-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
 .menu-row {
@@ -312,7 +310,7 @@ button.menu-row { font: inherit; }
 .refer-status-msg.success { color: var(--primary-green); }
 .refer-status-msg.error { color: var(--accent-red); }
 
-/* Add Tokens & QR Scanner Box */
+/* Add Tokens */
 .addtoken-amount-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 20px; }
 @media (min-width: 480px) { .addtoken-amount-grid { grid-template-columns: repeat(4, 1fr); } }
 .amount-chip {
@@ -320,14 +318,6 @@ button.menu-row { font: inherit; }
   padding: 14px 10px; border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center;
 }
 .amount-chip:hover, .amount-chip.active { background-color: var(--primary-green); color: #000; border-color: var(--primary-green); }
-
-.qr-box-wrap {
-  background: #fff; color: #000; width: 150px; height: 150px; border-radius: 8px;
-  margin: 14px auto; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 0.78rem; border: 4px solid #fff;
-}
-.qr-box-wrap svg { width: 90px; height: 90px; }
-
 .ledger-header h3, .section-card h3 { font-size: 1.15rem; font-weight: 700; }
 .ledger-sub, .section-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px; }
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -336,6 +326,16 @@ button.menu-row { font: inherit; }
 .ledger-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
 .badge-credit { background-color: rgba(0, 231, 1, 0.1); color: var(--primary-green); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
 .badge-debit { background-color: rgba(239, 68, 68, 0.1); color: var(--accent-red); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+
+/* Paytm QR Code Display Box */
+.qr-box-wrap {
+  background: #ffffff; color: #000; width: auto; max-width: 240px; border-radius: 12px;
+  margin: 16px auto; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 2px solid var(--border-highlight); box-shadow: 0 10px 24px -10px rgba(0,0,0,0.6);
+}
+.qr-box-wrap img {
+  width: 190px; height: 190px; border-radius: 6px; display: block;
+}
 
 /* ====================================================================== */
 .modal-overlay {
@@ -477,34 +477,127 @@ button.menu-row { font: inherit; }
 .result-banner.draw { color: var(--accent-gold); }
 .btn { display: inline-block; margin-top: 18px; background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 12px 22px; border-radius: var(--radius-sm); text-decoration: none; min-height: 44px; }
 
-/* Visual Polish & Animations */
+/* ======================================================================
+==== High-Tech Visual Polish & Animations
+====================================================================== ==== */
+
 body::before {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background-image: linear-gradient(rgba(0, 231, 1, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 231, 1, 0.05) 1px, transparent 1px);
-  background-size: 42px 42px; mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%); opacity: 0.6;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 231, 1, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 231, 1, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%);
+  opacity: 0.6;
 }
+
 .play-btn::after, .btn-primary::after, .google-auth-btn::after {
-  content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  content: "";
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%; height: 100%;
   background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none;
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+  pointer-events: none;
 }
 .play-btn:hover::after, .btn-primary:hover::after { left: 130%; }
-.play-btn:hover, .btn-primary:hover { box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.15), 0 10px 26px -10px var(--primary-glow); transform: translateY(-1px); }
-.tab-btn.active { position: relative; }
-.tab-btn.active::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -2px; height: 2px; background: var(--primary-green); box-shadow: 0 0 8px var(--primary-green); border-radius: 2px; }
 
-/* Toast Notifications */
+.play-btn:hover, .btn-primary:hover {
+  box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.15), 0 10px 26px -10px var(--primary-glow);
+  transform: translateY(-1px);
+}
+
+.tab-btn.active { position: relative; }
+.tab-btn.active::after {
+  content: "";
+  position: absolute;
+  left: 14px; right: 14px; bottom: -2px;
+  height: 2px;
+  background: var(--primary-green);
+  box-shadow: 0 0 8px var(--primary-green);
+  border-radius: 2px;
+}
+
+.card-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.7s ease;
+}
+.game-card:hover .card-media::before { transform: translateX(100%); }
+
+.hero-banner::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(0, 231, 1, 0.35), rgba(56, 189, 248, 0.15), rgba(0, 231, 1, 0.35));
+  background-size: 200% 200%;
+  animation: gradientShift 6s ease infinite;
+  opacity: 0.5;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.badge-pill { animation: badgeGlow 2.4s ease-in-out infinite; }
+@keyframes badgeGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(0, 231, 1, 0); }
+  50% { box-shadow: 0 0 14px rgba(0, 231, 1, 0.35); }
+}
+
+.result-card h2 { animation: resultPop 0.45s var(--ease-smooth); }
+@keyframes resultPop {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.radar-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--primary-green);
+  opacity: 0.15;
+  animation: pulse 1.6s ease-out infinite;
+  animation-delay: 0.5s;
+}
+
+@keyframes rowIn {
+  from { background-color: rgba(0, 231, 1, 0.14); }
+  to { background-color: transparent; }
+}
+.ledger-table tbody tr:first-child td,
+#matches-body tr:first-child td { animation: rowIn 1.2s ease-out; }
+
+/* ======================================================================
+==== Toast Notifications
+====================================================================== ==== */
 .toast-stack {
   position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 99998;
   display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
   pointer-events: none; max-width: calc(100vw - 28px);
 }
 .toast {
-  pointer-events: auto; display: flex; align-items: center; gap: 10px;
+  pointer-events: auto;
+  display: flex; align-items: center; gap: 10px;
   background-color: var(--bg-surface); border: 1px solid var(--border-highlight);
-  border-left: 3px solid var(--primary-green); border-radius: var(--radius-sm); padding: 10px 14px;
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5); font-size: 0.82rem; font-weight: 600; color: var(--text-main);
+  border-left: 3px solid var(--primary-green);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+  font-size: 0.82rem; font-weight: 600; color: var(--text-main);
   max-width: 320px; animation: toastIn 0.3s var(--ease-smooth);
 }
 .toast.toast-debit { border-left-color: var(--accent-red); }
@@ -523,7 +616,9 @@ body::before {
   .toast { max-width: none; }
 }
 
-/* Arena Turn Indicator */
+/* ======================================================================
+==== Turn Indicator
+====================================================================== ==== */
 .arena-turn-indicator {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   margin: -6px 0 18px; padding: 8px 16px; border-radius: 999px;
@@ -533,30 +628,26 @@ body::before {
 .turn-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .turn-dot-you { background-color: var(--primary-green); box-shadow: 0 0 8px var(--primary-green); animation: turnDotPulse 1.4s ease-in-out infinite; }
 .turn-dot-opp { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); animation: turnDotPulse 1.4s ease-in-out infinite; }
-@keyframes turnDotPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
+@keyframes turnDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
 .turn-text { font-family: var(--font-heading); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.01em; }
-.turn-text-you { color: var(--primary-green); }
-.turn-text-opp { color: var(--accent-red); }
+.turn-text-you { color: var(--primary-green); animation: turnTextGlowGreen 1.4s ease-in-out infinite; }
+.turn-text-opp { color: var(--accent-red); animation: turnTextGlowRed 1.4s ease-in-out infinite; }
+@keyframes turnTextGlowGreen {
+  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(0, 231, 1, 0.55); }
+  50% { opacity: 0.55; text-shadow: 0 0 2px rgba(0, 231, 1, 0); }
+}
+@keyframes turnTextGlowRed {
+  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(241, 100, 100, 0.55); }
+  50% { opacity: 0.55; text-shadow: 0 0 2px rgba(241, 100, 100, 0); }
+}
 .player-stat { transition: opacity 0.25s ease; opacity: 0.55; }
 .player-stat.side-active { opacity: 1; }
 .player-stat.side-active .arena-avatar { box-shadow: 0 0 0 3px rgba(0, 231, 1, 0.18); }
 .player-stat.side-active.opp-side .arena-avatar { box-shadow: 0 0 0 3px rgba(241, 100, 100, 0.18); border-color: var(--accent-red); }
 .player-stat:not(.side-active) .arena-avatar { border-color: var(--border-color); }
-
-@media (max-width: 480px) {
-  .app-main { padding-left: 14px; padding-right: 14px; }
-  .nav-container { padding-left: 14px; padding-right: 14px; gap: 10px; }
-  .hero-banner { padding: 18px 16px; }
-  .modal-card, .arena-card { padding: 24px 16px; }
-  .footer-links-group { grid-template-columns: repeat(2, 1fr); gap: 18px 16px; }
-  .footer-bottom { justify-content: center; text-align: center; }
-  .arena-header { gap: 6px; }
-  .arena-name { max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .quiz-options { grid-template-columns: 1fr; }
-  .hero-stats-row { gap: 20px; }
-  .card-title { font-size: 1rem; }
-}
-html, body { overflow-x: hidden; }
   </style>
 </head>
 <body class="app-body">
@@ -709,7 +800,7 @@ html, body { overflow-x: hidden; }
           </button>
 
           <button id="profile-nav-btn" class="user-profile-chip" type="button" title="View Profile">
-            <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=vishal" alt="Avatar" />
+            <img id="avatar" class="user-avatar" src="" alt="Avatar" />
             <span id="player-name" class="user-name">Vishal</span>
           </button>
         </div>
@@ -720,7 +811,7 @@ html, body { overflow-x: hidden; }
     <main class="app-main">
       <!-- VIEW 1: EARN -->
       <section id="view-earn" class="app-view active">
-        <!-- Next Cashout Progress Bar (Freecash Style) -->
+        <!-- Next Cashout Progress Bar -->
         <div class="cashout-progress-banner">
           <div class="progress-info">
             <span class="progress-title">Next Cashout Threshold</span>
@@ -924,22 +1015,22 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
-      <!-- VIEW: ADD TOKENS (Paytm / UPI Live QR Integration) -->
+      <!-- VIEW: ADD TOKENS (Paytm / UPI QR & UTR Verification) -->
       <section id="view-addtoken" class="app-view">
         <div class="section-card">
           <button class="back-link" id="addtoken-back-btn" type="button">‹ Back to Profile</button>
           <h3>Add Tokens via Paytm / UPI</h3>
-          <p class="section-sub">Scan the QR scanner, complete the payment, and submit your 12-digit UTR ID to top up your balance.</p>
+          <p class="section-sub">Scan the QR code in any UPI app (Paytm, PhonePe, GPay), complete payment, and paste the 12-digit UTR ID below.</p>
 
-          <!-- Paytm QR Box -->
-          <div class="qr-box-wrap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2">
-              <rect x="3" y="3" width="6" height="6" rx="1"></rect>
-              <rect x="15" y="3" width="6" height="6" rx="1"></rect>
-              <rect x="3" y="15" width="6" height="6" rx="1"></rect>
-              <path d="M15 15h3v3h-3zM18 18h3v3h-3zM15 21h3v-3M21 15v3"></path>
-            </svg>
-            <span>PAYTM / UPI QR</span>
+          <!-- Paytm / UPI QR Code Box -->
+          <div style="text-align:center; margin: 16px 0;">
+            <div class="qr-box-wrap">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=paytm.s1ax1t9@pty%26pn=Arena%20Game" 
+                   alt="Paytm UPI QR Scanner" />
+              <div style="margin-top:8px; font-size:0.8rem; font-weight:700; color:#12161f; font-family:var(--font-heading);">
+                UPI ID: <span style="color:#0284c7;">paytm.s1ax1t9@pty</span>
+              </div>
+            </div>
           </div>
 
           <div class="addtoken-amount-grid">
@@ -950,11 +1041,11 @@ html, body { overflow-x: hidden; }
           </div>
 
           <div class="refer-redeem-box">
-            <span class="refer-code-lbl">Enter Deposit Amount &amp; 12-Digit Transaction (UTR) ID</span>
+            <span class="refer-code-lbl">Submit Payment for Instant Verification</span>
             <div style="display:flex; flex-direction:column; gap:10px;">
               <input type="number" id="addtoken-input" class="name-input" min="1" value="50" placeholder="Enter amount (₹)" />
-              <input type="text" id="addtoken-utr-input" class="name-input" maxlength="16" placeholder="Paste 12-digit UTR ID (e.g. 481920384719)" />
-              <button id="addtoken-submit-btn" class="btn-primary" type="button">Submit UTR for Verification</button>
+              <input type="text" id="addtoken-utr-input" class="name-input" maxlength="16" placeholder="Paste 12-digit UPI / Paytm UTR number" />
+              <button id="addtoken-submit-btn" class="btn-primary" type="button">Submit UTR Verification</button>
             </div>
             <p id="addtoken-status-msg" class="refer-status-msg"></p>
           </div>
@@ -1047,7 +1138,6 @@ html, body { overflow-x: hidden; }
       </div>
     </div>
 
-
     <!-- Logout Confirmation Modal -->
     <div id="logout-confirm-overlay" class="modal-overlay hidden">
       <div class="modal-card">
@@ -1103,7 +1193,6 @@ html, body { overflow-x: hidden; }
 
   <div id="page-match" class="hidden">
     <p id="match-loading" class="center-screen loading-text">Loading match...</p>
-
     <div id="match-root" class="match-wrap hidden">
       <div class="vs-bar">
         <div class="vs-player">
@@ -1116,7 +1205,6 @@ html, body { overflow-x: hidden; }
           <img id="opp-avatar" src="" alt="Opponent" />
         </div>
       </div>
-
       <div class="game-stage" id="stage"></div>
     </div>
   </div>
@@ -1512,7 +1600,7 @@ async function loadTransactions() {
       date: new Date(t.created_at).toLocaleString()
     }));
   } catch (e) {
-    console.warn("Could not load transactions (run schema3.sql to enable the live ledger):", e);
+    console.warn("Could not load transactions:", e);
     transactions = [];
   }
 }
@@ -1554,7 +1642,7 @@ async function recordTransaction(desc, type, amount) {
     });
     if (error) throw error;
   } catch (e) {
-    console.warn("Transaction not persisted (run schema3.sql):", e);
+    console.warn("Transaction not persisted:", e);
   }
 }
 
@@ -1575,7 +1663,7 @@ async function loadMatchHistory() {
       date: new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     }));
   } catch (e) {
-    console.warn("Could not load match history (run schema3.sql to enable this):", e);
+    console.warn("Could not load match history:", e);
     matchHistory = [];
   }
 }
@@ -1599,7 +1687,7 @@ async function recordMatch(game, opponent, result, reward) {
     });
     if (error) throw error;
   } catch (e) {
-    console.warn("Match result not persisted (run schema3.sql):", e);
+    console.warn("Match result not persisted:", e);
   }
 }
 
@@ -1684,6 +1772,9 @@ function renderMatchHistory() {
     .join("");
 }
 
+// ----------------------------------------------------
+// Navigation & Category Filters
+// ----------------------------------------------------
 function switchView(targetId) {
   tabButtons.forEach((b) => b.classList.remove("active"));
   appViews.forEach((v) => v.classList.remove("active"));
@@ -1722,6 +1813,9 @@ ledgerBackBtn?.addEventListener("click", () => switchView("view-profile"));
 referBackBtn?.addEventListener("click", () => switchView("view-profile"));
 addtokenBackBtn?.addEventListener("click", () => switchView("view-profile"));
 
+// ----------------------------------------------------
+// Refer & Earn
+// ----------------------------------------------------
 function generateReferralCode(email) {
   const local = (email || "player").split("@")[0].replace(/[^a-zA-Z]/g, "").toUpperCase();
   const prefix = (local + "XXXXX").slice(0, 5);
@@ -1752,7 +1846,7 @@ async function loadReferralInfo() {
     }
     myReferralCodeEl.textContent = code || "—";
   } catch (e) {
-    console.warn("Could not load referral code (run schema6.sql to enable Refer & Earn):", e);
+    console.warn("Could not load referral code:", e);
     myReferralCodeEl.textContent = "Unavailable";
   }
 }
@@ -1798,7 +1892,7 @@ submitReferralBtn?.addEventListener("click", async () => {
       referralStatusMsg.className = "refer-status-msg error";
     }
   } catch (e) {
-    console.warn("Referral redemption failed (run schema6.sql to enable this):", e);
+    console.warn("Referral redemption failed:", e);
     referralStatusMsg.textContent = "Referral program isn't set up yet — please try again later.";
     referralStatusMsg.className = "refer-status-msg error";
   } finally {
@@ -1807,7 +1901,7 @@ submitReferralBtn?.addEventListener("click", async () => {
 });
 
 // ----------------------------------------------------
-// PAYTM / UPI ADD TOKENS FEATURE (Top up wallet)
+// PAYTM / UPI ADD TOKENS FEATURE
 // ----------------------------------------------------
 amountChips.forEach((chip) => {
   chip.addEventListener("click", () => {
@@ -1861,7 +1955,7 @@ addtokenSubmitBtn?.addEventListener("click", async () => {
       return;
     }
 
-    addtokenStatusMsg.textContent = `Deposit request for ₹${amount} submitted! Your wallet balance will automatically update once verified.`;
+    addtokenStatusMsg.textContent = `Deposit request for ₹${amount} submitted! Your wallet will update automatically upon verification.`;
     addtokenStatusMsg.className = "refer-status-msg success";
     if (addtokenUtrInput) addtokenUtrInput.value = "";
   } catch (err) {
@@ -1888,6 +1982,9 @@ filterChips.forEach((chip) => {
   });
 });
 
+// ----------------------------------------------------
+// Profile Name Editing
+// ----------------------------------------------------
 editNameBtn?.addEventListener("click", () => {
   nameInput.value = playerNameEl.textContent;
   nameEditBox.classList.remove("hidden");
@@ -1918,6 +2015,9 @@ saveNameBtn?.addEventListener("click", async () => {
   }
 });
 
+// ----------------------------------------------------
+// Matchmaking Engine
+// ----------------------------------------------------
 playButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     activeGame = { name: btn.getAttribute("data-game"), type: btn.getAttribute("data-type") };
@@ -1941,7 +2041,6 @@ async function findAndClaimOpponent() {
   }
 
   if (!match || !match.id) return null;
-
   return match;
 }
 
@@ -2093,6 +2192,9 @@ window.addEventListener("pagehide", () => {
   }
 });
 
+// ----------------------------------------------------
+// Arena Engine & Games
+// ----------------------------------------------------
 function launchArena(opponent) {
   activeOpponent = opponent;
   const myName = playerNameEl.textContent;
