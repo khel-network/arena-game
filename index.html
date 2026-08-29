@@ -15,8 +15,6 @@
 ==== Arena Design System
 ====================================================================== ==== */
 
-/* Professional font pairing — loaded here so it works even if the
-   HTML <head> doesn't have a Google Fonts <link> tag. */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
@@ -73,11 +71,6 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Keep double-tap-to-zoom disabled on buttons/links (the original intent of
-   the removed html { touch-action: manipulation } rule) without applying it
-   to <html> itself -- that global rule was what silently blocked two-finger
-   trackpad scrolling in desktop Chrome (pinch-zoom still worked because
-   "manipulation" explicitly allows it, only panning/scroll got eaten). */
 button, a, .play-btn, .tab-btn, .filter-chip, .game-card, .quiz-option, .ttt-cell {
   touch-action: manipulation;
 }
@@ -108,7 +101,6 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
   transform: scale(0.97);
 }
 
-/* ====================================================================== */
 .center-screen {
   position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
   background-color: var(--bg-dark); display: flex; align-items: center; justify-content: center; z-index: 99999;
@@ -126,7 +118,6 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
 
-/* ====================================================================== */
 .top-nav {
   background-color: rgba(14, 19, 31, 0.95); backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100;
@@ -187,7 +178,6 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
   font-size: 0.85rem; font-weight: 600; color: var(--text-main); max-width: 100px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-/* ====================================================================== */
 .app-main { max-width: 1240px; width: 100%; margin: 0 auto; padding: 24px 20px 60px; flex: 1; }
 .app-view { display: none; }
 @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
@@ -248,7 +238,6 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 }
 .play-btn:hover { background-color: #1d4ed8; }
 
-/* ====================================================================== */
 .profile-header-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
 @media (min-width: 840px) { .profile-header-card { grid-template-columns: 1fr 1.2fr; } }
 .profile-left { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
@@ -273,8 +262,6 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 
 .ledger-section, .section-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; }
 
-/* ====================================================================== */
-/* Profile Account Menu */
 .profile-menu-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
 .menu-row {
   display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
@@ -302,7 +289,6 @@ button.menu-row { font: inherit; }
 }
 .back-link:hover { color: var(--primary-green); }
 
-/* Refer & Earn */
 .refer-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
 .refer-info-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
 .refer-info-num { font-size: 1.4rem; font-weight: 800; color: var(--primary-green); font-family: var(--font-heading); }
@@ -317,7 +303,6 @@ button.menu-row { font: inherit; }
 .refer-status-msg.success { color: var(--primary-green); }
 .refer-status-msg.error { color: var(--accent-red); }
 
-/* Add Tokens */
 .addtoken-amount-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 20px; }
 @media (min-width: 480px) { .addtoken-amount-grid { grid-template-columns: repeat(4, 1fr); } }
 .amount-chip {
@@ -334,7 +319,6 @@ button.menu-row { font: inherit; }
 .badge-credit { background-color: rgba(0, 231, 1, 0.1); color: var(--primary-green); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
 .badge-debit { background-color: rgba(239, 68, 68, 0.1); color: var(--accent-red); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
 
-/* ====================================================================== */
 .modal-overlay {
   position: fixed; inset: 0; background-color: rgba(10, 13, 20, 0.85); backdrop-filter: blur(8px);
   display: flex; align-items: center; align-items: safe center; justify-content: center; z-index: 1000;
@@ -374,7 +358,6 @@ button.menu-row { font: inherit; }
 .btn-primary { background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; min-height: 44px; position: relative; overflow: hidden; }
 .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); font-weight: 600; font-size: 0.88rem; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; min-height: 44px; }
 
-/* ====================================================================== */
 .app-footer { background-color: var(--bg-surface); border-top: 1px solid var(--border-color); padding: 40px 20px 20px; margin-top: auto; }
 .footer-container { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; padding-bottom: 30px; border-bottom: 1px solid var(--border-color); }
 @media (min-width: 768px) { .footer-container { grid-template-columns: 1.4fr 2fr; } }
@@ -387,7 +370,6 @@ button.menu-row { font: inherit; }
 .footer-col a:hover { color: var(--primary-green); }
 .footer-bottom { max-width: 1240px; margin: 20px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-dim); flex-wrap: wrap; gap: 8px; }
 
-/* ====================================================================== */
 .landing-body {
   background-color: var(--bg-dark);
   background-image: radial-gradient(circle at 15% 10%, rgba(0, 231, 1, 0.08), transparent 40%), radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.06), transparent 45%);
@@ -430,7 +412,6 @@ button.menu-row { font: inherit; }
 .google-auth-btn:hover { box-shadow: 0 8px 20px -8px rgba(255, 255, 255, 0.25); transform: translateY(-1px); }
 .auth-footnote { font-size: 0.76rem; color: var(--text-dim); text-align: center; line-height: 1.5; }
 
-/* ====================================================================== */
 .match-wrap { max-width: 720px; width: 100%; margin: 0 auto; padding: 20px 16px 60px; animation: fadeSlideUp 0.4s var(--ease-smooth); }
 .vs-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; }
 .vs-player { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; }
@@ -474,11 +455,6 @@ button.menu-row { font: inherit; }
 .result-banner.draw { color: var(--accent-gold); }
 .btn { display: inline-block; margin-top: 18px; background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 12px 22px; border-radius: var(--radius-sm); text-decoration: none; min-height: 44px; }
 
-/* ======================================================================
-==== NEW: High-Tech Visual Polish & Animations (added)
-====================================================================== ==== */
-
-/* Subtle animated grid backdrop for a "high-tech" feel behind the app */
 body::before {
   content: "";
   position: fixed;
@@ -494,7 +470,6 @@ body::before {
   opacity: 0.6;
 }
 
-/* Neon glow + shine sweep on primary call-to-action buttons */
 .play-btn::after, .btn-primary::after, .google-auth-btn::after {
   content: "";
   position: absolute;
@@ -512,7 +487,6 @@ body::before {
   transform: translateY(-1px);
 }
 
-/* Glowing active nav tab underline */
 .tab-btn.active { position: relative; }
 .tab-btn.active::after {
   content: "";
@@ -524,7 +498,6 @@ body::before {
   border-radius: 2px;
 }
 
-/* Shimmer sweep across card media on hover — high-tech card feel */
 .card-media::before {
   content: "";
   position: absolute;
@@ -535,7 +508,6 @@ body::before {
 }
 .game-card:hover .card-media::before { transform: translateX(100%); }
 
-/* Animated gradient sheen on the hero banner border */
 .hero-banner::before {
   content: "";
   position: absolute;
@@ -553,14 +525,12 @@ body::before {
   100% { background-position: 0% 50%; }
 }
 
-/* Badge pill breathing glow (used for "live" / matchmaking indicators) */
 .badge-pill { animation: badgeGlow 2.4s ease-in-out infinite; }
 @keyframes badgeGlow {
   0%, 100% { box-shadow: 0 0 0 rgba(0, 231, 1, 0); }
   50% { box-shadow: 0 0 14px rgba(0, 231, 1, 0.35); }
 }
 
-/* Smoother, more "arcade" result reveal */
 .result-card h2 { animation: resultPop 0.45s var(--ease-smooth); }
 @keyframes resultPop {
   0% { transform: scale(0.7); opacity: 0; }
@@ -568,7 +538,6 @@ body::before {
   100% { transform: scale(1); }
 }
 
-/* Radar pulse gets a second, offset ring for a richer scanning effect */
 .radar-pulse::after {
   content: "";
   position: absolute;
@@ -580,7 +549,6 @@ body::before {
   animation-delay: 0.5s;
 }
 
-/* Table rows get a soft highlight sweep when new ledger/match rows arrive */
 @keyframes rowIn {
   from { background-color: rgba(0, 231, 1, 0.14); }
   to { background-color: transparent; }
@@ -588,9 +556,6 @@ body::before {
 .ledger-table tbody tr:first-child td,
 #matches-body tr:first-child td { animation: rowIn 1.2s ease-out; }
 
-/* ======================================================================
-==== Minimal Toast Notifications (wallet credit/debit)
-====================================================================== ==== */
 .toast-stack {
   position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 99998;
   display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
@@ -622,9 +587,6 @@ body::before {
   .toast { max-width: none; }
 }
 
-/* ======================================================================
-==== Turn Indicator (Your Turn / Opponent's Turn)
-====================================================================== ==== */
 .arena-turn-indicator {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   margin: -6px 0 18px; padding: 8px 16px; border-radius: 999px;
@@ -649,18 +611,12 @@ body::before {
   0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(241, 100, 100, 0.55); }
   50% { opacity: 0.55; text-shadow: 0 0 2px rgba(241, 100, 100, 0); }
 }
-/* Whichever side currently has the turn gets a glowing ring + slightly
-   raised look; the inactive side visibly dims so it always reads clearly
-   at a glance, on any game type. */
 .player-stat { transition: opacity 0.25s ease; opacity: 0.55; }
 .player-stat.side-active { opacity: 1; }
 .player-stat.side-active .arena-avatar { box-shadow: 0 0 0 3px rgba(0, 231, 1, 0.18); }
 .player-stat.side-active.opp-side .arena-avatar { box-shadow: 0 0 0 3px rgba(241, 100, 100, 0.18); border-color: var(--accent-red); }
 .player-stat:not(.side-active) .arena-avatar { border-color: var(--border-color); }
 
-/* ======================================================================
-==== Live / High-Tech Chips & Matchmaking Polish
-====================================================================== ==== */
 .live-chip {
   display: inline-flex; align-items: center; gap: 6px; font-size: 0.66rem; font-weight: 800;
   letter-spacing: 0.08em; color: var(--primary-green); background-color: rgba(0, 231, 1, 0.1);
@@ -676,13 +632,11 @@ body::before {
   100% { transform: translateX(320%); }
 }
 
-/* Modal cards get a subtle glowing gradient border for a premium feel */
 .modal-card, .arena-card {
   position: relative;
   box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.08), 0 24px 60px -20px rgba(0, 0, 0, 0.65);
 }
 
-/* Logout / destructive confirmation dialog */
 .confirm-card { max-width: 360px; }
 .confirm-icon-wrap {
   width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -698,14 +652,9 @@ body::before {
 }
 .btn-danger:hover { box-shadow: 0 10px 24px -10px rgba(241, 100, 100, 0.5); transform: translateY(-1px); }
 
-/* Menu row danger state gets a touch more presence to signal it's the
-   sign-out action, not just another settings link */
 .menu-row-danger .menu-row-icon { color: var(--accent-red); }
 .menu-row-danger:hover { border-color: rgba(241, 100, 100, 0.35); }
 
-/* ======================================================================
-==== Mobile-friendly refinements
-====================================================================== ==== */
 @media (max-width: 480px) {
   .app-main { padding-left: 14px; padding-right: 14px; }
   .nav-container { padding-left: 14px; padding-right: 14px; gap: 10px; }
@@ -721,11 +670,100 @@ body::before {
 }
 html, body { overflow-x: hidden; }
 
+/* ======================================================================
+==== Wallet Transactions Mini-Sheet (mobile-first quick view)
+====================================================================== ==== */
+.wallet-sheet-card {
+  max-width: 420px;
+  padding: 22px 18px 18px;
+  position: relative;
+  text-align: left;
+}
+.wallet-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.wallet-sheet-header h3 { margin-bottom: 0; }
+.wallet-sheet-close {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.wallet-sheet-close:hover { color: var(--text-main); border-color: var(--border-highlight); }
+.wallet-sheet-balance {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+.wallet-sheet-balance strong { color: var(--accent-gold); font-family: var(--font-heading); }
+.wallet-sheet-list {
+  max-height: 320px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wallet-tx-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border-color);
+}
+.wallet-tx-row:last-child { border-bottom: none; }
+.wallet-tx-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.wallet-tx-desc {
+  font-size: 0.85rem; font-weight: 600; color: var(--text-main);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.wallet-tx-date { font-size: 0.72rem; color: var(--text-dim); }
+.wallet-tx-amount { font-size: 0.88rem; font-weight: 700; flex: none; font-family: var(--font-heading); }
+.wallet-sheet-empty {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  padding: 30px 0;
+}
+@media (max-width: 480px) {
+  .modal-overlay:has(#wallet-sheet-overlay) { align-items: flex-end; }
+}
+#wallet-sheet-overlay {
+  align-items: flex-end;
+}
+#wallet-sheet-overlay .wallet-sheet-card {
+  margin: 0 0 0;
+  animation: walletSheetUp 0.3s var(--ease-smooth);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  max-height: 80dvh;
+}
+@keyframes walletSheetUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@media (min-width: 481px) {
+  #wallet-sheet-overlay { align-items: center; }
+  #wallet-sheet-overlay .wallet-sheet-card { border-radius: var(--radius-lg); max-height: calc(100dvh - 40px); }
+}
+
   </style>
 </head>
 <body class="app-body">
   <div id="page-landing">
-<!-- Top Navigation -->
   <header class="top-nav">
     <div class="nav-container">
       <div class="brand-logo">
@@ -746,10 +784,8 @@ html, body { overflow-x: hidden; }
     </div>
   </header>
 
-  <!-- Hero Section -->
   <main class="hero-section">
     <div class="hero-container">
-      <!-- Left Column: Value Proposition -->
       <div class="hero-left">
         <div class="badge-pill">
           <span class="badge-dot"></span>
@@ -778,7 +814,6 @@ html, body { overflow-x: hidden; }
         </div>
       </div>
 
-      <!-- Right Column: Auth Card -->
       <div class="hero-right">
         <div class="auth-card">
           <div class="auth-header">
@@ -819,7 +854,6 @@ html, body { overflow-x: hidden; }
   </div>
 
 <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
-  <!-- Loading Screen (Auto-dismisses in 400ms) -->
   <div id="loading" class="center-screen hidden">
     <div class="loader-container">
       <div class="loader-logo">
@@ -833,10 +867,8 @@ html, body { overflow-x: hidden; }
   </div>
 
   <div id="dashboard" class="app-wrap hidden">
-    <!-- Top Navigation -->
     <header class="top-nav">
       <div class="nav-container">
-        <!-- Logo -->
         <div class="brand-logo" id="nav-brand-logo">
           <svg class="logo-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
@@ -844,7 +876,6 @@ html, body { overflow-x: hidden; }
           <span class="logo-text">ARENA</span>
         </div>
 
-        <!-- Navigation Tabs -->
         <nav class="nav-tabs">
           <button class="tab-btn active" data-target="view-earn" type="button">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
@@ -864,7 +895,6 @@ html, body { overflow-x: hidden; }
           </button>
         </nav>
 
-        <!-- Right Side: Wallet & User Profile Button -->
         <div class="user-stats-bar">
           <button id="wallet-badge-btn" class="token-badge" title="View Token Transactions" type="button">
             <span class="token-icon-wrap">₹</span>
@@ -879,11 +909,8 @@ html, body { overflow-x: hidden; }
       </div>
     </header>
 
-    <!-- Main Views Container -->
     <main class="app-main">
-      <!-- VIEW 1: EARN -->
       <section id="view-earn" class="app-view active">
-        <!-- Next Cashout Progress Bar (Freecash Style) -->
         <div class="cashout-progress-banner">
           <div class="progress-info">
             <span class="progress-title">Next Cashout Threshold</span>
@@ -894,7 +921,6 @@ html, body { overflow-x: hidden; }
           </div>
         </div>
 
-        <!-- Banner Header -->
         <div class="hero-banner">
           <div class="banner-content">
             <span class="badge-tag">INSTANT 1V1 DUELS</span>
@@ -903,7 +929,6 @@ html, body { overflow-x: hidden; }
           </div>
         </div>
 
-        <!-- Category Filters -->
         <div class="filter-bar">
           <button class="filter-chip active" data-category="all" type="button">All Games</button>
           <button class="filter-chip" data-category="reflex" type="button">Reflex Speed</button>
@@ -912,11 +937,9 @@ html, body { overflow-x: hidden; }
           <button class="filter-chip" data-category="strategy" type="button">Strategy</button>
         </div>
 
-        <!-- Games Grid -->
         <div class="games-grid" id="gamesGrid"></div>
       </section>
 
-      <!-- VIEW 2: MY PROFILE -->
       <section id="view-profile" class="app-view">
         <div class="profile-header-card">
           <div class="profile-left">
@@ -964,7 +987,6 @@ html, body { overflow-x: hidden; }
           </div>
         </div>
 
-        <!-- Account Menu -->
         <div class="section-card">
           <h3>Account</h3>
           <p class="section-sub">Manage your wallet, profile and referral program</p>
@@ -1027,7 +1049,6 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
-      <!-- VIEW: TOKEN TRANSACTIONS (Ledger) -->
       <section id="view-ledger" class="app-view">
         <div class="section-card">
           <button class="back-link" id="ledger-back-btn" type="button">‹ Back to Profile</button>
@@ -1049,7 +1070,6 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
-      <!-- VIEW: REFER & EARN -->
       <section id="view-refer" class="app-view">
         <div class="section-card">
           <button class="back-link" id="refer-back-btn" type="button">‹ Back to Profile</button>
@@ -1087,7 +1107,6 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
-      <!-- VIEW: ADD TOKENS -->
       <section id="view-addtoken" class="app-view">
         <div class="section-card">
           <button class="back-link" id="addtoken-back-btn" type="button">‹ Back to Profile</button>
@@ -1111,7 +1130,6 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
-      <!-- VIEW 3: MATCHES -->
       <section id="view-matches" class="app-view">
         <div class="section-card">
           <h3>Match History</h3>
@@ -1133,7 +1151,6 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
-      <!-- VIEW 4: CASHOUT -->
       <section id="view-cashout" class="app-view">
         <div class="section-card">
           <h3>Cashout Vault</h3>
@@ -1145,7 +1162,6 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
-      <!-- VIEW 5: REWARDS -->
       <section id="view-rewards" class="app-view">
         <div class="section-card">
           <h3>Daily Rewards</h3>
@@ -1158,7 +1174,6 @@ html, body { overflow-x: hidden; }
       </section>
     </main>
 
-    <!-- Matchmaking Modal -->
     <div id="match-overlay" class="modal-overlay hidden">
       <div class="modal-card">
         <div class="radar-pulse">
@@ -1175,7 +1190,6 @@ html, body { overflow-x: hidden; }
       </div>
     </div>
 
-    <!-- Arena Modal -->
     <div id="game-arena-overlay" class="modal-overlay hidden">
       <div class="arena-card">
         <div class="arena-header">
@@ -1197,9 +1211,6 @@ html, body { overflow-x: hidden; }
       </div>
     </div>
 
-
-    <!-- Logout Confirmation Modal (this markup was missing from the project;
-         without it, clicking "Log Out" in the profile menu did nothing) -->
     <div id="logout-confirm-overlay" class="modal-overlay hidden">
       <div class="modal-card">
         <h3>Log Out?</h3>
@@ -1211,7 +1222,20 @@ html, body { overflow-x: hidden; }
       </div>
     </div>
 
-    <!-- Footer -->
+    <!-- Wallet Transactions Mini-Sheet: opened by tapping the ₹ balance
+         badge in the top nav. Shows a compact, scrollable transaction
+         list with a close (x) button - no full-page navigation needed. -->
+    <div id="wallet-sheet-overlay" class="modal-overlay hidden">
+      <div class="modal-card wallet-sheet-card">
+        <div class="wallet-sheet-header">
+          <h3>Transactions</h3>
+          <button id="wallet-sheet-close" class="wallet-sheet-close" type="button" aria-label="Close">✕</button>
+        </div>
+        <p class="wallet-sheet-balance">Current balance: <strong id="wallet-sheet-balance-value">₹0</strong></p>
+        <div id="wallet-sheet-list" class="wallet-sheet-list"></div>
+      </div>
+    </div>
+
     <footer class="app-footer">
       <div class="footer-container">
         <div class="footer-brand-col">
@@ -1272,16 +1296,12 @@ html, body { overflow-x: hidden; }
   </div>
   </div>
 
-  <!-- Supabase client library (external CDN — this is the one piece that can't be inlined) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-// ==== assets/supabaseClient.js ====
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5Zm1iaWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDE3NDIsImV4cCI6MjEwMzIxNzc0Mn0.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ==== assets/auth.js (login handlers only — redirect logic replaced by the router below) ====
-// Check for existing session and redirect if already logged in
 const googleLoginBtn = document.getElementById("google-login-btn");
 const navLoginBtn = document.getElementById("nav-login-btn");
 const navSignupBtn = document.getElementById("nav-signup-btn");
@@ -1315,60 +1335,27 @@ if (googleLoginBtn) googleLoginBtn.addEventListener("click", triggerGoogleLogin)
 if (navLoginBtn) navLoginBtn.addEventListener("click", triggerGoogleLogin);
 if (navSignupBtn) navSignupBtn.addEventListener("click", triggerGoogleLogin);
 
-// ==== assets/dashboard.js ====
 const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
-const BOT_WAIT_SECONDS = 5; // how long to wait for a real opponent before matching with a bot
-const BOT_MOVE_MIN_MS = 2000; // bot opponents always "think" for 2-3s, never instant
+const BOT_WAIT_SECONDS = 5;
+const BOT_MOVE_MIN_MS = 2000;
 const BOT_MOVE_MAX_MS = 3000;
 function botDelay() {
   return Math.floor(Math.random() * (BOT_MOVE_MAX_MS - BOT_MOVE_MIN_MS + 1)) + BOT_MOVE_MIN_MS;
 }
 
-// Only these catalog game types have a real live-multiplayer implementation
-// wired up in goToMatch()/page-match. Every other card still "plays" (vs a
-// bot) but must never enter the real matchmaking_queue table, since a live
-// match for an unsupported type has nowhere to route to and used to
-// dead-end on an "Unknown game type." screen when paired with a real human.
 const LIVE_ENABLED_TYPES = ["tictactoe"];
 
-// ----------------------------------------------------
-// Presence Heartbeat (requires schema7.sql)
-// ----------------------------------------------------
-// A queue row in matchmaking_queue used to be treated as "a live
-// player waiting" forever, even if that account had closed the tab
-// (or was a different account of yours that queued once and never
-// came back). That let matchmaking hand out "live opponent" matches
-// to accounts that weren't actually online.
-//
-// Fix: while the dashboard is open AND the tab is actually visible
-// and focused, we send a heartbeat every few seconds that stamps
-// public.users.last_seen for this account. The moment the tab is
-// backgrounded (switched away, minimized, screen off), heartbeats
-// stop entirely -- so last_seen naturally ages out and
-// claim_opponent() (see schema7.sql / schema_fix_stale_matchmaking.sql)
-// stops offering that account as a live opponent, and purges its
-// stale queue row -- across ALL game types, not just the one
-// currently being searched for -- so a leftover row from a
-// backgrounded/closed/crashed tab can't sit around and get matched
-// against later, exactly as the "Waiting for a live player... (5s)"
-// timer intends.
 const PRESENCE_HEARTBEAT_MS = 8000;
 let presenceHeartbeatTimer = null;
 
-// A tab only counts as "actually online" when it's both the visible
-// tab AND has window focus. Either alone isn't enough: a tab can be
-// technically visible but sit behind another focused app on desktop,
-// or (rarely) report focus while backgrounded on some mobile browsers.
-// Requiring both is the strict, safe check for "a person is really
-// looking at this right now."
 function isTabActive() {
   return document.visibilityState === "visible" && document.hasFocus();
 }
 
 async function touchPresence() {
   if (!currentUser) return;
-  if (!isTabActive()) return; // never refresh presence while backgrounded
+  if (!isTabActive()) return;
   try {
     await client
       .from("users")
@@ -1384,10 +1371,6 @@ function startPresenceHeartbeat() {
   if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
   presenceHeartbeatTimer = setInterval(touchPresence, PRESENCE_HEARTBEAT_MS);
 
-  // Fire an immediate heartbeat the instant the tab becomes visible/
-  // focused again, instead of waiting up to PRESENCE_HEARTBEAT_MS for
-  // the next tick -- this matters most right when someone switches back
-  // into a tab that's sitting in the matchmaking queue.
   document.addEventListener("visibilitychange", () => {
     if (isTabActive()) touchPresence();
   });
@@ -1396,11 +1379,6 @@ function startPresenceHeartbeat() {
   });
 }
 
-// ----------------------------------------------------
-// Game Catalog — single source of truth for the dashboard grid,
-// bot-arena dispatch (launchArena) and the live match.html dispatch.
-// icon = one emoji shown on the card banner; badge = small pill label.
-// ----------------------------------------------------
 const GAME_CATALOG = [
   { type: "tictactoe", name: "Tic-Tac-Toe Blitz", desc: "Classic 3x3 grid combat — get three in a row to win.", icon: "\u2716\uFE0F", badge: "CLASSIC", category: "brain" },
   { type: "rps", name: "RPS Duel", desc: "Best-of-5 rock, paper, scissors against your opponent.", icon: "\u270A", badge: "CLASSIC", category: "strategy" },
@@ -1449,7 +1427,6 @@ function renderGameCards() {
 }
 renderGameCards();
 
-// Indian Names Pool for Bot Fallback (boys & girls)
 const INDIAN_BOT_POOL = [
   { name: "Aarav Sharma", seed: "aarav" },
   { name: "Priya Patel", seed: "priya" },
@@ -1475,7 +1452,6 @@ function formatRupees(amount) {
   return sign + "\u20b9" + Math.abs(n).toLocaleString("en-IN");
 }
 
-// App State
 let currentUser = null;
 let currentBalance = 0;
 let matchHistory = [];
@@ -1486,14 +1462,12 @@ let matchmakingTimer = null;
 let queueChannel = null;
 let inQueue = false;
 
-// DOM Elements
 const loadingEl = document.getElementById("loading");
 const dashEl = document.getElementById("dashboard");
 const balanceEl = document.getElementById("balance-value");
 const playerNameEl = document.getElementById("player-name");
 const avatarEl = document.getElementById("avatar");
 
-// Profile View Elements
 const profileDisplayName = document.getElementById("profile-display-name");
 const profileViewAvatar = document.getElementById("profile-view-avatar");
 const editNameBtn = document.getElementById("edit-name-btn");
@@ -1503,7 +1477,6 @@ const saveNameBtn = document.getElementById("save-name-btn");
 const cancelNameBtn = document.getElementById("cancel-name-btn");
 const profileEmailEl = document.getElementById("profile-email");
 
-// Account Menu / Wallet / Refer & Earn / Add Tokens Elements
 const walletBadgeBtn = document.getElementById("wallet-badge-btn");
 const menuTransactionsBtn = document.getElementById("menu-transactions-btn");
 const menuAddTokensBtn = document.getElementById("menu-addtokens-btn");
@@ -1513,16 +1486,11 @@ const logoutConfirmOverlay = document.getElementById("logout-confirm-overlay");
 const logoutConfirmBtn = document.getElementById("logout-confirm-btn");
 const logoutCancelBtn = document.getElementById("logout-cancel-btn");
 
-// Arena turn-indicator elements (shared across every game type)
 const turnIndicatorText = document.getElementById("turn-indicator-text");
 const turnIndicatorDot = document.getElementById("turn-dot");
 const arenaUserSide = document.getElementById("arena-user-side");
 const arenaOppSide = document.getElementById("arena-opp-side");
 
-// Sets who the arena's "Your Turn / Opponent's Turn" indicator is showing
-// for right now. state: "you" (green, blinking) or "opp" (red, blinking).
-// Also glows/dims the matching avatar so the active player is obvious at
-// a glance, even with sound off or on a small screen.
 function setArenaTurn(state) {
   if (!turnIndicatorText || !turnIndicatorDot) return;
   if (state === "opp") {
@@ -1552,14 +1520,12 @@ const amountChips = document.querySelectorAll(".amount-chip");
 const addtokenInput = document.getElementById("addtoken-input");
 const addtokenSubmitBtn = document.getElementById("addtoken-submit-btn");
 
-// Navigation & Category Elements
 const tabButtons = document.querySelectorAll(".tab-btn");
 const appViews = document.querySelectorAll(".app-view");
 const filterChips = document.querySelectorAll(".filter-chip");
 const gameCards = document.querySelectorAll(".game-card");
 const playButtons = document.querySelectorAll(".play-btn");
 
-// Matchmaking & Arena Overlays
 const matchOverlay = document.getElementById("match-overlay");
 const cancelMatchBtn = document.getElementById("cancel-match-btn");
 const matchTitle = document.getElementById("match-title");
@@ -1571,9 +1537,11 @@ const arenaOppAvatar = document.getElementById("arena-opp-avatar");
 const arenaOppName = document.getElementById("arena-opp-name");
 const arenaStage = document.getElementById("arena-stage");
 
-// ----------------------------------------------------
-// 1. Initialization
-// ----------------------------------------------------
+const walletSheetOverlay = document.getElementById("wallet-sheet-overlay");
+const walletSheetClose = document.getElementById("wallet-sheet-close");
+const walletSheetList = document.getElementById("wallet-sheet-list");
+const walletSheetBalanceValue = document.getElementById("wallet-sheet-balance-value");
+
 async function initDashboard() {
   try {
     const sessionRes = await client.auth.getSession();
@@ -1601,7 +1569,6 @@ async function initDashboard() {
   }
 }
 
-// 3-second absolute safety fallback
 setTimeout(() => {
   if (loadingEl && !loadingEl.classList.contains("hidden")) {
     loadingEl.classList.add("hidden");
@@ -1618,8 +1585,6 @@ async function loadUserName() {
     meta.name ||
     (currentUser.email ? currentUser.email.split("@")[0] : "Player");
 
-  // public.users is the source of truth other players read from (match.html).
-  // Always trust it over localStorage/auth metadata when it exists.
   let dbName = null;
   try {
     const { data: profileRow } = await client
@@ -1635,8 +1600,6 @@ async function loadUserName() {
   const initialName = dbName || fallbackName;
   setUserDisplayName(initialName);
 
-  // Keep public.users in sync so opponents always see the current name/avatar,
-  // and backfill it if the signup trigger never populated it.
   if (dbName !== initialName) {
     syncProfileToDatabase(initialName);
   }
@@ -1664,9 +1627,6 @@ function setUserDisplayName(name) {
   if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
 }
 
-// ----------------------------------------------------
-// 2. Wallet — always backed by Supabase, never local-only
-// ----------------------------------------------------
 async function loadWallet() {
   try {
     const { data: wallet, error } = await client
@@ -1682,8 +1642,6 @@ async function loadWallet() {
   }
 }
 
-// Applies a delta (+credit / -debit) to the Supabase wallet and keeps currentBalance in sync.
-// This is the single source of truth fix for the "resets on refresh" bug.
 async function persistWalletDelta(delta) {
   const { data: wallet, error } = await client
     .from("wallet")
@@ -1707,13 +1665,10 @@ async function persistWalletDelta(delta) {
 function flashBalance() {
   if (!balanceEl) return;
   balanceEl.classList.remove("balance-flash");
-  void balanceEl.offsetWidth; // restart animation
+  void balanceEl.offsetWidth;
   balanceEl.classList.add("balance-flash");
 }
 
-// ----------------------------------------------------
-// 3. Transactions & Match History — persisted, not local-only
-// ----------------------------------------------------
 async function loadTransactions() {
   try {
     const { data, error } = await client
@@ -1821,9 +1776,6 @@ async function recordMatch(game, opponent, result, reward) {
   }
 }
 
-// ----------------------------------------------------
-// 4. UI Rendering
-// ----------------------------------------------------
 function updateUI() {
   if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString("en-IN");
 
@@ -1852,6 +1804,7 @@ function updateUI() {
 
   renderLedger();
   renderMatchHistory();
+  renderWalletSheet();
 }
 
 function renderLedger() {
@@ -1877,6 +1830,51 @@ function renderLedger() {
       );
     })
     .join("");
+}
+
+// Compact scrollable list used by the wallet mini-sheet (opened from the
+// ₹ balance badge). Same underlying `transactions` array as the full
+// ledger page, just rendered as simple rows instead of a table so it
+// reads well in a narrow mobile sheet.
+function renderWalletSheet() {
+  if (!walletSheetList) return;
+  if (walletSheetBalanceValue) {
+    walletSheetBalanceValue.textContent = formatRupees(currentBalance);
+  }
+  if (transactions.length === 0) {
+    walletSheetList.innerHTML = '<p class="wallet-sheet-empty">No transactions yet</p>';
+    return;
+  }
+  walletSheetList.innerHTML = transactions
+    .map((tx) => {
+      const isCredit = tx.type === "credit";
+      const sign = isCredit ? "+" : "-";
+      const color = isCredit ? "var(--primary-green)" : "var(--accent-red)";
+      return (
+        '<div class="wallet-tx-row">' +
+        '<div class="wallet-tx-info">' +
+        '<span class="wallet-tx-desc">' + tx.desc + "</span>" +
+        '<span class="wallet-tx-date">' + tx.date + "</span>" +
+        "</div>" +
+        '<span class="wallet-tx-amount" style="color:' + color + '">' + sign + formatRupees(tx.amount) + "</span>" +
+        "</div>"
+      );
+    })
+    .join("");
+}
+
+function openWalletSheet() {
+  if (!walletSheetOverlay) return;
+  renderWalletSheet();
+  walletSheetOverlay.classList.remove("hidden");
+  // Refresh from the database in case another tab/session added a
+  // transaction since this one last loaded - cheap, and keeps the
+  // sheet honest without blocking the initial open.
+  loadTransactions().then(renderWalletSheet);
+}
+
+function closeWalletSheet() {
+  walletSheetOverlay?.classList.add("hidden");
 }
 
 function renderMatchHistory() {
@@ -1905,9 +1903,6 @@ function renderMatchHistory() {
     .join("");
 }
 
-// ----------------------------------------------------
-// 5. Navigation & Category Filters
-// ----------------------------------------------------
 function switchView(targetId) {
   tabButtons.forEach((b) => b.classList.remove("active"));
   appViews.forEach((v) => v.classList.remove("active"));
@@ -1922,17 +1917,18 @@ tabButtons.forEach((btn) => {
 document.getElementById("profile-nav-btn")?.addEventListener("click", () => switchView("view-profile"));
 document.getElementById("nav-brand-logo")?.addEventListener("click", () => switchView("view-earn"));
 
-// Wallet badge (header) opens Token Transactions directly.
-walletBadgeBtn?.addEventListener("click", () => switchView("view-ledger"));
+// Tapping the ₹ balance badge now opens the compact wallet transactions
+// sheet instead of navigating to the full Token Transactions page.
+walletBadgeBtn?.addEventListener("click", openWalletSheet);
+walletSheetClose?.addEventListener("click", closeWalletSheet);
+// Tapping the dimmed backdrop (outside the card) also closes the sheet.
+walletSheetOverlay?.addEventListener("click", (e) => {
+  if (e.target === walletSheetOverlay) closeWalletSheet();
+});
 
-// Profile account menu — these views are only reachable via a click,
-// never shown directly inside the profile section itself.
 menuTransactionsBtn?.addEventListener("click", () => switchView("view-ledger"));
 menuAddTokensBtn?.addEventListener("click", () => switchView("view-addtoken"));
 menuReferBtn?.addEventListener("click", () => switchView("view-refer"));
-// Logging out always asks for confirmation first — logout can only be
-// triggered from the Profile > Account menu (the top-nav no longer has
-// its own logout icon, so there is exactly one entry point).
 menuLogoutBtn?.addEventListener("click", () => {
   logoutConfirmOverlay?.classList.remove("hidden");
 });
@@ -1952,12 +1948,6 @@ ledgerBackBtn?.addEventListener("click", () => switchView("view-profile"));
 referBackBtn?.addEventListener("click", () => switchView("view-profile"));
 addtokenBackBtn?.addEventListener("click", () => switchView("view-profile"));
 
-// ----------------------------------------------------
-// 6b. Refer & Earn
-// ----------------------------------------------------
-// Builds a code like "VISHA859": first 5 letters of the email's local
-// part (uppercased, padded with X if the local part is shorter), plus
-// 3 random digits.
 function generateReferralCode(email) {
   const local = (email || "player").split("@")[0].replace(/[^a-zA-Z]/g, "").toUpperCase();
   const prefix = (local + "XXXXX").slice(0, 5);
@@ -1977,8 +1967,6 @@ async function loadReferralInfo() {
 
     let code = row && row.referral_code;
     if (!code) {
-      // First time here — generate and save one. Retry a couple of times
-      // in the rare case of a random collision with an existing code.
       for (let attempt = 0; attempt < 4 && !code; attempt++) {
         const candidate = generateReferralCode(currentUser.email);
         const { error: upErr } = await client
@@ -2044,11 +2032,6 @@ submitReferralBtn?.addEventListener("click", async () => {
   }
 });
 
-// ----------------------------------------------------
-// 6c. Add Tokens — UI only for now, wired up later once a payment
-// provider is connected. Selecting a quick amount fills the custom
-// input; the Add button intentionally does nothing yet.
-// ----------------------------------------------------
 amountChips.forEach((chip) => {
   chip.addEventListener("click", () => {
     amountChips.forEach((c) => c.classList.remove("active"));
@@ -2072,9 +2055,6 @@ filterChips.forEach((chip) => {
   });
 });
 
-// ----------------------------------------------------
-// 6. Profile Name Editing
-// ----------------------------------------------------
 editNameBtn?.addEventListener("click", () => {
   nameInput.value = playerNameEl.textContent;
   nameEditBox.classList.remove("hidden");
@@ -2093,8 +2073,6 @@ saveNameBtn?.addEventListener("click", async () => {
   nameEditBox.classList.add("hidden");
 
   if (currentUser) {
-    // Cache locally for instant reload, but the database write below is what
-    // actually makes opponents see the updated name/avatar in match.html.
     localStorage.setItem("arena_name_" + currentUser.id, newName);
     saveNameBtn.disabled = true;
     try {
@@ -2107,9 +2085,6 @@ saveNameBtn?.addEventListener("click", async () => {
   }
 });
 
-// ----------------------------------------------------
-// 7. Real Matchmaking (live users first, bot after 5s)
-// ----------------------------------------------------
 playButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     activeGame = { name: btn.getAttribute("data-game"), type: btn.getAttribute("data-type") };
@@ -2121,24 +2096,6 @@ playButtons.forEach((btn) => {
   });
 });
 
-// Looks for a live opponent already waiting in the queue for this game
-// and, if one exists, atomically claims their queue slot and creates the
-// match. Used both when we first join the queue AND on every poll tick
-// while we wait — this is what lets two real players who queue up within
-// a few seconds of each other actually find one another instead of both
-// timing out to a bot.
-//
-// This calls the "claim_opponent" database function (see schema4.sql /
-// schema_fix_stale_matchmaking.sql) instead of doing the select/delete/
-// insert here in the browser. That's required, not just a style choice:
-// the matchmaking_queue table's RLS policy only allows a user to delete
-// THEIR OWN row, so a client-side delete of the *opponent's* row was
-// always silently blocked by the database, which is why real-vs-real
-// matches never actually formed no matter how the polling was tuned.
-// The database function runs with elevated rights and locks the row
-// (FOR UPDATE SKIP LOCKED), so it can both bypass that restriction
-// safely and guarantee two players polling at the same instant can
-// never claim the same opponent.
 async function findAndClaimOpponent() {
   const { data: match, error } = await client.rpc("claim_opponent", {
     p_game_type: activeGame.type,
@@ -2150,13 +2107,6 @@ async function findAndClaimOpponent() {
     return null;
   }
 
-  // When no opponent is waiting, the database function returns NULL,
-  // but because it's typed to return a "matches" row, Supabase/PostgREST
-  // sends that back as an object with every field set to null (e.g.
-  // { id: null, game_type: null, ... }) instead of an actual null value.
-  // Without this check, that object is truthy and gets treated as a
-  // real match with a null id -- which is what sent you to
-  // "match.html?id=null" instead of correctly falling back to a bot.
   if (!match || !match.id) return null;
 
   return match;
@@ -2168,10 +2118,6 @@ async function beginMatchmaking() {
   if (matchStatus) matchStatus.textContent = "Deducting entry stake...";
   if (matchOverlay) matchOverlay.classList.remove("hidden");
 
-  // Stamp our own presence immediately so, the instant we join the
-  // queue below, any other genuinely-online player scanning for us
-  // sees a fresh last_seen right away rather than waiting for the
-  // next scheduled heartbeat tick.
   touchPresence();
 
   try {
@@ -2185,10 +2131,6 @@ async function beginMatchmaking() {
     return;
   }
 
-  // Games without a real live-match implementation always play a bot —
-  // they must never touch matchmaking_queue/claim_opponent, or a real
-  // opponent could get paired into a game screen that doesn't know how
-  // to render their game type ("Unknown game type.").
   if (!LIVE_ENABLED_TYPES.includes(activeGame.type)) {
     if (matchStatus) matchStatus.textContent = "Matching you with an opponent...";
     setTimeout(() => {
@@ -2205,7 +2147,6 @@ async function beginMatchmaking() {
 
   if (matchStatus) matchStatus.textContent = "Scanning live queue for players...";
 
-  // 1. Is someone already waiting for this game?
   const foundMatch = await findAndClaimOpponent();
   if (foundMatch) {
     if (matchStatus) matchStatus.textContent = "Live opponent found! Launching arena...";
@@ -2217,7 +2158,6 @@ async function beginMatchmaking() {
     return;
   }
 
-  // 2. No one waiting — join the queue myself and watch for a live opponent
   await client.from("matchmaking_queue").upsert({ user_id: currentUser.id, game_type: activeGame.type });
 
   queueChannel = client
@@ -2247,11 +2187,6 @@ async function beginMatchmaking() {
     if (secondsLeft > 0) {
       if (matchStatus) matchStatus.textContent = "Waiting for a live player... (" + secondsLeft + "s)";
 
-      // Actively re-scan the queue for a live opponent who joined after us.
-      // (Previously we only checked once at the very start, so two real
-      // players queueing within the same few seconds would both sit here
-      // and both eventually time out to a bot instead of matching each
-      // other.)
       const liveMatch = await findAndClaimOpponent();
       if (liveMatch) {
         cleanupQueue();
@@ -2263,7 +2198,6 @@ async function beginMatchmaking() {
         return;
       }
 
-      // Poll as a backup in case realtime missed the insert
       const { data: mine } = await client
         .from("matches")
         .select("id")
@@ -2282,7 +2216,6 @@ async function beginMatchmaking() {
       return;
     }
 
-    // Timed out — fall back to a bot
     cleanupQueue();
     await client.from("matchmaking_queue").delete().eq("user_id", currentUser.id);
     const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
@@ -2321,21 +2254,12 @@ cancelMatchBtn?.addEventListener("click", async () => {
   }
 });
 
-// Belt-and-braces cleanup: if the player closes the tab, hits back, or
-// navigates away while still sitting in the queue, try to drop their
-// queue row immediately instead of relying only on the presence timeout
-// in claim_opponent() to catch it. This is best-effort (the request can
-// be interrupted by the unload), which is exactly why the presence
-// timeout above is the real fix and this is just a bonus.
 window.addEventListener("pagehide", () => {
   if (inQueue && currentUser) {
     client.from("matchmaking_queue").delete().eq("user_id", currentUser.id).then(() => {}, () => {});
   }
 });
 
-// ----------------------------------------------------
-// 8. Arena Engine
-// ----------------------------------------------------
 function launchArena(opponent) {
   activeOpponent = opponent;
   const myName = playerNameEl.textContent;
@@ -2360,7 +2284,6 @@ function launchArena(opponent) {
   }
 }
 
-// GAME 1: Reaction Duel
 function runReactionGame() {
   arenaStage.innerHTML =
     '<div class="reaction-box reaction-wait" id="reaction-box">' +
@@ -2398,7 +2321,6 @@ function runReactionGame() {
   });
 }
 
-// GAME 2: Cyber Math Duel
 function runCyberMathGame() {
   const n1 = Math.floor(Math.random() * 30) + 12;
   const n2 = Math.floor(Math.random() * 30) + 12;
@@ -2440,7 +2362,6 @@ function runCyberMathGame() {
   document.getElementById("opt-b")?.addEventListener("click", () => pickAnswer(optB));
 }
 
-// GAME 3: Color Clash
 function runColorClashGame() {
   const colors = [
     { text: "RED", css: "#ef4444" },
@@ -2475,7 +2396,6 @@ function runColorClashGame() {
   document.getElementById("match-no")?.addEventListener("click", () => evaluate(false));
 }
 
-// GAME 4: Memory Matrix
 function runMemoryMatrixGame() {
   let tilesHtml = "";
   for (let i = 0; i < 9; i++) {
@@ -2509,8 +2429,6 @@ function runMemoryMatrixGame() {
   }, 400);
 }
 
-// GAME 5: Tic-Tac-Toe Blitz (classic 3x3 — no forced turn clock; the bot
-// "thinks" for a humanized 2-3s before every move, same as other bot games)
 function runTicTacToeGame() {
   const board = Array(9).fill(null);
   const WIN_LINES = [
@@ -2518,7 +2436,7 @@ function runTicTacToeGame() {
     [0, 3, 6], [1, 4, 7], [2, 5, 8],
     [0, 4, 8], [2, 4, 6],
   ];
-  let playerTurn = true; // player is always X and moves first
+  let playerTurn = true;
   let over = false;
 
   renderBoard();
@@ -2598,14 +2516,9 @@ function runTicTacToeGame() {
     return WIN_LINES.find((line) => line.every((i) => board[i] === symbol));
   }
 
-  // Draws an animated line across the winning three cells, same idea as the
-  // real-time multiplayer version in assets/games/tictactoe.js.
   function drawWinLine(line) {
     const svg = document.getElementById("ttt-line");
     if (!svg) return;
-    // Coordinates are in the SVG's own 238x238 unit space (matching the
-    // 74px-cell + 8px-gap board); the SVG scales to fit the CSS box size
-    // at any breakpoint, so this math doesn't need to change on mobile.
     const cellSize = 74;
     const gap = 8;
     const step = cellSize + gap;
@@ -2694,9 +2607,6 @@ function runTicTacToeGame() {
   }
 }
 
-// ----------------------------------------------------
-// 9. Post-Match Resolution — now fully persisted
-// ----------------------------------------------------
 async function endDuel(won, analysisText) {
   let reward = -MATCH_ENTRY_FEE;
 
@@ -2745,8 +2655,6 @@ async function endDuel(won, analysisText) {
   });
 }
 
-
-// ==== assets/match-common.js ====
 const MatchRoom = (() => {
   let match = null;
   let myId = null;
@@ -2843,9 +2751,6 @@ function hashString(str) {
   return h;
 }
 
-// Deterministic PRNG (mulberry32) — used so both players in a live match
-// generate the exact same puzzle/sequence/word without any extra network
-// round trip. Seed it from the match id (+ an optional salt per game).
 function makeRng(seed) {
   let a = seed >>> 0;
   return function () {
@@ -2861,9 +2766,6 @@ function matchRng(salt) {
   return makeRng(hashString(id + (salt || "")));
 }
 
-// Generic judge for "race" style games — both players play an identical
-// (seeded) challenge independently and report a single finishing metric.
-// higherIsBetter=false means lowest metric (e.g. time in ms) wins.
 function createRaceJudge(stageEl, higherIsBetter, fmt) {
   let mine = null;
   let theirs = null;
@@ -2903,8 +2805,6 @@ function createRaceJudge(stageEl, higherIsBetter, fmt) {
   };
 }
 
-// Small confetti burst used to celebrate a win, both in live matches
-// (via showResult) and bot matches (via dashboard.js's endDuel).
 function celebrateWin(container) {
   if (!container) return;
   const layer = document.createElement("div");
@@ -2950,7 +2850,6 @@ function formatRupees(amount) {
   return "\u20b9" + n.toLocaleString("en-IN");
 }
 
-// ==== assets/games/reaction.js ====
 function initReactionDuel(stageEl, iAmPlayer1) {
   stageEl.innerHTML = `
     <p class="loading-text">Waiting for both players to be ready...</p>
@@ -3022,9 +2921,7 @@ function initReactionDuel(stageEl, iAmPlayer1) {
   }
 }
 
-// ==== assets/games/tictactoe.js ====
 function initTicTacToe(stageEl, iAmPlayer1) {
-  // Inject styles once
   if (!document.getElementById("ttt-styles")) {
     const style = document.createElement("style");
     style.id = "ttt-styles";
@@ -3167,7 +3064,6 @@ function initTicTacToe(stageEl, iAmPlayer1) {
   }
 }
 
-// ==== assets/games/quiz.js ====
 const QUIZ_POOL = [
   { q: "What is the capital of Japan?", options: ["Seoul", "Tokyo", "Beijing", "Bangkok"], correct: 1 },
   { q: "How many continents are there?", options: ["5", "6", "7", "8"], correct: 2 },
@@ -3270,7 +3166,6 @@ function initQuizBattle(stageEl, iAmPlayer1, matchId) {
   }
 }
 
-// ==== assets/games/math.js ====
 function initMathDuel(stageEl, iAmPlayer1, matchId) {
   let round = 0;
   let myWins = 0;
@@ -3360,12 +3255,6 @@ function initMathDuel(stageEl, iAmPlayer1, matchId) {
   }
 }
 
-
-// ----------------------------------------------------
-// Single-file router — replaces the old separate index.html /
-// dashboard.html / match.html navigation with in-page section
-// switching, so nothing here ever depends on a second file existing.
-// ----------------------------------------------------
 async function goToMatch(matchId, gameType) {
   document.getElementById("dashboard")?.classList.add("hidden");
   document.getElementById("page-match")?.classList.remove("hidden");
@@ -3429,10 +3318,6 @@ async function goToMatch(matchId, gameType) {
   }
 }
 
-// Leaving a live match (Back to Lobby): tear down the realtime channel and
-// refresh wallet/history from the DB, since a live match writes directly to
-// Supabase and the dashboard's in-memory numbers won't reflect that on their
-// own without a full page reload (which we intentionally no longer do).
 async function returnToDashboardFromMatch() {
   MatchRoom.cleanup();
   document.getElementById("page-match")?.classList.add("hidden");
