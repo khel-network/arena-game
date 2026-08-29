@@ -2345,6 +2345,12 @@ const MatchRoom = (() => {
   let channel = null;
   let finished = false;
   const handlers = {};
+  let activityCallback = null;
+
+  function onActivity(cb) {
+    activityCallback = cb;
+  }
+
   async function init(matchId, userId) {
     myId = userId;
     const { data, error } = await client
@@ -2363,6 +2369,8 @@ const MatchRoom = (() => {
     });
     channel.on("broadcast", { event: "move" }, (payload) => {
       const { type, data } = payload.payload;
+      // Notify about any opponent activity (resets inactivity timer)
+      if (activityCallback) activityCallback(type, data);
       if (handlers[type]) handlers[type](data);
     });
     await new Promise((resolve) => {
@@ -2425,7 +2433,7 @@ const MatchRoom = (() => {
   function cleanup() {
     if (channel) client.removeChannel(channel);
   }
-  return { init, send, onMessage, finish, cleanup, get match() { return match; } };
+  return { init, send, onMessage, finish, cleanup, onActivity, get match() { return match; } };
 })();
 function hashString(str) {
   let h = 0;
@@ -2440,7 +2448,7 @@ function makeRng(seed) {
     a = (a + 0x6d2b79f5) | 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    return ((t ^ (t >>> 7)) >>> 0) / 4294967296;
   };
 }
 function matchRng(salt) {
@@ -2940,6 +2948,8 @@ function initMathDuel(stageEl, iAmPlayer1, matchId) {
 // ----------------------------------------------------
 // Single-file router
 // ----------------------------------------------------
+let inactivityTimer = null;
+
 async function goToMatch(matchId, gameType) {
   document.getElementById("dashboard")?.classList.add("hidden");
   document.getElementById("page-match")?.classList.remove("hidden");
@@ -2982,6 +2992,42 @@ async function goToMatch(matchId, gameType) {
   const stage = document.getElementById("stage");
   stage.innerHTML = "";
 
+  // --- INACTIVITY TIMEOUT LOGIC ---
+  // Reset timer whenever opponent sends any broadcast
+  function resetInactivityTimer() {
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      // Opponent has been inactive for 10 seconds
+      if (MatchRoom.match && MatchRoom.match.status === 'active') {
+        // Show forfeit message
+        stage.innerHTML = `
+          <p class="result-banner win">Opponent forfeited (inactive)</p>
+          <p class="subtitle">They didn't respond in time.</p>
+          <button id="back-to-lobby-btn" class="btn" type="button">Back to Lobby</button>
+        `;
+        document.getElementById('back-to-lobby-btn')?.addEventListener('click', returnToDashboardFromMatch);
+        // Award win to current user
+        MatchRoom.finish('win');
+      }
+    }, 10000); // 10 seconds
+  }
+
+  // Register activity callback to reset timer on any opponent broadcast
+  MatchRoom.onActivity(() => {
+    resetInactivityTimer();
+  });
+
+  // Start the initial timer
+  resetInactivityTimer();
+
+  // Clean up timer when returning to dashboard
+  const originalReturn = returnToDashboardFromMatch;
+  returnToDashboardFromMatch = async function() {
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    await originalReturn();
+  };
+
+  // --- Initialize Game ---
   switch (gameType) {
     case "reaction":
       initReactionDuel(stage, roomInfo.iAmPlayer1);
@@ -3004,6 +3050,7 @@ async function goToMatch(matchId, gameType) {
 }
 
 async function returnToDashboardFromMatch() {
+  if (inactivityTimer) clearTimeout(inactivityTimer);
   MatchRoom.cleanup();
   document.getElementById("page-match")?.classList.add("hidden");
   document.getElementById("dashboard")?.classList.remove("hidden");
@@ -3035,7 +3082,10 @@ async function routeOnLoad() {
   }
 }
 
-window.addEventListener("beforeunload", () => MatchRoom.cleanup());
+window.addEventListener("beforeunload", () => {
+  if (inactivityTimer) clearTimeout(inactivityTimer);
+  MatchRoom.cleanup();
+});
 routeOnLoad();
 
   </script>
