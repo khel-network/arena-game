@@ -2,28 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Arena | Competitive Skill Duels</title>
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e131f'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
   <style>
-    /* ===== RESET & GLOBAL ===== */
+    /* ===== RESET ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', -apple-system, sans-serif;
       background: #0a0f1a;
       color: #fff;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
     }
-    a { text-decoration: none; color: inherit; }
-    button { cursor: pointer; border: none; outline: none; background: none; font: inherit; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; border: none; outline: none; background: none; color: inherit; }
     .hidden { display: none !important; }
+    a { text-decoration: none; color: inherit; }
 
     /* ===== LANDING PAGE ===== */
     #page-landing {
@@ -32,16 +34,16 @@
       display: flex;
       flex-direction: column;
     }
-
-    /* Top Nav (Landing) */
     .landing-nav {
-      padding: 20px 40px;
+      padding: 16px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       backdrop-filter: blur(8px);
-      background: rgba(10, 15, 26, 0.6);
+      background: rgba(10,15,26,0.6);
       border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-wrap: wrap;
+      gap: 12px;
     }
     .brand {
       display: flex;
@@ -55,28 +57,25 @@
     .brand svg { color: #00e701; }
     .nav-actions { display: flex; gap: 12px; }
     .btn-outline {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.2);
-      color: #fff;
       padding: 8px 20px;
       border-radius: 100px;
+      border: 1px solid rgba(255,255,255,0.2);
       font-weight: 600;
       font-size: 0.9rem;
-      transition: all 0.2s ease;
+      transition: 0.2s;
     }
     .btn-outline:hover { border-color: #00e701; color: #00e701; }
     .btn-primary {
-      background: #00e701;
-      color: #000;
       padding: 8px 24px;
       border-radius: 100px;
+      background: #00e701;
+      color: #000;
       font-weight: 700;
       font-size: 0.9rem;
-      transition: all 0.2s ease;
+      transition: 0.2s;
     }
     .btn-primary:hover { background: #00c601; transform: scale(1.02); }
 
-    /* Hero */
     .hero {
       flex: 1;
       display: flex;
@@ -89,9 +88,7 @@
       gap: 60px;
       flex-wrap: wrap;
     }
-    .hero-left {
-      flex: 1 1 400px;
-    }
+    .hero-left { flex: 1 1 400px; }
     .hero-left .badge {
       display: inline-block;
       background: rgba(0,231,1,0.12);
@@ -106,7 +103,7 @@
     }
     .hero-left h1 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 3rem;
+      font-size: 2.8rem;
       font-weight: 800;
       line-height: 1.1;
       margin-bottom: 16px;
@@ -119,29 +116,17 @@
       margin-bottom: 30px;
       line-height: 1.6;
     }
-    .hero-stats {
-      display: flex;
-      gap: 40px;
-    }
-    .hero-stats .stat {
-      display: flex;
-      flex-direction: column;
-    }
+    .hero-stats { display: flex; gap: 40px; flex-wrap: wrap; }
+    .hero-stats .stat { display: flex; flex-direction: column; }
     .hero-stats .stat .number {
       font-family: 'Space Grotesk', sans-serif;
       font-weight: 700;
       font-size: 1.6rem;
       color: #fff;
     }
-    .hero-stats .stat .label {
-      font-size: 0.85rem;
-      color: #8895b0;
-    }
+    .hero-stats .stat .label { font-size: 0.85rem; color: #8895b0; }
 
-    /* Auth Card (glass) */
-    .hero-right {
-      flex: 0 0 360px;
-    }
+    .hero-right { flex: 0 0 360px; min-width: 280px; }
     .auth-card {
       background: rgba(255,255,255,0.04);
       backdrop-filter: blur(16px);
@@ -156,17 +141,8 @@
       font-weight: 700;
       margin-bottom: 6px;
     }
-    .auth-card .sub {
-      color: #b0bccf;
-      font-size: 0.95rem;
-      margin-bottom: 24px;
-    }
-    .auth-perks {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
+    .auth-card .sub { color: #b0bccf; font-size: 0.95rem; margin-bottom: 24px; }
+    .auth-perks { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
     .auth-perks .perk {
       display: flex;
       align-items: center;
@@ -187,26 +163,19 @@
       border-radius: 12px;
       font-weight: 600;
       font-size: 1rem;
-      transition: all 0.2s ease;
+      transition: 0.2s;
       margin-bottom: 16px;
     }
     .google-btn:hover { transform: scale(1.02); background: #f0f0f0; }
-    .auth-footnote {
-      font-size: 0.75rem;
-      color: #6a7a94;
-      text-align: center;
-    }
+    .auth-footnote { font-size: 0.75rem; color: #6a7a94; text-align: center; }
 
-    /* ===== DASHBOARD (unchanged layout, but improved styles) ===== */
-    .app-wrap {
-      min-height: 100vh;
-      background: #0a0f1a;
-    }
+    /* ===== DASHBOARD ===== */
+    .app-wrap { min-height: 100vh; background: #0a0f1a; }
     .top-nav {
-      background: rgba(10, 15, 26, 0.9);
+      background: rgba(10,15,26,0.9);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(255,255,255,0.06);
-      padding: 12px 24px;
+      padding: 10px 16px;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -217,33 +186,47 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .nav-tabs { display: flex; gap: 4px; }
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
     .tab-btn {
-      padding: 8px 16px;
+      padding: 6px 12px;
       border-radius: 8px;
       color: #8895b0;
       font-weight: 600;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
+      font-size: 0.85rem;
+      transition: 0.2s;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      white-space: nowrap;
     }
     .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
     .tab-btn.active { color: #00e701; background: rgba(0,231,1,0.08); }
-    .user-stats-bar { display: flex; align-items: center; gap: 16px; }
+    .user-stats-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
     .token-badge {
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 100px;
-      padding: 6px 16px;
+      padding: 4px 14px;
       display: flex;
       align-items: center;
       gap: 6px;
       font-weight: 700;
       color: #f5c842;
+      cursor: pointer;
+      transition: 0.2s;
     }
+    .token-badge:hover { border-color: #00e701; background: rgba(0,231,1,0.05); }
     .token-badge svg { color: #f5c842; }
     .user-profile-chip {
       display: flex;
@@ -253,7 +236,10 @@
       border: 1px solid rgba(255,255,255,0.06);
       border-radius: 100px;
       padding: 4px 12px 4px 4px;
+      cursor: pointer;
+      transition: 0.2s;
     }
+    .user-profile-chip:hover { border-color: #00e701; }
     .user-avatar {
       width: 30px;
       height: 30px;
@@ -261,61 +247,148 @@
       border: 2px solid #00e701;
       object-fit: cover;
     }
-    .user-name { font-weight: 600; font-size: 0.9rem; }
+    .user-name { font-weight: 600; font-size: 0.85rem; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* Views */
+    /* Main views */
     .app-main {
       max-width: 1240px;
-      margin: 20px auto 0;
-      padding: 0 20px 80px;
+      margin: 16px auto 0;
+      padding: 0 16px 80px;
     }
     .app-view { display: none; animation: fadeUp 0.3s ease; }
     .app-view.active { display: block; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Game Cards - improved */
+    /* Progress banner */
+    .cashout-progress-banner {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #8895b0;
+    }
+    .progress-row .value { color: #00e701; }
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00e701, #38bdf8);
+      border-radius: 100px;
+      transition: width 0.5s ease;
+    }
+
+    /* Hero banner */
+    .hero-banner {
+      background: linear-gradient(135deg, #101726, #0c121e);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .hero-banner .tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #00e701;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .hero-banner h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 4px 0;
+    }
+    .hero-banner p {
+      color: #8895b0;
+      font-size: 0.9rem;
+    }
+    .hero-banner p strong { color: #fff; }
+    .hero-banner p .reward { color: #00e701; }
+
+    /* Filters */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      padding: 6px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 100px;
+      color: #8895b0;
+      font-weight: 600;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .filter-chip.active,
+    .filter-chip:hover {
+      background: #00e701;
+      color: #000;
+      border-color: #00e701;
+    }
+
+    /* Games Grid */
     .games-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 20px;
-      margin-top: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
     }
     .game-card {
       background: rgba(255,255,255,0.04);
-      border-radius: 16px;
       border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
       overflow: hidden;
-      transition: all 0.25s ease;
+      transition: 0.25s ease;
       display: flex;
       flex-direction: column;
     }
     .game-card:hover {
-      transform: translateY(-6px);
+      transform: translateY(-4px);
       border-color: #00e701;
-      box-shadow: 0 12px 40px rgba(0,231,1,0.08);
+      box-shadow: 0 8px 30px rgba(0,231,1,0.06);
     }
     .card-media {
-      height: 110px;
+      height: 100px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
+      font-size: 2.8rem;
       position: relative;
     }
     .card-badge {
       position: absolute;
-      top: 10px;
-      left: 10px;
+      top: 8px;
+      left: 8px;
       background: rgba(0,0,0,0.6);
-      padding: 2px 12px;
+      padding: 2px 10px;
       border-radius: 100px;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: 700;
       letter-spacing: 0.04em;
       color: #fff;
     }
     .card-content {
-      padding: 16px;
+      padding: 14px;
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -323,37 +396,383 @@
     .card-title {
       font-family: 'Space Grotesk', sans-serif;
       font-weight: 700;
-      font-size: 1.1rem;
-      margin-bottom: 4px;
+      font-size: 1rem;
+      margin-bottom: 2px;
     }
     .card-desc {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: #8895b0;
       line-height: 1.4;
       flex: 1;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .card-meta {
       display: flex;
       justify-content: space-between;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: #8895b0;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .card-meta .win { color: #00e701; }
     .play-btn {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       background: #2563eb;
       color: #fff;
       border-radius: 10px;
       font-weight: 700;
-      transition: all 0.2s ease;
+      transition: 0.2s;
+      font-size: 0.9rem;
     }
     .play-btn:hover { background: #1d4ed8; transform: scale(1.02); }
 
-    /* Arena Modal - improved */
+    /* Profile section */
+    .profile-header-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 600px) {
+      .profile-header-card { grid-template-columns: 1fr; }
+    }
+    .profile-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .profile-avatar-lg {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid #00e701;
+      object-fit: cover;
+    }
+    .name-edit-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .name-edit-group h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .icon-btn {
+      color: #8895b0;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+    }
+    .icon-btn:hover { color: #00e701; }
+    .name-edit-box {
+      display: flex;
+      gap: 6px;
+      margin: 6px 0;
+      flex-wrap: wrap;
+    }
+    .name-input {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 6px 10px;
+      color: #fff;
+      font-size: 0.9rem;
+      outline: none;
+      min-width: 140px;
+    }
+    .btn-save {
+      background: #00e701;
+      color: #000;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+    .btn-cancel-sm {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #8895b0;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+    .join-date { font-size: 0.75rem; color: #6a7a94; margin: 4px 0 6px; }
+    .level-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      flex-wrap: wrap;
+    }
+    .level-bar-bg {
+      width: 80px;
+      height: 4px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .level-bar-fill {
+      height: 100%;
+      background: #00e701;
+      border-radius: 100px;
+    }
+    .xp-text { color: #6a7a94; }
+
+    .profile-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .stat-box-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      display: block;
+    }
+    .stat-box-lbl {
+      font-size: 0.7rem;
+      color: #8895b0;
+    }
+
+    .section-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .section-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .section-sub {
+      font-size: 0.85rem;
+      color: #8895b0;
+      margin-bottom: 16px;
+    }
+    .profile-menu-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .menu-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      text-align: left;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .menu-row:hover { border-color: #00e701; background: rgba(0,231,1,0.04); }
+    .menu-row-icon {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #00e701;
+    }
+    .menu-row-text { flex: 1; }
+    .menu-row-title { font-weight: 700; font-size: 0.9rem; }
+    .menu-row-sub { font-size: 0.75rem; color: #8895b0; }
+    .menu-row-arrow { color: #6a7a94; font-size: 1.2rem; font-weight: 300; }
+    .menu-row-danger .menu-row-icon { color: #f16464; }
+    .menu-row-danger:hover { border-color: #f16464; }
+
+    /* Table styles */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .ledger-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      text-align: left;
+    }
+    .ledger-table th {
+      color: #6a7a94;
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .ledger-table td {
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: #e0e8f0;
+    }
+    .badge-credit {
+      background: rgba(0,231,1,0.12);
+      color: #00e701;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.7rem;
+    }
+    .badge-debit {
+      background: rgba(241,100,100,0.12);
+      color: #f16464;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.7rem;
+    }
+
+    /* Refer & Earn */
+    .refer-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0;
+    }
+    .refer-info-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+    .refer-info-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #00e701;
+    }
+    .refer-info-lbl { font-size: 0.75rem; color: #8895b0; }
+    .refer-explainer {
+      font-size: 0.85rem;
+      color: #8895b0;
+      line-height: 1.5;
+      margin: 12px 0 16px;
+    }
+    .refer-code-box, .refer-redeem-box {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .refer-code-lbl {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #6a7a94;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .refer-code-row, .refer-redeem-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .refer-code-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      background: rgba(255,255,255,0.04);
+      border: 1px dashed rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 6px 14px;
+      flex: 1;
+      min-width: 120px;
+      color: #fff;
+    }
+    .refer-status-msg {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 8px;
+      min-height: 1.2em;
+    }
+    .refer-status-msg.success { color: #00e701; }
+    .refer-status-msg.error { color: #f16464; }
+
+    /* Add tokens */
+    .addtoken-amount-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 12px 0 16px;
+    }
+    .amount-chip {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 700;
+      text-align: center;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .amount-chip.active,
+    .amount-chip:hover {
+      background: #00e701;
+      color: #000;
+      border-color: #00e701;
+    }
+    .qr-box-wrap {
+      background: #fff;
+      color: #000;
+      max-width: 200px;
+      margin: 12px auto;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .qr-box-wrap img {
+      width: 160px;
+      height: 160px;
+      border-radius: 6px;
+    }
+    .qr-box-wrap .upi-id {
+      font-weight: 700;
+      font-size: 0.8rem;
+      margin-top: 6px;
+      color: #0a0f1a;
+    }
+
+    /* Back link */
+    .back-link {
+      background: none;
+      border: none;
+      color: #8895b0;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+    .back-link:hover { color: #00e701; }
+
+    /* Modals */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -364,23 +783,71 @@
       justify-content: center;
       z-index: 1000;
       padding: 20px;
+      animation: fadeUp 0.25s ease;
     }
-    .arena-card {
+    .modal-card, .arena-card {
       background: #141c2b;
-      border-radius: 24px;
-      padding: 32px;
-      max-width: 480px;
-      width: 100%;
       border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 24px;
+      max-width: 460px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
       box-shadow: 0 24px 80px rgba(0,0,0,0.6);
       animation: fadeUp 0.3s ease;
     }
+    .modal-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .modal-subtitle {
+      color: #8895b0;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+    .btn-cancel {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: #8895b0;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+    .btn-cancel:hover { background: rgba(255,255,255,0.04); }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      flex: 1;
+      text-align: center;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.04); }
+    .btn-primary {
+      background: #00e701;
+      color: #000;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 12px;
+      flex: 1;
+      text-align: center;
+    }
+    .btn-primary:hover { background: #00c601; }
+
+    /* Arena modal */
     .arena-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
     }
     .player-stat {
@@ -390,102 +857,247 @@
       gap: 4px;
     }
     .arena-avatar {
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       border: 2px solid #00e701;
       object-fit: cover;
     }
     .opp-side .arena-avatar { border-color: #38bdf8; }
-    .arena-name { font-weight: 600; font-size: 0.85rem; }
-    .vs-badge { font-weight: 800; color: #8895b0; font-size: 1.2rem; }
+    .arena-name { font-weight: 600; font-size: 0.8rem; }
+    .vs-badge { font-weight: 800; color: #6a7a94; font-size: 1.1rem; }
     .arena-turn-indicator {
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       font-weight: 600;
     }
-    .turn-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+    .turn-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
     .turn-dot-you { background: #00e701; }
     .turn-dot-opp { background: #38bdf8; }
     .arena-stage {
-      min-height: 200px;
+      min-height: 180px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
     }
 
-    /* Result screen */
-    .result-card h2 { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; }
-    .win-text { color: #00e701; }
-    .lose-text { color: #f16464; }
-    .result-analytics {
-      background: rgba(255,255,255,0.04);
-      border-radius: 12px;
-      padding: 14px;
-      margin: 16px 0;
-      font-size: 0.85rem;
-      color: #b0bccf;
+    /* Tic-Tac-Toe styles */
+    .ttt-wrapper {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      margin: 0 auto;
     }
-    .result-btn-row { display: flex; gap: 10px; }
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #fff;
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 600;
-      flex: 1;
+    .ttt-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      width: 240px;
+      height: 240px;
     }
-    .btn-secondary:hover { background: rgba(255,255,255,0.05); }
-
-    /* Tic-Tac-Toe styles (kept) */
-    .ttt-wrapper { position: relative; width: 270px; height: 270px; margin: 0 auto; }
-    .ttt-board { display: grid; grid-template-columns: repeat(3, 1fr); width: 270px; height: 270px; }
     .ttt-cell {
       background: #1e293b;
       border: 2px solid #334155;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
+      font-size: 2.8rem;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: 0.15s;
+      color: #e0e8f0;
     }
     .ttt-cell:hover { background: #2a3a55; }
     .ttt-cell.filled { cursor: default; }
-    .ttt-line-overlay { position: absolute; top: 0; left: 0; width: 270px; height: 270px; pointer-events: none; }
-    .ttt-winline { stroke: #f16464; stroke-width: 6; stroke-linecap: round; }
+    .ttt-line-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 240px;
+      pointer-events: none;
+    }
+    .ttt-winline {
+      stroke: #f16464;
+      stroke-width: 6;
+      stroke-linecap: round;
+    }
 
-    /* Misc */
-    .toast-stack { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    /* Result card */
+    .result-card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+    }
+    .win-text { color: #00e701; }
+    .lose-text { color: #f16464; }
+    .result-analytics {
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 12px 0 16px;
+      font-size: 0.85rem;
+      color: #b0bccf;
+    }
+    .result-btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Reaction game */
+    .reaction-box {
+      width: 100%;
+      height: 160px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: 0.1s;
+    }
+    .reaction-wait { background: #7f1d1d; color: #fff; }
+    .reaction-go { background: #00e701; color: #000; font-weight: 800; }
+
+    /* Quiz / Math styles */
+    .math-problem {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 12px 0;
+    }
+    .quiz-options {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .quiz-option {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .quiz-option:hover { background: rgba(0,231,1,0.08); border-color: #00e701; }
+    .quiz-option.correct { background: #00e701; color: #000; }
+    .quiz-option.wrong { background: #f16464; color: #fff; }
+    .subtitle { font-size: 0.85rem; color: #8895b0; margin-bottom: 8px; }
+
+    /* Toast */
+    .toast-stack {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 320px;
+      width: 100%;
+    }
     .toast {
       background: #1e293b;
       border-left: 4px solid #00e701;
-      padding: 12px 20px;
+      padding: 10px 16px;
       border-radius: 8px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-      animation: slideUp 0.3s ease;
-      min-width: 240px;
+      animation: slideIn 0.3s ease;
+      font-size: 0.85rem;
     }
     .toast-debit { border-left-color: #f16464; }
     .toast-credit-text { color: #00e701; font-weight: 700; }
     .toast-debit-text { color: #f16464; font-weight: 700; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .toast-out { opacity: 0; transform: translateX(40px); transition: all 0.25s ease; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .toast-out {
+      opacity: 0;
+      transform: translateX(40px);
+      transition: 0.25s ease;
+    }
+
+    /* Transaction Modal - NEW */
+    .tx-modal-content {
+      max-height: 60vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tx-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .tx-modal-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .tx-close-btn {
+      background: rgba(255,255,255,0.04);
+      border: none;
+      color: #8895b0;
+      font-size: 1.5rem;
+      padding: 0 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .tx-close-btn:hover { color: #fff; }
+    .tx-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .tx-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.85rem;
+    }
+    .tx-item .desc { flex: 1; margin-right: 8px; }
+    .tx-item .amount {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .tx-item .amount.credit { color: #00e701; }
+    .tx-item .amount.debit { color: #f16464; }
+    .tx-item .date { font-size: 0.7rem; color: #6a7a94; }
+
+    /* Footer */
+    .app-footer {
+      margin-top: auto;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 16px 20px;
+      background: rgba(10,15,26,0.8);
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6a7a94;
+    }
 
     /* Responsive */
-    @media (max-width: 768px) {
-      .hero-left h1 { font-size: 2.2rem; }
+    @media (max-width: 640px) {
+      .hero-left h1 { font-size: 2rem; }
       .hero-right { flex: 1 1 100%; }
-      .hero-stats { gap: 20px; flex-wrap: wrap; }
-      .landing-nav { padding: 16px 20px; flex-wrap: wrap; gap: 12px; }
-      .nav-container { flex-wrap: wrap; gap: 8px; }
-      .user-stats-bar { gap: 8px; }
+      .nav-tabs .tab-btn span { display: none; }
+      .nav-tabs .tab-btn svg { margin: 0; }
+      .games-grid { grid-template-columns: 1fr 1fr; }
+      .profile-header-card { grid-template-columns: 1fr; }
+      .addtoken-amount-grid { grid-template-columns: repeat(2, 1fr); }
+      .arena-card { padding: 16px; }
+      .ttt-wrapper { width: 200px; height: 200px; }
+      .ttt-board { width: 200px; height: 200px; }
+      .ttt-line-overlay { width: 200px; height: 200px; }
+      .ttt-cell { font-size: 2.2rem; }
     }
   </style>
 </head>
@@ -550,8 +1162,9 @@
 <!-- Toast stack -->
 <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
 
-<!-- ===== DASHBOARD (hidden until login) ===== -->
+<!-- ===== DASHBOARD ===== -->
 <div id="dashboard" class="app-wrap hidden">
+  <!-- Top Nav -->
   <header class="top-nav">
     <div class="nav-container">
       <div class="brand" id="nav-brand-logo" style="cursor:pointer;">
@@ -561,13 +1174,13 @@
         ARENA
       </div>
       <nav class="nav-tabs">
-        <button class="tab-btn active" data-target="view-earn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> Earn</button>
-        <button class="tab-btn" data-target="view-matches"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> My Matches</button>
-        <button class="tab-btn" data-target="view-cashout"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Cashout</button>
-        <button class="tab-btn" data-target="view-rewards"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7.5"/><path d="M14 14.66V17c0 .55.45 1 1 1h1.5"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg> Rewards</button>
+        <button class="tab-btn active" data-target="view-earn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg><span>Earn</span></button>
+        <button class="tab-btn" data-target="view-matches"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Matches</span></button>
+        <button class="tab-btn" data-target="view-cashout"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span>Cashout</span></button>
+        <button class="tab-btn" data-target="view-rewards"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7.5"/><path d="M14 14.66V17c0 .55.45 1 1 1h1.5"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg><span>Rewards</span></button>
       </nav>
       <div class="user-stats-bar">
-        <button id="wallet-badge-btn" class="token-badge">
+        <button id="wallet-badge-btn" class="token-badge" title="View transactions">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           <span id="balance-value">1,200</span>
         </button>
@@ -580,50 +1193,270 @@
   </header>
 
   <main class="app-main">
-    <!-- EARN view -->
+    <!-- EARN VIEW -->
     <section id="view-earn" class="app-view active">
-      <div class="cashout-progress-banner" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:16px 20px; margin-bottom:20px;">
-        <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:600; margin-bottom:8px;">
-          <span style="color:#8895b0;">Next Cashout Threshold</span>
-          <span id="progress-text" style="color:#00e701;">₹1,200 / ₹2,500</span>
+      <div class="cashout-progress-banner">
+        <div class="progress-row">
+          <span>Next Cashout Threshold</span>
+          <span class="value" id="progress-text">₹1,200 / ₹2,500</span>
         </div>
-        <div style="width:100%; height:6px; background:rgba(255,255,255,0.06); border-radius:100px; overflow:hidden;">
-          <div id="progress-fill" style="height:100%; width:48%; background:linear-gradient(90deg, #00e701, #38bdf8); border-radius:100px; transition:width 0.5s ease;"></div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:48%;"></div>
         </div>
       </div>
 
-      <div class="hero-banner" style="background:linear-gradient(135deg, #101726, #0c121e); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:24px 28px; margin-bottom:20px;">
-        <span style="font-size:0.75rem; font-weight:700; color:#00e701; letter-spacing:0.08em;">INSTANT 1V1 DUELS</span>
-        <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:700; margin:4px 0;">Challenge Players &amp; Win Real Tokens</h2>
-        <p style="color:#8895b0; font-size:0.9rem;">Entry: <strong style="color:#fff;">₹50</strong> • Winner Reward: <strong style="color:#00e701;">₹90</strong> (Net +₹40)</p>
+      <div class="hero-banner">
+        <div class="tag">INSTANT 1V1 DUELS</div>
+        <h2>Challenge Players &amp; Win Real Tokens</h2>
+        <p>Entry: <strong>₹50</strong> • Winner Reward: <strong class="reward">₹90</strong> (Net +₹40)</p>
       </div>
 
-      <div class="filter-bar" style="display:flex; gap:8px; overflow-x:auto; margin-bottom:16px;">
-        <button class="filter-chip active" data-category="all" style="padding:8px 16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:100px; color:#8895b0; font-weight:600; font-size:0.8rem; cursor:pointer; white-space:nowrap;">All Games</button>
-        <button class="filter-chip" data-category="reflex" style="padding:8px 16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:100px; color:#8895b0; font-weight:600; font-size:0.8rem; cursor:pointer; white-space:nowrap;">Reflex Speed</button>
-        <button class="filter-chip" data-category="math" style="padding:8px 16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:100px; color:#8895b0; font-weight:600; font-size:0.8rem; cursor:pointer; white-space:nowrap;">Math</button>
-        <button class="filter-chip" data-category="brain" style="padding:8px 16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:100px; color:#8895b0; font-weight:600; font-size:0.8rem; cursor:pointer; white-space:nowrap;">Memory &amp; Brain</button>
-        <button class="filter-chip" data-category="strategy" style="padding:8px 16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:100px; color:#8895b0; font-weight:600; font-size:0.8rem; cursor:pointer; white-space:nowrap;">Strategy</button>
+      <div class="filter-bar">
+        <button class="filter-chip active" data-category="all">All Games</button>
+        <button class="filter-chip" data-category="reflex">Reflex Speed</button>
+        <button class="filter-chip" data-category="math">Math</button>
+        <button class="filter-chip" data-category="brain">Memory &amp; Brain</button>
+        <button class="filter-chip" data-category="strategy">Strategy</button>
       </div>
 
       <div class="games-grid" id="gamesGrid"></div>
     </section>
 
-    <!-- Other views (profile, ledger, refer, addtoken, matches, cashout, rewards) - kept from original but simplified for brevity; the full code includes them -->
-    <!-- For production, uncomment the full views below; I'm truncating to save space but the final file will have all -->
-    <!-- ... (all views are present in the full code) ... -->
+    <!-- PROFILE VIEW -->
+    <section id="view-profile" class="app-view">
+      <div class="profile-header-card">
+        <div class="profile-left">
+          <img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" />
+          <div class="profile-meta">
+            <div class="name-edit-group">
+              <h2 id="profile-display-name">Vishal</h2>
+              <button id="edit-name-btn" class="icon-btn" title="Edit Name">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+              </button>
+            </div>
+            <div id="name-edit-box" class="name-edit-box hidden">
+              <input type="text" id="name-input" class="name-input" maxlength="20" placeholder="New username" />
+              <button id="save-name-btn" class="btn-save">Save</button>
+              <button id="cancel-name-btn" class="btn-cancel-sm">Cancel</button>
+            </div>
+            <p class="join-date">Arena Member • Verified Account</p>
+            <div class="level-pill">
+              <span>Level <strong id="user-level">1</strong></span>
+              <div class="level-bar-bg"><div class="level-bar-fill" style="width:48%;"></div></div>
+              <span class="xp-text">480 / 1,000 XP</span>
+            </div>
+          </div>
+        </div>
+        <div class="profile-stats-grid">
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-total-earnings">₹1,200</span>
+            <span class="stat-box-lbl">Token Balance</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-matches-played">0</span>
+            <span class="stat-box-lbl">Matches Played</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-win-rate">0%</span>
+            <span class="stat-box-lbl">Win Rate</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-tokens-won">+₹0</span>
+            <span class="stat-box-lbl">Duel Profit</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3>Account</h3>
+        <p class="section-sub">Manage your wallet, profile and referral program</p>
+        <div class="profile-menu-list">
+          <div class="menu-row menu-row-static">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><path d="M2 6h20v12H2z"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Signed in as</span>
+              <span class="menu-row-sub" id="profile-email">—</span>
+            </div>
+          </div>
+
+          <button class="menu-row" id="menu-transactions-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Token Transactions</span>
+              <span class="menu-row-sub">View your full credit &amp; debit history</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+
+          <button class="menu-row" id="menu-addtokens-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Add Tokens</span>
+              <span class="menu-row-sub">Top up your wallet balance</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+
+          <button class="menu-row" id="menu-refer-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Refer &amp; Earn</span>
+              <span class="menu-row-sub">Invite friends, earn bonus tokens</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+
+          <button class="menu-row menu-row-danger" id="menu-logout-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Log Out</span>
+              <span class="menu-row-sub">Sign out of your Arena account</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSACTIONS VIEW (Full page) -->
+    <section id="view-ledger" class="app-view">
+      <div class="section-card">
+        <button class="back-link" id="ledger-back-btn">‹ Back to Profile</button>
+        <h3>Token Transactions</h3>
+        <p class="section-sub">Live record of credit and debit events</p>
+        <div class="table-wrap">
+          <table class="ledger-table">
+            <thead><tr><th>Description</th><th>Type</th><th>Amount</th><th>Date &amp; Time</th></tr></thead>
+            <tbody id="ledger-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- REFER VIEW -->
+    <section id="view-refer" class="app-view">
+      <div class="section-card">
+        <button class="back-link" id="refer-back-btn">‹ Back to Profile</button>
+        <h3>Refer &amp; Earn</h3>
+        <p class="section-sub">Invite friends to Arena and earn free tokens together</p>
+        <div class="refer-info-grid">
+          <div class="refer-info-box">
+            <span class="refer-info-num">₹100</span>
+            <span class="refer-info-lbl">You get, per friend who joins</span>
+          </div>
+          <div class="refer-info-box">
+            <span class="refer-info-num">₹300</span>
+            <span class="refer-info-lbl">Your friend gets, on signup</span>
+          </div>
+        </div>
+        <p class="refer-explainer">Share your referral code below. When a friend enters it, they instantly receive ₹300 in tokens and you receive ₹100 — for every friend you refer, with no limit.</p>
+        <div class="refer-code-box">
+          <span class="refer-code-lbl">Your Referral Code</span>
+          <div class="refer-code-row">
+            <span id="my-referral-code" class="refer-code-value">—</span>
+            <button id="copy-referral-btn" class="btn-secondary">Copy</button>
+          </div>
+        </div>
+        <div class="refer-redeem-box">
+          <span class="refer-code-lbl">Have a Referral Code?</span>
+          <div class="refer-redeem-row">
+            <input type="text" id="referral-input" class="name-input" maxlength="12" placeholder="Enter code e.g. VISHA859" />
+            <button id="submit-referral-btn" class="btn-primary">Submit</button>
+          </div>
+          <p id="referral-status-msg" class="refer-status-msg"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADD TOKENS VIEW -->
+    <section id="view-addtoken" class="app-view">
+      <div class="section-card">
+        <button class="back-link" id="addtoken-back-btn">‹ Back to Profile</button>
+        <h3>Add Tokens via Paytm / UPI</h3>
+        <p class="section-sub">Scan the QR code in any UPI app (Paytm, PhonePe, GPay), complete payment, and paste the 12-digit UTR ID below.</p>
+        <div style="text-align:center;">
+          <div class="qr-box-wrap">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=paytm.s1ax1t9@pty%26pn=Arena%20Game" alt="UPI QR" />
+            <div class="upi-id">UPI ID: paytm.s1ax1t9@pty</div>
+          </div>
+        </div>
+        <div class="addtoken-amount-grid">
+          <button class="amount-chip" data-amount="20">₹20</button>
+          <button class="amount-chip active" data-amount="50">₹50</button>
+          <button class="amount-chip" data-amount="100">₹100</button>
+          <button class="amount-chip" data-amount="200">₹200</button>
+        </div>
+        <div class="refer-redeem-box">
+          <span class="refer-code-lbl">Submit Payment for Instant Verification (Min: ₹1)</span>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <input type="number" id="addtoken-input" class="name-input" min="1" value="50" placeholder="Enter amount (₹)" />
+            <input type="text" id="addtoken-utr-input" class="name-input" maxlength="16" placeholder="Paste 12-digit UPI / Paytm UTR" />
+            <button id="addtoken-submit-btn" class="btn-primary">Submit UTR for Verification</button>
+          </div>
+          <p id="addtoken-status-msg" class="refer-status-msg"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MATCH HISTORY VIEW -->
+    <section id="view-matches" class="app-view">
+      <div class="section-card">
+        <h3>Match History</h3>
+        <p class="section-sub">Your recent 1v1 duel records</p>
+        <div class="table-wrap">
+          <table class="ledger-table">
+            <thead><tr><th>Game</th><th>Opponent</th><th>Result</th><th>Reward</th><th>Time</th></tr></thead>
+            <tbody id="matches-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- CASHOUT VIEW -->
+    <section id="view-cashout" class="app-view">
+      <div class="section-card">
+        <h3>Cashout Vault</h3>
+        <p class="section-sub">Exchange tokens for rewards</p>
+        <div class="stat-box" style="margin-top:12px;">
+          <p>Minimum payout requires ₹2,500 in your wallet.</p>
+          <button class="btn-primary" style="margin-top:12px; max-width:200px;" onclick="alert('Threshold: Reach ₹2,500 to initialize redemption.')">Request Cashout</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- REWARDS VIEW -->
+    <section id="view-rewards" class="app-view">
+      <div class="section-card">
+        <h3>Daily Rewards</h3>
+        <p class="section-sub">Daily streak login bonus</p>
+        <div class="stat-box" style="margin-top:12px;">
+          <span class="stat-box-num">Day 1 Streak</span>
+          <button class="btn-primary" style="margin-top:12px; max-width:220px;" onclick="alert('Daily reward claimed: +₹50!')">Claim ₹50 Daily Bonus</button>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- Matchmaking Modal -->
   <div id="match-overlay" class="modal-overlay hidden">
-    <div class="modal-card" style="background:#141c2b; border-radius:24px; padding:32px; max-width:400px; width:100%; text-align:center; border:1px solid rgba(255,255,255,0.06);">
-      <div style="margin-bottom:16px;">
+    <div class="modal-card">
+      <div style="margin-bottom:12px;">
         <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#00e701" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
       </div>
-      <h3 id="match-title" style="font-family:'Space Grotesk',sans-serif; font-size:1.2rem;">Finding Opponent</h3>
-      <p id="match-status" style="color:#8895b0; margin:8px 0 16px;">Scanning live queue...</p>
-      <div style="background:rgba(255,255,255,0.04); border-radius:12px; padding:8px; margin-bottom:20px; font-size:0.85rem; color:#8895b0;">Entry Stake: <strong style="color:#f5c842;">₹50</strong></div>
-      <button id="cancel-match-btn" style="width:100%; padding:12px; background:transparent; border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:#8895b0; font-weight:600;">Cancel Queue</button>
+      <h3 id="match-title">Finding Opponent</h3>
+      <p class="modal-subtitle" id="match-status">Scanning live queue for players...</p>
+      <div class="modal-fee-notice" style="background:rgba(255,255,255,0.04); border-radius:12px; padding:8px; margin-bottom:16px; color:#8895b0; font-size:0.85rem;">Entry Stake: <strong style="color:#f5c842;">₹50</strong></div>
+      <button id="cancel-match-btn" class="btn-cancel">Cancel Queue</button>
     </div>
   </div>
 
@@ -649,36 +1482,71 @@
     </div>
   </div>
 
-  <!-- Logout Confirmation -->
+  <!-- Logout Confirm Modal -->
   <div id="logout-confirm-overlay" class="modal-overlay hidden">
-    <div class="modal-card" style="background:#141c2b; border-radius:24px; padding:32px; max-width:400px; width:100%; text-align:center; border:1px solid rgba(255,255,255,0.06);">
-      <h3 style="font-family:'Space Grotesk',sans-serif;">Log Out?</h3>
-      <p style="color:#8895b0; margin:8px 0 20px;">You'll need to sign in again to access your wallet and matches.</p>
-      <div style="display:flex; gap:10px;">
+    <div class="modal-card">
+      <h3>Log Out?</h3>
+      <p class="modal-subtitle">You'll need to sign in again to access your wallet and matches.</p>
+      <div class="result-btn-row">
         <button id="logout-cancel-btn" class="btn-secondary">Cancel</button>
-        <button id="logout-confirm-btn" class="btn-primary" style="background:#00e701; color:#000; padding:12px; border-radius:12px; font-weight:700; flex:1;">Log Out</button>
+        <button id="logout-confirm-btn" class="btn-primary">Log Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Popup Modal (New) -->
+  <div id="transaction-modal" class="modal-overlay hidden" style="align-items:flex-start; padding-top:10vh;">
+    <div class="modal-card" style="max-width:400px; padding:16px 20px;">
+      <div class="tx-modal-header">
+        <h3>Token Transactions</h3>
+        <button id="tx-modal-close" class="tx-close-btn">✕</button>
+      </div>
+      <div class="tx-modal-content" id="tx-modal-body">
+        <div class="tx-list" id="tx-list-container">
+          <!-- Rendered by JS -->
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Footer -->
-  <footer style="margin-top:auto; border-top:1px solid rgba(255,255,255,0.06); padding:24px 20px 16px; background:rgba(10,15,26,0.8);">
-    <div style="max-width:1240px; margin:0 auto; display:flex; justify-content:space-between; font-size:0.8rem; color:#6a7a94; flex-wrap:wrap; gap:12px;">
-      <span>© 2026 Arena Technologies. All rights reserved.</span>
-      <span>English (US)</span>
-    </div>
+  <footer class="app-footer">
+    <p>© 2026 Arena Technologies. All rights reserved.</p>
   </footer>
+</div>
+
+<!-- ===== LIVE MATCH PAGE (for real-time games) ===== -->
+<div id="page-match" class="hidden">
+  <p id="match-loading" class="center-screen loading-text" style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#0a0f1a;">Loading match...</p>
+  <div id="match-root" class="match-wrap hidden" style="padding:20px; max-width:600px; margin:0 auto;">
+    <div class="vs-bar" style="display:flex; align-items:center; justify-content:space-around; margin-bottom:20px;">
+      <div class="vs-player" style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+        <img id="me-avatar" src="" alt="You" style="width:50px; height:50px; border-radius:50%; border:2px solid #00e701;" />
+        <span id="me-name" style="font-weight:600;">You</span>
+      </div>
+      <span class="vs-label" style="font-weight:800; color:#6a7a94; font-size:1.2rem;">VS</span>
+      <div class="vs-player" style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+        <span id="opp-name" style="font-weight:600;">Opponent</span>
+        <img id="opp-avatar" src="" alt="Opponent" style="width:50px; height:50px; border-radius:50%; border:2px solid #38bdf8;" />
+      </div>
+    </div>
+    <div class="game-stage" id="stage" style="min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:center;"></div>
+  </div>
 </div>
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ===== SUPABASE CLIENT =====
+// ============================================================
+//  FULL CLIENT-SIDE CODE – ALL FEATURES INTACT
+// ============================================================
+
+// ---- Supabase ----
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5Zm1iaWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDE3NDIsImV4cCI6MjEwMzIxNzc0Mn0.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ===== AUTH =====
+// ---- Auth ----
 const googleLoginBtn = document.getElementById('google-login-btn');
 const navLoginBtn = document.getElementById('nav-login-btn');
 const navSignupBtn = document.getElementById('nav-signup-btn');
@@ -694,7 +1562,30 @@ googleLoginBtn?.addEventListener('click', triggerGoogleLogin);
 navLoginBtn?.addEventListener('click', triggerGoogleLogin);
 navSignupBtn?.addEventListener('click', triggerGoogleLogin);
 
-// ===== GAME DATA =====
+// ---- Constants ----
+const MATCH_ENTRY_FEE = 50;
+const MATCH_WIN_REWARD = 90;
+const BOT_WAIT_SECONDS = 8;
+const LIVE_ENABLED_TYPES = ['tictactoe'];
+const INDIAN_BOT_POOL = [
+  { name: 'Aarav Sharma', seed: 'aarav' },
+  { name: 'Priya Patel', seed: 'priya' },
+  { name: 'Rohan Verma', seed: 'rohan' },
+  { name: 'Ananya Singh', seed: 'ananya' },
+  { name: 'Vikram Malhotra', seed: 'vikram' },
+  { name: 'Sneha Reddy', seed: 'sneha' },
+  { name: 'Aditya Kumar', seed: 'aditya' },
+  { name: 'Neha Gupta', seed: 'neha' },
+  { name: 'Karan Mehta', seed: 'karan' },
+  { name: 'Divya Roy', seed: 'divya' },
+  { name: 'Arjun Chopra', seed: 'arjun' },
+  { name: 'Riya Sen', seed: 'riya' },
+  { name: 'Ishaan Kapoor', seed: 'ishaan' },
+  { name: 'Meera Nair', seed: 'meera' },
+  { name: 'Rahul Iyer', seed: 'rahul' },
+  { name: 'Kavya Joshi', seed: 'kavya' }
+];
+
 const GAME_CATALOG = [
   { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat — get three in a row to win.', icon: '✖️', badge: 'CLASSIC', category: 'brain' },
   { type: 'rps', name: 'RPS Duel', desc: 'Best-of-5 rock, paper, scissors.', icon: '✊', badge: 'CLASSIC', category: 'strategy' },
@@ -718,54 +1609,7 @@ const GAME_CATALOG = [
   { type: 'emojisprint', name: 'Emoji Memory Sprint', desc: 'Memory match with growing grid.', icon: '🌟', badge: 'MEMORY', category: 'brain' },
   { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve 5 quick sums back-to-back.', icon: '🧮', badge: 'MATH', category: 'math' },
 ];
-const BANNER_CLASSES = ['#1a2a3a', '#2d3748', '#1e293b', '#0f172a', '#1e2a3a', '#2a1e3a'];
-
-function renderGameCards() {
-  const grid = document.getElementById('gamesGrid');
-  if (!grid) return;
-  grid.innerHTML = GAME_CATALOG.map((g, i) => {
-    const bg = BANNER_CLASSES[i % BANNER_CLASSES.length];
-    return `
-      <div class="game-card" data-category="${g.category}">
-        <div class="card-media" style="background:${bg};">
-          <span class="card-badge">${g.badge}</span>
-          <span style="font-size:3rem;">${g.icon}</span>
-        </div>
-        <div class="card-content">
-          <h3 class="card-title">${g.name}</h3>
-          <p class="card-desc">${g.desc}</p>
-          <div class="card-meta"><span>Fee: ₹50</span><span class="win">+₹90 Reward</span></div>
-          <button class="play-btn" data-game="${g.name}" data-type="${g.type}">Play Match</button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-renderGameCards();
-
-// ===== CONSTANTS =====
-const MATCH_ENTRY_FEE = 50;
-const MATCH_WIN_REWARD = 90;
-const BOT_WAIT_SECONDS = 8; // increased from 5 to give real users more time
-const LIVE_ENABLED_TYPES = ['tictactoe']; // games that support live pairing
-const INDIAN_BOT_POOL = [
-  { name: 'Aarav Sharma', seed: 'aarav' },
-  { name: 'Priya Patel', seed: 'priya' },
-  { name: 'Rohan Verma', seed: 'rohan' },
-  { name: 'Ananya Singh', seed: 'ananya' },
-  { name: 'Vikram Malhotra', seed: 'vikram' },
-  { name: 'Sneha Reddy', seed: 'sneha' },
-  { name: 'Aditya Kumar', seed: 'aditya' },
-  { name: 'Neha Gupta', seed: 'neha' },
-  { name: 'Karan Mehta', seed: 'karan' },
-  { name: 'Divya Roy', seed: 'divya' },
-  { name: 'Arjun Chopra', seed: 'arjun' },
-  { name: 'Riya Sen', seed: 'riya' },
-  { name: 'Ishaan Kapoor', seed: 'ishaan' },
-  { name: 'Meera Nair', seed: 'meera' },
-  { name: 'Rahul Iyer', seed: 'rahul' },
-  { name: 'Kavya Joshi', seed: 'kavya' }
-];
+const BANNER_CLASSES = ['#1a2a3a','#2d3748','#1e293b','#0f172a','#1e2a3a','#2a1e3a'];
 
 function formatRupees(amount) {
   const n = Number(amount) || 0;
@@ -773,7 +1617,7 @@ function formatRupees(amount) {
   return sign + '₹' + Math.abs(n).toLocaleString('en-IN');
 }
 
-// ===== STATE =====
+// ---- State ----
 let currentUser = null;
 let currentBalance = 0;
 let matchHistory = [];
@@ -785,9 +1629,7 @@ let queueChannel = null;
 let inQueue = false;
 let presenceHeartbeatTimer = null;
 
-// ===== DOM REFS =====
-const loadingEl = document.getElementById('loading');
-const dashEl = document.getElementById('dashboard');
+// ---- DOM refs ----
 const balanceEl = document.getElementById('balance-value');
 const playerNameEl = document.getElementById('player-name');
 const avatarEl = document.getElementById('avatar');
@@ -839,18 +1681,19 @@ const arenaUserName = document.getElementById('arena-user-name');
 const arenaOppAvatar = document.getElementById('arena-opp-avatar');
 const arenaOppName = document.getElementById('arena-opp-name');
 const arenaStage = document.getElementById('arena-stage');
+const txModal = document.getElementById('transaction-modal');
+const txModalClose = document.getElementById('tx-modal-close');
+const txListContainer = document.getElementById('tx-list-container');
 
-// ===== FUNCTIONS =====
-function isTabActive() {
-  return document.visibilityState === 'visible' && document.hasFocus();
-}
+// ---- Helper functions ----
+function isTabActive() { return document.visibilityState === 'visible' && document.hasFocus(); }
 
 async function touchPresence() {
   if (!currentUser) return;
   if (!isTabActive()) return;
   try {
     await client.from('users').update({ last_seen: new Date().toISOString() }).eq('id', currentUser.id);
-  } catch (err) { /* ignore */ }
+  } catch (e) {}
 }
 
 function startPresenceHeartbeat() {
@@ -861,25 +1704,7 @@ function startPresenceHeartbeat() {
   window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
 }
 
-async function initDashboard() {
-  try {
-    const { data: { session } } = await client.auth.getSession();
-    if (!session) { goToLanding(); return; }
-    currentUser = session.user;
-    if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '—';
-    await loadUserName();
-    await loadWallet();
-    await loadTransactions();
-    await loadMatchHistory();
-    await loadReferralInfo();
-    updateUI();
-    startPresenceHeartbeat();
-  } catch (err) { console.error(err); } finally {
-    if (loadingEl) loadingEl.classList.add('hidden');
-    if (dashEl) dashEl.classList.remove('hidden');
-  }
-}
-
+// ---- Data loading ----
 async function loadUserName() {
   const meta = currentUser.user_metadata || {};
   const localName = localStorage.getItem('arena_name_' + currentUser.id);
@@ -888,7 +1713,7 @@ async function loadUserName() {
   try {
     const { data: profileRow } = await client.from('users').select('full_name').eq('id', currentUser.id).maybeSingle();
     dbName = profileRow?.full_name || null;
-  } catch (err) {}
+  } catch (e) {}
   const initialName = dbName || fallbackName;
   setUserDisplayName(initialName);
   if (dbName !== initialName) syncProfileToDatabase(initialName);
@@ -898,7 +1723,7 @@ async function syncProfileToDatabase(name) {
   const avatarUrl = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(name);
   try {
     await client.from('users').upsert({ id: currentUser.id, email: currentUser.email, full_name: name, avatar_url: avatarUrl });
-  } catch (err) {}
+  } catch (e) {}
 }
 
 function setUserDisplayName(name) {
@@ -949,10 +1774,8 @@ function showToast(desc, type, amount) {
   const isCredit = type === 'credit';
   const toast = document.createElement('div');
   toast.className = 'toast ' + (isCredit ? 'toast-credit' : 'toast-debit');
-  toast.innerHTML = `
-    <span>${isCredit ? '+' : '-'}${formatRupees(Math.abs(amount))}</span>
-    <span>${desc}</span>
-  `;
+  const amtText = (isCredit ? '+' : '-') + formatRupees(Math.abs(amount));
+  toast.innerHTML = `<span class="${isCredit ? 'toast-credit-text' : 'toast-debit-text'}">${amtText}</span> <span>${desc}</span>`;
   stack.appendChild(toast);
   setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 3000);
 }
@@ -963,7 +1786,7 @@ async function recordTransaction(desc, type, amount) {
   showToast(desc, type, amount);
   try {
     await client.from('transactions').insert({ user_id: currentUser.id, description: desc, type, amount });
-  } catch (e) { /* ignore */ }
+  } catch (e) {}
 }
 
 async function loadMatchHistory() {
@@ -979,7 +1802,7 @@ async function recordMatch(game, opponent, result, reward) {
   updateUI();
   try {
     await client.from('match_history').insert({ user_id: currentUser.id, game, opponent, result, reward });
-  } catch (e) { /* ignore */ }
+  } catch (e) {}
 }
 
 function updateUI() {
@@ -1003,6 +1826,7 @@ function updateUI() {
   if (statWon) statWon.textContent = '+' + formatRupees(totalWonTokens);
   renderLedger();
   renderMatchHistory();
+  renderTxModalList();
 }
 
 function renderLedger() {
@@ -1031,7 +1855,37 @@ function renderMatchHistory() {
   }).join('');
 }
 
-// ===== NAVIGATION =====
+// ---- Transaction Modal ----
+function renderTxModalList() {
+  if (!txListContainer) return;
+  if (transactions.length === 0) {
+    txListContainer.innerHTML = '<p style="color:#8895b0; text-align:center; padding:12px 0;">No transactions yet.</p>';
+    return;
+  }
+  txListContainer.innerHTML = transactions.map(tx => {
+    const isCredit = tx.type === 'credit';
+    const sign = isCredit ? '+' : '-';
+    const cls = isCredit ? 'credit' : 'debit';
+    return `<div class="tx-item">
+      <span class="desc">${tx.desc}</span>
+      <span class="amount ${cls}">${sign}${formatRupees(tx.amount)}</span>
+      <span class="date">${tx.date}</span>
+    </div>`;
+  }).join('');
+}
+
+function openTxModal() {
+  renderTxModalList();
+  txModal.classList.remove('hidden');
+}
+function closeTxModal() {
+  txModal.classList.add('hidden');
+}
+walletBadgeBtn?.addEventListener('click', openTxModal);
+txModalClose?.addEventListener('click', closeTxModal);
+txModal?.addEventListener('click', (e) => { if (e.target === txModal) closeTxModal(); });
+
+// ---- Navigation ----
 function switchView(targetId) {
   tabButtons.forEach(b => b.classList.remove('active'));
   appViews.forEach(v => v.classList.remove('active'));
@@ -1040,11 +1894,9 @@ function switchView(targetId) {
   const targetView = document.getElementById(targetId);
   if (targetView) targetView.classList.add('active');
 }
-
 tabButtons.forEach(btn => btn.addEventListener('click', () => switchView(btn.getAttribute('data-target'))));
 document.getElementById('profile-nav-btn')?.addEventListener('click', () => switchView('view-profile'));
 document.getElementById('nav-brand-logo')?.addEventListener('click', () => switchView('view-earn'));
-walletBadgeBtn?.addEventListener('click', () => switchView('view-ledger'));
 menuTransactionsBtn?.addEventListener('click', () => switchView('view-ledger'));
 menuAddTokensBtn?.addEventListener('click', () => switchView('view-addtoken'));
 menuReferBtn?.addEventListener('click', () => switchView('view-refer'));
@@ -1064,7 +1916,7 @@ ledgerBackBtn?.addEventListener('click', () => switchView('view-profile'));
 referBackBtn?.addEventListener('click', () => switchView('view-profile'));
 addtokenBackBtn?.addEventListener('click', () => switchView('view-profile'));
 
-// ===== REFERRAL =====
+// ---- Referral ----
 function generateReferralCode(email) {
   const local = (email || 'player').split('@')[0].replace(/[^a-zA-Z]/g, '').toUpperCase();
   const prefix = (local + 'XXXXX').slice(0, 5);
@@ -1117,7 +1969,7 @@ submitReferralBtn?.addEventListener('click', async () => {
   submitReferralBtn.disabled = false;
 });
 
-// ===== PAYMENT (Add Tokens) =====
+// ---- Add Tokens ----
 amountChips.forEach(chip => {
   chip.addEventListener('click', () => {
     amountChips.forEach(c => c.classList.remove('active'));
@@ -1125,7 +1977,6 @@ amountChips.forEach(chip => {
     if (addtokenInput) addtokenInput.value = chip.getAttribute('data-amount');
   });
 });
-
 addtokenSubmitBtn?.addEventListener('click', async () => {
   const amount = parseFloat(addtokenInput?.value);
   const utr = (addtokenUtrInput?.value || '').trim();
@@ -1146,7 +1997,7 @@ addtokenSubmitBtn?.addEventListener('click', async () => {
   addtokenSubmitBtn.disabled = false;
 });
 
-// ===== FILTERS =====
+// ---- Filters ----
 filterChips.forEach(chip => {
   chip.addEventListener('click', () => {
     filterChips.forEach(c => c.classList.remove('active'));
@@ -1158,7 +2009,7 @@ filterChips.forEach(chip => {
   });
 });
 
-// ===== PROFILE NAME EDIT =====
+// ---- Profile name edit ----
 editNameBtn?.addEventListener('click', () => {
   nameInput.value = playerNameEl.textContent;
   nameEditBox.classList.remove('hidden');
@@ -1178,7 +2029,31 @@ saveNameBtn?.addEventListener('click', async () => {
   }
 });
 
-// ===== MATCHMAKING =====
+// ---- Game Cards ----
+function renderGameCards() {
+  const grid = document.getElementById('gamesGrid');
+  if (!grid) return;
+  grid.innerHTML = GAME_CATALOG.map((g, i) => {
+    const bg = BANNER_CLASSES[i % BANNER_CLASSES.length];
+    return `
+      <div class="game-card" data-category="${g.category}">
+        <div class="card-media" style="background:${bg};">
+          <span class="card-badge">${g.badge}</span>
+          <span style="font-size:3rem;">${g.icon}</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">${g.name}</h3>
+          <p class="card-desc">${g.desc}</p>
+          <div class="card-meta"><span>Fee: ₹50</span><span class="win">+₹90 Reward</span></div>
+          <button class="play-btn" data-game="${g.name}" data-type="${g.type}">Play Match</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+renderGameCards();
+
+// ---- Matchmaking ----
 async function findAndClaimOpponent() {
   const { data: match, error } = await client.rpc('claim_opponent', { p_game_type: activeGame.type, p_entry_fee: MATCH_ENTRY_FEE });
   if (error || !match || !match.id) return null;
@@ -1191,7 +2066,6 @@ async function beginMatchmaking() {
   if (matchStatus) matchStatus.textContent = 'Deducting entry stake...';
   if (matchOverlay) matchOverlay.classList.remove('hidden');
 
-  // Update presence immediately so we are considered online
   await touchPresence();
 
   try {
@@ -1205,7 +2079,6 @@ async function beginMatchmaking() {
     return;
   }
 
-  // For games not supporting live pairing, go straight to bot
   if (!LIVE_ENABLED_TYPES.includes(activeGame.type)) {
     if (matchStatus) matchStatus.textContent = 'Matching you with an opponent...';
     setTimeout(() => {
@@ -1216,7 +2089,7 @@ async function beginMatchmaking() {
     return;
   }
 
-  // Try to find an immediate opponent
+  // Live mode
   if (matchStatus) matchStatus.textContent = 'Scanning live queue...';
   const foundMatch = await findAndClaimOpponent();
   if (foundMatch) {
@@ -1226,10 +2099,8 @@ async function beginMatchmaking() {
     return;
   }
 
-  // Add ourselves to the queue
   await client.from('matchmaking_queue').upsert({ user_id: currentUser.id, game_type: activeGame.type });
 
-  // Listen for match creation
   queueChannel = client.channel('queue-watch-' + currentUser.id)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'matches', filter: 'player2_id=eq.' + currentUser.id }, (payload) => {
       if (!inQueue) return;
@@ -1242,7 +2113,6 @@ async function beginMatchmaking() {
   let secondsLeft = BOT_WAIT_SECONDS;
   if (matchStatus) matchStatus.textContent = 'Waiting for a live player... (' + secondsLeft + 's)';
 
-  // Also send presence updates every 3 seconds while waiting to stay "online"
   const presenceInterval = setInterval(touchPresence, 3000);
 
   matchmakingTimer = setInterval(async () => {
@@ -1252,7 +2122,6 @@ async function beginMatchmaking() {
     if (secondsLeft > 0) {
       if (matchStatus) matchStatus.textContent = 'Waiting for a live player... (' + secondsLeft + 's)';
 
-      // Try to claim an opponent again
       const liveMatch = await findAndClaimOpponent();
       if (liveMatch) {
         cleanupQueue();
@@ -1262,7 +2131,6 @@ async function beginMatchmaking() {
         return;
       }
 
-      // Also check if we are already in a match (from the other side)
       const { data: mine } = await client.from('matches').select('id').or('player1_id.eq.' + currentUser.id + ',player2_id.eq.' + currentUser.id).eq('status', 'active').order('created_at', { ascending: false }).limit(1);
       if (mine && mine.length > 0) {
         cleanupQueue();
@@ -1273,7 +2141,6 @@ async function beginMatchmaking() {
       return;
     }
 
-    // Time's up – fallback to bot
     cleanupQueue();
     clearInterval(presenceInterval);
     await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
@@ -1303,7 +2170,7 @@ window.addEventListener('pagehide', () => {
   if (inQueue && currentUser) client.from('matchmaking_queue').delete().eq('user_id', currentUser.id).then(() => {}, () => {});
 });
 
-// ===== ARENA GAMES =====
+// ---- Arena Games ----
 function setArenaTurn(state) {
   if (!turnIndicatorText || !turnIndicatorDot) return;
   if (state === 'opp') {
@@ -1340,6 +2207,7 @@ function launchArena(opponent) {
   else runReactionGame();
 }
 
+// ---- Individual games (bot versions) ----
 function runReactionGame() {
   arenaStage.innerHTML = `<div class="reaction-box reaction-wait" id="reaction-box"><h2>WAIT FOR GREEN...</h2><p style="margin-top:8px;font-size:0.8rem;opacity:0.85">Click instantly when the box turns green</p></div>`;
   const box = document.getElementById('reaction-box');
@@ -1375,7 +2243,7 @@ function runCyberMathGame() {
   const optB = leftIsCorrect ? wrong : correct;
   arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">Fast Equation Solve</p><div class="math-problem">${n1} + ${n2} = ?</div><div class="quiz-options"><button class="quiz-option" id="opt-a">${optA}</button><button class="quiz-option" id="opt-b">${optB}</button></div></div>`;
   let answered = false;
-  const botAnswerTimer = setTimeout(() => { if (!answered) { answered = true; endDuel(false, 'Opponent calculated first!'); } }, botDelay());
+  const botAnswerTimer = setTimeout(() => { if (!answered) { answered = true; endDuel(false, 'Opponent calculated first!'); } }, 2000 + Math.random() * 1000);
   function pickAnswer(val) { if (answered) return; answered = true; clearTimeout(botAnswerTimer); if (val === correct) endDuel(true, 'Accurate calculation!'); else endDuel(false, 'Incorrect answer.'); }
   document.getElementById('opt-a')?.addEventListener('click', () => pickAnswer(optA));
   document.getElementById('opt-b')?.addEventListener('click', () => pickAnswer(optB));
@@ -1385,7 +2253,7 @@ function runColorClashGame() {
   const colors = [{ text: 'RED', css: '#ef4444' }, { text: 'BLUE', css: '#38bdf8' }, { text: 'GREEN', css: '#00e701' }];
   const targetWord = colors[Math.floor(Math.random() * colors.length)];
   const fontColor = colors[Math.floor(Math.random() * colors.length)];
-  arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">Does the word match the font color?</p><div class="quiz-question" style="color:${fontColor.css}">${targetWord.text}</div><div class="quiz-options"><button class="quiz-option" id="match-yes">YES (MATCH)</button><button class="quiz-option" id="match-no">NO (DIFFERENT)</button></div></div>`;
+  arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">Does the word match the font color?</p><div class="quiz-question" style="color:${fontColor.css}; font-size:2rem; font-weight:700;">${targetWord.text}</div><div class="quiz-options"><button class="quiz-option" id="match-yes">YES (MATCH)</button><button class="quiz-option" id="match-no">NO (DIFFERENT)</button></div></div>`;
   const isMatching = targetWord.text === fontColor.text;
   let done = false;
   function evaluate(answer) { if (done) return; done = true; if (answer === isMatching) endDuel(true, 'Correct cognitive distinction!'); else endDuel(false, 'Incorrect mismatch.'); }
@@ -1426,7 +2294,7 @@ function runTicTacToeGame() {
     board.forEach((val, i) => {
       cellsHtml += `<div class="ttt-cell${val ? ' filled' : ''}" data-idx="${i}">${val || ''}</div>`;
     });
-    arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">You are X · Opponent is O</p><div class="ttt-wrapper"><div class="ttt-board" id="ttt-board">${cellsHtml}</div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 270 270"></svg></div></div>`;
+    arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">You are X · Opponent is O</p><div class="ttt-wrapper"><div class="ttt-board" id="ttt-board">${cellsHtml}</div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 240 240"></svg></div></div>`;
     if (playerTurn && !over) {
       document.querySelectorAll('#ttt-board .ttt-cell').forEach(cell => {
         cell.addEventListener('click', () => handlePlayerMove(parseInt(cell.getAttribute('data-idx'), 10)));
@@ -1440,7 +2308,7 @@ function runTicTacToeGame() {
     playerTurn = false;
     renderBoard();
     if (checkEnd()) return;
-    setTimeout(botMove, botDelay());
+    setTimeout(botMove, 2000 + Math.random() * 1000);
   }
 
   function botMove() {
@@ -1468,9 +2336,7 @@ function runTicTacToeGame() {
   function drawWinLine(line) {
     const svg = document.getElementById('ttt-line');
     if (!svg) return;
-    const cellSize = 85;
-    const gap = 5;
-    const step = cellSize + gap;
+    const cellSize = 74, gap = 6, step = cellSize + gap;
     const centers = [0,1,2,3,4,5,6,7,8].map(i => {
       const row = Math.floor(i / 3), col = i % 3;
       return [col * step + cellSize/2, row * step + cellSize/2];
@@ -1523,9 +2389,7 @@ async function endDuel(won, analysisText) {
   document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); });
 }
 
-function botDelay() { return Math.floor(Math.random() * 1000) + 2000; } // 2-3s
-
-// ===== LIVE MATCH ROUTING (for real-time games) =====
+// ---- Live Match Room (for real-time games) ----
 const MatchRoom = (() => {
   let match = null, myId = null, opponentId = null, iAmPlayer1 = false, channel = null, finished = false;
   const handlers = {};
@@ -1580,7 +2444,6 @@ async function showResult(stageEl, result, detail) {
 }
 
 function initTicTacToeLive(stageEl, iAmPlayer1) {
-  // Same as runTicTacToe but using MatchRoom for moves
   const mySymbol = iAmPlayer1 ? 'X' : 'O';
   const theirSymbol = iAmPlayer1 ? 'O' : 'X';
   let board = Array(9).fill(null);
@@ -1589,7 +2452,7 @@ function initTicTacToeLive(stageEl, iAmPlayer1) {
   const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
   function render() {
-    stageEl.innerHTML = `<p class="subtitle">You are <strong>${mySymbol}</strong></p><p class="loading-text" id="turn-label">${myTurn ? 'Your move' : "Opponent's move"}</p><div class="ttt-wrapper"><div class="ttt-board" id="board"></div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 270 270"></svg></div>`;
+    stageEl.innerHTML = `<p class="subtitle">You are <strong>${mySymbol}</strong></p><p class="loading-text" id="turn-label">${myTurn ? 'Your move' : "Opponent's move"}</p><div class="ttt-wrapper"><div class="ttt-board" id="board"></div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 240 240"></svg></div>`;
     const boardEl = document.getElementById('board');
     board.forEach((val, i) => {
       const cell = document.createElement('div');
@@ -1630,7 +2493,7 @@ function initTicTacToeLive(stageEl, iAmPlayer1) {
   function drawWinLine(line) {
     const svg = document.getElementById('ttt-line');
     if (!svg) return;
-    const cellSize = 85, gap = 5, step = cellSize + gap;
+    const cellSize = 74, gap = 6, step = cellSize + gap;
     const centers = [0,1,2,3,4,5,6,7,8].map(i => { const row = Math.floor(i/3), col = i%3; return [col*step + cellSize/2, row*step + cellSize/2]; });
     const [x1,y1] = centers[line[0]], [x2,y2] = centers[line[2]];
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1643,7 +2506,7 @@ function initTicTacToeLive(stageEl, iAmPlayer1) {
   render();
 }
 
-// ===== MAIN ROUTER =====
+// ---- Main Router ----
 let inactivityTimer = null;
 
 async function goToMatch(matchId, gameType) {
@@ -1680,12 +2543,12 @@ async function goToMatch(matchId, gameType) {
   const stage = document.getElementById('stage');
   stage.innerHTML = '';
 
-  // Inactivity timer: 10 seconds of opponent inactivity = forfeit
+  // Inactivity timer
   function resetInactivityTimer() {
     if (inactivityTimer) clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
       if (MatchRoom.match && MatchRoom.match.status === 'active') {
-        stage.innerHTML = `<p class="result-banner win">Opponent forfeited (inactive)</p><p class="subtitle">They didn't respond in time.</p><button id="back-to-lobby-btn" class="btn" style="background:#00e701;color:#000;padding:12px 24px;border-radius:12px;font-weight:700;margin-top:12px;">Back to Lobby</button>`;
+        stage.innerHTML = `<p class="result-banner win" style="color:#00e701; font-weight:800; font-size:1.4rem;">Opponent forfeited (inactive)</p><p class="subtitle">They didn't respond in time.</p><button id="back-to-lobby-btn" class="btn" style="background:#00e701;color:#000;padding:12px 24px;border-radius:12px;font-weight:700;margin-top:12px;">Back to Lobby</button>`;
         document.getElementById('back-to-lobby-btn')?.addEventListener('click', returnToDashboardFromMatch);
         MatchRoom.finish('win');
       }
@@ -1700,7 +2563,6 @@ async function goToMatch(matchId, gameType) {
     await originalReturn();
   };
 
-  // Launch the specific game
   if (gameType === 'tictactoe') {
     initTicTacToeLive(stage, roomInfo.iAmPlayer1);
   } else {
@@ -1724,6 +2586,35 @@ function goToLanding() {
   document.getElementById('page-match')?.classList.add('hidden');
 }
 
+// ---- Play buttons ----
+playButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeGame = { name: btn.getAttribute('data-game'), type: btn.getAttribute('data-type') };
+    if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance. Need ' + formatRupees(MATCH_ENTRY_FEE)); return; }
+    beginMatchmaking();
+  });
+});
+
+// ---- Init ----
+async function initDashboard() {
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { goToLanding(); return; }
+    currentUser = session.user;
+    if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '—';
+    await loadUserName();
+    await loadWallet();
+    await loadTransactions();
+    await loadMatchHistory();
+    await loadReferralInfo();
+    updateUI();
+    startPresenceHeartbeat();
+  } catch (e) { console.error(e); } finally {
+    document.getElementById('loading')?.classList.add('hidden');
+    document.getElementById('dashboard')?.classList.remove('hidden');
+  }
+}
+
 async function routeOnLoad() {
   const { data: { session } } = await client.auth.getSession();
   if (session) {
@@ -1740,18 +2631,7 @@ window.addEventListener('beforeunload', () => {
   MatchRoom.cleanup();
 });
 
-// ===== PLAY BUTTONS =====
-playButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    activeGame = { name: btn.getAttribute('data-game'), type: btn.getAttribute('data-type') };
-    if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance. Need ' + formatRupees(MATCH_ENTRY_FEE)); return; }
-    beginMatchmaking();
-  });
-});
-
-// ===== INIT =====
 routeOnLoad();
-
 </script>
 </body>
 </html>
