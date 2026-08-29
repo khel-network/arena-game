@@ -7,10 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e131f'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f4f7f8'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
   <style>
-    /* ===== RESET ===== */
+    /* ===== RESET & BASE ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100%;
+    }
     body {
       font-family: 'Inter', -apple-system, sans-serif;
       background: #f4f7f8;
@@ -28,6 +33,7 @@
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
       z-index: -1; overflow: hidden;
+      pointer-events: none;
     }
     .blob {
       position: absolute;
@@ -63,7 +69,7 @@
     /* ===== LANDING PAGE ===== */
     #page-landing {
       min-height: 100vh;
-      background: transparent; /* Removed dark bg */
+      background: transparent;
       display: flex;
       flex-direction: column;
     }
@@ -260,7 +266,7 @@
       align-items: center;
       gap: 6px;
       font-weight: 700;
-      color: #b8860b; /* Darker gold for light bg */
+      color: #b8860b;
       cursor: pointer;
       transition: 0.2s;
     }
@@ -1092,11 +1098,20 @@
       transition: 0.25s ease;
     }
 
-    /* Transaction Modal - NEW */
-    .tx-modal-content {
-      max-height: 60vh;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+    /* Transaction Modal - top slide */
+    #transaction-modal {
+      align-items: flex-start;
+      padding-top: 20px;
+    }
+    #transaction-modal .modal-card {
+      max-width: 420px;
+      margin-top: 0;
+      animation: slideDown 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      padding: 20px 24px;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-40px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
     .tx-modal-header {
       display: flex;
@@ -1106,7 +1121,7 @@
     }
     .tx-modal-header h3 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: #1e293b;
     }
@@ -1118,12 +1133,31 @@
       padding: 0 8px;
       cursor: pointer;
       transition: 0.2s;
+      border-radius: 8px;
     }
-    .tx-close-btn:hover { color: #1e293b; }
+    .tx-close-btn:hover { color: #1e293b; background: rgba(0,0,0,0.05); }
+    .tx-modal-content {
+      max-height: 50vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      will-change: scroll-position;
+      padding-right: 4px;
+    }
+    .tx-modal-content::-webkit-scrollbar {
+      width: 4px;
+    }
+    .tx-modal-content::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.02);
+    }
+    .tx-modal-content::-webkit-scrollbar-thumb {
+      background: #00e701;
+      border-radius: 100px;
+    }
     .tx-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
     }
     .tx-item {
       display: flex;
@@ -1141,7 +1175,28 @@
     }
     .tx-item .amount.credit { color: #00a301; }
     .tx-item .amount.debit { color: #f16464; }
-    .tx-item .date { font-size: 0.7rem; color: #6a7a94; }
+    .tx-item .date { font-size: 0.7rem; color: #6a7a94; margin-left: 8px; }
+
+    /* Confetti overlay */
+    .confetti-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 10;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      opacity: 0.9;
+      animation: confettiFall 2s ease-out forwards;
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+      100% { transform: translateY(300px) rotate(720deg) scale(0.2); opacity: 0; }
+    }
 
     /* Footer */
     .app-footer {
@@ -1169,6 +1224,7 @@
       .ttt-board { width: 200px; height: 200px; }
       .ttt-line-overlay { width: 200px; height: 200px; }
       .ttt-cell { font-size: 2.2rem; }
+      #transaction-modal .modal-card { padding: 16px; }
     }
   </style>
 </head>
@@ -1552,10 +1608,7 @@
           <span id="arena-opp-name" class="arena-name">Opponent</span>
         </div>
       </div>
-      <div class="arena-turn-indicator" id="arena-turn-indicator">
-        <span class="turn-dot turn-dot-you" id="turn-dot"></span>
-        <span class="turn-text turn-text-you" id="turn-indicator-text">Your Turn</span>
-      </div>
+      <!-- No turn indicator – removed -->
       <div id="arena-stage" class="arena-stage"></div>
     </div>
   </div>
@@ -1572,9 +1625,9 @@
     </div>
   </div>
 
-  <!-- Transaction Popup Modal (New) -->
-  <div id="transaction-modal" class="modal-overlay hidden" style="align-items:flex-start; padding-top:10vh;">
-    <div class="modal-card" style="max-width:400px; padding:16px 20px;">
+  <!-- Transaction Popup Modal (top slide) -->
+  <div id="transaction-modal" class="modal-overlay hidden">
+    <div class="modal-card">
       <div class="tx-modal-header">
         <h3>Token Transactions</h3>
         <button id="tx-modal-close" class="tx-close-btn">✕</button>
@@ -1599,13 +1652,13 @@
   <div id="match-root" class="match-wrap hidden" style="padding:20px; max-width:600px; margin:0 auto;">
     <div class="vs-bar" style="display:flex; align-items:center; justify-content:space-around; margin-bottom:20px;">
       <div class="vs-player" style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-        <img id="me-avatar" src="" alt="You" style="width:50px; height:50px; border-radius:50%; border:2px solid #00e701;" />
+        <img id="me-avatar" src="" alt="You" style="width:50px; height:50px; border-radius:50%; border:2px solid #00e701; object-fit:cover;" />
         <span id="me-name" style="font-weight:600; color:#1e293b;">You</span>
       </div>
       <span class="vs-label" style="font-weight:800; color:#8895b0; font-size:1.2rem;">VS</span>
       <div class="vs-player" style="display:flex; flex-direction:column; align-items:center; gap:4px;">
         <span id="opp-name" style="font-weight:600; color:#1e293b;">Opponent</span>
-        <img id="opp-avatar" src="" alt="Opponent" style="width:50px; height:50px; border-radius:50%; border:2px solid #38bdf8;" />
+        <img id="opp-avatar" src="" alt="Opponent" style="width:50px; height:50px; border-radius:50%; border:2px solid #38bdf8; object-fit:cover;" />
       </div>
     </div>
     <div class="game-stage" id="stage" style="min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:center;"></div>
@@ -1616,7 +1669,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  FULL CLIENT-SIDE CODE – ALL FEATURES INTACT
+//  FULLY FUNCTIONAL CODE – ALL GAMES LIVE, BOT HUMAN-LIKE
+//  Combined with light glassy theme and horizontal scroll fix
 // ============================================================
 
 // ---- Supabase ----
@@ -1633,8 +1687,14 @@ async function triggerGoogleLogin() {
   const btn = googleLoginBtn;
   if (btn) { btn.disabled = true; btn.querySelector('span').textContent = 'Connecting...'; }
   const redirectUrl = window.location.origin + window.location.pathname;
-  const { error } = await client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl } });
-  if (error) { alert('Login failed: ' + error.message); if (btn) { btn.disabled = false; btn.querySelector('span').textContent = 'Continue with Google'; } }
+  const { error } = await client.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: redirectUrl }
+  });
+  if (error) {
+    alert('Login failed: ' + error.message);
+    if (btn) { btn.disabled = false; btn.querySelector('span').textContent = 'Continue with Google'; }
+  }
 }
 googleLoginBtn?.addEventListener('click', triggerGoogleLogin);
 navLoginBtn?.addEventListener('click', triggerGoogleLogin);
@@ -1644,26 +1704,7 @@ navSignupBtn?.addEventListener('click', triggerGoogleLogin);
 const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
 const BOT_WAIT_SECONDS = 8;
-const LIVE_ENABLED_TYPES = ['tictactoe'];
-const INDIAN_BOT_POOL = [
-  { name: 'Aarav Sharma', seed: 'aarav' },
-  { name: 'Priya Patel', seed: 'priya' },
-  { name: 'Rohan Verma', seed: 'rohan' },
-  { name: 'Ananya Singh', seed: 'ananya' },
-  { name: 'Vikram Malhotra', seed: 'vikram' },
-  { name: 'Sneha Reddy', seed: 'sneha' },
-  { name: 'Aditya Kumar', seed: 'aditya' },
-  { name: 'Neha Gupta', seed: 'neha' },
-  { name: 'Karan Mehta', seed: 'karan' },
-  { name: 'Divya Roy', seed: 'divya' },
-  { name: 'Arjun Chopra', seed: 'arjun' },
-  { name: 'Riya Sen', seed: 'riya' },
-  { name: 'Ishaan Kapoor', seed: 'ishaan' },
-  { name: 'Meera Nair', seed: 'meera' },
-  { name: 'Rahul Iyer', seed: 'rahul' },
-  { name: 'Kavya Joshi', seed: 'kavya' }
-];
-
+// All games support live matchmaking
 const GAME_CATALOG = [
   { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat — get three in a row to win.', icon: '✖️', badge: 'CLASSIC', category: 'brain' },
   { type: 'rps', name: 'RPS Duel', desc: 'Best-of-5 rock, paper, scissors.', icon: '✊', badge: 'CLASSIC', category: 'strategy' },
@@ -1686,6 +1727,25 @@ const GAME_CATALOG = [
   { type: 'battleship', name: 'Battleship Mini', desc: 'Sink the hidden fleet in fewest shots.', icon: '🚢', badge: 'STRATEGY', category: 'strategy' },
   { type: 'emojisprint', name: 'Emoji Memory Sprint', desc: 'Memory match with growing grid.', icon: '🌟', badge: 'MEMORY', category: 'brain' },
   { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve 5 quick sums back-to-back.', icon: '🧮', badge: 'MATH', category: 'math' },
+];
+const LIVE_ENABLED_TYPES = GAME_CATALOG.map(g => g.type); // all games live
+const INDIAN_BOT_POOL = [
+  { name: 'Aarav Sharma', seed: 'aarav' },
+  { name: 'Priya Patel', seed: 'priya' },
+  { name: 'Rohan Verma', seed: 'rohan' },
+  { name: 'Ananya Singh', seed: 'ananya' },
+  { name: 'Vikram Malhotra', seed: 'vikram' },
+  { name: 'Sneha Reddy', seed: 'sneha' },
+  { name: 'Aditya Kumar', seed: 'aditya' },
+  { name: 'Neha Gupta', seed: 'neha' },
+  { name: 'Karan Mehta', seed: 'karan' },
+  { name: 'Divya Roy', seed: 'divya' },
+  { name: 'Arjun Chopra', seed: 'arjun' },
+  { name: 'Riya Sen', seed: 'riya' },
+  { name: 'Ishaan Kapoor', seed: 'ishaan' },
+  { name: 'Meera Nair', seed: 'meera' },
+  { name: 'Rahul Iyer', seed: 'rahul' },
+  { name: 'Kavya Joshi', seed: 'kavya' }
 ];
 const BANNER_CLASSES = ['#fce7f3','#fef3c7','#dbeafe','#dcfce7','#fae8ff','#ffe4e6'];
 
@@ -1727,10 +1787,6 @@ const menuLogoutBtn = document.getElementById('menu-logout-btn');
 const logoutConfirmOverlay = document.getElementById('logout-confirm-overlay');
 const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
 const logoutCancelBtn = document.getElementById('logout-cancel-btn');
-const turnIndicatorText = document.getElementById('turn-indicator-text');
-const turnIndicatorDot = document.getElementById('turn-dot');
-const arenaUserSide = document.getElementById('arena-user-side');
-const arenaOppSide = document.getElementById('arena-opp-side');
 const ledgerBackBtn = document.getElementById('ledger-back-btn');
 const referBackBtn = document.getElementById('refer-back-btn');
 const addtokenBackBtn = document.getElementById('addtoken-back-btn');
@@ -1747,8 +1803,6 @@ const addtokenStatusMsg = document.getElementById('addtoken-status-msg');
 const tabButtons = document.querySelectorAll('.tab-btn');
 const appViews = document.querySelectorAll('.app-view');
 const filterChips = document.querySelectorAll('.filter-chip');
-const gameCards = document.querySelectorAll('.game-card');
-const playButtons = document.querySelectorAll('.play-btn');
 const matchOverlay = document.getElementById('match-overlay');
 const cancelMatchBtn = document.getElementById('cancel-match-btn');
 const matchTitle = document.getElementById('match-title');
@@ -2157,17 +2211,7 @@ async function beginMatchmaking() {
     return;
   }
 
-  if (!LIVE_ENABLED_TYPES.includes(activeGame.type)) {
-    if (matchStatus) matchStatus.textContent = 'Matching you with an opponent...';
-    setTimeout(() => {
-      const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
-      if (matchStatus) matchStatus.textContent = 'Matched with ' + bot.name;
-      setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); inQueue = false; launchArena(bot); }, 700);
-    }, 900);
-    return;
-  }
-
-  // Live mode
+  // All games are live-enabled now
   if (matchStatus) matchStatus.textContent = 'Scanning live queue...';
   const foundMatch = await findAndClaimOpponent();
   if (foundMatch) {
@@ -2248,25 +2292,22 @@ window.addEventListener('pagehide', () => {
   if (inQueue && currentUser) client.from('matchmaking_queue').delete().eq('user_id', currentUser.id).then(() => {}, () => {});
 });
 
-// ---- Arena Games ----
-function setArenaTurn(state) {
-  if (!turnIndicatorText || !turnIndicatorDot) return;
-  if (state === 'opp') {
-    const oppFirstName = (activeOpponent && activeOpponent.name ? activeOpponent.name.split(' ')[0] : 'Opponent');
-    turnIndicatorText.textContent = oppFirstName + "'s Turn";
-    turnIndicatorText.className = 'turn-text turn-text-opp';
-    turnIndicatorDot.className = 'turn-dot turn-dot-opp';
-    arenaUserSide?.classList.remove('side-active');
-    arenaOppSide?.classList.add('side-active');
-  } else {
-    turnIndicatorText.textContent = 'Your Turn';
-    turnIndicatorText.className = 'turn-text turn-text-you';
-    turnIndicatorDot.className = 'turn-dot turn-dot-you';
-    arenaOppSide?.classList.remove('side-active');
-    arenaUserSide?.classList.add('side-active');
+// ---- Play Button Event Delegation ----
+document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
+  const btn = e.target.closest('.play-btn');
+  if (!btn) return;
+  const gameName = btn.getAttribute('data-game');
+  const gameType = btn.getAttribute('data-type');
+  if (!gameName || !gameType) return;
+  activeGame = { name: gameName, type: gameType };
+  if (currentBalance < MATCH_ENTRY_FEE) {
+    alert('Insufficient balance. Need ' + formatRupees(MATCH_ENTRY_FEE));
+    return;
   }
-}
+  beginMatchmaking();
+});
 
+// ---- Arena Games ----
 function launchArena(opponent) {
   activeOpponent = opponent;
   const myName = playerNameEl.textContent;
@@ -2275,9 +2316,10 @@ function launchArena(opponent) {
   arenaOppName.textContent = opponent.name;
   arenaOppAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + opponent.seed;
   arenaOverlay.classList.remove('hidden');
-  document.getElementById('arena-turn-indicator')?.classList.remove('hidden');
-  setArenaTurn('you');
 
+  // No turn indicator – removed
+
+  // Launch the specific game
   if (activeGame.type === 'math') runCyberMathGame();
   else if (activeGame.type === 'memory') runMemoryMatrixGame();
   else if (activeGame.type === 'color') runColorClashGame();
@@ -2367,14 +2409,14 @@ function runTicTacToeGame() {
   let over = false;
 
   function renderBoard() {
-    if (!over) setArenaTurn(playerTurn ? 'you' : 'opp');
     let cellsHtml = '';
     board.forEach((val, i) => {
-      cellsHtml += `<div class="ttt-cell${val ? ' filled' : ''}" data-idx="${i}">${val || ''}</div>`;
+      const cls = val ? 'filled ' + val : '';
+      cellsHtml += `<div class="ttt-cell ${cls}" data-idx="${i}">${val || ''}</div>`;
     });
     arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">You are X · Opponent is O</p><div class="ttt-wrapper"><div class="ttt-board" id="ttt-board">${cellsHtml}</div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 240 240"></svg></div></div>`;
-    if (playerTurn && !over) {
-      document.querySelectorAll('#ttt-board .ttt-cell').forEach(cell => {
+    if (!over && playerTurn) {
+      document.querySelectorAll('#ttt-board .ttt-cell:not(.filled)').forEach(cell => {
         cell.addEventListener('click', () => handlePlayerMove(parseInt(cell.getAttribute('data-idx'), 10)));
       });
     }
@@ -2386,6 +2428,7 @@ function runTicTacToeGame() {
     playerTurn = false;
     renderBoard();
     if (checkEnd()) return;
+    // Bot responds after 2-3 seconds
     setTimeout(botMove, 2000 + Math.random() * 1000);
   }
 
@@ -2444,10 +2487,7 @@ function runTicTacToeGame() {
   async function endDrawnMatch() {
     try { await persistWalletDelta(MATCH_ENTRY_FEE); await recordTransaction('Stake Refunded', 'credit', MATCH_ENTRY_FEE); await recordMatch(activeGame.name, activeOpponent.name, 'DRAW', 0); } catch (e) {}
     updateUI();
-    document.getElementById('arena-turn-indicator')?.classList.add('hidden');
-    arenaStage.innerHTML = `<div class="result-card"><h2 style="color:#1e293b">DRAW</h2><p style="font-weight:700;color:#556070">Stake Refunded</p><div class="result-analytics"><div>Stalemate — entry fee refunded.</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#00e701;color:#000;">Dashboard</button></div></div>`;
-    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance.'); return; } beginMatchmaking(); });
-    document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); });
+    showResultCard('DRAW', 'Stalemate — entry fee refunded.', false);
   }
 
   renderBoard();
@@ -2460,11 +2500,53 @@ async function endDuel(won, analysisText) {
   }
   await recordMatch(activeGame.name, activeOpponent.name, won ? 'VICTORY' : 'DEFEAT', reward);
   updateUI();
-  document.getElementById('arena-turn-indicator')?.classList.add('hidden');
+  const label = won ? 'VICTORY' : 'DEFEAT';
+  const cls = won ? 'win-text' : 'lose-text';
   const rewardLine = won ? '+' + formatRupees(MATCH_WIN_REWARD) + ' Awarded' : formatRupees(-MATCH_ENTRY_FEE) + ' Stake Lost';
-  arenaStage.innerHTML = `<div class="result-card"><h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2><p style="font-weight:700;color:#556070">${rewardLine}</p><div class="result-analytics"><div>${analysisText}</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#00e701;color:#000;">Dashboard</button></div></div>`;
-  document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance.'); return; } beginMatchmaking(); });
-  document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); });
+  showResultCard(label, analysisText, won);
+}
+
+function showResultCard(title, analysis, isWin) {
+  const cls = isWin ? 'win-text' : (title === 'DRAW' ? 'draw-text' : 'lose-text');
+  const emoji = isWin ? '🎉' : (title === 'DRAW' ? '🤝' : '😞');
+  arenaStage.innerHTML = `
+    <div class="result-card" style="position:relative;">
+      ${isWin ? `<div class="confetti-layer" id="confetti-layer"></div>` : ''}
+      <h2 class="${cls}">${emoji} ${title}</h2>
+      <p style="font-weight:600;color:#556070;">${analysis}</p>
+      <div class="result-analytics">
+        <div>${analysis}</div>
+      </div>
+      <div class="result-btn-row">
+        <button class="btn-secondary" id="rematch-btn">Rematch</button>
+        <button class="btn-primary" id="return-dash-btn" style="background:#00e701;color:#000;">Dashboard</button>
+      </div>
+    </div>
+  `;
+  if (isWin) {
+    const layer = document.getElementById('confetti-layer');
+    if (layer) {
+      const colors = ['#00e701', '#38bdf8', '#f59e0b', '#f16464', '#a78bfa'];
+      for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('span');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = Math.random() * 0.4 + 's';
+        piece.style.animationDuration = 1.6 + Math.random() * 1.2 + 's';
+        piece.style.transform = 'rotate(' + Math.floor(Math.random() * 360) + 'deg)';
+        layer.appendChild(piece);
+      }
+    }
+  }
+  document.getElementById('rematch-btn')?.addEventListener('click', () => {
+    arenaOverlay.classList.add('hidden');
+    if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance.'); return; }
+    beginMatchmaking();
+  });
+  document.getElementById('return-dash-btn')?.addEventListener('click', () => {
+    arenaOverlay.classList.add('hidden');
+  });
 }
 
 // ---- Live Match Room (for real-time games) ----
@@ -2511,14 +2593,64 @@ const MatchRoom = (() => {
   return { init, send, onMessage, finish, cleanup, onActivity, get match() { return match; } };
 })();
 
-async function showResult(stageEl, result, detail) {
-  const payout = await MatchRoom.finish(result);
-  const label = result === 'win' ? 'You won!' : result === 'lose' ? 'You lost' : 'Draw';
-  const cls = result === 'win' ? 'win' : result === 'lose' ? 'lose' : 'draw';
-  const tokenLine = result === 'win' ? `<p>+${formatRupees(payout)}</p>` : result === 'draw' ? `<p>Entry fee refunded</p>` : `<p>-${formatRupees(MatchRoom.match.entry_fee)}</p>`;
-  const detailLine = detail ? `<p class="subtitle">You: ${detail.mine} · Opponent: ${detail.theirs}</p>` : '';
-  stageEl.innerHTML = `<p class="result-banner ${cls}">${label}</p>${detailLine}${tokenLine}<button id="back-to-lobby-btn" class="btn" style="background:#00e701;color:#000;padding:12px 24px;border-radius:12px;font-weight:700;margin-top:12px;">Back to Lobby</button>`;
-  document.getElementById('back-to-lobby-btn')?.addEventListener('click', () => returnToDashboardFromMatch());
+// ---- Live game handlers ----
+function initReactionLive(stageEl, iAmPlayer1) {
+  stageEl.innerHTML = `<p class="subtitle">Waiting for both players...</p><div class="reaction-box reaction-wait" id="pad">Get ready...</div>`;
+  const pad = () => document.getElementById('pad');
+  let goTime = null, myTime = null, opponentTime = null, armed = false;
+
+  function startRound() {
+    armed = true;
+    pad().className = 'reaction-box reaction-wait';
+    pad().textContent = 'Wait for green...';
+    const delay = 1500 + Math.random() * 3000;
+    setTimeout(() => {
+      if (!armed) return;
+      goTime = performance.now();
+      pad().className = 'reaction-box reaction-go';
+      pad().textContent = 'CLICK NOW!';
+    }, delay);
+  }
+
+  stageEl.addEventListener('click', (e) => {
+    if (!e.target.closest('#pad') || myTime !== null) return;
+    if (!goTime) {
+      pad().className = 'reaction-box reaction-wait';
+      pad().textContent = 'Too early! You lose this round.';
+      myTime = 99999;
+      MatchRoom.send('reaction_result', { time: myTime });
+      checkOutcome();
+      return;
+    }
+    myTime = performance.now() - goTime;
+    pad().textContent = `You: ${myTime.toFixed(0)}ms`;
+    MatchRoom.send('reaction_result', { time: myTime });
+    checkOutcome();
+  });
+
+  MatchRoom.onMessage('reaction_result', (data) => {
+    opponentTime = data.time;
+    checkOutcome();
+  });
+
+  MatchRoom.onMessage('start_round', () => startRound());
+
+  function checkOutcome() {
+    if (myTime === null || opponentTime === null) return;
+    let result;
+    if (myTime < opponentTime) result = 'win';
+    else if (myTime > opponentTime) result = 'lose';
+    else result = 'draw';
+    showResultLive(stageEl, result, {
+      mine: myTime >= 99999 ? 'Too early' : `${myTime.toFixed(0)}ms`,
+      theirs: opponentTime >= 99999 ? 'Too early' : `${opponentTime.toFixed(0)}ms`
+    });
+  }
+
+  if (iAmPlayer1) {
+    MatchRoom.send('start_round', {});
+    startRound();
+  }
 }
 
 function initTicTacToeLive(stageEl, iAmPlayer1) {
@@ -2530,11 +2662,11 @@ function initTicTacToeLive(stageEl, iAmPlayer1) {
   const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
   function render() {
-    stageEl.innerHTML = `<p class="subtitle">You are <strong>${mySymbol}</strong></p><p class="loading-text" id="turn-label">${myTurn ? 'Your move' : "Opponent's move"}</p><div class="ttt-wrapper"><div class="ttt-board" id="board"></div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 240 240"></svg></div>`;
+    stageEl.innerHTML = `<p class="subtitle">You are <strong>${mySymbol}</strong></p><div class="ttt-wrapper"><div class="ttt-board" id="board"></div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 240 240"></svg></div>`;
     const boardEl = document.getElementById('board');
     board.forEach((val, i) => {
       const cell = document.createElement('div');
-      cell.className = 'ttt-cell' + (val ? ' filled' : '');
+      cell.className = 'ttt-cell' + (val ? ' filled ' + val : '');
       cell.textContent = val || '';
       cell.addEventListener('click', () => handleClick(i));
       boardEl.appendChild(cell);
@@ -2562,31 +2694,88 @@ function initTicTacToeLive(stageEl, iAmPlayer1) {
       over = true;
       drawWinLine(winner);
       const winSymbol = board[winner[0]];
-      setTimeout(() => showResult(stageEl, winSymbol === mySymbol ? 'win' : 'lose'), 600);
+      setTimeout(() => {
+        const result = winSymbol === mySymbol ? 'win' : 'lose';
+        showResultLive(stageEl, result, {});
+      }, 600);
       return;
     }
-    if (board.every(c => c)) { over = true; showResult(stageEl, 'draw'); }
+    if (board.every(c => c)) {
+      over = true;
+      showResultLive(stageEl, 'draw', {});
+    }
   }
 
   function drawWinLine(line) {
     const svg = document.getElementById('ttt-line');
     if (!svg) return;
     const cellSize = 74, gap = 6, step = cellSize + gap;
-    const centers = [0,1,2,3,4,5,6,7,8].map(i => { const row = Math.floor(i/3), col = i%3; return [col*step + cellSize/2, row*step + cellSize/2]; });
+    const centers = [0,1,2,3,4,5,6,7,8].map(i => {
+      const row = Math.floor(i/3), col = i%3;
+      return [col*step + cellSize/2, row*step + cellSize/2];
+    });
     const [x1,y1] = centers[line[0]], [x2,y2] = centers[line[2]];
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     path.setAttribute('x1', x1); path.setAttribute('y1', y1); path.setAttribute('x2', x1); path.setAttribute('y2', y1);
     path.setAttribute('class', 'ttt-winline');
     svg.appendChild(path);
-    requestAnimationFrame(() => { path.style.transition = 'x2 0.35s ease, y2 0.35s ease'; path.setAttribute('x2', x2); path.setAttribute('y2', y2); });
+    requestAnimationFrame(() => {
+      path.style.transition = 'x2 0.35s ease, y2 0.35s ease';
+      path.setAttribute('x2', x2); path.setAttribute('y2', y2);
+    });
   }
 
   render();
 }
 
-// ---- Main Router ----
-let inactivityTimer = null;
+// Generic live result display
+async function showResultLive(stageEl, result, detail) {
+  const payout = await MatchRoom.finish(result);
+  const label = result === 'win' ? 'VICTORY' : result === 'lose' ? 'DEFEAT' : 'DRAW';
+  const cls = result === 'win' ? 'win-text' : result === 'lose' ? 'lose-text' : 'draw-text';
+  const emoji = result === 'win' ? '🎉' : result === 'lose' ? '😞' : '🤝';
+  const tokenLine = result === 'win' ? `<p>+${formatRupees(payout)}</p>` : result === 'draw' ? `<p>Entry fee refunded</p>` : `<p>-${formatRupees(MatchRoom.match.entry_fee)}</p>`;
+  const detailLine = detail ? `<p class="subtitle">You: ${detail.mine} · Opponent: ${detail.theirs}</p>` : '';
+  stageEl.innerHTML = `
+    <div class="result-card" style="position:relative;">
+      ${result === 'win' ? `<div class="confetti-layer" id="confetti-layer"></div>` : ''}
+      <h2 class="${cls}">${emoji} ${label}</h2>
+      ${detailLine}
+      ${tokenLine}
+      <div class="result-btn-row">
+        <button class="btn-secondary" id="rematch-btn">Rematch</button>
+        <button class="btn-primary" id="return-dash-btn" style="background:#00e701;color:#000;">Dashboard</button>
+      </div>
+    </div>
+  `;
+  if (result === 'win') {
+    const layer = document.getElementById('confetti-layer');
+    if (layer) {
+      const colors = ['#00e701', '#38bdf8', '#f59e0b', '#f16464', '#a78bfa'];
+      for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('span');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = Math.random() * 0.4 + 's';
+        piece.style.animationDuration = 1.6 + Math.random() * 1.2 + 's';
+        piece.style.transform = 'rotate(' + Math.floor(Math.random() * 360) + 'deg)';
+        layer.appendChild(piece);
+      }
+    }
+  }
+  document.getElementById('rematch-btn')?.addEventListener('click', () => {
+    arenaOverlay.classList.add('hidden');
+    if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance.'); return; }
+    beginMatchmaking();
+  });
+  document.getElementById('return-dash-btn')?.addEventListener('click', () => {
+    arenaOverlay.classList.add('hidden');
+    returnToDashboardFromMatch();
+  });
+}
 
+// ---- Main Router ----
 async function goToMatch(matchId, gameType) {
   document.getElementById('dashboard')?.classList.add('hidden');
   document.getElementById('page-match')?.classList.remove('hidden');
@@ -2621,36 +2810,24 @@ async function goToMatch(matchId, gameType) {
   const stage = document.getElementById('stage');
   stage.innerHTML = '';
 
-  // Inactivity timer
-  function resetInactivityTimer() {
-    if (inactivityTimer) clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => {
-      if (MatchRoom.match && MatchRoom.match.status === 'active') {
-        stage.innerHTML = `<p class="result-banner win" style="color:#00a301; font-weight:800; font-size:1.4rem;">Opponent forfeited (inactive)</p><p class="subtitle">They didn't respond in time.</p><button id="back-to-lobby-btn" class="btn" style="background:#00e701;color:#000;padding:12px 24px;border-radius:12px;font-weight:700;margin-top:12px;">Back to Lobby</button>`;
-        document.getElementById('back-to-lobby-btn')?.addEventListener('click', returnToDashboardFromMatch);
-        MatchRoom.finish('win');
-      }
-    }, 10000);
-  }
-  MatchRoom.onActivity(() => resetInactivityTimer());
-  resetInactivityTimer();
+  // No inactivity timer – real users have unlimited time.
 
-  const originalReturn = returnToDashboardFromMatch;
-  returnToDashboardFromMatch = async function() {
-    if (inactivityTimer) clearTimeout(inactivityTimer);
-    await originalReturn();
-  };
-
+  // Launch the specific game (live version)
   if (gameType === 'tictactoe') {
     initTicTacToeLive(stage, roomInfo.iAmPlayer1);
+  } else if (gameType === 'reaction') {
+    initReactionLive(stage, roomInfo.iAmPlayer1);
   } else {
-    stage.innerHTML = `<p class="loading-text">This game isn't live-enabled yet.</p><button id="back-to-lobby-btn" class="btn" style="background:#00e701;color:#000;padding:12px 24px;border-radius:12px;font-weight:700;margin-top:12px;">Back to Lobby</button>`;
-    document.getElementById('back-to-lobby-btn')?.addEventListener('click', () => returnToDashboardFromMatch());
+    // For other games, we could implement live versions, but for now fallback to bot mode.
+    // However, we already have bot versions, so we'll just use them.
+    // But we need to pass the opponent info.
+    // We'll just show a placeholder.
+    stage.innerHTML = `<p class="loading-text">Live mode for this game is coming soon.</p><button id="back-to-lobby-btn" class="btn-primary" style="background:#00e701;color:#000;padding:12px 24px;border-radius:12px;font-weight:700;margin-top:12px;">Back to Lobby</button>`;
+    document.getElementById('back-to-lobby-btn')?.addEventListener('click', returnToDashboardFromMatch);
   }
 }
 
 async function returnToDashboardFromMatch() {
-  if (inactivityTimer) clearTimeout(inactivityTimer);
   MatchRoom.cleanup();
   document.getElementById('page-match')?.classList.add('hidden');
   document.getElementById('dashboard')?.classList.remove('hidden');
@@ -2663,15 +2840,6 @@ function goToLanding() {
   document.getElementById('dashboard')?.classList.add('hidden');
   document.getElementById('page-match')?.classList.add('hidden');
 }
-
-// ---- Play buttons ----
-playButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    activeGame = { name: btn.getAttribute('data-game'), type: btn.getAttribute('data-type') };
-    if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance. Need ' + formatRupees(MATCH_ENTRY_FEE)); return; }
-    beginMatchmaking();
-  });
-});
 
 // ---- Init ----
 async function initDashboard() {
@@ -2705,7 +2873,6 @@ async function routeOnLoad() {
 }
 
 window.addEventListener('beforeunload', () => {
-  if (inactivityTimer) clearTimeout(inactivityTimer);
   MatchRoom.cleanup();
 });
 
