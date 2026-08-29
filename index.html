@@ -1669,8 +1669,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  FULLY FUNCTIONAL CODE – ALL GAMES LIVE, BOT HUMAN-LIKE
-//  Combined with light glassy theme and horizontal scroll fix
+//  FIXED AUTHENTICATION – handles OAuth redirect and session
 // ============================================================
 
 // ---- Supabase ----
@@ -1678,7 +1677,24 @@ const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5ZmJpY2UiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzY0MTc0MiwiZXhwIjoyMTAzMjE3NzQyfQ.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ---- Auth ----
+// ---- Auth State Listener ----
+let authInitialized = false;
+client.auth.onAuthStateChange(async (event, session) => {
+  console.log('Auth event:', event, session);
+  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+    // User signed in – show dashboard
+    if (!authInitialized) {
+      authInitialized = true;
+      await initDashboard();
+    }
+  } else if (event === 'SIGNED_OUT') {
+    // User signed out – go to landing
+    authInitialized = false;
+    goToLanding();
+  }
+});
+
+// ---- Auth Buttons ----
 const googleLoginBtn = document.getElementById('google-login-btn');
 const navLoginBtn = document.getElementById('nav-login-btn');
 const navSignupBtn = document.getElementById('nav-signup-btn');
@@ -1704,7 +1720,6 @@ navSignupBtn?.addEventListener('click', triggerGoogleLogin);
 const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
 const BOT_WAIT_SECONDS = 8;
-// All games support live matchmaking
 const GAME_CATALOG = [
   { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat — get three in a row to win.', icon: '✖️', badge: 'CLASSIC', category: 'brain' },
   { type: 'rps', name: 'RPS Duel', desc: 'Best-of-5 rock, paper, scissors.', icon: '✊', badge: 'CLASSIC', category: 'strategy' },
@@ -1728,7 +1743,7 @@ const GAME_CATALOG = [
   { type: 'emojisprint', name: 'Emoji Memory Sprint', desc: 'Memory match with growing grid.', icon: '🌟', badge: 'MEMORY', category: 'brain' },
   { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve 5 quick sums back-to-back.', icon: '🧮', badge: 'MATH', category: 'math' },
 ];
-const LIVE_ENABLED_TYPES = GAME_CATALOG.map(g => g.type); // all games live
+const LIVE_ENABLED_TYPES = GAME_CATALOG.map(g => g.type);
 const INDIAN_BOT_POOL = [
   { name: 'Aarav Sharma', seed: 'aarav' },
   { name: 'Priya Patel', seed: 'priya' },
@@ -2836,9 +2851,9 @@ async function returnToDashboardFromMatch() {
 
 function goToLanding() {
   document.getElementById('page-landing')?.classList.remove('hidden');
-  document.getElementById('loading')?.classList.add('hidden');
   document.getElementById('dashboard')?.classList.add('hidden');
   document.getElementById('page-match')?.classList.add('hidden');
+  authInitialized = false;
 }
 
 // ---- Init ----
@@ -2862,11 +2877,13 @@ async function initDashboard() {
 }
 
 async function routeOnLoad() {
+  // Check if there is a session
   const { data: { session } } = await client.auth.getSession();
   if (session) {
     document.getElementById('page-landing')?.classList.add('hidden');
     document.getElementById('loading')?.classList.remove('hidden');
     await initDashboard();
+    authInitialized = true;
   } else {
     goToLanding();
   }
