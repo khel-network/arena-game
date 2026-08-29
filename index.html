@@ -419,10 +419,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.8rem;
       position: relative;
       background: rgba(255,255,255,0.4);
     }
+    .card-media svg { width: 48px; height: 48px; }
     .card-badge {
       position: absolute;
       top: 8px;
@@ -1669,7 +1669,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  FIXED AUTHENTICATION – handles OAuth redirect and session
+//  FIXED AUTH + SVG ICONS FOR GAME THUMBNAILS
 // ============================================================
 
 // ---- Supabase ----
@@ -1677,18 +1677,40 @@ const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5ZmJpY2UiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzY0MTc0MiwiZXhwIjoyMTAzMjE3NzQyfQ.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ---- Auth State Listener ----
+// ---- Auth ----
+function checkForHashToken() {
+  const hash = window.location.hash;
+  if (!hash) return false;
+  try {
+    const params = new URLSearchParams(hash.substring(1));
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+    if (access_token && refresh_token) {
+      client.auth.setSession({ access_token, refresh_token }).then(() => {
+        window.location.hash = ''; // clean URL
+        window.location.reload(); // force reload to pick up session
+      });
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+// Check on load immediately
+if (!checkForHashToken()) {
+  // If no hash token, proceed normally
+}
+
+// Auth state listener
 let authInitialized = false;
 client.auth.onAuthStateChange(async (event, session) => {
   console.log('Auth event:', event, session);
   if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-    // User signed in – show dashboard
     if (!authInitialized) {
       authInitialized = true;
       await initDashboard();
     }
   } else if (event === 'SIGNED_OUT') {
-    // User signed out – go to landing
     authInitialized = false;
     goToLanding();
   }
@@ -1721,27 +1743,27 @@ const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
 const BOT_WAIT_SECONDS = 8;
 const GAME_CATALOG = [
-  { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat — get three in a row to win.', icon: '✖️', badge: 'CLASSIC', category: 'brain' },
-  { type: 'rps', name: 'RPS Duel', desc: 'Best-of-5 rock, paper, scissors.', icon: '✊', badge: 'CLASSIC', category: 'strategy' },
-  { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four in a row.', icon: '🔴', badge: 'STRATEGY', category: 'strategy' },
-  { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board faster.', icon: '🧠', badge: 'BRAIN', category: 'brain' },
-  { type: 'scramble', name: 'Word Scramble', desc: 'Unscramble the word before your opponent.', icon: '🔤', badge: 'WORD', category: 'brain' },
-  { type: 'typing', name: 'Typing Race', desc: 'Type the sentence exactly, first to finish wins.', icon: '⌨️', badge: 'SPEED', category: 'reflex' },
-  { type: 'higherlower', name: 'Higher-Lower Duel', desc: 'Guess the secret number in fewest tries.', icon: '🎯', badge: 'LOGIC', category: 'brain' },
-  { type: 'snake', name: 'Snake Duel', desc: 'Eat, grow, survive — highest score wins.', icon: '🐍', badge: 'ARCADE', category: 'reflex' },
-  { type: 'simon', name: 'Simon Says', desc: 'Repeat the growing color pattern.', icon: '🎵', badge: 'MEMORY', category: 'brain' },
-  { type: 'dice', name: 'Dice Battle', desc: 'Push your luck rolling dice.', icon: '🎲', badge: 'LUCK', category: 'strategy' },
-  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5 seconds wins.', icon: '👆', badge: 'SPEED', category: 'reflex' },
-  { type: 'whack', name: 'Whack-a-Mole', desc: 'First to 15 correct hits wins.', icon: '🔨', badge: 'REFLEX', category: 'reflex' },
-  { type: 'recall', name: 'Sequence Recall', desc: 'Numbers flash briefly — tap them back.', icon: '🔢', badge: 'MEMORY', category: 'brain' },
-  { type: 'superttt', name: 'Tic-Tac-Toe Ultimate', desc: '3x3 grid of boards — win the meta-board.', icon: '🕹️', badge: 'STRATEGY', category: 'strategy' },
-  { type: 'slide', name: 'Slide Puzzle Race', desc: 'Solve the 15-puzzle before your opponent.', icon: '🧩', badge: 'PUZZLE', category: 'brain' },
-  { type: 'stroop', name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', icon: '🎨', badge: 'REFLEX', category: 'reflex' },
-  { type: 'reflex', name: 'Reflex Grid', desc: 'Tap the lit tile before it fades.', icon: '⚡', badge: 'REFLEX', category: 'reflex' },
-  { type: 'mathduel', name: 'Math Duel', desc: 'Solve 5 equations fastest to win.', icon: '➕', badge: 'MATH', category: 'math' },
-  { type: 'battleship', name: 'Battleship Mini', desc: 'Sink the hidden fleet in fewest shots.', icon: '🚢', badge: 'STRATEGY', category: 'strategy' },
-  { type: 'emojisprint', name: 'Emoji Memory Sprint', desc: 'Memory match with growing grid.', icon: '🌟', badge: 'MEMORY', category: 'brain' },
-  { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve 5 quick sums back-to-back.', icon: '🧮', badge: 'MATH', category: 'math' },
+  { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat — get three in a row to win.', icon: 'tictactoe', badge: 'CLASSIC', category: 'brain' },
+  { type: 'rps', name: 'RPS Duel', desc: 'Best-of-5 rock, paper, scissors.', icon: 'rps', badge: 'CLASSIC', category: 'strategy' },
+  { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four in a row.', icon: 'connect4', badge: 'STRATEGY', category: 'strategy' },
+  { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board faster.', icon: 'memory', badge: 'BRAIN', category: 'brain' },
+  { type: 'scramble', name: 'Word Scramble', desc: 'Unscramble the word before your opponent.', icon: 'scramble', badge: 'WORD', category: 'brain' },
+  { type: 'typing', name: 'Typing Race', desc: 'Type the sentence exactly, first to finish wins.', icon: 'typing', badge: 'SPEED', category: 'reflex' },
+  { type: 'higherlower', name: 'Higher-Lower Duel', desc: 'Guess the secret number in fewest tries.', icon: 'higherlower', badge: 'LOGIC', category: 'brain' },
+  { type: 'snake', name: 'Snake Duel', desc: 'Eat, grow, survive — highest score wins.', icon: 'snake', badge: 'ARCADE', category: 'reflex' },
+  { type: 'simon', name: 'Simon Says', desc: 'Repeat the growing color pattern.', icon: 'simon', badge: 'MEMORY', category: 'brain' },
+  { type: 'dice', name: 'Dice Battle', desc: 'Push your luck rolling dice.', icon: 'dice', badge: 'LUCK', category: 'strategy' },
+  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5 seconds wins.', icon: 'tap', badge: 'SPEED', category: 'reflex' },
+  { type: 'whack', name: 'Whack-a-Mole', desc: 'First to 15 correct hits wins.', icon: 'whack', badge: 'REFLEX', category: 'reflex' },
+  { type: 'recall', name: 'Sequence Recall', desc: 'Numbers flash briefly — tap them back.', icon: 'recall', badge: 'MEMORY', category: 'brain' },
+  { type: 'superttt', name: 'Tic-Tac-Toe Ultimate', desc: '3x3 grid of boards — win the meta-board.', icon: 'superttt', badge: 'STRATEGY', category: 'strategy' },
+  { type: 'slide', name: 'Slide Puzzle Race', desc: 'Solve the 15-puzzle before your opponent.', icon: 'slide', badge: 'PUZZLE', category: 'brain' },
+  { type: 'stroop', name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', icon: 'stroop', badge: 'REFLEX', category: 'reflex' },
+  { type: 'reflex', name: 'Reflex Grid', desc: 'Tap the lit tile before it fades.', icon: 'reflex', badge: 'REFLEX', category: 'reflex' },
+  { type: 'mathduel', name: 'Math Duel', desc: 'Solve 5 equations fastest to win.', icon: 'mathduel', badge: 'MATH', category: 'math' },
+  { type: 'battleship', name: 'Battleship Mini', desc: 'Sink the hidden fleet in fewest shots.', icon: 'battleship', badge: 'STRATEGY', category: 'strategy' },
+  { type: 'emojisprint', name: 'Emoji Memory Sprint', desc: 'Memory match with growing grid.', icon: 'emojisprint', badge: 'MEMORY', category: 'brain' },
+  { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve 5 quick sums back-to-back.', icon: 'mathchain', badge: 'MATH', category: 'math' },
 ];
 const LIVE_ENABLED_TYPES = GAME_CATALOG.map(g => g.type);
 const INDIAN_BOT_POOL = [
@@ -1763,6 +1785,34 @@ const INDIAN_BOT_POOL = [
   { name: 'Kavya Joshi', seed: 'kavya' }
 ];
 const BANNER_CLASSES = ['#fce7f3','#fef3c7','#dbeafe','#dcfce7','#fae8ff','#ffe4e6'];
+
+// SVG icon mapping
+function getGameIcon(type) {
+  const icons = {
+    tictactoe: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg>`,
+    rps: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l4-4 4 4"/><path d="M8 12l4 4 4-4"/></svg>`,
+    connect4: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="12" cy="14" r="3"/><circle cx="7" cy="19" r="3"/><circle cx="17" cy="19" r="3"/></svg>`,
+    memory: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16z"/><path d="M12 8v4l2 2"/></svg>`,
+    scramble: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l16 16"/><path d="M20 4L4 20"/><circle cx="12" cy="12" r="10"/></svg>`,
+    typing: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h12"/><path d="M8 14h8"/></svg>`,
+    higherlower: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 15l7-7 7 7"/><path d="M5 9l7 7 7-7"/></svg>`,
+    snake: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a8 8 0 0 1 16 0"/><path d="M12 4v16"/><circle cx="12" cy="12" r="2"/></svg>`,
+    simon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v10"/><path d="M12 22V12"/><path d="M2 12h10"/><path d="M22 12H12"/></svg>`,
+    dice: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/><circle cx="8" cy="16" r="1.5"/><circle cx="16" cy="16" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>`,
+    tap: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+    whack: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 8l8 8"/><path d="M8 16l8-8"/></svg>`,
+    recall: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l16 16"/><path d="M20 4L4 20"/><circle cx="12" cy="12" r="10"/></svg>`,
+    superttt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="6" height="6"/><rect x="10" y="2" width="6" height="6"/><rect x="18" y="2" width="6" height="6"/><rect x="2" y="10" width="6" height="6"/><rect x="10" y="10" width="6" height="6"/><rect x="18" y="10" width="6" height="6"/><rect x="2" y="18" width="6" height="6"/><rect x="10" y="18" width="6" height="6"/><rect x="18" y="18" width="6" height="6"/></svg>`,
+    slide: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 8l-4 4 4 4"/><path d="M16 8l4 4-4 4"/></svg>`,
+    stroop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h8"/></svg>`,
+    reflex: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>`,
+    mathduel: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 8l8 8"/><path d="M8 16l8-8"/><circle cx="12" cy="12" r="10"/></svg>`,
+    battleship: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="6" cy="6" r="1.5"/><circle cx="18" cy="18" r="1.5"/><circle cx="18" cy="6" r="1.5"/><circle cx="6" cy="18" r="1.5"/></svg>`,
+    emojisprint: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h8"/></svg>`,
+    mathchain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l16 16"/><path d="M20 4L4 20"/><circle cx="12" cy="12" r="9"/></svg>`
+  };
+  return icons[type] || icons.tictactoe;
+}
 
 function formatRupees(amount) {
   const n = Number(amount) || 0;
@@ -2182,11 +2232,12 @@ function renderGameCards() {
   if (!grid) return;
   grid.innerHTML = GAME_CATALOG.map((g, i) => {
     const bg = BANNER_CLASSES[i % BANNER_CLASSES.length];
+    const svgIcon = getGameIcon(g.icon);
     return `
       <div class="game-card" data-category="${g.category}">
         <div class="card-media" style="background:${bg};">
           <span class="card-badge">${g.badge}</span>
-          <span style="font-size:3rem;">${g.icon}</span>
+          ${svgIcon}
         </div>
         <div class="card-content">
           <h3 class="card-title">${g.name}</h3>
@@ -2877,7 +2928,8 @@ async function initDashboard() {
 }
 
 async function routeOnLoad() {
-  // Check if there is a session
+  // First check if we have a hash token (already handled at top, but double-check)
+  // If we already have a session, init dashboard.
   const { data: { session } } = await client.auth.getSession();
   if (session) {
     document.getElementById('page-landing')?.classList.add('hidden');
@@ -2892,6 +2944,27 @@ async function routeOnLoad() {
 window.addEventListener('beforeunload', () => {
   MatchRoom.cleanup();
 });
+
+// ---- After page load, also check for hash token again (in case the first check missed) ----
+setTimeout(() => {
+  if (!authInitialized) {
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      // Try to parse and set session
+      try {
+        const params = new URLSearchParams(hash.substring(1));
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+        if (access_token && refresh_token) {
+          client.auth.setSession({ access_token, refresh_token }).then(() => {
+            window.location.hash = '';
+            window.location.reload();
+          });
+        }
+      } catch (e) {}
+    }
+  }
+}, 500);
 
 routeOnLoad();
 </script>
