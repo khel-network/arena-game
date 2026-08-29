@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Favicon embedded directly as a data URI so it can never go missing from a separate file again -->
+  <!-- Favicon embedded directly as a data URI -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e131f'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
   <style>
 /* ======================================================================
@@ -101,6 +101,7 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
   transform: scale(0.97);
 }
 
+/* Loading Screen */
 .center-screen {
   position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
   background-color: var(--bg-dark); display: flex; align-items: center; justify-content: center; z-index: 99999;
@@ -118,6 +119,7 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
 
+/* Top Navigation */
 .top-nav {
   background-color: rgba(14, 19, 31, 0.95); backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100;
@@ -178,6 +180,8 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
   font-size: 0.85rem; font-weight: 600; color: var(--text-main); max-width: 100px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
+/* Layout */
 .app-main { max-width: 1240px; width: 100%; margin: 0 auto; padding: 24px 20px 60px; flex: 1; }
 .app-view { display: none; }
 @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
@@ -195,7 +199,7 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 .hero-banner h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
 .hero-banner p { color: var(--text-muted); font-size: 0.88rem; }
 
-.filter-bar { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 2px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.filter-bar { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 2px; scrollbar-width: none; }
 .filter-bar::-webkit-scrollbar { display: none; }
 .filter-chip {
   background-color: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-muted);
@@ -238,6 +242,7 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 }
 .play-btn:hover { background-color: #1d4ed8; }
 
+/* Profile & Account Views */
 .profile-header-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
 @media (min-width: 840px) { .profile-header-card { grid-template-columns: 1fr 1.2fr; } }
 .profile-left { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
@@ -262,6 +267,7 @@ button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .fi
 
 .ledger-section, .section-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; }
 
+/* Profile Account Menu */
 .profile-menu-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
 .menu-row {
   display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
@@ -289,6 +295,7 @@ button.menu-row { font: inherit; }
 }
 .back-link:hover { color: var(--primary-green); }
 
+/* Refer & Earn */
 .refer-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
 .refer-info-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
 .refer-info-num { font-size: 1.4rem; font-weight: 800; color: var(--primary-green); font-family: var(--font-heading); }
@@ -303,6 +310,7 @@ button.menu-row { font: inherit; }
 .refer-status-msg.success { color: var(--primary-green); }
 .refer-status-msg.error { color: var(--accent-red); }
 
+/* Add Tokens View & Paytm QR Styles */
 .addtoken-amount-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 20px; }
 @media (min-width: 480px) { .addtoken-amount-grid { grid-template-columns: repeat(4, 1fr); } }
 .amount-chip {
@@ -310,6 +318,16 @@ button.menu-row { font: inherit; }
   padding: 14px 10px; border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center;
 }
 .amount-chip:hover, .amount-chip.active { background-color: var(--primary-green); color: #000; border-color: var(--primary-green); }
+
+.qr-box-wrap {
+  background: #ffffff; color: #000; width: auto; max-width: 250px; border-radius: 12px;
+  margin: 16px auto; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 2px solid var(--border-highlight); box-shadow: 0 10px 24px -10px rgba(0,0,0,0.6);
+}
+.qr-box-wrap img {
+  width: 200px; height: 200px; border-radius: 6px; display: block;
+}
+
 .ledger-header h3, .section-card h3 { font-size: 1.15rem; font-weight: 700; }
 .ledger-sub, .section-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px; }
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -319,6 +337,7 @@ button.menu-row { font: inherit; }
 .badge-credit { background-color: rgba(0, 231, 1, 0.1); color: var(--primary-green); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
 .badge-debit { background-color: rgba(239, 68, 68, 0.1); color: var(--accent-red); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
 
+/* Modals */
 .modal-overlay {
   position: fixed; inset: 0; background-color: rgba(10, 13, 20, 0.85); backdrop-filter: blur(8px);
   display: flex; align-items: center; align-items: safe center; justify-content: center; z-index: 1000;
@@ -358,6 +377,7 @@ button.menu-row { font: inherit; }
 .btn-primary { background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; min-height: 44px; position: relative; overflow: hidden; }
 .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); font-weight: 600; font-size: 0.88rem; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; min-height: 44px; }
 
+/* Footer */
 .app-footer { background-color: var(--bg-surface); border-top: 1px solid var(--border-color); padding: 40px 20px 20px; margin-top: auto; }
 .footer-container { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; padding-bottom: 30px; border-bottom: 1px solid var(--border-color); }
 @media (min-width: 768px) { .footer-container { grid-template-columns: 1.4fr 2fr; } }
@@ -369,491 +389,106 @@ button.menu-row { font: inherit; }
 .footer-col a { color: var(--text-muted); font-size: 0.8rem; text-decoration: none; }
 .footer-col a:hover { color: var(--primary-green); }
 .footer-bottom { max-width: 1240px; margin: 20px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-dim); flex-wrap: wrap; gap: 8px; }
-
-.landing-body {
-  background-color: var(--bg-dark);
-  background-image: radial-gradient(circle at 15% 10%, rgba(0, 231, 1, 0.08), transparent 40%), radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.06), transparent 45%);
-  min-height: 100vh; min-height: 100dvh;
-}
-.logo-text { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-main); }
-.nav-links { display: none; align-items: center; gap: 28px; }
-@media (min-width: 900px) { .nav-links { display: flex; } }
-.nav-link { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-decoration: none; }
-.nav-link:hover, .nav-link.active { color: var(--text-main); }
-.nav-actions { display: flex; align-items: center; gap: 10px; }
-.nav-actions .btn-secondary, .nav-actions .btn-primary { flex: none; padding: 9px 18px; }
-.nav-actions .btn-primary { box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.25), 0 8px 20px -8px var(--primary-glow); }
-.nav-actions .btn-primary:hover { background-color: var(--primary-green-hover); }
-.nav-actions .btn-secondary:hover { border-color: var(--border-highlight); background-color: var(--bg-card); }
-
-.hero-section { flex: 1; display: flex; align-items: center; padding: 60px 20px 80px; }
-.hero-container { max-width: 1240px; width: 100%; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 56px; align-items: center; }
-@media (min-width: 960px) { .hero-container { grid-template-columns: 1.1fr 0.9fr; gap: 40px; } }
-.hero-left { display: flex; flex-direction: column; gap: 24px; }
-.badge-pill { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; background-color: rgba(0, 231, 1, 0.1); border: 1px solid rgba(0, 231, 1, 0.25); color: var(--primary-green); font-size: 0.8rem; font-weight: 600; padding: 7px 14px; border-radius: 999px; }
-.badge-dot { width: 7px; height: 7px; border-radius: 50%; background-color: var(--primary-green); box-shadow: 0 0 8px var(--primary-green); }
-.hero-title { font-family: var(--font-heading); font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.12; letter-spacing: -0.02em; color: var(--text-main); }
-.highlight-green { color: var(--primary-green); }
-.hero-subtitle { font-size: 1.05rem; line-height: 1.6; color: var(--text-muted); max-width: 540px; }
-.hero-stats-row { display: flex; flex-wrap: wrap; gap: 36px; margin-top: 8px; padding-top: 24px; border-top: 1px solid var(--border-color); }
-.stat-item { display: flex; flex-direction: column; gap: 4px; }
-.stat-number { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; color: var(--text-main); }
-.stat-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 500; }
-
-.hero-right { display: flex; justify-content: center; }
-.auth-card { width: 100%; max-width: 400px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 22px; animation: fadeSlideUp 0.5s var(--ease-smooth); }
-.auth-header h3 { font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
-.auth-header p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
-.auth-perks { display: flex; flex-direction: column; gap: 12px; }
-.perk-item { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; color: var(--text-muted); }
-.perk-item strong { color: var(--text-main); }
-.perk-svg { flex: none; color: var(--primary-green); }
-.google-auth-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background-color: #fff; color: #1f2937; font-size: 0.92rem; font-weight: 600; border: none; border-radius: var(--radius-sm); padding: 13px 18px; cursor: pointer; min-height: 44px; }
-.google-auth-btn:hover { box-shadow: 0 8px 20px -8px rgba(255, 255, 255, 0.25); transform: translateY(-1px); }
-.auth-footnote { font-size: 0.76rem; color: var(--text-dim); text-align: center; line-height: 1.5; }
-
-.match-wrap { max-width: 720px; width: 100%; margin: 0 auto; padding: 20px 16px 60px; animation: fadeSlideUp 0.4s var(--ease-smooth); }
-.vs-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; }
-.vs-player { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; }
-.vs-player img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary-green); background-color: var(--bg-card); object-fit: cover; }
-.vs-label { font-family: var(--font-heading); font-weight: 800; color: var(--text-dim); }
-.game-stage { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 28px 20px; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; }
-.reaction-pad { width: 100%; height: 200px; border-radius: var(--radius-md); background-color: #7f1d1d; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; cursor: pointer; user-select: none; }
-.reaction-pad.go { background-color: var(--primary-green); color: #000; }
-.reaction-pad.early { background-color: var(--accent-red); }
-.ttt-wrapper { position: relative; width: 238px; margin: 0 auto; }
-.ttt-board { display: grid; grid-template-columns: repeat(3, 74px); grid-template-rows: repeat(3, 74px); gap: 8px; margin-top: 8px; }
-.ttt-cell { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; cursor: pointer; }
-.ttt-cell:hover:not(.filled) { background-color: var(--bg-card-hover); }
-.ttt-cell.filled { cursor: default; }
-.ttt-line-overlay { position: absolute; top: 8px; left: 0; width: 238px; height: 238px; pointer-events: none; }
-.ttt-winline { stroke: var(--primary-green); stroke-width: 6; stroke-linecap: round; filter: drop-shadow(0 0 6px var(--primary-glow)); }
-.ttt-turn-timer { font-weight: 700; color: var(--accent-red); margin-bottom: 6px; min-height: 20px; font-size: 0.95rem; }
-.ttt-opp-dots { display: inline-flex; gap: 4px; margin-bottom: 6px; min-height: 20px; align-items: center; justify-content: center; }
-.ttt-opp-dots span { width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-dim); animation: tttDotBounce 1s ease-in-out infinite; }
-.ttt-opp-dots span:nth-child(2) { animation-delay: 0.15s; }
-.ttt-opp-dots span:nth-child(3) { animation-delay: 0.3s; }
-@keyframes tttDotBounce { 0%, 80%, 100% { opacity: 0.35; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
-@media (max-width: 380px) {
-  .ttt-wrapper, .ttt-line-overlay { width: 204px; }
-  .ttt-board { grid-template-columns: repeat(3, 62px); grid-template-rows: repeat(3, 62px); gap: 8px; }
-  .ttt-cell { font-size: 1.5rem; }
-}
-.score-row { display: flex; gap: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: var(--text-muted); }
-.score-row .me { color: var(--primary-green); }
-.quiz-question, .math-problem { font-size: 1.3rem; font-weight: 700; margin: 8px 0 20px; }
-.quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-.quiz-option { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px; cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; justify-content: center; text-align: center; }
-.quiz-option:hover { border-color: var(--border-highlight); }
-.quiz-option.correct { background-color: rgba(0, 231, 1, 0.15); border-color: var(--primary-green); color: var(--primary-green); }
-.quiz-option.wrong { background-color: rgba(239, 68, 68, 0.15); border-color: var(--accent-red); color: var(--accent-red); }
-.math-input { width: 160px; text-align: center; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-highlight); background-color: var(--bg-card); color: var(--text-main); font-weight: 700; }
-.result-banner { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
-.result-banner.win { color: var(--primary-green); }
-.result-banner.lose { color: var(--accent-red); }
-.result-banner.draw { color: var(--accent-gold); }
-.btn { display: inline-block; margin-top: 18px; background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 12px 22px; border-radius: var(--radius-sm); text-decoration: none; min-height: 44px; }
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(0, 231, 1, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 231, 1, 0.05) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 90%);
-  opacity: 0.6;
-}
-
-.play-btn::after, .btn-primary::after, .google-auth-btn::after {
-  content: "";
-  position: absolute;
-  top: 0; left: -60%;
-  width: 40%; height: 100%;
-  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  transform: skewX(-20deg);
-  transition: left 0.6s ease;
-  pointer-events: none;
-}
-.play-btn:hover::after, .btn-primary:hover::after { left: 130%; }
-
-.play-btn:hover, .btn-primary:hover {
-  box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.15), 0 10px 26px -10px var(--primary-glow);
-  transform: translateY(-1px);
-}
-
-.tab-btn.active { position: relative; }
-.tab-btn.active::after {
-  content: "";
-  position: absolute;
-  left: 14px; right: 14px; bottom: -2px;
-  height: 2px;
-  background: var(--primary-green);
-  box-shadow: 0 0 8px var(--primary-green);
-  border-radius: 2px;
-}
-
-.card-media::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
-  transform: translateX(-100%);
-  transition: transform 0.7s ease;
-}
-.game-card:hover .card-media::before { transform: translateX(100%); }
-
-.hero-banner::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  z-index: -1;
-  border-radius: inherit;
-  background: linear-gradient(120deg, rgba(0, 231, 1, 0.35), rgba(56, 189, 248, 0.15), rgba(0, 231, 1, 0.35));
-  background-size: 200% 200%;
-  animation: gradientShift 6s ease infinite;
-  opacity: 0.5;
-}
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.badge-pill { animation: badgeGlow 2.4s ease-in-out infinite; }
-@keyframes badgeGlow {
-  0%, 100% { box-shadow: 0 0 0 rgba(0, 231, 1, 0); }
-  50% { box-shadow: 0 0 14px rgba(0, 231, 1, 0.35); }
-}
-
-.result-card h2 { animation: resultPop 0.45s var(--ease-smooth); }
-@keyframes resultPop {
-  0% { transform: scale(0.7); opacity: 0; }
-  60% { transform: scale(1.08); opacity: 1; }
-  100% { transform: scale(1); }
-}
-
-.radar-pulse::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: var(--primary-green);
-  opacity: 0.15;
-  animation: pulse 1.6s ease-out infinite;
-  animation-delay: 0.5s;
-}
-
-@keyframes rowIn {
-  from { background-color: rgba(0, 231, 1, 0.14); }
-  to { background-color: transparent; }
-}
-.ledger-table tbody tr:first-child td,
-#matches-body tr:first-child td { animation: rowIn 1.2s ease-out; }
-
-.toast-stack {
-  position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 99998;
-  display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
-  pointer-events: none; max-width: calc(100vw - 28px);
-}
-.toast {
-  pointer-events: auto;
-  display: flex; align-items: center; gap: 10px;
-  background-color: var(--bg-surface); border: 1px solid var(--border-highlight);
-  border-left: 3px solid var(--primary-green);
-  border-radius: var(--radius-sm); padding: 10px 14px;
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
-  font-size: 0.82rem; font-weight: 600; color: var(--text-main);
-  max-width: 320px; animation: toastIn 0.3s var(--ease-smooth);
-}
-.toast.toast-debit { border-left-color: var(--accent-red); }
-.toast-icon { flex: none; display: flex; }
-.toast.toast-credit .toast-icon { color: var(--primary-green); }
-.toast.toast-debit .toast-icon { color: var(--accent-red); }
-.toast-text { display: flex; flex-direction: column; gap: 1px; }
-.toast-amount.toast-credit-text { color: var(--primary-green); }
-.toast-amount.toast-debit-text { color: var(--accent-red); }
-.toast-desc { color: var(--text-muted); font-weight: 500; font-size: 0.74rem; }
-.toast.toast-out { animation: toastOut 0.25s ease forwards; }
-@keyframes toastIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(24px); } }
-@media (max-width: 480px) {
-  .toast-stack { left: 14px; right: 14px; align-items: stretch; }
-  .toast { max-width: none; }
-}
-
-.arena-turn-indicator {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin: -6px 0 18px; padding: 8px 16px; border-radius: 999px;
-  background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color);
-  width: fit-content; margin-left: auto; margin-right: auto;
-}
-.turn-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
-.turn-dot-you { background-color: var(--primary-green); box-shadow: 0 0 8px var(--primary-green); animation: turnDotPulse 1.4s ease-in-out infinite; }
-.turn-dot-opp { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); animation: turnDotPulse 1.4s ease-in-out infinite; }
-@keyframes turnDotPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.8); }
-}
-.turn-text { font-family: var(--font-heading); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.01em; }
-.turn-text-you { color: var(--primary-green); animation: turnTextGlowGreen 1.4s ease-in-out infinite; }
-.turn-text-opp { color: var(--accent-red); animation: turnTextGlowRed 1.4s ease-in-out infinite; }
-@keyframes turnTextGlowGreen {
-  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(0, 231, 1, 0.55); }
-  50% { opacity: 0.55; text-shadow: 0 0 2px rgba(0, 231, 1, 0); }
-}
-@keyframes turnTextGlowRed {
-  0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(241, 100, 100, 0.55); }
-  50% { opacity: 0.55; text-shadow: 0 0 2px rgba(241, 100, 100, 0); }
-}
-.player-stat { transition: opacity 0.25s ease; opacity: 0.55; }
-.player-stat.side-active { opacity: 1; }
-.player-stat.side-active .arena-avatar { box-shadow: 0 0 0 3px rgba(0, 231, 1, 0.18); }
-.player-stat.side-active.opp-side .arena-avatar { box-shadow: 0 0 0 3px rgba(241, 100, 100, 0.18); border-color: var(--accent-red); }
-.player-stat:not(.side-active) .arena-avatar { border-color: var(--border-color); }
-
-.live-chip {
-  display: inline-flex; align-items: center; gap: 6px; font-size: 0.66rem; font-weight: 800;
-  letter-spacing: 0.08em; color: var(--primary-green); background-color: rgba(0, 231, 1, 0.1);
-  border: 1px solid rgba(0, 231, 1, 0.28); padding: 4px 10px; border-radius: 999px; margin: 0 auto 14px;
-}
-.live-chip-dot { width: 6px; height: 6px; border-radius: 50%; background-color: var(--primary-green); box-shadow: 0 0 6px var(--primary-green); animation: turnDotPulse 1.2s ease-in-out infinite; }
-.arena-live-chip { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); margin: 0; }
-.arena-card { position: relative; }
-.modal-scan-bar { width: 100%; height: 3px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; margin: 4px 0 18px; }
-.modal-scan-bar-fill { width: 40%; height: 100%; background: linear-gradient(90deg, transparent, var(--primary-green), transparent); animation: scanSweep 1.3s ease-in-out infinite; }
-@keyframes scanSweep {
-  0% { transform: translateX(-120%); }
-  100% { transform: translateX(320%); }
-}
-
-.modal-card, .arena-card {
-  position: relative;
-  box-shadow: 0 0 0 1px rgba(0, 231, 1, 0.08), 0 24px 60px -20px rgba(0, 0, 0, 0.65);
-}
-
-.confirm-card { max-width: 360px; }
-.confirm-icon-wrap {
-  width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 16px; color: var(--accent-red); background-color: rgba(241, 100, 100, 0.12);
-  border: 1px solid rgba(241, 100, 100, 0.3);
-}
-.confirm-btn-row { display: flex; gap: 10px; margin-top: 20px; }
-.confirm-btn-row .btn-cancel { width: auto; flex: 1; margin: 0; }
-.btn-danger {
-  flex: 1; background: linear-gradient(135deg, #f16464, #d43f3f); color: #fff; border: none;
-  padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.85rem;
-  cursor: pointer; min-height: 44px;
-}
-.btn-danger:hover { box-shadow: 0 10px 24px -10px rgba(241, 100, 100, 0.5); transform: translateY(-1px); }
-
-.menu-row-danger .menu-row-icon { color: var(--accent-red); }
-.menu-row-danger:hover { border-color: rgba(241, 100, 100, 0.35); }
-
-@media (max-width: 480px) {
-  .app-main { padding-left: 14px; padding-right: 14px; }
-  .nav-container { padding-left: 14px; padding-right: 14px; gap: 10px; }
-  .hero-banner { padding: 18px 16px; }
-  .modal-card, .arena-card { padding: 24px 16px; }
-  .footer-links-group { grid-template-columns: repeat(2, 1fr); gap: 18px 16px; }
-  .footer-bottom { justify-content: center; text-align: center; }
-  .arena-header { gap: 6px; }
-  .arena-name { max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .quiz-options { grid-template-columns: 1fr; }
-  .hero-stats-row { gap: 20px; }
-  .card-title { font-size: 1rem; }
-}
-html, body { overflow-x: hidden; }
-
-/* ======================================================================
-==== Wallet Transactions Mini-Sheet (mobile-first quick view)
-====================================================================== ==== */
-.wallet-sheet-card {
-  max-width: 420px;
-  padding: 22px 18px 18px;
-  position: relative;
-  text-align: left;
-}
-.wallet-sheet-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-.wallet-sheet-header h3 { margin-bottom: 0; }
-.wallet-sheet-close {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  color: var(--text-muted);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex: none;
-  font-size: 1.1rem;
-  line-height: 1;
-}
-.wallet-sheet-close:hover { color: var(--text-main); border-color: var(--border-highlight); }
-.wallet-sheet-balance {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin-bottom: 14px;
-}
-.wallet-sheet-balance strong { color: var(--accent-gold); font-family: var(--font-heading); }
-.wallet-sheet-list {
-  max-height: 320px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.wallet-tx-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 4px;
-  border-bottom: 1px solid var(--border-color);
-}
-.wallet-tx-row:last-child { border-bottom: none; }
-.wallet-tx-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.wallet-tx-desc {
-  font-size: 0.85rem; font-weight: 600; color: var(--text-main);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.wallet-tx-date { font-size: 0.72rem; color: var(--text-dim); }
-.wallet-tx-amount { font-size: 0.88rem; font-weight: 700; flex: none; font-family: var(--font-heading); }
-.wallet-sheet-empty {
-  text-align: center;
-  color: var(--text-dim);
-  font-size: 0.85rem;
-  padding: 30px 0;
-}
-@media (max-width: 480px) {
-  .modal-overlay:has(#wallet-sheet-overlay) { align-items: flex-end; }
-}
-#wallet-sheet-overlay {
-  align-items: flex-end;
-}
-#wallet-sheet-overlay .wallet-sheet-card {
-  margin: 0 0 0;
-  animation: walletSheetUp 0.3s var(--ease-smooth);
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  max-height: 80dvh;
-}
-@keyframes walletSheetUp {
-  from { transform: translateY(24px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-@media (min-width: 481px) {
-  #wallet-sheet-overlay { align-items: center; }
-  #wallet-sheet-overlay .wallet-sheet-card { border-radius: var(--radius-lg); max-height: calc(100dvh - 40px); }
-}
-
   </style>
 </head>
 <body class="app-body">
   <div id="page-landing">
-  <header class="top-nav">
-    <div class="nav-container">
-      <div class="brand-logo">
-        <svg class="logo-svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-        </svg>
-        <span class="logo-text">ARENA</span>
-      </div>
-      <div class="nav-links">
-        <a href="#games" class="nav-link active">Games</a>
-        <a href="#rewards" class="nav-link">Rewards</a>
-        <a href="#leaderboard" class="nav-link">Leaderboard</a>
-      </div>
-      <div class="nav-actions">
-        <button id="nav-login-btn" class="btn-secondary" type="button">Sign In</button>
-        <button id="nav-signup-btn" class="btn-primary" type="button">Get Started</button>
-      </div>
-    </div>
-  </header>
-
-  <main class="hero-section">
-    <div class="hero-container">
-      <div class="hero-left">
-        <div class="badge-pill">
-          <span class="badge-dot"></span>
-          <span>Verified 1v1 Skill Arenas</span>
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <div class="nav-container">
+        <div class="brand-logo">
+          <svg class="logo-svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span class="logo-text">ARENA</span>
         </div>
-        <h1 class="hero-title">
-          Play Skill Games. <br/><span class="highlight-green">Win Real Tokens.</span>
-        </h1>
-        <p class="hero-subtitle">
-          Compete against players in fast-paced skill duels. Instant matchmaking, fair matchmaking algorithms, and immediate token rewards.
-        </p>
-
-        <div class="hero-stats-row">
-          <div class="stat-item">
-            <span class="stat-number">1,000</span>
-            <span class="stat-label">Welcome Tokens</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">&lt; 10s</span>
-            <span class="stat-label">Match Queues</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">100%</span>
-            <span class="stat-label">Skill-Based</span>
-          </div>
+        <div class="nav-links">
+          <a href="#games" class="nav-link active">Games</a>
+          <a href="#rewards" class="nav-link">Rewards</a>
+          <a href="#leaderboard" class="nav-link">Leaderboard</a>
+        </div>
+        <div class="nav-actions">
+          <button id="nav-login-btn" class="btn-secondary" type="button">Sign In</button>
+          <button id="nav-signup-btn" class="btn-primary" type="button">Get Started</button>
         </div>
       </div>
+    </header>
 
-      <div class="hero-right">
-        <div class="auth-card">
-          <div class="auth-header">
-            <h3>Create an Account</h3>
-            <p>Sign in to claim your 1,000 tokens and enter live matches</p>
+    <!-- Hero Section -->
+    <main class="hero-section">
+      <div class="hero-container">
+        <!-- Left Column: Value Proposition -->
+        <div class="hero-left">
+          <div class="badge-pill">
+            <span class="badge-dot"></span>
+            <span>Verified 1v1 Skill Arenas</span>
           </div>
+          <h1 class="hero-title">
+            Play Skill Games. <br/><span class="highlight-green">Win Real Tokens.</span>
+          </h1>
+          <p class="hero-subtitle">
+            Compete against players in fast-paced skill duels. Instant matchmaking, fair matchmaking algorithms, and immediate token rewards.
+          </p>
 
-          <div class="auth-perks">
-            <div class="perk-item">
-              <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
-              <span><strong>1,000 Tokens</strong> instantly credited</span>
+          <div class="hero-stats-row">
+            <div class="stat-item">
+              <span class="stat-number">1,000</span>
+              <span class="stat-label">Welcome Tokens</span>
             </div>
-            <div class="perk-item">
-              <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-              <span>Encrypted &amp; secure authentication</span>
+            <div class="stat-item">
+              <span class="stat-number">&lt; 10s</span>
+              <span class="stat-label">Match Queues</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">Skill-Based</span>
             </div>
           </div>
+        </div>
 
-          <button id="google-login-btn" class="google-auth-btn" type="button">
-            <svg width="20" height="20" viewBox="0 0 48 48">
-              <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
-              <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
-              <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
-              <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/>
-            </svg>
-            <span>Continue with Google</span>
-          </button>
+        <!-- Right Column: Auth Card -->
+        <div class="hero-right">
+          <div class="auth-card">
+            <div class="auth-header">
+              <h3>Create an Account</h3>
+              <p>Sign in to claim your 1,000 tokens and enter live matches</p>
+            </div>
 
-          <p class="auth-footnote">By continuing, you agree to the Arena Terms of Service.</p>
+            <div class="auth-perks">
+              <div class="perk-item">
+                <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span><strong>1,000 Tokens</strong> instantly credited</span>
+              </div>
+              <div class="perk-item">
+                <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span>Encrypted &amp; secure authentication</span>
+              </div>
+            </div>
+
+            <button id="google-login-btn" class="google-auth-btn" type="button">
+              <svg width="20" height="20" viewBox="0 0 48 48">
+                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
+                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
+                <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
+                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/>
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+
+            <p class="auth-footnote">By continuing, you agree to the Arena Terms of Service.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </main>
+    </main>
   </div>
 
-<div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+  <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+
+  <!-- Loading Screen (Auto-dismisses in 400ms) -->
   <div id="loading" class="center-screen hidden">
     <div class="loader-container">
       <div class="loader-logo">
@@ -867,8 +502,10 @@ html, body { overflow-x: hidden; }
   </div>
 
   <div id="dashboard" class="app-wrap hidden">
+    <!-- Top Navigation -->
     <header class="top-nav">
       <div class="nav-container">
+        <!-- Logo -->
         <div class="brand-logo" id="nav-brand-logo">
           <svg class="logo-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
@@ -876,6 +513,7 @@ html, body { overflow-x: hidden; }
           <span class="logo-text">ARENA</span>
         </div>
 
+        <!-- Navigation Tabs -->
         <nav class="nav-tabs">
           <button class="tab-btn active" data-target="view-earn" type="button">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
@@ -895,6 +533,7 @@ html, body { overflow-x: hidden; }
           </button>
         </nav>
 
+        <!-- Right Side: Wallet & User Profile Button -->
         <div class="user-stats-bar">
           <button id="wallet-badge-btn" class="token-badge" title="View Token Transactions" type="button">
             <span class="token-icon-wrap">₹</span>
@@ -902,15 +541,18 @@ html, body { overflow-x: hidden; }
           </button>
 
           <button id="profile-nav-btn" class="user-profile-chip" type="button" title="View Profile">
-            <img id="avatar" class="user-avatar" src="https://api.dicebear.com/7.x/identicon/svg?seed=vishal" alt="Avatar" />
+            <img id="avatar" class="user-avatar" src="" alt="Avatar" />
             <span id="player-name" class="user-name">Vishal</span>
           </button>
         </div>
       </div>
     </header>
 
+    <!-- Main Views Container -->
     <main class="app-main">
+      <!-- VIEW 1: EARN -->
       <section id="view-earn" class="app-view active">
+        <!-- Next Cashout Progress Bar -->
         <div class="cashout-progress-banner">
           <div class="progress-info">
             <span class="progress-title">Next Cashout Threshold</span>
@@ -921,6 +563,7 @@ html, body { overflow-x: hidden; }
           </div>
         </div>
 
+        <!-- Banner Header -->
         <div class="hero-banner">
           <div class="banner-content">
             <span class="badge-tag">INSTANT 1V1 DUELS</span>
@@ -929,17 +572,20 @@ html, body { overflow-x: hidden; }
           </div>
         </div>
 
+        <!-- Category Filters -->
         <div class="filter-bar">
           <button class="filter-chip active" data-category="all" type="button">All Games</button>
           <button class="filter-chip" data-category="reflex" type="button">Reflex Speed</button>
           <button class="filter-chip" data-category="math" type="button">Math Calculations</button>
-          <button class="filter-chip" data-category="brain" type="button">Memory & Brain</button>
+          <button class="filter-chip" data-category="brain" type="button">Memory &amp; Brain</button>
           <button class="filter-chip" data-category="strategy" type="button">Strategy</button>
         </div>
 
+        <!-- Games Grid -->
         <div class="games-grid" id="gamesGrid"></div>
       </section>
 
+      <!-- VIEW 2: MY PROFILE -->
       <section id="view-profile" class="app-view">
         <div class="profile-header-card">
           <div class="profile-left">
@@ -987,6 +633,7 @@ html, body { overflow-x: hidden; }
           </div>
         </div>
 
+        <!-- Account Menu -->
         <div class="section-card">
           <h3>Account</h3>
           <p class="section-sub">Manage your wallet, profile and referral program</p>
@@ -1049,6 +696,7 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
+      <!-- VIEW: TOKEN TRANSACTIONS -->
       <section id="view-ledger" class="app-view">
         <div class="section-card">
           <button class="back-link" id="ledger-back-btn" type="button">‹ Back to Profile</button>
@@ -1070,6 +718,7 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
+      <!-- VIEW: REFER & EARN -->
       <section id="view-refer" class="app-view">
         <div class="section-card">
           <button class="back-link" id="refer-back-btn" type="button">‹ Back to Profile</button>
@@ -1107,29 +756,46 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
+      <!-- VIEW: ADD TOKENS (Paytm / UPI QR & UTR Verification) -->
       <section id="view-addtoken" class="app-view">
         <div class="section-card">
           <button class="back-link" id="addtoken-back-btn" type="button">‹ Back to Profile</button>
-          <h3>Add Tokens</h3>
-          <p class="section-sub">Top up your wallet balance</p>
+          <h3>Add Tokens via Paytm / UPI</h3>
+          <p class="section-sub">Scan the QR code in any UPI app (Paytm, PhonePe, GPay), complete payment, and paste the 12-digit UTR ID below.</p>
 
+          <!-- Paytm / UPI QR Code Box -->
+          <div style="text-align:center; margin: 16px 0;">
+            <div class="qr-box-wrap">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=paytm.s1ax1t9@pty%26pn=Arena%20Game" 
+                   alt="Paytm UPI QR Scanner" />
+              <div style="margin-top:8px; font-size:0.8rem; font-weight:700; color:#12161f; font-family:var(--font-heading);">
+                UPI ID: <span style="color:#0284c7;">paytm.s1ax1t9@pty</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Suggestion Chips (Minimum suggested starting from ₹20) -->
           <div class="addtoken-amount-grid">
             <button class="amount-chip" data-amount="20" type="button">₹20</button>
-            <button class="amount-chip" data-amount="50" type="button">₹50</button>
+            <button class="amount-chip active" data-amount="50" type="button">₹50</button>
             <button class="amount-chip" data-amount="100" type="button">₹100</button>
             <button class="amount-chip" data-amount="200" type="button">₹200</button>
           </div>
 
+          <!-- Custom Deposit Input (Allows minimum ₹1) -->
           <div class="refer-redeem-box">
-            <span class="refer-code-lbl">Or Enter a Custom Amount</span>
-            <div class="refer-redeem-row">
-              <input type="number" id="addtoken-input" class="name-input" min="1" placeholder="Enter amount (₹)" />
-              <button id="addtoken-submit-btn" class="btn-primary" type="button">Add</button>
+            <span class="refer-code-lbl">Submit Payment for Instant Verification (Min: ₹1)</span>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <input type="number" id="addtoken-input" class="name-input" min="1" value="50" placeholder="Enter amount (₹) — Min ₹1" />
+              <input type="text" id="addtoken-utr-input" class="name-input" maxlength="16" placeholder="Paste 12-digit UPI / Paytm UTR number" />
+              <button id="addtoken-submit-btn" class="btn-primary" type="button">Submit UTR for Verification</button>
             </div>
+            <p id="addtoken-status-msg" class="refer-status-msg"></p>
           </div>
         </div>
       </section>
 
+      <!-- VIEW 3: MATCHES -->
       <section id="view-matches" class="app-view">
         <div class="section-card">
           <h3>Match History</h3>
@@ -1151,6 +817,7 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
+      <!-- VIEW 4: CASHOUT -->
       <section id="view-cashout" class="app-view">
         <div class="section-card">
           <h3>Cashout Vault</h3>
@@ -1162,6 +829,7 @@ html, body { overflow-x: hidden; }
         </div>
       </section>
 
+      <!-- VIEW 5: REWARDS -->
       <section id="view-rewards" class="app-view">
         <div class="section-card">
           <h3>Daily Rewards</h3>
@@ -1174,6 +842,7 @@ html, body { overflow-x: hidden; }
       </section>
     </main>
 
+    <!-- Matchmaking Modal -->
     <div id="match-overlay" class="modal-overlay hidden">
       <div class="modal-card">
         <div class="radar-pulse">
@@ -1190,6 +859,7 @@ html, body { overflow-x: hidden; }
       </div>
     </div>
 
+    <!-- Arena Modal -->
     <div id="game-arena-overlay" class="modal-overlay hidden">
       <div class="arena-card">
         <div class="arena-header">
@@ -1211,6 +881,7 @@ html, body { overflow-x: hidden; }
       </div>
     </div>
 
+    <!-- Logout Confirmation Modal -->
     <div id="logout-confirm-overlay" class="modal-overlay hidden">
       <div class="modal-card">
         <h3>Log Out?</h3>
@@ -1222,20 +893,7 @@ html, body { overflow-x: hidden; }
       </div>
     </div>
 
-    <!-- Wallet Transactions Mini-Sheet: opened by tapping the ₹ balance
-         badge in the top nav. Shows a compact, scrollable transaction
-         list with a close (x) button - no full-page navigation needed. -->
-    <div id="wallet-sheet-overlay" class="modal-overlay hidden">
-      <div class="modal-card wallet-sheet-card">
-        <div class="wallet-sheet-header">
-          <h3>Transactions</h3>
-          <button id="wallet-sheet-close" class="wallet-sheet-close" type="button" aria-label="Close">✕</button>
-        </div>
-        <p class="wallet-sheet-balance">Current balance: <strong id="wallet-sheet-balance-value">₹0</strong></p>
-        <div id="wallet-sheet-list" class="wallet-sheet-list"></div>
-      </div>
-    </div>
-
+    <!-- Footer -->
     <footer class="app-footer">
       <div class="footer-container">
         <div class="footer-brand-col">
@@ -1277,31 +935,34 @@ html, body { overflow-x: hidden; }
   </div>
 
   <div id="page-match" class="hidden">
-<p id="match-loading" class="center-screen loading-text">Loading match...</p>
+    <p id="match-loading" class="center-screen loading-text">Loading match...</p>
 
-  <div id="match-root" class="match-wrap hidden">
-    <div class="vs-bar">
-      <div class="vs-player">
-        <img id="me-avatar" src="" alt="You" />
-        <span id="me-name">You</span>
+    <div id="match-root" class="match-wrap hidden">
+      <div class="vs-bar">
+        <div class="vs-player">
+          <img id="me-avatar" src="" alt="You" />
+          <span id="me-name">You</span>
+        </div>
+        <span class="vs-label">VS</span>
+        <div class="vs-player">
+          <span id="opp-name">Opponent</span>
+          <img id="opp-avatar" src="" alt="Opponent" />
+        </div>
       </div>
-      <span class="vs-label">VS</span>
-      <div class="vs-player">
-        <span id="opp-name">Opponent</span>
-        <img id="opp-avatar" src="" alt="Opponent" />
-      </div>
+
+      <div class="game-stage" id="stage"></div>
     </div>
-
-    <div class="game-stage" id="stage"></div>
-  </div>
   </div>
 
+  <!-- Supabase client library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+// ==== assets/supabaseClient.js ====
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5Zm1iaWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDE3NDIsImV4cCI6MjEwMzIxNzc0Mn0.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ==== assets/auth.js ====
 const googleLoginBtn = document.getElementById("google-login-btn");
 const navLoginBtn = document.getElementById("nav-login-btn");
 const navSignupBtn = document.getElementById("nav-signup-btn");
@@ -1335,6 +996,7 @@ if (googleLoginBtn) googleLoginBtn.addEventListener("click", triggerGoogleLogin)
 if (navLoginBtn) navLoginBtn.addEventListener("click", triggerGoogleLogin);
 if (navSignupBtn) navSignupBtn.addEventListener("click", triggerGoogleLogin);
 
+// ==== assets/dashboard.js ====
 const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
 const BOT_WAIT_SECONDS = 5;
@@ -1508,6 +1170,7 @@ function setArenaTurn(state) {
     arenaUserSide?.classList.add("side-active");
   }
 }
+
 const ledgerBackBtn = document.getElementById("ledger-back-btn");
 const referBackBtn = document.getElementById("refer-back-btn");
 const addtokenBackBtn = document.getElementById("addtoken-back-btn");
@@ -1518,7 +1181,9 @@ const submitReferralBtn = document.getElementById("submit-referral-btn");
 const referralStatusMsg = document.getElementById("referral-status-msg");
 const amountChips = document.querySelectorAll(".amount-chip");
 const addtokenInput = document.getElementById("addtoken-input");
+const addtokenUtrInput = document.getElementById("addtoken-utr-input");
 const addtokenSubmitBtn = document.getElementById("addtoken-submit-btn");
+const addtokenStatusMsg = document.getElementById("addtoken-status-msg");
 
 const tabButtons = document.querySelectorAll(".tab-btn");
 const appViews = document.querySelectorAll(".app-view");
@@ -1536,11 +1201,6 @@ const arenaUserName = document.getElementById("arena-user-name");
 const arenaOppAvatar = document.getElementById("arena-opp-avatar");
 const arenaOppName = document.getElementById("arena-opp-name");
 const arenaStage = document.getElementById("arena-stage");
-
-const walletSheetOverlay = document.getElementById("wallet-sheet-overlay");
-const walletSheetClose = document.getElementById("wallet-sheet-close");
-const walletSheetList = document.getElementById("wallet-sheet-list");
-const walletSheetBalanceValue = document.getElementById("wallet-sheet-balance-value");
 
 async function initDashboard() {
   try {
@@ -1804,7 +1464,6 @@ function updateUI() {
 
   renderLedger();
   renderMatchHistory();
-  renderWalletSheet();
 }
 
 function renderLedger() {
@@ -1830,51 +1489,6 @@ function renderLedger() {
       );
     })
     .join("");
-}
-
-// Compact scrollable list used by the wallet mini-sheet (opened from the
-// ₹ balance badge). Same underlying `transactions` array as the full
-// ledger page, just rendered as simple rows instead of a table so it
-// reads well in a narrow mobile sheet.
-function renderWalletSheet() {
-  if (!walletSheetList) return;
-  if (walletSheetBalanceValue) {
-    walletSheetBalanceValue.textContent = formatRupees(currentBalance);
-  }
-  if (transactions.length === 0) {
-    walletSheetList.innerHTML = '<p class="wallet-sheet-empty">No transactions yet</p>';
-    return;
-  }
-  walletSheetList.innerHTML = transactions
-    .map((tx) => {
-      const isCredit = tx.type === "credit";
-      const sign = isCredit ? "+" : "-";
-      const color = isCredit ? "var(--primary-green)" : "var(--accent-red)";
-      return (
-        '<div class="wallet-tx-row">' +
-        '<div class="wallet-tx-info">' +
-        '<span class="wallet-tx-desc">' + tx.desc + "</span>" +
-        '<span class="wallet-tx-date">' + tx.date + "</span>" +
-        "</div>" +
-        '<span class="wallet-tx-amount" style="color:' + color + '">' + sign + formatRupees(tx.amount) + "</span>" +
-        "</div>"
-      );
-    })
-    .join("");
-}
-
-function openWalletSheet() {
-  if (!walletSheetOverlay) return;
-  renderWalletSheet();
-  walletSheetOverlay.classList.remove("hidden");
-  // Refresh from the database in case another tab/session added a
-  // transaction since this one last loaded - cheap, and keeps the
-  // sheet honest without blocking the initial open.
-  loadTransactions().then(renderWalletSheet);
-}
-
-function closeWalletSheet() {
-  walletSheetOverlay?.classList.add("hidden");
 }
 
 function renderMatchHistory() {
@@ -1903,6 +1517,9 @@ function renderMatchHistory() {
     .join("");
 }
 
+// ----------------------------------------------------
+// Navigation & Category Filters
+// ----------------------------------------------------
 function switchView(targetId) {
   tabButtons.forEach((b) => b.classList.remove("active"));
   appViews.forEach((v) => v.classList.remove("active"));
@@ -1917,18 +1534,11 @@ tabButtons.forEach((btn) => {
 document.getElementById("profile-nav-btn")?.addEventListener("click", () => switchView("view-profile"));
 document.getElementById("nav-brand-logo")?.addEventListener("click", () => switchView("view-earn"));
 
-// Tapping the ₹ balance badge now opens the compact wallet transactions
-// sheet instead of navigating to the full Token Transactions page.
-walletBadgeBtn?.addEventListener("click", openWalletSheet);
-walletSheetClose?.addEventListener("click", closeWalletSheet);
-// Tapping the dimmed backdrop (outside the card) also closes the sheet.
-walletSheetOverlay?.addEventListener("click", (e) => {
-  if (e.target === walletSheetOverlay) closeWalletSheet();
-});
-
+walletBadgeBtn?.addEventListener("click", () => switchView("view-ledger"));
 menuTransactionsBtn?.addEventListener("click", () => switchView("view-ledger"));
 menuAddTokensBtn?.addEventListener("click", () => switchView("view-addtoken"));
 menuReferBtn?.addEventListener("click", () => switchView("view-refer"));
+
 menuLogoutBtn?.addEventListener("click", () => {
   logoutConfirmOverlay?.classList.remove("hidden");
 });
@@ -1948,6 +1558,9 @@ ledgerBackBtn?.addEventListener("click", () => switchView("view-profile"));
 referBackBtn?.addEventListener("click", () => switchView("view-profile"));
 addtokenBackBtn?.addEventListener("click", () => switchView("view-profile"));
 
+// ----------------------------------------------------
+// Refer & Earn
+// ----------------------------------------------------
 function generateReferralCode(email) {
   const local = (email || "player").split("@")[0].replace(/[^a-zA-Z]/g, "").toUpperCase();
   const prefix = (local + "XXXXX").slice(0, 5);
@@ -2032,12 +1645,71 @@ submitReferralBtn?.addEventListener("click", async () => {
   }
 });
 
+// ----------------------------------------------------
+// PAYTM / UPI ADD TOKENS FEATURE
+// ----------------------------------------------------
 amountChips.forEach((chip) => {
   chip.addEventListener("click", () => {
     amountChips.forEach((c) => c.classList.remove("active"));
     chip.classList.add("active");
     if (addtokenInput) addtokenInput.value = chip.getAttribute("data-amount");
   });
+});
+
+addtokenSubmitBtn?.addEventListener("click", async () => {
+  const amount = parseFloat(addtokenInput?.value);
+  const utr = (addtokenUtrInput?.value || "").trim();
+
+  if (!addtokenStatusMsg) return;
+  addtokenStatusMsg.className = "refer-status-msg";
+  addtokenStatusMsg.textContent = "";
+
+  if (isNaN(amount) || amount < 1) {
+    addtokenStatusMsg.textContent = "Please enter a valid deposit amount (Minimum ₹1).";
+    addtokenStatusMsg.className = "refer-status-msg error";
+    return;
+  }
+
+  if (!utr || utr.length < 8) {
+    addtokenStatusMsg.textContent = "Please enter a valid 12-digit UPI / Paytm UTR number.";
+    addtokenStatusMsg.className = "refer-status-msg error";
+    return;
+  }
+
+  addtokenSubmitBtn.disabled = true;
+  addtokenStatusMsg.textContent = "Submitting verification request...";
+
+  try {
+    const { error } = await client
+      .from("payment_requests")
+      .insert({
+        user_id: currentUser.id,
+        txn_id: utr,
+        amount_inr: amount,
+        tokens_to_credit: Math.floor(amount),
+        status: "pending"
+      });
+
+    if (error) {
+      if (error.code === "23505") {
+        addtokenStatusMsg.textContent = "This Transaction ID has already been submitted.";
+      } else {
+        addtokenStatusMsg.textContent = "Submission error: " + error.message;
+      }
+      addtokenStatusMsg.className = "refer-status-msg error";
+      return;
+    }
+
+    addtokenStatusMsg.textContent = `Deposit request for ₹${amount} submitted! Your wallet will update automatically upon verification.`;
+    addtokenStatusMsg.className = "refer-status-msg success";
+    if (addtokenUtrInput) addtokenUtrInput.value = "";
+  } catch (err) {
+    console.error("Payment submission failed:", err);
+    addtokenStatusMsg.textContent = "Failed to submit request. Please try again.";
+    addtokenStatusMsg.className = "refer-status-msg error";
+  } finally {
+    addtokenSubmitBtn.disabled = false;
+  }
 });
 
 filterChips.forEach((chip) => {
@@ -2055,6 +1727,9 @@ filterChips.forEach((chip) => {
   });
 });
 
+// ----------------------------------------------------
+// Profile Name Editing
+// ----------------------------------------------------
 editNameBtn?.addEventListener("click", () => {
   nameInput.value = playerNameEl.textContent;
   nameEditBox.classList.remove("hidden");
@@ -2085,6 +1760,9 @@ saveNameBtn?.addEventListener("click", async () => {
   }
 });
 
+// ----------------------------------------------------
+// Matchmaking Engine
+// ----------------------------------------------------
 playButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     activeGame = { name: btn.getAttribute("data-game"), type: btn.getAttribute("data-type") };
@@ -2260,6 +1938,9 @@ window.addEventListener("pagehide", () => {
   }
 });
 
+// ----------------------------------------------------
+// Arena Games & Engine
+// ----------------------------------------------------
 function launchArena(opponent) {
   activeOpponent = opponent;
   const myName = playerNameEl.textContent;
@@ -2655,6 +2336,7 @@ async function endDuel(won, analysisText) {
   });
 }
 
+// ==== assets/match-common.js ====
 const MatchRoom = (() => {
   let match = null;
   let myId = null;
@@ -2845,11 +2527,8 @@ async function showResult(stageEl, result, detail) {
   if (result === "win") celebrateWin(stageEl);
   document.getElementById("back-to-lobby-btn")?.addEventListener("click", () => returnToDashboardFromMatch());
 }
-function formatRupees(amount) {
-  const n = Number(amount) || 0;
-  return "\u20b9" + n.toLocaleString("en-IN");
-}
 
+// ==== assets/games/reaction.js ====
 function initReactionDuel(stageEl, iAmPlayer1) {
   stageEl.innerHTML = `
     <p class="loading-text">Waiting for both players to be ready...</p>
@@ -2921,6 +2600,7 @@ function initReactionDuel(stageEl, iAmPlayer1) {
   }
 }
 
+// ==== assets/games/tictactoe.js ====
 function initTicTacToe(stageEl, iAmPlayer1) {
   if (!document.getElementById("ttt-styles")) {
     const style = document.createElement("style");
@@ -3064,6 +2744,7 @@ function initTicTacToe(stageEl, iAmPlayer1) {
   }
 }
 
+// ==== assets/games/quiz.js ====
 const QUIZ_POOL = [
   { q: "What is the capital of Japan?", options: ["Seoul", "Tokyo", "Beijing", "Bangkok"], correct: 1 },
   { q: "How many continents are there?", options: ["5", "6", "7", "8"], correct: 2 },
@@ -3166,6 +2847,7 @@ function initQuizBattle(stageEl, iAmPlayer1, matchId) {
   }
 }
 
+// ==== assets/games/math.js ====
 function initMathDuel(stageEl, iAmPlayer1, matchId) {
   let round = 0;
   let myWins = 0;
@@ -3255,6 +2937,9 @@ function initMathDuel(stageEl, iAmPlayer1, matchId) {
   }
 }
 
+// ----------------------------------------------------
+// Single-file router
+// ----------------------------------------------------
 async function goToMatch(matchId, gameType) {
   document.getElementById("dashboard")?.classList.add("hidden");
   document.getElementById("page-match")?.classList.remove("hidden");
