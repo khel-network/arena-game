@@ -1669,12 +1669,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  SIMPLIFIED & ROBUST AUTHENTICATION
+//  COMPLETE SCRIPT – ALL DOM REFS DEFINED
 // ============================================================
 
 // ---- Supabase ----
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5Zm1iaWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDE3NDIsImV4cCI6MjEwMzIxNzc0Mn0.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5ZmJpY2UiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzY0MTc0MiwiZXhwIjoyMTAzMjE3NzQyfQ.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ---- Global state ----
@@ -1702,16 +1702,11 @@ const navSignupBtn = document.getElementById('nav-signup-btn');
 async function triggerGoogleLogin() {
   const btn = googleLoginBtn;
   if (btn) { btn.disabled = true; btn.querySelector('span').textContent = 'Connecting...'; }
-  
   const redirectUrl = window.location.origin + window.location.pathname;
-  
   const { error } = await client.auth.signInWithOAuth({
     provider: 'google',
-    options: { 
-      redirectTo: redirectUrl
-    }
+    options: { redirectTo: redirectUrl }
   });
-  
   if (error) {
     alert('Login failed: ' + error.message);
     if (btn) { btn.disabled = false; btn.querySelector('span').textContent = 'Continue with Google'; }
@@ -1721,7 +1716,7 @@ googleLoginBtn?.addEventListener('click', triggerGoogleLogin);
 navLoginBtn?.addEventListener('click', triggerGoogleLogin);
 navSignupBtn?.addEventListener('click', triggerGoogleLogin);
 
-// ---- Constants (game catalog, etc.) ----
+// ---- Constants ----
 const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
 const BOT_WAIT_SECONDS = 8;
@@ -1814,9 +1809,55 @@ let queueChannel = null;
 let inQueue = false;
 let presenceHeartbeatTimer = null;
 
-// ---- DOM refs (abbreviated for brevity – all present in full code) ----
-// (Full code includes all DOM refs – omitted for space here)
-// The full code has all necessary elements.
+// ---- DOM refs (ALL DECLARED) ----
+const balanceEl = document.getElementById('balance-value');
+const playerNameEl = document.getElementById('player-name');
+const avatarEl = document.getElementById('avatar');
+const profileDisplayName = document.getElementById('profile-display-name');
+const profileViewAvatar = document.getElementById('profile-view-avatar');
+const editNameBtn = document.getElementById('edit-name-btn');
+const nameEditBox = document.getElementById('name-edit-box');
+const nameInput = document.getElementById('name-input');
+const saveNameBtn = document.getElementById('save-name-btn');
+const cancelNameBtn = document.getElementById('cancel-name-btn');
+const profileEmailEl = document.getElementById('profile-email');
+const walletBadgeBtn = document.getElementById('wallet-badge-btn');
+const menuTransactionsBtn = document.getElementById('menu-transactions-btn');
+const menuAddTokensBtn = document.getElementById('menu-addtokens-btn');
+const menuReferBtn = document.getElementById('menu-refer-btn');
+const menuLogoutBtn = document.getElementById('menu-logout-btn');
+const logoutConfirmOverlay = document.getElementById('logout-confirm-overlay');
+const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
+const logoutCancelBtn = document.getElementById('logout-cancel-btn');
+const ledgerBackBtn = document.getElementById('ledger-back-btn');
+const referBackBtn = document.getElementById('refer-back-btn');
+const addtokenBackBtn = document.getElementById('addtoken-back-btn');
+const myReferralCodeEl = document.getElementById('my-referral-code');
+const copyReferralBtn = document.getElementById('copy-referral-btn');
+const referralInput = document.getElementById('referral-input');
+const submitReferralBtn = document.getElementById('submit-referral-btn');
+const referralStatusMsg = document.getElementById('referral-status-msg');
+const amountChips = document.querySelectorAll('.amount-chip');
+const addtokenInput = document.getElementById('addtoken-input');
+const addtokenUtrInput = document.getElementById('addtoken-utr-input');
+const addtokenSubmitBtn = document.getElementById('addtoken-submit-btn');
+const addtokenStatusMsg = document.getElementById('addtoken-status-msg');
+const tabButtons = document.querySelectorAll('.tab-btn');
+const appViews = document.querySelectorAll('.app-view');
+const filterChips = document.querySelectorAll('.filter-chip');
+const matchOverlay = document.getElementById('match-overlay');
+const cancelMatchBtn = document.getElementById('cancel-match-btn');
+const matchTitle = document.getElementById('match-title');
+const matchStatus = document.getElementById('match-status');
+const arenaOverlay = document.getElementById('game-arena-overlay');
+const arenaUserAvatar = document.getElementById('arena-user-avatar');
+const arenaUserName = document.getElementById('arena-user-name');
+const arenaOppAvatar = document.getElementById('arena-opp-avatar');
+const arenaOppName = document.getElementById('arena-opp-name');
+const arenaStage = document.getElementById('arena-stage');
+const txModal = document.getElementById('transaction-modal');
+const txModalClose = document.getElementById('tx-modal-close');
+const txListContainer = document.getElementById('tx-list-container');
 
 // ---- Helper functions ----
 function isTabActive() { return document.visibilityState === 'visible' && document.hasFocus(); }
@@ -2213,7 +2254,6 @@ async function beginMatchmaking() {
     return;
   }
 
-  // All games are live-enabled now
   if (matchStatus) matchStatus.textContent = 'Scanning live queue...';
   const foundMatch = await findAndClaimOpponent();
   if (foundMatch) {
@@ -2319,7 +2359,6 @@ function launchArena(opponent) {
   arenaOppAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + opponent.seed;
   arenaOverlay.classList.remove('hidden');
 
-  // Launch the specific game
   if (activeGame.type === 'math') runCyberMathGame();
   else if (activeGame.type === 'memory') runMemoryMatrixGame();
   else if (activeGame.type === 'color') runColorClashGame();
@@ -2428,7 +2467,6 @@ function runTicTacToeGame() {
     playerTurn = false;
     renderBoard();
     if (checkEnd()) return;
-    // Bot responds after 2-3 seconds
     setTimeout(botMove, 2000 + Math.random() * 1000);
   }
 
@@ -2810,18 +2848,12 @@ async function goToMatch(matchId, gameType) {
   const stage = document.getElementById('stage');
   stage.innerHTML = '';
 
-  // No inactivity timer – real users have unlimited time.
-
   // Launch the specific game (live version)
   if (gameType === 'tictactoe') {
     initTicTacToeLive(stage, roomInfo.iAmPlayer1);
   } else if (gameType === 'reaction') {
     initReactionLive(stage, roomInfo.iAmPlayer1);
   } else {
-    // For other games, we could implement live versions, but for now fallback to bot mode.
-    // However, we already have bot versions, so we'll just use them.
-    // But we need to pass the opponent info.
-    // We'll just show a placeholder.
     stage.innerHTML = `<p class="loading-text">Live mode for this game is coming soon.</p><button id="back-to-lobby-btn" class="btn-primary" style="background:#00e701;color:#000;padding:12px 24px;border-radius:12px;font-weight:700;margin-top:12px;">Back to Lobby</button>`;
     document.getElementById('back-to-lobby-btn')?.addEventListener('click', returnToDashboardFromMatch);
   }
@@ -2862,7 +2894,6 @@ async function initDashboard() {
 }
 
 async function routeOnLoad() {
-  // Check for existing session
   const { data: { session } } = await client.auth.getSession();
   if (session) {
     document.getElementById('page-landing')?.classList.add('hidden');
