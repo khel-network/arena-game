@@ -4,541 +4,563 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arena | Competitive Skill Duels</title>
-  <!-- Google Fonts: Space Grotesk (headings) + Inter (body) -->
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Favicon embedded directly as a data URI -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e131f'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
   <style>
-/* ======================================================================
-==== Arena Design System
-====================================================================== ==== */
+    /* ==========================================================================
+       Arena Design System (Original Theme)
+       ========================================================================== */
+    :root {
+      --bg-dark: #07090e;
+      --bg-surface: #0e131f;
+      --bg-card: #141b2b;
+      --bg-card-hover: #1b253b;
+      --primary-green: #00e701;
+      --primary-green-hover: #00c601;
+      --primary-glow: rgba(0, 231, 1, 0.22);
+      --accent-blue: #38bdf8;
+      --accent-gold: #f59e0b;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #8e9fb5;
+      --text-dim: #54647c;
+      --border-color: #1e283d;
+      --border-highlight: #283752;
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); letter-spacing: -0.01em; }
+    body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+    .hidden { display: none !important; }
 
-:root {
-  --bg-dark: #12161f;
-  --bg-surface: #1a2130;
-  --bg-card: #232c40;
-  --bg-card-hover: #2c3650;
-  --primary-green: #00e701;
-  --primary-green-hover: #00c601;
-  --primary-glow: rgba(0, 231, 1, 0.22);
-  --accent-blue: #38bdf8;
-  --accent-gold: #f59e0b;
-  --accent-red: #f16464;
-  --text-main: #ffffff;
-  --text-muted: #b3bfd6;
-  --text-dim: #8492ac;
-  --border-color: #313d58;
-  --border-highlight: #455274;
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-heading: 'Space Grotesk', var(--font-family);
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
-}
+    .center-screen { position: fixed; inset: 0; width: 100vw; height: 100vh; background-color: var(--bg-dark); display: flex; align-items: center; justify-content: center; z-index: 99999; }
+    .loader-container { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .loader-logo { color: var(--primary-green); }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--primary-green); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-family);
-  letter-spacing: -0.01em;
-}
+    .top-nav { background-color: rgba(14, 19, 31, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+    .nav-container { max-width: 1240px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand-logo { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 800; color: var(--text-main); cursor: pointer; }
+    .logo-svg { color: var(--primary-green); }
+    .nav-tabs { display: flex; gap: 6px; }
+    @media (max-width: 768px) { .nav-tabs { display: none; } }
+    .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.15s ease; }
+    .tab-btn:hover { color: var(--text-main); background-color: var(--bg-card); }
+    .tab-btn.active { color: var(--primary-green); background-color: rgba(0, 231, 1, 0.08); }
 
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
-  overflow-y: auto;
-  height: auto;
-}
+    .user-stats-bar { display: flex; align-items: center; gap: 10px; }
+    .token-badge { background-color: var(--bg-card); border: 1px solid var(--border-highlight); padding: 5px 12px; border-radius: 999px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .token-icon-wrap { color: var(--accent-gold); display: flex; }
+    .token-count { font-size: 0.95rem; font-weight: 700; color: var(--accent-gold); }
+    .user-profile-chip { display: flex; align-items: center; gap: 8px; background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 3px 12px 3px 4px; border-radius: 999px; cursor: pointer; }
+    .user-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--primary-green); }
+    .user-name { font-size: 0.85rem; font-weight: 600; color: var(--text-main); max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-body {
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
+    .app-main { max-width: 1240px; width: 100%; margin: 0 auto; padding: 24px 20px 60px; flex: 1; }
+    .app-view { display: none; }
+    .app-view.active { display: block; }
 
-button, a, .play-btn, .tab-btn, .filter-chip, .game-card, .quiz-option, .ttt-cell {
-  touch-action: manipulation;
-}
+    .cashout-progress-banner { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 20px; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; }
+    .progress-title { color: var(--text-muted); }
+    .progress-nums { color: var(--primary-green); }
+    .progress-track { width: 100%; height: 8px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary-green), var(--accent-blue)); border-radius: 999px; transition: width 0.3s ease; }
 
-h1, h2, h3, .logo-text, .card-title, .stat-box-num, .token-count, .modal-card h3,
-.arena-name, .result-card h2, .hero-banner h2, .name-edit-group h2, .auth-header h3,
-.quiz-question, .math-problem {
-  font-family: var(--font-heading);
-}
+    .hero-banner { background: linear-gradient(135deg, #101726 0%, #0c121e 100%); border: 1px solid var(--border-highlight); border-radius: var(--radius-md); padding: 24px 28px; margin-bottom: 20px; }
+    .badge-tag { font-size: 0.72rem; font-weight: 700; color: var(--primary-green); letter-spacing: 0.08em; margin-bottom: 6px; display: inline-block; }
+    .hero-banner h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
+    .hero-banner p { color: var(--text-muted); font-size: 0.88rem; }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+    .filter-bar { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 2px; }
+    .filter-chip { background-color: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 16px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.15s ease; }
+    .filter-chip:hover, .filter-chip.active { background-color: var(--primary-green); color: #000000; border-color: var(--primary-green); }
 
-input, textarea, select { font-size: 16px; }
-.hidden { display: none !important; }
+    .games-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    @media (min-width: 580px) { .games-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 992px) { .games-grid { grid-template-columns: repeat(3, 1fr); } }
+    .game-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.18s ease, border-color 0.18s ease; }
+    .game-card:hover { transform: translateY(-3px); border-color: var(--border-highlight); }
+    .card-media { height: 120px; display: flex; align-items: center; justify-content: center; position: relative; }
+    .banner-reaction { background: linear-gradient(135deg, #854d0e 0%, #582e07 100%); }
+    .banner-math { background: linear-gradient(135deg, #047857 0%, #034b36 100%); }
+    .banner-memory { background: linear-gradient(135deg, #1d4ed8 0%, #112e82 100%); }
+    .banner-color { background: linear-gradient(135deg, #b91c1c 0%, #6d0f0f 100%); }
+    .banner-tictactoe { background: linear-gradient(135deg, #4338ca 0%, #292277 100%); }
+    .banner-trivia { background: linear-gradient(135deg, #7e22ce 0%, #4c147d 100%); }
+    .game-icon-svg { color: #ffffff; opacity: 0.95; }
+    .card-badge { position: absolute; top: 8px; left: 8px; background-color: rgba(0, 0, 0, 0.65); color: #ffffff; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 4px; }
+    .card-content { padding: 16px; display: flex; flex-direction: column; flex: 1; }
+    .card-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+    .card-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 14px; flex: 1; }
+    .card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 0.78rem; font-weight: 600; }
+    .meta-fee { color: var(--text-dim); }
+    .meta-win { color: var(--primary-green); }
+    .play-btn { width: 100%; background-color: #2563eb; color: #ffffff; border: none; padding: 11px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: background-color 0.15s ease; }
+    .play-btn:hover { background-color: #1d4ed8; }
 
-button, a, .play-btn, .tab-btn, .filter-chip, .game-card, .quiz-option, .ttt-cell {
-  transition: transform 0.15s var(--ease-smooth), background-color 0.15s ease,
-    border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-}
-button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .filter-chip:active {
-  transform: scale(0.97);
-}
+    .profile-header-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
+    @media (min-width: 840px) { .profile-header-card { grid-template-columns: 1fr 1.2fr; } }
+    .profile-left { display: flex; align-items: center; gap: 18px; }
+    .profile-avatar-lg { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--primary-green); object-fit: cover; background-color: var(--bg-card); }
+    .name-edit-group { display: flex; align-items: center; gap: 10px; }
+    .name-edit-group h2 { font-size: 1.3rem; font-weight: 700; }
+    .icon-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; }
+    .icon-btn:hover { color: var(--primary-green); }
+    .name-edit-box { display: flex; gap: 6px; margin: 6px 0; }
+    .name-input { background-color: var(--bg-card); border: 1px solid var(--border-highlight); color: var(--text-main); padding: 4px 10px; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none; }
+    .btn-save { background-color: var(--primary-green); color: #000; border: none; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer; }
+    .btn-cancel-sm { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer; }
+    .join-date { font-size: 0.78rem; color: var(--text-dim); margin: 4px 0 10px; }
+    .profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; flex-direction: column; }
+    .stat-box-num { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
+    .stat-box-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
 
-.center-screen {
-  position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
-  background-color: var(--bg-dark); display: flex; align-items: center; justify-content: center; z-index: 99999;
-}
-.loader-container { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.loader-logo { color: var(--primary-green); animation: pulseLogo 1.5s ease-in-out infinite; }
-@keyframes pulseLogo {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 12px var(--primary-green)); }
-}
-.spinner {
-  width: 40px; height: 40px; border: 3px solid var(--border-color);
-  border-top-color: var(--primary-green); border-radius: 50%; animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
+    .ledger-section, .section-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; }
+    .ledger-header h3, .section-card h3 { font-size: 1.15rem; font-weight: 700; }
+    .ledger-sub, .section-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px; }
+    .table-wrap { overflow-x: auto; }
+    .ledger-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+    .ledger-table th { color: var(--text-dim); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 14px; border-bottom: 1px solid var(--border-color); }
+    .ledger-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+    .badge-credit { background-color: rgba(0, 231, 1, 0.1); color: var(--primary-green); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+    .badge-debit { background-color: rgba(239, 68, 68, 0.1); color: var(--accent-red); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
 
-.top-nav {
-  background-color: rgba(14, 19, 31, 0.95); backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100;
-  padding-top: env(safe-area-inset-top);
-}
-.nav-container {
-  max-width: 1240px; margin: 0 auto; padding: 10px 20px;
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-}
-.brand-logo { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 800; color: var(--text-main); cursor: pointer; }
-.logo-svg { color: var(--primary-green); }
-.nav-tabs { display: flex; gap: 6px; }
-@media (max-width: 768px) { .nav-tabs { display: none; } }
-.tab-btn {
-  background: transparent; border: none; color: var(--text-muted); padding: 8px 14px;
-  border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 600;
-  display: flex; align-items: center; gap: 8px; cursor: pointer;
-}
-.tab-btn:hover { color: var(--text-main); background-color: var(--bg-card); }
-.tab-btn.active { color: var(--primary-green); background-color: rgba(0, 231, 1, 0.08); position: relative; }
-.tab-btn.active::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -2px; height: 2px; background: var(--primary-green); border-radius: 2px; }
+    .modal-overlay { position: fixed; inset: 0; background-color: rgba(7, 9, 14, 0.92); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-card, .arena-card { background-color: var(--bg-surface); border: 1px solid var(--border-highlight); border-radius: var(--radius-lg); padding: 32px 24px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75); }
+    .radar-pulse { position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--primary-green); }
+    .pulse-circle { position: absolute; inset: 0; border-radius: 50%; background: var(--primary-green); opacity: 0.25; animation: pulse 1.6s ease-out infinite; }
+    @keyframes pulse { 0% { transform: scale(0.6); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
+    .btn-cancel { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.85rem; cursor: pointer; width: 100%; transition: all 0.15s ease; }
+    .btn-cancel:hover { background-color: var(--bg-card); color: var(--text-main); }
 
-.bottom-nav { display: none; }
-@media (max-width: 768px) {
-  .bottom-nav {
-    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 500;
-    background-color: rgba(14, 19, 31, 0.97); backdrop-filter: blur(14px);
-    border-top: 1px solid var(--border-color); justify-content: space-around; align-items: center;
-    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
-  }
-  .bottom-nav .tab-btn { flex-direction: column; gap: 3px; font-size: 0.64rem; padding: 6px 10px; border-radius: var(--radius-sm); }
-  .bottom-nav .tab-btn svg { width: 19px; height: 19px; }
-  .app-main { padding-bottom: 96px; }
-}
+    .arena-header { display: flex; align-items: center; justify-content: space-around; padding-bottom: 18px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+    .player-stat { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .arena-avatar { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--primary-green); background-color: var(--bg-card); object-fit: cover; }
+    .opp-side .arena-avatar { border-color: var(--accent-blue); }
+    .arena-name { font-size: 0.85rem; font-weight: 600; }
+    .vs-badge { font-size: 1rem; font-weight: 800; color: var(--text-dim); }
+    .arena-stage { min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .reaction-box { width: 100%; height: 180px; border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: background-color 0.1s ease; }
+    .reaction-wait { background-color: #7f1d1d; color: #fff; }
+    .reaction-go { background-color: var(--primary-green); color: #000; font-weight: 800; }
+    .btn-primary { background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 10px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; }
+    .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); font-weight: 600; font-size: 0.88rem; padding: 10px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; }
 
-.user-stats-bar { display: flex; align-items: center; gap: 10px; }
-.token-badge {
-  background-color: var(--bg-card); border: 1px solid var(--border-highlight);
-  padding: 5px 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px;
-  cursor: pointer; font: inherit; color: inherit;
-}
-.token-badge:hover { border-color: var(--primary-green); }
-.token-icon-wrap { color: var(--accent-gold); display: flex; align-items: center; font-weight: 800; font-size: 0.9rem; font-family: var(--font-heading); }
-.token-count { font-size: 0.95rem; font-weight: 700; color: var(--accent-gold); display: inline-block; }
-@keyframes balancePulse { 0% { transform: scale(1); } 35% { transform: scale(1.14); color: var(--primary-green); } 100% { transform: scale(1); } }
-.token-count.balance-flash, .stat-box-num.balance-flash { animation: balancePulse 0.55s var(--ease-smooth); }
+    .app-footer { background-color: var(--bg-surface); border-top: 1px solid var(--border-color); padding: 40px 20px 20px; margin-top: auto; }
+    .footer-container { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; padding-bottom: 30px; border-bottom: 1px solid var(--border-color); }
+    @media (min-width: 768px) { .footer-container { grid-template-columns: 1.4fr 2fr; } }
+    .footer-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin: 12px 0; max-width: 380px; }
+    .trust-badge { font-size: 0.78rem; color: var(--primary-green); display: flex; align-items: center; gap: 6px; font-weight: 600; }
+    .footer-links-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .footer-col { display: flex; flex-direction: column; gap: 8px; }
+    .footer-heading { font-size: 0.82rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+    .footer-col a { color: var(--text-muted); font-size: 0.8rem; text-decoration: none; transition: color 0.15s ease; }
+    .footer-col a:hover { color: var(--primary-green); }
+    .footer-bottom { max-width: 1240px; margin: 20px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-dim); }
 
-.user-profile-chip {
-  display: flex; align-items: center; gap: 8px; background-color: var(--bg-card);
-  border: 1px solid var(--border-color); padding: 3px 12px 3px 4px; border-radius: 999px; cursor: pointer;
-}
-.user-profile-chip:hover { border-color: var(--primary-green); }
-.user-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--primary-green); }
-.user-name {
-  font-size: 0.85rem; font-weight: 600; color: var(--text-main); max-width: 100px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+    .landing-body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 15% 10%, rgba(0, 231, 1, 0.08), transparent 40%), radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.06), transparent 45%);
+      min-height: 100vh;
+    }
+    .logo-text { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-main); }
+    .nav-links { display: none; align-items: center; gap: 28px; }
+    @media (min-width: 900px) { .nav-links { display: flex; } }
+    .nav-link { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.15s ease; }
+    .nav-link:hover, .nav-link.active { color: var(--text-main); }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
 
-.app-main { max-width: 1240px; width: 100%; margin: 0 auto; padding: 24px 20px 60px; flex: 1; }
-.app-view { display: none; }
-@keyframes fadeSlideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-.app-view.active { display: block; animation: fadeSlideUp 0.4s var(--ease-smooth); }
+    .hero-section { flex: 1; display: flex; align-items: center; padding: 60px 20px 80px; }
+    .hero-container { max-width: 1240px; width: 100%; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 56px; align-items: center; }
+    @media (min-width: 960px) { .hero-container { grid-template-columns: 1.1fr 0.9fr; gap: 40px; } }
+    .hero-left { display: flex; flex-direction: column; gap: 24px; }
+    .badge-pill { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; background-color: rgba(0, 231, 1, 0.1); border: 1px solid rgba(0, 231, 1, 0.25); color: var(--primary-green); font-size: 0.8rem; font-weight: 600; padding: 7px 14px; border-radius: 999px; }
+    .badge-dot { width: 7px; height: 7px; border-radius: 50%; background-color: var(--primary-green); box-shadow: 0 0 8px var(--primary-green); }
+    .hero-title { font-family: 'Plus Jakarta Sans', var(--font-family); font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.12; letter-spacing: -0.02em; color: var(--text-main); }
+    .highlight-green { color: var(--primary-green); }
+    .hero-subtitle { font-size: 1.05rem; line-height: 1.6; color: var(--text-muted); max-width: 540px; }
+    .hero-stats-row { display: flex; flex-wrap: wrap; gap: 36px; margin-top: 8px; paddingTop: 24px; border-top: 1px solid var(--border-color); }
+    .stat-item { display: flex; flex-direction: column; gap: 4px; }
+    .stat-number { font-family: 'Plus Jakarta Sans', var(--font-family); font-size: 1.6rem; font-weight: 800; color: var(--text-main); }
+    .stat-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 500; }
 
-.cashout-progress-banner { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 20px; }
-.progress-info { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; }
-.progress-title { color: var(--text-muted); }
-.progress-nums { color: var(--primary-green); }
-.progress-track { width: 100%; height: 8px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; }
-.progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary-green), var(--accent-blue)); border-radius: 999px; transition: width 0.5s var(--ease-smooth); }
+    .hero-right { display: flex; justify-content: center; }
+    .auth-card { width: 100%; max-width: 400px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 22px; }
+    .auth-header h3 { font-family: 'Plus Jakarta Sans', var(--font-family); font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
+    .auth-header p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
+    .auth-perks { display: flex; flex-direction: column; gap: 12px; }
+    .perk-item { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; color: var(--text-muted); }
+    .google-auth-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background-color: #fff; color: #1f2937; font-size: 0.92rem; font-weight: 600; border: none; border-radius: var(--radius-sm); padding: 12px 18px; cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+    .google-auth-btn:hover { box-shadow: 0 8px 20px -8px rgba(255, 255, 255, 0.25); transform: translateY(-1px); }
+    .auth-footnote { font-size: 0.76rem; color: var(--text-dim); text-align: center; line-height: 1.5; }
 
-.hero-banner { background: linear-gradient(135deg, #101726 0%, #0c121e 100%); border: 1px solid var(--border-highlight); border-radius: var(--radius-md); padding: 24px 28px; margin-bottom: 20px; position: relative; overflow: hidden; }
-.badge-tag { font-size: 0.72rem; font-weight: 700; color: var(--primary-green); letter-spacing: 0.08em; margin-bottom: 6px; display: inline-block; }
-.hero-banner h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
-.hero-banner p { color: var(--text-muted); font-size: 0.88rem; }
+    /* Toast Notification Stack */
+    .toast-stack { position: fixed; top: 16px; right: 16px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast { pointer-events: auto; background: var(--bg-surface); border: 1px solid var(--border-highlight); border-left: 4px solid var(--primary-green); padding: 12px 16px; border-radius: var(--radius-sm); box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-size: 0.85rem; display: flex; flex-direction: column; gap: 2px; animation: slideIn 0.3s ease; }
+    .toast.toast-debit { border-left-color: var(--accent-red); }
+    .toast-credit-text { color: var(--primary-green); font-weight: 700; }
+    .toast-debit-text { color: var(--accent-red); font-weight: 700; }
+    .toast-desc { color: var(--text-muted); font-size: 0.75rem; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-.filter-bar { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 2px; scrollbar-width: none; }
-.filter-bar::-webkit-scrollbar { display: none; }
-.filter-chip {
-  background-color: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-muted);
-  padding: 8px 16px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap;
-}
-.filter-chip:hover, .filter-chip.active { background-color: var(--primary-green); color: #000000; border-color: var(--primary-green); }
-
-.games-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
-@media (min-width: 580px) { .games-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 992px) { .games-grid { grid-template-columns: repeat(3, 1fr); } }
-.game-card {
-  background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);
-  overflow: hidden; display: flex; flex-direction: column; animation: fadeSlideUp 0.45s var(--ease-smooth) backwards;
-}
-.game-card:nth-child(2) { animation-delay: 0.04s; }
-.game-card:nth-child(3) { animation-delay: 0.08s; }
-.game-card:nth-child(4) { animation-delay: 0.12s; }
-.game-card:nth-child(5) { animation-delay: 0.16s; }
-.game-card:nth-child(6) { animation-delay: 0.2s; }
-.game-card:hover { transform: translateY(-3px); border-color: var(--border-highlight); box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.55); }
-.card-media { height: 120px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-.banner-reaction { background: linear-gradient(135deg, #854d0e 0%, #582e07 100%); }
-.banner-math { background: linear-gradient(135deg, #047857 0%, #034b36 100%); }
-.banner-memory { background: linear-gradient(135deg, #1d4ed8 0%, #112e82 100%); }
-.banner-color { background: linear-gradient(135deg, #b91c1c 0%, #6d0f0f 100%); }
-.banner-tictactoe { background: linear-gradient(135deg, #4338ca 0%, #292277 100%); }
-.banner-trivia { background: linear-gradient(135deg, #7e22ce 0%, #4c147d 100%); }
-.game-icon-svg { color: #ffffff; opacity: 0.95; }
-.card-badge { position: absolute; top: 8px; left: 8px; background-color: rgba(0, 0, 0, 0.65); color: #ffffff; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 4px; }
-.card-content { padding: 16px; display: flex; flex-direction: column; flex: 1; }
-.card-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
-.card-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 14px; flex: 1; }
-.card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 0.78rem; font-weight: 600; }
-.meta-fee { color: var(--text-dim); }
-.meta-win { color: var(--primary-green); }
-.play-btn {
-  width: 100%; background-color: #2563eb; color: #ffffff; border: none; padding: 12px;
-  border-radius: var(--radius-sm); font-weight: 700; font-size: 0.88rem; cursor: pointer; min-height: 44px;
-  position: relative; overflow: hidden;
-}
-.play-btn:hover { background-color: #1d4ed8; }
-
-.profile-header-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
-@media (min-width: 840px) { .profile-header-card { grid-template-columns: 1fr 1.2fr; } }
-.profile-left { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-.profile-avatar-lg { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--primary-green); object-fit: cover; background-color: var(--bg-card); }
-.name-edit-group { display: flex; align-items: center; gap: 10px; }
-.name-edit-group h2 { font-size: 1.3rem; font-weight: 700; }
-.icon-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; }
-.icon-btn:hover { color: var(--primary-green); }
-.name-edit-box { display: flex; gap: 6px; margin: 6px 0; flex-wrap: wrap; }
-.name-input { background-color: var(--bg-card); border: 1px solid var(--border-highlight); color: var(--text-main); padding: 8px 10px; border-radius: var(--radius-sm); outline: none; }
-.btn-save { background-color: var(--primary-green); color: #000; border: none; font-weight: 700; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer; }
-.btn-cancel-sm { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 10px; border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer; }
-.join-date { font-size: 0.78rem; color: var(--text-dim); margin: 4px 0 10px; }
-.level-pill { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; font-weight: 600; flex-wrap: wrap; }
-.level-bar-bg { width: 100px; height: 6px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; }
-.level-bar-fill { height: 100%; background-color: var(--primary-green); transition: width 0.5s var(--ease-smooth); }
-.xp-text { color: var(--text-dim); font-size: 0.72rem; }
-.profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.stat-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; flex-direction: column; }
-.stat-box-num { font-size: 1.2rem; font-weight: 700; color: var(--text-main); display: inline-block; }
-.stat-box-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-
-.section-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; }
-.profile-menu-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
-.menu-row {
-  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
-  background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm);
-  padding: 14px 16px; cursor: pointer; color: var(--text-main);
-}
-button.menu-row { font: inherit; }
-.menu-row:hover { border-color: var(--border-highlight); background-color: var(--bg-card-hover); }
-.menu-row-static { cursor: default; }
-.menu-row-static:hover { border-color: var(--border-color); background-color: var(--bg-card); }
-.menu-row-icon {
-  width: 36px; height: 36px; min-width: 36px; border-radius: 50%; background-color: var(--bg-surface);
-  color: var(--primary-green); display: flex; align-items: center; justify-content: center;
-}
-.menu-row-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.menu-row-title { font-size: 0.92rem; font-weight: 700; }
-.menu-row-sub { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.menu-row-arrow { color: var(--text-dim); font-size: 1.2rem; font-weight: 700; }
-.menu-row-danger .menu-row-icon { color: var(--accent-red); }
-.menu-row-danger:hover { border-color: var(--accent-red); }
-
-.back-link {
-  background: transparent; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
-  cursor: pointer; padding: 0; margin-bottom: 14px; display: inline-block;
-}
-.back-link:hover { color: var(--primary-green); }
-
-.refer-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
-.refer-info-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
-.refer-info-num { font-size: 1.4rem; font-weight: 800; color: var(--primary-green); font-family: var(--font-heading); }
-.refer-info-lbl { font-size: 0.78rem; color: var(--text-muted); }
-.refer-explainer { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
-.refer-code-box, .refer-redeem-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; }
-.refer-code-lbl { font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
-.refer-code-row, .refer-redeem-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.refer-code-value { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--text-main); letter-spacing: 0.06em; background-color: var(--bg-surface); border: 1px dashed var(--border-highlight); border-radius: var(--radius-sm); padding: 8px 14px; flex: 1; min-width: 140px; }
-.refer-redeem-row .name-input { flex: 1; min-width: 160px; }
-.refer-status-msg { font-size: 0.82rem; font-weight: 600; margin-top: 10px; min-height: 1em; }
-.refer-status-msg.success { color: var(--primary-green); }
-.refer-status-msg.error { color: var(--accent-red); }
-
-.addtoken-amount-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 20px; }
-@media (min-width: 480px) { .addtoken-amount-grid { grid-template-columns: repeat(4, 1fr); } }
-.amount-chip {
-  background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);
-  padding: 14px 10px; border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center;
-}
-.amount-chip:hover, .amount-chip.active { background-color: var(--primary-green); color: #000; border-color: var(--primary-green); }
-
-.paytm-card-display {
-  background: #ffffff;
-  color: #12161f;
-  max-width: 240px;
-  border-radius: 14px;
-  margin: 16px auto;
-  padding: 14px;
-  text-align: center;
-  border: 2px solid var(--border-highlight);
-  box-shadow: 0 14px 30px -10px rgba(0,0,0,0.6);
-}
-.paytm-card-display img {
-  width: 200px;
-  height: 200px;
-  display: block;
-  margin: 0 auto;
-  border-radius: 8px;
-}
-.paytm-card-display .upi-tag {
-  margin-top: 8px;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.82rem;
-  color: #0284c7;
-}
-
-.table-wrap { overflow-x: auto; }
-.ledger-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
-.ledger-table th { color: var(--text-dim); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 14px; border-bottom: 1px solid var(--border-color); }
-.ledger-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
-.badge-credit { background-color: rgba(0, 231, 1, 0.1); color: var(--primary-green); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
-.badge-debit { background-color: rgba(239, 68, 68, 0.1); color: var(--accent-red); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
-
-.modal-overlay {
-  position: fixed; inset: 0; background-color: rgba(10, 13, 20, 0.85); backdrop-filter: blur(8px);
-  display: flex; align-items: center; align-items: safe center; justify-content: center; z-index: 1000;
-  padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; animation: fadeSlideUp 0.25s ease;
-}
-.modal-card, .arena-card {
-  background-color: var(--bg-surface); border: 1px solid var(--border-highlight); border-radius: var(--radius-lg);
-  padding: 32px 24px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
-  animation: fadeSlideUp 0.35s var(--ease-smooth);
-  max-height: calc(100dvh - 40px); overflow-y: auto; -webkit-overflow-scrolling: touch; margin: auto 0;
-}
-.radar-pulse { position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--primary-green); }
-.pulse-circle { position: absolute; inset: 0; border-radius: 50%; background: var(--primary-green); opacity: 0.25; animation: pulse 1.6s ease-out infinite; }
-@keyframes pulse { 0% { transform: scale(0.6); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
-.btn-cancel { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.85rem; cursor: pointer; width: 100%; min-height: 44px; }
-.btn-cancel:hover { background-color: var(--bg-card); color: var(--text-main); }
-
-.arena-header { display: flex; align-items: center; justify-content: space-around; padding-bottom: 18px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
-.player-stat { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.arena-avatar { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--primary-green); background-color: var(--bg-card); }
-.opp-side .arena-avatar { border-color: var(--accent-blue); }
-.arena-name { font-size: 0.85rem; font-weight: 600; }
-.vs-badge { font-size: 1rem; font-weight: 800; color: var(--text-dim); }
-.arena-stage { min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.reaction-box { width: 100%; height: 180px; border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: background-color 0.1s ease; }
-.reaction-wait { background-color: #7f1d1d; color: #fff; }
-.reaction-go { background-color: var(--primary-green); color: #000; font-weight: 800; }
-.result-card h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
-.win-text { color: var(--primary-green); }
-.lose-text { color: var(--accent-red); }
-.result-analytics { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin: 14px 0 20px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
-.result-btn-row { display: flex; gap: 10px; }
-.btn-primary { background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; min-height: 44px; position: relative; overflow: hidden; }
-.btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); font-weight: 600; font-size: 0.88rem; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; min-height: 44px; }
-
-.app-footer { background-color: var(--bg-surface); border-top: 1px solid var(--border-color); padding: 40px 20px 20px; margin-top: auto; }
-.footer-container { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; padding-bottom: 30px; border-bottom: 1px solid var(--border-color); }
-@media (min-width: 768px) { .footer-container { grid-template-columns: 1.4fr 2fr; } }
-.footer-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin: 12px 0; max-width: 380px; }
-.trust-badge { font-size: 0.78rem; color: var(--primary-green); display: flex; align-items: center; gap: 6px; font-weight: 600; }
-.footer-links-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.footer-col { display: flex; flex-direction: column; gap: 8px; }
-.footer-heading { font-size: 0.82rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
-.footer-col a { color: var(--text-muted); font-size: 0.8rem; text-decoration: none; }
-.footer-col a:hover { color: var(--primary-green); }
-.footer-bottom { max-width: 1240px; margin: 20px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-dim); flex-wrap: wrap; gap: 8px; }
-
-.landing-body {
-  background-color: var(--bg-dark);
-  background-image: radial-gradient(circle at 15% 10%, rgba(0, 231, 1, 0.08), transparent 40%), radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.06), transparent 45%);
-  min-height: 100vh; min-height: 100dvh;
-}
-.logo-text { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-main); }
-.nav-links { display: none; align-items: center; gap: 28px; }
-@media (min-width: 900px) { .nav-links { display: flex; } }
-.nav-link { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-decoration: none; }
-.nav-actions { display: flex; align-items: center; gap: 10px; }
-.nav-actions .btn-secondary, .nav-actions .btn-primary { flex: none; padding: 9px 18px; }
-
-.hero-section { flex: 1; display: flex; align-items: center; padding: 60px 20px 80px; }
-.hero-container { max-width: 1240px; width: 100%; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 56px; align-items: center; }
-@media (min-width: 960px) { .hero-container { grid-template-columns: 1.1fr 0.9fr; gap: 40px; } }
-.hero-left { display: flex; flex-direction: column; gap: 24px; }
-.hero-title { font-family: var(--font-heading); font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.12; color: var(--text-main); }
-.hero-subtitle { font-size: 1.05rem; line-height: 1.6; color: var(--text-muted); max-width: 540px; }
-.hero-stats-row { display: flex; flex-wrap: wrap; gap: 36px; margin-top: 8px; padding-top: 24px; border-top: 1px solid var(--border-color); }
-.stat-item { display: flex; flex-direction: column; gap: 4px; }
-.stat-number { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; color: var(--text-main); }
-.stat-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 500; }
-
-.hero-right { display: flex; justify-content: center; }
-.auth-card { width: 100%; max-width: 400px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 22px; }
-.auth-header h3 { font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
-.auth-header p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
-.auth-perks { display: flex; flex-direction: column; gap: 12px; }
-.perk-item { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; color: var(--text-muted); }
-.google-auth-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background-color: #fff; color: #1f2937; font-size: 0.92rem; font-weight: 600; border: none; border-radius: var(--radius-sm); padding: 13px 18px; cursor: pointer; min-height: 44px; }
-
-.match-wrap { max-width: 720px; width: 100%; margin: 0 auto; padding: 20px 16px 60px; }
-.vs-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; }
-.vs-player { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; }
-.vs-player img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary-green); background-color: var(--bg-card); object-fit: cover; }
-.vs-label { font-family: var(--font-heading); font-weight: 800; color: var(--text-dim); }
-.game-stage { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 28px 20px; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-
-.toast-stack { position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 99998; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; pointer-events: none; max-width: calc(100vw - 28px); }
-.toast { pointer-events: auto; display: flex; align-items: center; gap: 10px; background-color: var(--bg-surface); border: 1px solid var(--border-highlight); border-left: 3px solid var(--primary-green); border-radius: var(--radius-sm); padding: 10px 14px; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5); font-size: 0.82rem; font-weight: 600; color: var(--text-main); max-width: 320px; }
-.toast.toast-debit { border-left-color: var(--accent-red); }
-.toast-amount.toast-credit-text { color: var(--primary-green); }
-.toast-amount.toast-debit-text { color: var(--accent-red); }
-.toast-desc { color: var(--text-muted); font-weight: 500; font-size: 0.74rem; }
-
-.arena-turn-indicator { display: flex; align-items: center; justify-content: center; gap: 8px; margin: -6px 0 18px; padding: 8px 16px; border-radius: 999px; background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); width: fit-content; margin-left: auto; margin-right: auto; }
-.turn-dot { width: 8px; height: 8px; border-radius: 50%; }
-.turn-dot-you { background-color: var(--primary-green); }
-.turn-dot-opp { background-color: var(--accent-red); }
-.turn-text { font-family: var(--font-heading); font-weight: 700; font-size: 0.92rem; }
-.turn-text-you { color: var(--primary-green); }
-.turn-text-opp { color: var(--accent-red); }
+    /* Paytm QR Box Display */
+    .paytm-card-display { background: #ffffff; color: #12161f; max-width: 240px; border-radius: 14px; margin: 16px auto; padding: 14px; text-align: center; border: 2px solid var(--border-highlight); box-shadow: 0 14px 30px -10px rgba(0,0,0,0.6); }
+    .paytm-card-display img { width: 200px; height: 200px; display: block; margin: 0 auto; border-radius: 8px; }
+    .paytm-card-display .upi-tag { margin-top: 8px; font-weight: 700; font-size: 0.82rem; color: #0284c7; }
+    .addtoken-amount-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0 20px; }
+    .amount-chip { background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px 10px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.95rem; cursor: pointer; text-align: center; }
+    .amount-chip:hover, .amount-chip.active { background-color: var(--primary-green); color: #000; border-color: var(--primary-green); }
   </style>
 </head>
-<body class="app-body">
-  <div id="page-landing">
-    <header class="top-nav">
-      <div class="nav-container">
-        <div class="brand-logo"><svg class="logo-svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg><span class="logo-text">ARENA</span></div>
-        <div class="nav-actions"><button id="nav-login-btn" class="btn-secondary" type="button">Sign In</button><button id="nav-signup-btn" class="btn-primary" type="button">Get Started</button></div>
+<body class="landing-body">
+  <!-- Top Navigation (Landing) -->
+  <header class="top-nav" id="landing-nav">
+    <div class="nav-container">
+      <div class="brand-logo">
+        <svg class="logo-svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        <span class="logo-text">ARENA</span>
       </div>
-    </header>
-    <main class="hero-section">
-      <div class="hero-container">
-        <div class="hero-left">
-          <h1 class="hero-title">Play Skill Games. <br/><span class="highlight-green">Win Real Tokens.</span></h1>
-          <p class="hero-subtitle">Compete in instant 1v1 duels with verified payments.</p>
+      <div class="nav-links">
+        <a href="#games" class="nav-link active">Games</a>
+        <a href="#rewards" class="nav-link">Rewards</a>
+        <a href="#leaderboard" class="nav-link">Leaderboard</a>
+      </div>
+      <div class="nav-actions">
+        <button id="nav-login-btn" class="btn-secondary" type="button">Sign In</button>
+        <button id="nav-signup-btn" class="btn-primary" type="button">Get Started</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section (Landing) -->
+  <main class="hero-section" id="landing-hero">
+    <div class="hero-container">
+      <div class="hero-left">
+        <div class="badge-pill">
+          <span class="badge-dot"></span>
+          <span>Verified 1v1 Skill Arenas</span>
         </div>
-        <div class="hero-right">
-          <div class="auth-card">
-            <div class="auth-header"><h3>Create an Account</h3><p>Sign in to claim ₹1,000 welcome tokens</p></div>
-            <button id="google-login-btn" class="google-auth-btn" type="button">Continue with Google</button>
+        <h1 class="hero-title">
+          Play Skill Games. <br/><span class="highlight-green">Win Real Tokens.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Compete against players in fast-paced skill duels. Instant matchmaking, fair matchmaking algorithms, and immediate token rewards.
+        </p>
+
+        <div class="hero-stats-row">
+          <div class="stat-item">
+            <span class="stat-number">1,000</span>
+            <span class="stat-label">Welcome Tokens</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">&lt; 10s</span>
+            <span class="stat-label">Match Queues</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">100%</span>
+            <span class="stat-label">Skill-Based</span>
           </div>
         </div>
       </div>
-    </main>
-  </div>
 
-  <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+      <div class="hero-right">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h3>Create an Account</h3>
+            <p>Sign in to claim your 1,000 tokens and enter live matches</p>
+          </div>
 
+          <div class="auth-perks">
+            <div class="perk-item">
+              <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+              <span><strong>1,000 Tokens</strong> instantly credited</span>
+            </div>
+            <div class="perk-item">
+              <svg class="perk-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <span>Encrypted &amp; secure authentication</span>
+            </div>
+          </div>
+
+          <button id="google-login-btn" class="google-auth-btn" type="button">
+            <svg width="20" height="20" viewBox="0 0 48 48">
+              <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
+              <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
+              <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
+              <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+
+          <p class="auth-footnote">By continuing, you agree to the Arena Terms of Service.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast-stack" class="toast-stack"></div>
+
+  <!-- Loading Screen -->
   <div id="loading" class="center-screen hidden">
-    <div class="loader-container"><div class="spinner"></div><p class="loading-text">Connecting to Arena Network...</p></div>
+    <div class="loader-container">
+      <div class="loader-logo">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <div class="spinner"></div>
+      <p class="loading-text">Connecting to Arena Network...</p>
+    </div>
   </div>
 
+  <!-- MAIN DASHBOARD -->
   <div id="dashboard" class="app-wrap hidden">
     <header class="top-nav">
       <div class="nav-container">
-        <div class="brand-logo" id="nav-brand-logo"><svg class="logo-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg><span class="logo-text">ARENA</span></div>
+        <div class="brand-logo" id="nav-brand-logo">
+          <svg class="logo-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span class="logo-text">ARENA</span>
+        </div>
+
         <nav class="nav-tabs">
-          <button class="tab-btn active" data-target="view-earn" type="button">Earn</button>
-          <button class="tab-btn" data-target="view-matches" type="button">My Matches</button>
-          <button class="tab-btn" data-target="view-cashout" type="button">Cashout</button>
-          <button class="tab-btn" data-target="view-rewards" type="button">Rewards</button>
+          <button class="tab-btn active" data-target="view-earn" type="button">
+            <span>Earn</span>
+          </button>
+          <button class="tab-btn" data-target="view-matches" type="button">
+            <span>My Matches</span>
+          </button>
+          <button class="tab-btn" data-target="view-cashout" type="button">
+            <span>Cashout</span>
+          </button>
+          <button class="tab-btn" data-target="view-rewards" type="button">
+            <span>Rewards</span>
+          </button>
         </nav>
+
         <div class="user-stats-bar">
-          <button id="wallet-badge-btn" class="token-badge" type="button"><span class="token-icon-wrap">₹</span><span id="balance-value" class="token-count">1,000</span></button>
-          <button id="profile-nav-btn" class="user-profile-chip" type="button"><img id="avatar" class="user-avatar" src="" alt="Avatar" /><span id="player-name" class="user-name">Vishal</span></button>
+          <div class="token-badge" title="Token Balance">
+            <span class="token-icon-wrap">🪙</span>
+            <span id="balance-value" class="token-count">1,200</span>
+          </div>
+
+          <button id="profile-nav-btn" class="user-profile-chip" type="button" title="View Profile">
+            <img id="avatar" class="user-avatar" src="" alt="Avatar" />
+            <span id="player-name" class="user-name">Vishal</span>
+          </button>
+
+          <button id="logout-btn" class="logout-btn" type="button" title="Sign out" style="background:transparent;border:1px solid var(--border-color);color:var(--text-muted);padding:6px 10px;border-radius:var(--radius-sm);cursor:pointer;">
+            🚪
+          </button>
         </div>
       </div>
     </header>
 
     <main class="app-main">
+      <!-- VIEW 1: EARN -->
       <section id="view-earn" class="app-view active">
         <div class="cashout-progress-banner">
-          <div class="progress-info"><span class="progress-title">Next Cashout Threshold</span><span id="progress-text" class="progress-nums">₹1,000 / ₹2,500 Threshold</span></div>
-          <div class="progress-track"><div id="progress-fill" class="progress-bar" style="width: 40%;"></div></div>
+          <div class="progress-info">
+            <span class="progress-title">Next Cashout Threshold</span>
+            <span id="progress-text" class="progress-nums">$1.20 / $2.50 (1,200 / 2,500 Tokens)</span>
+          </div>
+          <div class="progress-track">
+            <div id="progress-fill" class="progress-bar" style="width: 48%;"></div>
+          </div>
         </div>
-        <div class="hero-banner"><span class="badge-tag">INSTANT 1V1 DUELS</span><h2>Challenge Players &amp; Win Real Tokens</h2><p>Entry: <strong>₹50</strong> • Winner Reward: <strong>₹90</strong></p></div>
+
+        <div class="hero-banner">
+          <div class="banner-content">
+            <span class="badge-tag">INSTANT 1V1 DUELS</span>
+            <h2>Challenge Players &amp; Win Real Tokens</h2>
+            <p>Entry: <strong>50 Tokens</strong> • Winner Reward: <strong>90 Tokens</strong> (Net +40)</p>
+          </div>
+        </div>
+
         <div class="filter-bar">
           <button class="filter-chip active" data-category="all" type="button">All Games</button>
           <button class="filter-chip" data-category="reflex" type="button">Reflex Speed</button>
           <button class="filter-chip" data-category="math" type="button">Math Calculations</button>
           <button class="filter-chip" data-category="brain" type="button">Memory &amp; Brain</button>
         </div>
-        <div class="games-grid" id="gamesGrid"></div>
+
+        <div class="games-grid">
+          <!-- Game 1: Reaction Duel -->
+          <article class="game-card" data-category="reflex">
+            <div class="card-media banner-reaction">
+              <span class="card-badge">POPULAR</span>
+              <svg class="game-icon-svg" viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">Reaction Duel</h3>
+              <p class="card-desc">Click first the exact millisecond the signal turns green.</p>
+              <div class="card-meta">
+                <span class="meta-fee">Fee: 50 🪙</span>
+                <span class="meta-win">+90 Reward</span>
+              </div>
+              <button class="play-btn" data-game="Reaction Duel" data-type="reaction" type="button">Play Match</button>
+            </div>
+          </article>
+
+          <!-- Game 2: Cyber Math -->
+          <article class="game-card" data-category="math">
+            <div class="card-media banner-math">
+              <span class="card-badge">SKILL</span>
+              <svg class="game-icon-svg" viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><line x1="8" y1="10" x2="10" y2="10"></line></svg>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">Cyber Math</h3>
+              <p class="card-desc">Solve rapid mental equations in under 4 seconds.</p>
+              <div class="card-meta">
+                <span class="meta-fee">Fee: 50 🪙</span>
+                <span class="meta-win">+90 Reward</span>
+              </div>
+              <button class="play-btn" data-game="Cyber Math" data-type="math" type="button">Play Match</button>
+            </div>
+          </article>
+
+          <!-- Game 3: Memory Matrix -->
+          <article class="game-card" data-category="brain">
+            <div class="card-media banner-memory">
+              <span class="card-badge">NEW</span>
+              <svg class="game-icon-svg" viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">Memory Matrix</h3>
+              <p class="card-desc">Memorize the flashing tile faster than opponent.</p>
+              <div class="card-meta">
+                <span class="meta-fee">Fee: 50 🪙</span>
+                <span class="meta-win">+90 Reward</span>
+              </div>
+              <button class="play-btn" data-game="Memory Matrix" data-type="memory" type="button">Play Match</button>
+            </div>
+          </article>
+
+          <!-- Game 4: Color Clash -->
+          <article class="game-card" data-category="reflex">
+            <div class="card-media banner-color">
+              <span class="card-badge">REFLEX</span>
+              <svg class="game-icon-svg" viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">Color Clash</h3>
+              <p class="card-desc">Match text meaning vs color under extreme pressure.</p>
+              <div class="card-meta">
+                <span class="meta-fee">Fee: 50 🪙</span>
+                <span class="meta-win">+90 Reward</span>
+              </div>
+              <button class="play-btn" data-game="Color Clash" data-type="color" type="button">Play Match</button>
+            </div>
+          </article>
+
+          <!-- Game 5: Tic-Tac-Toe Blitz -->
+          <article class="game-card" data-category="brain">
+            <div class="card-media banner-tictactoe">
+              <span class="card-badge">CLASSIC</span>
+              <svg class="game-icon-svg" viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">Tic-Tac-Toe Blitz</h3>
+              <p class="card-desc">Strategic 3x3 combat with a 5-second per-turn clock.</p>
+              <div class="card-meta">
+                <span class="meta-fee">Fee: 50 🪙</span>
+                <span class="meta-win">+90 Reward</span>
+              </div>
+              <button class="play-btn" data-game="Tic-Tac-Toe Blitz" data-type="reaction" type="button">Play Match</button>
+            </div>
+          </article>
+
+          <!-- Game 6: Trivia Sprint -->
+          <article class="game-card" data-category="brain">
+            <div class="card-media banner-trivia">
+              <span class="card-badge">TRIVIA</span>
+              <svg class="game-icon-svg" viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 3 2 5 3 6v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2c1-1 3-3 3-6a8 8 0 0 0-8-8z"></path><line x1="9" y1="22" x2="15" y2="22"></line></svg>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title">Trivia Sprint</h3>
+              <p class="card-desc">Answer 3 speed trivia questions before opponent.</p>
+              <div class="card-meta">
+                <span class="meta-fee">Fee: 50 🪙</span>
+                <span class="meta-win">+90 Reward</span>
+              </div>
+              <button class="play-btn" data-game="Trivia Sprint" data-type="math" type="button">Play Match</button>
+            </div>
+          </article>
+        </div>
       </section>
 
+      <!-- VIEW 2: MY PROFILE -->
       <section id="view-profile" class="app-view">
         <div class="profile-header-card">
-          <div class="profile-left"><img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" /><div class="profile-meta"><h2 id="profile-display-name">Vishal</h2><p class="join-date">Arena Member • Verified Account</p></div></div>
-          <div class="profile-stats-grid"><div class="stat-box"><span class="stat-box-num" id="stat-total-earnings">₹1,000</span><span class="stat-box-lbl">Balance</span></div><div class="stat-box"><span class="stat-box-num" id="stat-matches-played">0</span><span class="stat-box-lbl">Matches</span></div></div>
-        </div>
-        <div class="section-card">
-          <h3>Account</h3>
-          <div class="profile-menu-list">
-            <button class="menu-row" id="menu-addtokens-btn" type="button"><div class="menu-row-icon">🪙</div><div class="menu-row-text"><span class="menu-row-title">Add Tokens via Paytm / UPI</span><span class="menu-row-sub">Scan QR &amp; Enter UTR</span></div><span class="menu-row-arrow">›</span></button>
-            <button class="menu-row" id="menu-transactions-btn" type="button"><div class="menu-row-icon">📋</div><div class="menu-row-text"><span class="menu-row-title">Token Transactions</span><span class="menu-row-sub">Credit and debit history</span></div><span class="menu-row-arrow">›</span></button>
-            <button class="menu-row" id="menu-refer-btn" type="button"><div class="menu-row-icon">🎁</div><div class="menu-row-text"><span class="menu-row-title">Refer &amp; Earn</span><span class="menu-row-sub">Earn ₹100 per friend</span></div><span class="menu-row-arrow">›</span></button>
-            <button class="menu-row menu-row-danger" id="menu-logout-btn" type="button"><div class="menu-row-icon">🚪</div><div class="menu-row-text"><span class="menu-row-title">Log Out</span></div><span class="menu-row-arrow">›</span></button>
+          <div class="profile-left">
+            <div class="avatar-wrap">
+              <img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" />
+            </div>
+            <div class="profile-meta">
+              <div class="name-edit-group">
+                <h2 id="profile-display-name">Vishal</h2>
+                <button id="edit-name-btn" class="icon-btn" title="Edit Name" type="button">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                </button>
+              </div>
+              <div id="name-edit-box" class="name-edit-box hidden">
+                <input type="text" id="name-input" class="name-input" maxlength="20" placeholder="New username" />
+                <button id="save-name-btn" class="btn-save" type="button">Save</button>
+                <button id="cancel-name-btn" class="btn-cancel-sm" type="button">Cancel</button>
+              </div>
+              <p class="join-date">Arena Member • Verified Account</p>
+              <div class="level-pill">
+                <span>Level <strong id="user-level">1</strong></span>
+                <div class="level-bar-bg"><div class="level-bar-fill" style="width: 48%;"></div></div>
+                <span class="xp-text">480 / 1,000 XP</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-stats-grid">
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-total-earnings">1,200 🪙</span>
+              <span class="stat-box-lbl">Token Balance</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-matches-played">0</span>
+              <span class="stat-box-lbl">Matches Played</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-win-rate">0%</span>
+              <span class="stat-box-lbl">Win Rate</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num" id="stat-tokens-won">+0 🪙</span>
+              <span class="stat-box-lbl">Duel Profit</span>
+            </div>
           </div>
         </div>
-      </section>
 
-      <section id="view-ledger" class="app-view">
-        <div class="section-card"><button class="back-link" id="ledger-back-btn" type="button">‹ Back to Profile</button><h3>Token Transactions</h3><div class="table-wrap"><table class="ledger-table"><thead><tr><th>Description</th><th>Type</th><th>Amount</th><th>Time</th></tr></thead><tbody id="ledger-body"></tbody></table></div></div>
-      </section>
-
-      <section id="view-refer" class="app-view">
-        <div class="section-card"><button class="back-link" id="refer-back-btn" type="button">‹ Back to Profile</button><h3>Refer &amp; Earn</h3><div class="refer-code-box"><span class="refer-code-lbl">Your Code</span><div class="refer-code-row"><span id="my-referral-code" class="refer-code-value">—</span><button id="copy-referral-btn" class="btn-secondary" type="button">Copy</button></div></div><div class="refer-redeem-box"><input type="text" id="referral-input" class="name-input" placeholder="Referral code" /><button id="submit-referral-btn" class="btn-primary" type="button">Submit</button><p id="referral-status-msg" class="refer-status-msg"></p></div></div>
-      </section>
-
-      <!-- ADD TOKENS (PAYTM / UPI) -->
-      <section id="view-addtoken" class="app-view">
+        <!-- Add Tokens via Paytm QR Section -->
         <div class="section-card">
-          <button class="back-link" id="addtoken-back-btn" type="button">‹ Back to Profile</button>
           <h3>Add Tokens via Paytm / UPI</h3>
-          <p class="section-sub">Scan the QR scanner, complete the payment, and enter your 12-digit UTR ID to credit your wallet.</p>
-
+          <p class="section-sub">Scan the QR code below, complete payment, and paste your UTR ID to add tokens instantly.</p>
+          
           <div class="paytm-card-display">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=paytm.s1ax1t9@pty%26pn=Paytm%20Merchant" alt="Paytm Scanner" />
-            <div class="upi-tag">UPI ID: paytm.s1ax1t9@pty</div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=paytm.s1ax1t9@pty%26pn=Arena%20Game" alt="Paytm QR Code" />
+            <div class="upi-tag">paytm.s1ax1t9@pty</div>
           </div>
 
           <div class="addtoken-amount-grid">
@@ -548,1464 +570,594 @@ button.menu-row { font: inherit; }
             <button class="amount-chip" data-amount="200" type="button">₹200</button>
           </div>
 
-          <div class="refer-redeem-box">
-            <span class="refer-code-lbl">Enter Deposit Amount &amp; 12-Digit Transaction (UTR) ID (Min: ₹1)</span>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <input type="number" id="addtoken-input" class="name-input" min="1" value="50" placeholder="Enter amount (₹) — Min ₹1" />
-              <input type="text" id="addtoken-utr-input" class="name-input" maxlength="16" placeholder="Paste 12-digit UPI / Paytm UTR number" />
-              <button id="addtoken-submit-btn" class="btn-primary" type="button">Verify &amp; Add to Wallet</button>
-            </div>
-            <p id="addtoken-status-msg" class="refer-status-msg"></p>
+          <div style="display:flex; flex-direction:column; gap:10px; max-width:400px; margin:0 auto;">
+            <input type="number" id="deposit-amount-input" class="name-input" min="1" value="50" placeholder="Amount paid (₹) — Min ₹1" style="width:150px; padding:10px;" />
+            <input type="text" id="deposit-utr-input" class="name-input" maxlength="16" placeholder="Paste 12-digit UTR ID (e.g. 481920384719)" style="padding:10px;" />
+            <button id="deposit-submit-btn" class="btn-primary" type="button">Verify &amp; Add Tokens</button>
+            <p id="deposit-status-msg" style="font-size:0.8rem; font-weight:600; min-height:1em;"></p>
+          </div>
+        </div>
+
+        <!-- Ledger -->
+        <div class="ledger-section">
+          <div class="ledger-header">
+            <h3>Token Transactions & Match Ledger</h3>
+            <span class="ledger-sub">Live record of credit and debit events</span>
+          </div>
+
+          <div class="table-wrap">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th>Event Description</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Date & Time</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-body"></tbody>
+            </table>
           </div>
         </div>
       </section>
 
+      <!-- VIEW 3: MATCHES -->
       <section id="view-matches" class="app-view">
-        <div class="section-card"><h3>Match History</h3><div class="table-wrap"><table class="ledger-table"><thead><tr><th>Game</th><th>Opponent</th><th>Result</th><th>Reward</th><th>Time</th></tr></thead><tbody id="matches-body"></tbody></table></div></div>
+        <div class="section-card">
+          <h3>Match History</h3>
+          <p class="section-sub">Your recent 1v1 duel records</p>
+          <div class="table-wrap">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th>Game</th>
+                  <th>Opponent</th>
+                  <th>Result</th>
+                  <th>Reward</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="matches-body"></tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
+      <!-- VIEW 4: CASHOUT -->
       <section id="view-cashout" class="app-view">
-        <div class="section-card"><h3>Cashout Vault</h3><p class="section-sub">Minimum payout threshold: ₹2,500.</p><button class="btn-primary" type="button" onclick="alert('Threshold: Reach ₹2,500.')">Request Cashout</button></div>
+        <div class="section-card">
+          <h3>Cashout Vault</h3>
+          <p class="section-sub">Exchange tokens for rewards</p>
+          <div class="stat-box" style="margin-top:14px;">
+            <p>Minimum payout requires 2,500 tokens ($2.50 value prototype).</p>
+            <button class="btn-primary" style="margin-top:14px; max-width:200px;" type="button" onclick="alert('Threshold: Reach 2,500 tokens to initialize redemption.')">Request Cashout</button>
+          </div>
+        </div>
       </section>
 
+      <!-- VIEW 5: REWARDS -->
       <section id="view-rewards" class="app-view">
-        <div class="section-card"><h3>Daily Rewards</h3><button class="btn-primary" type="button" onclick="alert('Daily bonus claimed: +₹50!')">Claim ₹50 Daily Bonus</button></div>
+        <div class="section-card">
+          <h3>Daily Rewards</h3>
+          <p class="section-sub">Daily streak login bonus</p>
+          <div class="stat-box" style="margin-top:14px;">
+            <span class="stat-box-num">Day 1 Streak</span>
+            <button class="btn-primary" style="margin-top:14px; max-width:220px;" type="button" onclick="alert('Daily reward claimed: +50 Tokens!')">Claim 50 Daily Tokens</button>
+          </div>
+        </div>
       </section>
     </main>
 
     <!-- Matchmaking Modal -->
     <div id="match-overlay" class="modal-overlay hidden">
       <div class="modal-card">
-        <div class="radar-pulse"><div class="pulse-circle"></div>⚡</div>
+        <div class="radar-pulse">
+          <div class="pulse-circle"></div>
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a10 10 0 0 1 10 10"></path>
+          </svg>
+        </div>
         <h3 id="match-title">Finding Opponent</h3>
-        <p class="modal-subtitle" id="match-status">Scanning live queue...</p>
-        <button id="cancel-match-btn" class="btn-cancel" type="button">Cancel</button>
+        <p class="modal-subtitle" id="match-status">Scanning live queue for players...</p>
+        <div class="modal-fee-notice">Entry Stake: <strong>50 Tokens</strong></div>
+        <button id="cancel-match-btn" class="btn-cancel" type="button">Cancel Queue</button>
       </div>
     </div>
 
-    <!-- Arena Game Modal -->
+    <!-- Arena Modal -->
     <div id="game-arena-overlay" class="modal-overlay hidden">
       <div class="arena-card">
         <div class="arena-header">
-          <div class="player-stat user-side" id="arena-user-side"><img id="arena-user-avatar" class="arena-avatar" src="" alt="You" /><span id="arena-user-name">You</span></div>
+          <div class="player-stat user-side">
+            <img id="arena-user-avatar" class="arena-avatar" src="" alt="You" />
+            <span id="arena-user-name" class="arena-name">You</span>
+          </div>
           <div class="vs-badge">VS</div>
-          <div class="player-stat opp-side" id="arena-opp-side"><img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" /><span id="arena-opp-name">Opponent</span></div>
+          <div class="player-stat opp-side">
+            <img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
+            <span id="arena-opp-name" class="arena-name">Opponent</span>
+          </div>
         </div>
         <div id="arena-stage" class="arena-stage"></div>
       </div>
     </div>
 
-    <!-- Logout Confirmation Modal -->
-    <div id="logout-confirm-overlay" class="modal-overlay hidden">
-      <div class="modal-card">
-        <h3>Log Out?</h3>
-        <p class="modal-subtitle">You'll need to sign in again to access your wallet.</p>
-        <div class="result-btn-row">
-          <button id="logout-cancel-btn" class="btn-secondary" type="button">Cancel</button>
-          <button id="logout-confirm-btn" class="btn-primary" type="button">Log Out</button>
-        </div>
-      </div>
-    </div>
-
+    <!-- Footer -->
     <footer class="app-footer">
       <div class="footer-container">
-        <div><div class="brand-logo">⚡ ARENA</div><p class="footer-desc">Arena is a 1v1 skill-based gaming platform.</p></div>
+        <div class="footer-brand-col">
+          <div class="brand-logo">
+            <svg class="logo-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span class="logo-text">ARENA</span>
+          </div>
+          <p class="footer-desc">Arena is a 1v1 skill-based platform where players duel in instant mini-games and earn tokens.</p>
+          <div class="trust-badge">
+            <span>★ ★ ★ ★ ★</span>
+            <span>Verified 100% Fair Play Matchmaking</span>
+          </div>
+        </div>
+
+        <div class="footer-links-group">
+          <div class="footer-col">
+            <span class="footer-heading">Platform</span>
+            <a href="#">Earn Tokens</a>
+            <a href="#">Leaderboard</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-heading">Resources</span>
+            <a href="#">Help Center</a>
+            <a href="#">Live Support</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-heading">Legal</span>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+          </div>
+        </div>
       </div>
-      <div class="footer-bottom"><p>© 2026 Arena Technologies. All rights reserved.</p></div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Arena Technologies. All rights reserved.</p>
+        <span class="lang-tag">English (US)</span>
+      </div>
     </footer>
   </div>
 
-  <div id="page-match" class="hidden">
-    <p id="match-loading" class="center-screen loading-text">Loading match...</p>
-    <div id="match-root" class="match-wrap hidden">
-      <div class="vs-bar">
-        <div class="vs-player"><img id="me-avatar" src="" alt="You" /><span id="me-name">You</span></div>
-        <span class="vs-label">VS</span>
-        <div class="vs-player"><span id="opp-name">Opponent</span><img id="opp-avatar" src="" alt="Opponent" /></div>
-      </div>
-      <div class="game-stage" id="stage"></div>
-    </div>
-  </div>
-
+  <!-- CDN Script & Dashboard Engine -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5Zm1iaWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDE3NDIsImV4cCI6MjEwMzIxNzc0Mn0.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
-const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5Zm1iaWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDE3NDIsImV4cCI6MjEwMzIxNzc0Mn0.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const googleLoginBtn = document.getElementById("google-login-btn");
-const navLoginBtn = document.getElementById("nav-login-btn");
-const navSignupBtn = document.getElementById("nav-signup-btn");
+    const MATCH_ENTRY_FEE = 50;
+    const MATCH_WIN_REWARD = 90;
 
-async function triggerGoogleLogin() {
-  const redirectUrl = window.location.origin + window.location.pathname;
-  await client.auth.signInWithOAuth({ provider: "google", options: { redirectTo: redirectUrl } });
-}
-if (googleLoginBtn) googleLoginBtn.addEventListener("click", triggerGoogleLogin);
-if (navLoginBtn) navLoginBtn.addEventListener("click", triggerGoogleLogin);
-if (navSignupBtn) navSignupBtn.addEventListener("click", triggerGoogleLogin);
+    const INDIAN_BOT_POOL = [
+      { name: "Aarav_Sharma", seed: "aarav" }, { name: "Priya_Patel", seed: "priya" },
+      { name: "Rohan_Verma", seed: "rohan" }, { name: "Ananya_Singh", seed: "ananya" },
+      { name: "Vikram_Malhotra", seed: "vikram" }, { name: "Sneha_Reddy", seed: "sneha" },
+      { name: "Aditya_Kumar", seed: "aditya" }, { name: "Neha_Gupta", seed: "neha" }
+    ];
 
-const MATCH_ENTRY_FEE = 50;
-const MATCH_WIN_REWARD = 90;
-const BOT_WAIT_SECONDS = 5;
+    let currentUser = null;
+    let currentBalance = 1200;
+    let matchHistory = [];
+    let transactions = [];
+    let activeOpponent = null;
+    let activeGame = null;
+    let matchmakingTimer = null;
 
-const GAME_CATALOG = [
-  { type: "tictactoe", name: "Tic-Tac-Toe Blitz", desc: "Classic 3x3 grid combat.", icon: "❌", badge: "CLASSIC", category: "brain" },
-  { type: "reaction", name: "Reaction Duel", desc: "Click instantly when green.", icon: "⚡", badge: "REFLEX", category: "reflex" },
-  { type: "math", name: "Cyber Math", desc: "Mental arithmetic calculations.", icon: "🧮", badge: "MATH", category: "math" },
-  { type: "color", name: "Color Clash", desc: "Match text color semantics.", icon: "🎨", badge: "SPEED", category: "reflex" },
-  { type: "memory", name: "Memory Matrix", desc: "Recall spatial matrix sequences.", icon: "🧠", badge: "BRAIN", category: "brain" }
-];
+    const loadingEl = document.getElementById("loading");
+    const dashEl = document.getElementById("dashboard");
+    const balanceEl = document.getElementById("balance-value");
+    const playerNameEl = document.getElementById("player-name");
+    const avatarEl = document.getElementById("avatar");
+    const logoutBtn = document.getElementById("logout-btn");
 
-const INDIAN_BOT_POOL = [
-  { name: "Aarav Sharma", seed: "aarav" }, { name: "Priya Patel", seed: "priya" },
-  { name: "Rohan Verma", seed: "rohan" }, { name: "Ananya Singh", seed: "ananya" }
-];
+    const profileDisplayName = document.getElementById("profile-display-name");
+    const profileViewAvatar = document.getElementById("profile-view-avatar");
+    const editNameBtn = document.getElementById("edit-name-btn");
+    const nameEditBox = document.getElementById("name-edit-box");
+    const nameInput = document.getElementById("name-input");
+    const saveNameBtn = document.getElementById("save-name-btn");
+    const cancelNameBtn = document.getElementById("cancel-name-btn");
 
-function formatRupees(amount) {
-  return "₹" + Number(amount || 0).toLocaleString("en-IN");
-}
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const appViews = document.querySelectorAll(".app-view");
+    const filterChips = document.querySelectorAll(".filter-chip");
+    const gameCards = document.querySelectorAll(".game-card");
+    const playButtons = document.querySelectorAll(".play-btn");
 
-let currentUser = null;
-let currentBalance = 0;
-let matchHistory = [];
-let transactions = [];
-let activeOpponent = null;
-let activeGame = null;
-let inQueue = false;
-let queueTimer = null;
-let livePaymentChannel = null;
+    const matchOverlay = document.getElementById("match-overlay");
+    const cancelMatchBtn = document.getElementById("cancel-match-btn");
+    const matchTitle = document.getElementById("match-title");
+    const matchStatus = document.getElementById("match-status");
 
-const loadingEl = document.getElementById("loading");
-const dashEl = document.getElementById("dashboard");
-const balanceEl = document.getElementById("balance-value");
-const playerNameEl = document.getElementById("player-name");
-const avatarEl = document.getElementById("avatar");
+    const arenaOverlay = document.getElementById("game-arena-overlay");
+    const arenaUserAvatar = document.getElementById("arena-user-avatar");
+    const arenaUserName = document.getElementById("arena-user-name");
+    const arenaOppAvatar = document.getElementById("arena-opp-avatar");
+    const arenaOppName = document.getElementById("arena-opp-name");
+    const arenaStage = document.getElementById("arena-stage");
 
-function renderGameCards() {
-  const grid = document.getElementById("gamesGrid");
-  if (!grid) return;
-  grid.innerHTML = GAME_CATALOG.map(g => `
-    <article class="game-card" data-category="${g.category}">
-      <div class="card-media banner-reaction"><span class="card-badge">${g.badge}</span><span>${g.icon}</span></div>
-      <div class="card-content">
-        <h3 class="card-title">${g.name}</h3><p class="card-desc">${g.desc}</p>
-        <div class="card-meta"><span>Fee: ₹50</span><span style="color:var(--primary-green);">+₹90 Reward</span></div>
-        <button class="play-btn" data-game="${g.name}" data-type="${g.type}" type="button">Play Match</button>
-      </div>
-    </article>
-  `).join("");
+    async function init() {
+      try {
+        const sessionRes = await client.auth.getSession();
+        const session = sessionRes && sessionRes.data ? sessionRes.data.session : null;
+        if (!session) {
+          document.getElementById("loading").classList.add("hidden");
+          return;
+        }
 
-  document.querySelectorAll(".play-btn").forEach(btn => {
-    btn.onclick = () => {
-      activeGame = { name: btn.getAttribute("data-game"), type: btn.getAttribute("data-type") };
-      if (currentBalance < MATCH_ENTRY_FEE) { alert("Insufficient balance. You need ₹50."); return; }
-      beginMatchmaking();
-    };
-  });
-}
+        currentUser = session.user;
+        try {
+          const { data: wallet } = await client.from("wallet").select("dummy_token").eq("user_id", currentUser.id).single();
+          if (wallet && typeof wallet.dummy_token === "number") currentBalance = wallet.dummy_token;
+        } catch (e) {}
 
-function showToast(desc, type, amount) {
-  const stack = document.getElementById("toast-stack");
-  if (!stack) return;
-  const isCredit = type === "credit";
-  const toast = document.createElement("div");
-  toast.className = "toast " + (isCredit ? "toast-credit" : "toast-debit");
-  toast.innerHTML = `
-    <span class="toast-text">
-      <span class="toast-amount ${isCredit ? 'toast-credit-text' : 'toast-debit-text'}">${isCredit ? '+' : '-'}${formatRupees(amount)}</span>
-      <span class="toast-desc">${desc}</span>
-    </span>`;
-  stack.appendChild(toast);
-  setTimeout(() => toast.remove(), 3200);
-}
+        loadLocalUserData();
+        updateUI();
+      } catch (err) {
+        console.error("Init error:", err);
+      } finally {
+        if (loadingEl) loadingEl.classList.add("hidden");
+        if (dashEl) dashEl.classList.remove("hidden");
+      }
+    }
 
-function flashBalance() {
-  if (!balanceEl) return;
-  balanceEl.classList.remove("balance-flash");
-  void balanceEl.offsetWidth;
-  balanceEl.classList.add("balance-flash");
-}
+    setTimeout(() => {
+      if (loadingEl && !loadingEl.classList.contains("hidden")) {
+        loadingEl.classList.add("hidden");
+        if (dashEl) dashEl.classList.remove("hidden");
+      }
+    }, 400);
 
-async function loadWallet() {
-  try {
-    const { data } = await client.from("wallet").select("dummy_token").eq("user_id", currentUser.id).single();
-    currentBalance = data ? data.dummy_token : 0;
-  } catch (e) { currentBalance = 0; }
-}
+    function loadLocalUserData() {
+      const savedName = localStorage.getItem("arena_name_" + currentUser.id);
+      const meta = currentUser.user_metadata || {};
+      const initialName = savedName || meta.full_name || meta.name || (currentUser.email ? currentUser.email.split("@")[0] : "Vishal");
 
-async function loadTransactions() {
-  try {
-    const { data } = await client.from("transactions").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false }).limit(30);
-    transactions = (data || []).map(t => ({ desc: t.description, type: t.type, amount: t.amount, date: new Date(t.created_at).toLocaleString() }));
-    renderLedger();
-  } catch (e) { transactions = []; }
-}
+      const storedTx = localStorage.getItem("arena_tx_" + currentUser.id);
+      if (storedTx) {
+        try { transactions = JSON.parse(storedTx); } catch (e) { transactions = []; }
+      } else {
+        transactions = [{ desc: "Welcome Bonus Credited", type: "credit", amount: 1000, date: new Date().toLocaleString() }];
+        saveTransactions();
+      }
 
-async function loadMatchHistory() {
-  try {
-    const { data } = await client.from("match_history").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false }).limit(30);
-    matchHistory = (data || []).map(m => ({ game: m.game, opponent: m.opponent, result: m.result, reward: m.reward, date: new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }));
-    renderMatchHistory();
-  } catch (e) { matchHistory = []; }
-}
+      const storedMatches = localStorage.getItem("arena_matches_" + currentUser.id);
+      if (storedMatches) {
+        try { matchHistory = JSON.parse(storedMatches); } catch (e) { matchHistory = []; }
+      }
 
-function updateUI() {
-  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString("en-IN");
-  document.getElementById("stat-total-earnings").textContent = formatRupees(currentBalance);
-  document.getElementById("stat-matches-played").textContent = matchHistory.length;
-  document.getElementById("progress-text").textContent = formatRupees(currentBalance) + " / ₹2,500 Threshold";
-  document.getElementById("progress-fill").style.width = Math.min(100, Math.round((currentBalance / 2500) * 100)) + "%";
-  renderLedger();
-  renderMatchHistory();
-}
+      setUserDisplayName(initialName);
+    }
 
-function renderLedger() {
-  const tbody = document.getElementById("ledger-body");
-  if (!tbody) return;
-  tbody.innerHTML = transactions.length === 0 ? '<tr><td colspan="4">No transactions recorded</td></tr>' : transactions.map(tx => `
-    <tr>
-      <td>${tx.desc}</td>
-      <td><span class="${tx.type === 'credit' ? 'badge-credit' : 'badge-debit'}">${tx.type.toUpperCase()}</span></td>
-      <td style="color:${tx.type === 'credit' ? 'var(--primary-green)' : 'var(--accent-red)'}">${tx.type === 'credit' ? '+' : '-'}${formatRupees(tx.amount)}</td>
-      <td>${tx.date}</td>
-    </tr>`).join("");
-}
+    function setUserDisplayName(name) {
+      if (playerNameEl) playerNameEl.textContent = name;
+      if (profileDisplayName) profileDisplayName.textContent = name;
+      const avatarUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(name);
+      if (avatarEl) avatarEl.src = avatarUrl;
+      if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
+    }
 
-function renderMatchHistory() {
-  const tbody = document.getElementById("matches-body");
-  if (!tbody) return;
-  tbody.innerHTML = matchHistory.length === 0 ? '<tr><td colspan="5">No matches played yet.</td></tr>' : matchHistory.map(m => `
-    <tr>
-      <td>${m.game}</td><td>${m.opponent}</td><td><span class="${m.result === 'VICTORY' ? 'badge-credit' : 'badge-debit'}">${m.result}</span></td>
-      <td style="color:${m.result === 'VICTORY' ? 'var(--primary-green)' : 'var(--accent-red)'}">${m.reward >= 0 ? '+' : ''}${formatRupees(m.reward)}</td><td>${m.date}</td>
-    </tr>`).join("");
-}
+    function updateUI() {
+      if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString();
+      const progressPercent = Math.min(100, Math.round((currentBalance / 2500) * 100));
+      const progressFill = document.getElementById("progress-fill");
+      const progressText = document.getElementById("progress-text");
+      if (progressFill) progressFill.style.width = progressPercent + "%";
+      if (progressText) {
+        progressText.textContent = "$" + (currentBalance / 1000).toFixed(2) + " / $2.50 (" + currentBalance.toLocaleString() + " / 2,500 Tokens)";
+      }
 
-// ----------------------------------------------------
-// PAYTM / UPI DEPOSIT VERIFICATION VIA RPC (Secure & Instant)
-// ----------------------------------------------------
-document.querySelectorAll(".amount-chip").forEach(chip => {
-  chip.onclick = () => {
-    document.querySelectorAll(".amount-chip").forEach(c => c.classList.remove("active"));
-    chip.classList.add("active");
-    document.getElementById("addtoken-input").value = chip.getAttribute("data-amount");
-  };
-});
+      const totalMatches = matchHistory.length;
+      const wins = matchHistory.filter(m => m.result === "VICTORY").length;
+      const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
+      const totalWonTokens = wins * MATCH_WIN_REWARD;
 
-document.getElementById("addtoken-submit-btn")?.addEventListener("click", async () => {
-  const amount = parseFloat(document.getElementById("addtoken-input")?.value);
-  const utr = (document.getElementById("addtoken-utr-input")?.value || "").trim();
-  const statusMsg = document.getElementById("addtoken-status-msg");
+      if (document.getElementById("stat-total-earnings")) document.getElementById("stat-total-earnings").textContent = currentBalance.toLocaleString() + " 🪙";
+      if (document.getElementById("stat-matches-played")) document.getElementById("stat-matches-played").textContent = totalMatches;
+      if (document.getElementById("stat-win-rate")) document.getElementById("stat-win-rate").textContent = winRate + "%";
+      if (document.getElementById("stat-tokens-won")) document.getElementById("stat-tokens-won").textContent = "+" + totalWonTokens.toLocaleString() + " 🪙";
 
-  if (!statusMsg) return;
-  statusMsg.className = "refer-status-msg";
-  statusMsg.textContent = "";
+      renderLedger();
+      renderMatchHistory();
+    }
 
-  if (isNaN(amount) || amount < 1) {
-    statusMsg.textContent = "Please enter a valid amount (Minimum ₹1).";
-    statusMsg.className = "refer-status-msg error";
-    return;
-  }
+    function renderLedger() {
+      const tbody = document.getElementById("ledger-body");
+      if (!tbody) return;
+      if (transactions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-dim);">No transactions recorded</td></tr>';
+        return;
+      }
+      tbody.innerHTML = transactions.map(tx => {
+        const isCredit = tx.type === "credit";
+        const sign = isCredit ? "+" : "-";
+        const color = isCredit ? "var(--primary-green)" : "var(--accent-red)";
+        const badgeClass = isCredit ? "badge-credit" : "badge-debit";
+        return '<tr><td>' + tx.desc + '</td><td><span class="' + badgeClass + '">' + tx.type.toUpperCase() + '</span></td><td style="font-weight:700; color:' + color + ';">' + sign + tx.amount + ' 🪙</td><td style="color:var(--text-dim);">' + tx.date + '</td></tr>';
+      }).join("");
+    }
 
-  if (!utr || utr.length < 8) {
-    statusMsg.textContent = "Please enter a valid 12-digit UTR number.";
-    statusMsg.className = "refer-status-msg error";
-    return;
-  }
+    function renderMatchHistory() {
+      const tbody = document.getElementById("matches-body");
+      if (!tbody) return;
+      if (matchHistory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-dim);">No matches played yet. Choose a game above!</td></tr>';
+        return;
+      }
+      tbody.innerHTML = matchHistory.map(m => {
+        const isWin = m.result === "VICTORY";
+        const color = isWin ? "var(--primary-green)" : "var(--accent-red)";
+        const badgeClass = isWin ? "badge-credit" : "badge-debit";
+        return '<tr><td style="font-weight:600;">' + m.game + '</td><td>' + m.opponent + '</td><td><span class="' + badgeClass + '">' + m.result + '</span></td><td style="font-weight:700; color:' + color + ';">' + m.reward + '</td><td style="color:var(--text-dim);">' + m.date + '</td></tr>';
+      }).join("");
+    }
 
-  document.getElementById("addtoken-submit-btn").disabled = true;
-  statusMsg.textContent = "Verifying UTR against bank records...";
+    function recordTransaction(desc, type, amount) {
+      transactions.unshift({ desc: desc, type: type, amount: amount, date: new Date().toLocaleString() });
+      if (currentUser) localStorage.setItem("arena_tx_" + currentUser.id, JSON.stringify(transactions.slice(0, 50)));
+      updateUI();
+    }
 
-  try {
-    const { data, error } = await client.rpc("verify_and_credit_deposit", {
-      p_utr: utr,
-      p_amount: amount
+    function saveMatches() {
+      if (currentUser) localStorage.setItem("arena_matches_" + currentUser.id, JSON.stringify(matchHistory.slice(0, 50)));
+    }
+
+    function showToast(title, desc, isCredit = true) {
+      const stack = document.getElementById("toast-stack");
+      if (!stack) return;
+      const t = document.createElement("div");
+      t.className = "toast " + (isCredit ? "" : "toast-debit");
+      t.innerHTML = `<strong>${title}</strong><span class="toast-desc">${desc}</span>`;
+      stack.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    function switchView(targetId) {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      appViews.forEach(v => v.classList.remove("active"));
+      const targetTab = Array.from(tabButtons).find(b => b.getAttribute("data-target") === targetId);
+      if (targetTab) targetTab.classList.add("active");
+      const targetView = document.getElementById(targetId);
+      if (targetView) targetView.classList.add("active");
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => switchView(btn.getAttribute("data-target")));
     });
 
-    if (error) {
-      statusMsg.textContent = "Error: " + error.message;
-      statusMsg.className = "refer-status-msg error";
-      return;
-    }
-
-    if (data && data.success) {
-      await loadWallet();
-      await loadTransactions();
-      updateUI();
-      flashBalance();
-      showToast("Deposit Credited", "credit", data.amount);
-      statusMsg.textContent = data.message;
-      statusMsg.className = "refer-status-msg success";
-      document.getElementById("addtoken-utr-input").value = "";
-    } else {
-      statusMsg.textContent = data?.message || "Invalid Transaction ID or Amount mismatch.";
-      statusMsg.className = "refer-status-msg error";
-    }
-  } catch (err) {
-    statusMsg.textContent = "Verification failed. Please try again.";
-    statusMsg.className = "refer-status-msg error";
-  } finally {
-    document.getElementById("addtoken-submit-btn").disabled = false;
-  }
-});
-
-function switchView(targetId) {
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll(".app-view").forEach(v => v.classList.remove("active"));
-  document.getElementById(targetId)?.classList.add("active");
-  document.querySelector(`[data-target="${targetId}"]`)?.classList.add("active");
-}
-document.querySelectorAll(".tab-btn").forEach(btn => btn.onclick = () => switchView(btn.getAttribute("data-target")));
-document.getElementById("profile-nav-btn").onclick = () => switchView("view-profile");
-document.getElementById("wallet-badge-btn").onclick = () => switchView("view-ledger");
-document.getElementById("menu-addtokens-btn").onclick = () => switchView("view-addtoken");
-document.getElementById("menu-transactions-btn").onclick = () => switchView("view-ledger");
-document.getElementById("menu-refer-btn").onclick = () => switchView("view-refer");
-document.getElementById("addtoken-back-btn").onclick = () => switchView("view-profile");
-document.getElementById("ledger-back-btn").onclick = () => switchView("view-profile");
-document.getElementById("refer-back-btn").onclick = () => switchView("view-profile");
-
-document.getElementById("menu-logout-btn").onclick = () => document.getElementById("logout-confirm-overlay").classList.remove("hidden");
-document.getElementById("logout-cancel-btn").onclick = () => document.getElementById("logout-confirm-overlay").classList.add("hidden");
-document.getElementById("logout-confirm-btn").onclick = async () => {
-  await client.auth.signOut();
-  window.location.reload();
-};
-
-async function beginMatchmaking() {
-  inQueue = true;
-  document.getElementById("match-title").textContent = "Finding Opponent — " + activeGame.name;
-  document.getElementById("match-overlay").classList.remove("hidden");
-
-  try {
-    const { data: newBal, error } = await client.rpc("process_game_stake", { p_fee: MATCH_ENTRY_FEE, p_desc: "Stake Entry: " + activeGame.name });
-    if (error) throw error;
-    currentBalance = newBal;
-    updateUI();
-    showToast("Stake Entry: " + activeGame.name, "debit", MATCH_ENTRY_FEE);
-  } catch (e) {
-    document.getElementById("match-overlay").classList.add("hidden");
-    alert("Could not process entry stake: " + e.message);
-    inQueue = false;
-    return;
-  }
-
-  queueTimer = setTimeout(() => {
-    if (!inQueue) return;
-    document.getElementById("match-overlay").classList.add("hidden");
-    inQueue = false;
-    const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
-    launchArena(bot);
-  }, 5000);
-}
-
-document.getElementById("cancel-match-btn").onclick = async () => {
-  if (!inQueue) return;
-  inQueue = false;
-  clearTimeout(queueTimer);
-  document.getElementById("match-overlay").classList.add("hidden");
-  await client.rpc("process_game_win", { p_reward: MATCH_ENTRY_FEE, p_game: activeGame.name, p_opponent: "Refund" });
-  await loadWallet();
-  updateUI();
-};
-
-function launchArena(opponent) {
-  activeOpponent = opponent;
-  document.getElementById("arena-user-name").textContent = document.getElementById("player-name").textContent;
-  document.getElementById("arena-user-avatar").src = document.getElementById("avatar").src;
-  document.getElementById("arena-opp-name").textContent = opponent.name;
-  document.getElementById("arena-opp-avatar").src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + opponent.seed;
-  document.getElementById("game-arena-overlay").classList.remove("hidden");
-
-  const stage = document.getElementById("arena-stage");
-  if (activeGame.type === "reaction") {
-    stage.innerHTML = '<div class="reaction-box reaction-wait" id="r-box"><h2>WAIT FOR GREEN...</h2></div>';
-    const box = document.getElementById("r-box");
-    let canClick = false, start = 0;
-    const delay = Math.floor(Math.random() * 2000) + 2200;
-    const timer = setTimeout(() => {
-      canClick = true; start = Date.now();
-      box.className = "reaction-box reaction-go";
-      box.innerHTML = "<h2>CLICK NOW!</h2>";
-    }, delay);
-
-    box.onclick = () => {
-      if (!canClick) { clearTimeout(timer); endDuel(false, "False start!"); }
-      else {
-        const time = Date.now() - start;
-        if (time < 380) endDuel(true, `Speed: ${time}ms (Superior speed!)`);
-        else endDuel(false, `Speed: ${time}ms (Opponent was faster)`);
-      }
-    };
-  } else {
-    const a = Math.floor(Math.random() * 25) + 10, b = Math.floor(Math.random() * 25) + 10;
-    const correct = a + b;
-    stage.innerHTML = `<h2 style="margin-bottom:12px;">${a} + ${b} = ?</h2><div class="quiz-options"><button class="quiz-option" id="opt-1">${correct}</button><button class="quiz-option" id="opt-2">${correct + 4}</button></div>`;
-    document.getElementById("opt-1").onclick = () => endDuel(true, "Accurate fast calculation!");
-    document.getElementById("opt-2").onclick = () => endDuel(false, "Incorrect equation result selected.");
-  }
-}
-
-async function endDuel(won, analysisText) {
-  if (won) {
-    const { data: newBal } = await client.rpc("process_game_win", { p_reward: MATCH_WIN_REWARD, p_game: activeGame.name, p_opponent: activeOpponent.name });
-    currentBalance = newBal || (currentBalance + MATCH_WIN_REWARD);
-    showToast("Duel Victory: " + activeGame.name, "credit", MATCH_WIN_REWARD);
-  } else {
-    await client.rpc("process_game_loss", { p_game: activeGame.name, p_opponent: activeOpponent.name, p_fee: MATCH_ENTRY_FEE });
-  }
-
-  await loadMatchHistory();
-  await loadTransactions();
-  updateUI();
-
-  document.getElementById("arena-stage").innerHTML = `
-    <h2 style="color:${won ? 'var(--primary-green)' : 'var(--accent-red)'}; font-size:2rem;">${won ? 'VICTORY' : 'DEFEAT'}</h2>
-    <p style="font-size:0.85rem; color:var(--text-muted); margin:8px 0 16px;">${analysisText}</p>
-    <button class="btn-primary" style="width:100%;" onclick="document.getElementById('game-arena-overlay').classList.add('hidden');">Return to Lobby</button>
-  `;
-}
-
-async function initDashboard() {
-  renderGameCards();
-  await loadWallet();
-  await loadTransactions();
-  await loadMatchHistory();
-  
-  const { data } = await client.from("users").select("full_name").eq("id", currentUser.id).maybeSingle();
-  const name = data?.full_name || currentUser.user_metadata?.full_name || "Vishal";
-  document.getElementById("player-name").textContent = name;
-  document.getElementById("profile-display-name").textContent = name;
-  const avatarUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(name);
-  document.getElementById("avatar").src = avatarUrl;
-  document.getElementById("profile-view-avatar").src = avatarUrl;
-
-  updateUI();
-  document.getElementById("loading").classList.add("hidden");
-  document.getElementById("dashboard").classList.remove("hidden");
-}
-
-async function routeOnLoad() {
-  const { data: { session } } = await client.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    document.getElementById("page-landing").classList.add("hidden");
-    document.getElementById("loading").classList.remove("hidden");
-    await initDashboard();
-  } else {
-    document.getElementById("page-landing").classList.remove("hidden");
-    document.getElementById("dashboard").classList.add("hidden");
-    document.getElementById("loading").classList.add("hidden");
-  }
-}
-
-routeOnLoad();
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arena | Competitive Skill Duels</title>
-  <!-- Google Fonts: Space Grotesk (headings) + Inter (body) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Favicon embedded directly as a data URI -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e131f'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
-  <style>
-/* ======================================================================
-==== Arena Design System
-====================================================================== ==== */
-
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
-
-:root {
-  --bg-dark: #12161f;
-  --bg-surface: #1a2130;
-  --bg-card: #232c40;
-  --bg-card-hover: #2c3650;
-  --primary-green: #00e701;
-  --primary-green-hover: #00c601;
-  --primary-glow: rgba(0, 231, 1, 0.22);
-  --accent-blue: #38bdf8;
-  --accent-gold: #f59e0b;
-  --accent-red: #f16464;
-  --text-main: #ffffff;
-  --text-muted: #b3bfd6;
-  --text-dim: #8492ac;
-  --border-color: #313d58;
-  --border-highlight: #455274;
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-heading: 'Space Grotesk', var(--font-family);
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-family);
-  letter-spacing: -0.01em;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
-  overflow-y: auto;
-  height: auto;
-}
-
-body {
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-button, a, .play-btn, .tab-btn, .filter-chip, .game-card, .quiz-option, .ttt-cell {
-  touch-action: manipulation;
-}
-
-h1, h2, h3, .logo-text, .card-title, .stat-box-num, .token-count, .modal-card h3,
-.arena-name, .result-card h2, .hero-banner h2, .name-edit-group h2, .auth-header h3,
-.quiz-question, .math-problem {
-  font-family: var(--font-heading);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-input, textarea, select { font-size: 16px; }
-.hidden { display: none !important; }
-
-button, a, .play-btn, .tab-btn, .filter-chip, .game-card, .quiz-option, .ttt-cell {
-  transition: transform 0.15s var(--ease-smooth), background-color 0.15s ease,
-    border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-}
-button:active, .play-btn:active, .btn-primary:active, .btn-secondary:active, .filter-chip:active {
-  transform: scale(0.97);
-}
-
-.center-screen {
-  position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
-  background-color: var(--bg-dark); display: flex; align-items: center; justify-content: center; z-index: 99999;
-}
-.loader-container { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.loader-logo { color: var(--primary-green); animation: pulseLogo 1.5s ease-in-out infinite; }
-@keyframes pulseLogo {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 12px var(--primary-green)); }
-}
-.spinner {
-  width: 40px; height: 40px; border: 3px solid var(--border-color);
-  border-top-color: var(--primary-green); border-radius: 50%; animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
-
-.top-nav {
-  background-color: rgba(14, 19, 31, 0.95); backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100;
-  padding-top: env(safe-area-inset-top);
-}
-.nav-container {
-  max-width: 1240px; margin: 0 auto; padding: 10px 20px;
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-}
-.brand-logo { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 800; color: var(--text-main); cursor: pointer; }
-.logo-svg { color: var(--primary-green); }
-.nav-tabs { display: flex; gap: 6px; }
-@media (max-width: 768px) { .nav-tabs { display: none; } }
-.tab-btn {
-  background: transparent; border: none; color: var(--text-muted); padding: 8px 14px;
-  border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 600;
-  display: flex; align-items: center; gap: 8px; cursor: pointer;
-}
-.tab-btn:hover { color: var(--text-main); background-color: var(--bg-card); }
-.tab-btn.active { color: var(--primary-green); background-color: rgba(0, 231, 1, 0.08); position: relative; }
-.tab-btn.active::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -2px; height: 2px; background: var(--primary-green); border-radius: 2px; }
-
-.bottom-nav { display: none; }
-@media (max-width: 768px) {
-  .bottom-nav {
-    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 500;
-    background-color: rgba(14, 19, 31, 0.97); backdrop-filter: blur(14px);
-    border-top: 1px solid var(--border-color); justify-content: space-around; align-items: center;
-    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
-  }
-  .bottom-nav .tab-btn { flex-direction: column; gap: 3px; font-size: 0.64rem; padding: 6px 10px; border-radius: var(--radius-sm); }
-  .bottom-nav .tab-btn svg { width: 19px; height: 19px; }
-  .app-main { padding-bottom: 96px; }
-}
-
-.user-stats-bar { display: flex; align-items: center; gap: 10px; }
-.token-badge {
-  background-color: var(--bg-card); border: 1px solid var(--border-highlight);
-  padding: 5px 12px; border-radius: 999px; display: flex; align-items: center; gap: 6px;
-  cursor: pointer; font: inherit; color: inherit;
-}
-.token-badge:hover { border-color: var(--primary-green); }
-.token-icon-wrap { color: var(--accent-gold); display: flex; align-items: center; font-weight: 800; font-size: 0.9rem; font-family: var(--font-heading); }
-.token-count { font-size: 0.95rem; font-weight: 700; color: var(--accent-gold); display: inline-block; }
-@keyframes balancePulse { 0% { transform: scale(1); } 35% { transform: scale(1.14); color: var(--primary-green); } 100% { transform: scale(1); } }
-.token-count.balance-flash, .stat-box-num.balance-flash { animation: balancePulse 0.55s var(--ease-smooth); }
-
-.user-profile-chip {
-  display: flex; align-items: center; gap: 8px; background-color: var(--bg-card);
-  border: 1px solid var(--border-color); padding: 3px 12px 3px 4px; border-radius: 999px; cursor: pointer;
-}
-.user-profile-chip:hover { border-color: var(--primary-green); }
-.user-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--primary-green); }
-.user-name {
-  font-size: 0.85rem; font-weight: 600; color: var(--text-main); max-width: 100px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-.app-main { max-width: 1240px; width: 100%; margin: 0 auto; padding: 24px 20px 60px; flex: 1; }
-.app-view { display: none; }
-@keyframes fadeSlideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-.app-view.active { display: block; animation: fadeSlideUp 0.4s var(--ease-smooth); }
-
-.cashout-progress-banner { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 20px; }
-.progress-info { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; }
-.progress-title { color: var(--text-muted); }
-.progress-nums { color: var(--primary-green); }
-.progress-track { width: 100%; height: 8px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; }
-.progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary-green), var(--accent-blue)); border-radius: 999px; transition: width 0.5s var(--ease-smooth); }
-
-.hero-banner { background: linear-gradient(135deg, #101726 0%, #0c121e 100%); border: 1px solid var(--border-highlight); border-radius: var(--radius-md); padding: 24px 28px; margin-bottom: 20px; position: relative; overflow: hidden; }
-.badge-tag { font-size: 0.72rem; font-weight: 700; color: var(--primary-green); letter-spacing: 0.08em; margin-bottom: 6px; display: inline-block; }
-.hero-banner h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
-.hero-banner p { color: var(--text-muted); font-size: 0.88rem; }
-
-.filter-bar { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 2px; scrollbar-width: none; }
-.filter-bar::-webkit-scrollbar { display: none; }
-.filter-chip {
-  background-color: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-muted);
-  padding: 8px 16px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap;
-}
-.filter-chip:hover, .filter-chip.active { background-color: var(--primary-green); color: #000000; border-color: var(--primary-green); }
-
-.games-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
-@media (min-width: 580px) { .games-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 992px) { .games-grid { grid-template-columns: repeat(3, 1fr); } }
-.game-card {
-  background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);
-  overflow: hidden; display: flex; flex-direction: column; animation: fadeSlideUp 0.45s var(--ease-smooth) backwards;
-}
-.game-card:nth-child(2) { animation-delay: 0.04s; }
-.game-card:nth-child(3) { animation-delay: 0.08s; }
-.game-card:nth-child(4) { animation-delay: 0.12s; }
-.game-card:nth-child(5) { animation-delay: 0.16s; }
-.game-card:nth-child(6) { animation-delay: 0.2s; }
-.game-card:hover { transform: translateY(-3px); border-color: var(--border-highlight); box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.55); }
-.card-media { height: 120px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-.banner-reaction { background: linear-gradient(135deg, #854d0e 0%, #582e07 100%); }
-.banner-math { background: linear-gradient(135deg, #047857 0%, #034b36 100%); }
-.banner-memory { background: linear-gradient(135deg, #1d4ed8 0%, #112e82 100%); }
-.banner-color { background: linear-gradient(135deg, #b91c1c 0%, #6d0f0f 100%); }
-.banner-tictactoe { background: linear-gradient(135deg, #4338ca 0%, #292277 100%); }
-.banner-trivia { background: linear-gradient(135deg, #7e22ce 0%, #4c147d 100%); }
-.game-icon-svg { color: #ffffff; opacity: 0.95; }
-.card-badge { position: absolute; top: 8px; left: 8px; background-color: rgba(0, 0, 0, 0.65); color: #ffffff; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 4px; }
-.card-content { padding: 16px; display: flex; flex-direction: column; flex: 1; }
-.card-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
-.card-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 14px; flex: 1; }
-.card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 0.78rem; font-weight: 600; }
-.meta-fee { color: var(--text-dim); }
-.meta-win { color: var(--primary-green); }
-.play-btn {
-  width: 100%; background-color: #2563eb; color: #ffffff; border: none; padding: 12px;
-  border-radius: var(--radius-sm); font-weight: 700; font-size: 0.88rem; cursor: pointer; min-height: 44px;
-  position: relative; overflow: hidden;
-}
-.play-btn:hover { background-color: #1d4ed8; }
-
-.profile-header-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
-@media (min-width: 840px) { .profile-header-card { grid-template-columns: 1fr 1.2fr; } }
-.profile-left { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-.profile-avatar-lg { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--primary-green); object-fit: cover; background-color: var(--bg-card); }
-.name-edit-group { display: flex; align-items: center; gap: 10px; }
-.name-edit-group h2 { font-size: 1.3rem; font-weight: 700; }
-.icon-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; }
-.icon-btn:hover { color: var(--primary-green); }
-.name-edit-box { display: flex; gap: 6px; margin: 6px 0; flex-wrap: wrap; }
-.name-input { background-color: var(--bg-card); border: 1px solid var(--border-highlight); color: var(--text-main); padding: 8px 10px; border-radius: var(--radius-sm); outline: none; }
-.btn-save { background-color: var(--primary-green); color: #000; border: none; font-weight: 700; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer; }
-.btn-cancel-sm { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 10px; border-radius: var(--radius-sm); font-size: 0.78rem; cursor: pointer; }
-.join-date { font-size: 0.78rem; color: var(--text-dim); margin: 4px 0 10px; }
-.level-pill { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; font-weight: 600; flex-wrap: wrap; }
-.level-bar-bg { width: 100px; height: 6px; background-color: var(--bg-card); border-radius: 999px; overflow: hidden; }
-.level-bar-fill { height: 100%; background-color: var(--primary-green); transition: width 0.5s var(--ease-smooth); }
-.xp-text { color: var(--text-dim); font-size: 0.72rem; }
-.profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.stat-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; flex-direction: column; }
-.stat-box-num { font-size: 1.2rem; font-weight: 700; color: var(--text-main); display: inline-block; }
-.stat-box-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-
-.section-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; }
-.profile-menu-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
-.menu-row {
-  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
-  background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm);
-  padding: 14px 16px; cursor: pointer; color: var(--text-main);
-}
-button.menu-row { font: inherit; }
-.menu-row:hover { border-color: var(--border-highlight); background-color: var(--bg-card-hover); }
-.menu-row-static { cursor: default; }
-.menu-row-static:hover { border-color: var(--border-color); background-color: var(--bg-card); }
-.menu-row-icon {
-  width: 36px; height: 36px; min-width: 36px; border-radius: 50%; background-color: var(--bg-surface);
-  color: var(--primary-green); display: flex; align-items: center; justify-content: center;
-}
-.menu-row-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.menu-row-title { font-size: 0.92rem; font-weight: 700; }
-.menu-row-sub { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.menu-row-arrow { color: var(--text-dim); font-size: 1.2rem; font-weight: 700; }
-.menu-row-danger .menu-row-icon { color: var(--accent-red); }
-.menu-row-danger:hover { border-color: var(--accent-red); }
-
-.back-link {
-  background: transparent; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
-  cursor: pointer; padding: 0; margin-bottom: 14px; display: inline-block;
-}
-.back-link:hover { color: var(--primary-green); }
-
-.refer-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
-.refer-info-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
-.refer-info-num { font-size: 1.4rem; font-weight: 800; color: var(--primary-green); font-family: var(--font-heading); }
-.refer-info-lbl { font-size: 0.78rem; color: var(--text-muted); }
-.refer-explainer { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
-.refer-code-box, .refer-redeem-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; }
-.refer-code-lbl { font-size: 0.78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
-.refer-code-row, .refer-redeem-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.refer-code-value { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--text-main); letter-spacing: 0.06em; background-color: var(--bg-surface); border: 1px dashed var(--border-highlight); border-radius: var(--radius-sm); padding: 8px 14px; flex: 1; min-width: 140px; }
-.refer-redeem-row .name-input { flex: 1; min-width: 160px; }
-.refer-status-msg { font-size: 0.82rem; font-weight: 600; margin-top: 10px; min-height: 1em; }
-.refer-status-msg.success { color: var(--primary-green); }
-.refer-status-msg.error { color: var(--accent-red); }
-
-.addtoken-amount-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 20px; }
-@media (min-width: 480px) { .addtoken-amount-grid { grid-template-columns: repeat(4, 1fr); } }
-.amount-chip {
-  background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);
-  padding: 14px 10px; border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; cursor: pointer; text-align: center;
-}
-.amount-chip:hover, .amount-chip.active { background-color: var(--primary-green); color: #000; border-color: var(--primary-green); }
-
-.paytm-card-display {
-  background: #ffffff;
-  color: #12161f;
-  max-width: 240px;
-  border-radius: 14px;
-  margin: 16px auto;
-  padding: 14px;
-  text-align: center;
-  border: 2px solid var(--border-highlight);
-  box-shadow: 0 14px 30px -10px rgba(0,0,0,0.6);
-}
-.paytm-card-display img {
-  width: 200px;
-  height: 200px;
-  display: block;
-  margin: 0 auto;
-  border-radius: 8px;
-}
-.paytm-card-display .upi-tag {
-  margin-top: 8px;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.82rem;
-  color: #0284c7;
-}
-
-.table-wrap { overflow-x: auto; }
-.ledger-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
-.ledger-table th { color: var(--text-dim); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 14px; border-bottom: 1px solid var(--border-color); }
-.ledger-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
-.badge-credit { background-color: rgba(0, 231, 1, 0.1); color: var(--primary-green); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
-.badge-debit { background-color: rgba(239, 68, 68, 0.1); color: var(--accent-red); padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
-
-.modal-overlay {
-  position: fixed; inset: 0; background-color: rgba(10, 13, 20, 0.85); backdrop-filter: blur(8px);
-  display: flex; align-items: center; align-items: safe center; justify-content: center; z-index: 1000;
-  padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; animation: fadeSlideUp 0.25s ease;
-}
-.modal-card, .arena-card {
-  background-color: var(--bg-surface); border: 1px solid var(--border-highlight); border-radius: var(--radius-lg);
-  padding: 32px 24px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
-  animation: fadeSlideUp 0.35s var(--ease-smooth);
-  max-height: calc(100dvh - 40px); overflow-y: auto; -webkit-overflow-scrolling: touch; margin: auto 0;
-}
-.radar-pulse { position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--primary-green); }
-.pulse-circle { position: absolute; inset: 0; border-radius: 50%; background: var(--primary-green); opacity: 0.25; animation: pulse 1.6s ease-out infinite; }
-@keyframes pulse { 0% { transform: scale(0.6); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
-.btn-cancel { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 12px 20px; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.85rem; cursor: pointer; width: 100%; min-height: 44px; }
-.btn-cancel:hover { background-color: var(--bg-card); color: var(--text-main); }
-
-.arena-header { display: flex; align-items: center; justify-content: space-around; padding-bottom: 18px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
-.player-stat { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.arena-avatar { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--primary-green); background-color: var(--bg-card); }
-.opp-side .arena-avatar { border-color: var(--accent-blue); }
-.arena-name { font-size: 0.85rem; font-weight: 600; }
-.vs-badge { font-size: 1rem; font-weight: 800; color: var(--text-dim); }
-.arena-stage { min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.reaction-box { width: 100%; height: 180px; border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: background-color 0.1s ease; }
-.reaction-wait { background-color: #7f1d1d; color: #fff; }
-.reaction-go { background-color: var(--primary-green); color: #000; font-weight: 800; }
-.result-card h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
-.win-text { color: var(--primary-green); }
-.lose-text { color: var(--accent-red); }
-.result-analytics { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin: 14px 0 20px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
-.result-btn-row { display: flex; gap: 10px; }
-.btn-primary { background-color: var(--primary-green); color: #000; font-weight: 700; font-size: 0.88rem; border: none; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; min-height: 44px; position: relative; overflow: hidden; }
-.btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); font-weight: 600; font-size: 0.88rem; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; flex: 1; min-height: 44px; }
-
-.app-footer { background-color: var(--bg-surface); border-top: 1px solid var(--border-color); padding: 40px 20px 20px; margin-top: auto; }
-.footer-container { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; padding-bottom: 30px; border-bottom: 1px solid var(--border-color); }
-@media (min-width: 768px) { .footer-container { grid-template-columns: 1.4fr 2fr; } }
-.footer-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin: 12px 0; max-width: 380px; }
-.trust-badge { font-size: 0.78rem; color: var(--primary-green); display: flex; align-items: center; gap: 6px; font-weight: 600; }
-.footer-links-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.footer-col { display: flex; flex-direction: column; gap: 8px; }
-.footer-heading { font-size: 0.82rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
-.footer-col a { color: var(--text-muted); font-size: 0.8rem; text-decoration: none; }
-.footer-col a:hover { color: var(--primary-green); }
-.footer-bottom { max-width: 1240px; margin: 20px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-dim); flex-wrap: wrap; gap: 8px; }
-
-.landing-body {
-  background-color: var(--bg-dark);
-  background-image: radial-gradient(circle at 15% 10%, rgba(0, 231, 1, 0.08), transparent 40%), radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.06), transparent 45%);
-  min-height: 100vh; min-height: 100dvh;
-}
-.logo-text { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em; color: var(--text-main); }
-.nav-links { display: none; align-items: center; gap: 28px; }
-@media (min-width: 900px) { .nav-links { display: flex; } }
-.nav-link { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-decoration: none; }
-.nav-actions { display: flex; align-items: center; gap: 10px; }
-.nav-actions .btn-secondary, .nav-actions .btn-primary { flex: none; padding: 9px 18px; }
-
-.hero-section { flex: 1; display: flex; align-items: center; padding: 60px 20px 80px; }
-.hero-container { max-width: 1240px; width: 100%; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 56px; align-items: center; }
-@media (min-width: 960px) { .hero-container { grid-template-columns: 1.1fr 0.9fr; gap: 40px; } }
-.hero-left { display: flex; flex-direction: column; gap: 24px; }
-.hero-title { font-family: var(--font-heading); font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.12; color: var(--text-main); }
-.hero-subtitle { font-size: 1.05rem; line-height: 1.6; color: var(--text-muted); max-width: 540px; }
-.hero-stats-row { display: flex; flex-wrap: wrap; gap: 36px; margin-top: 8px; padding-top: 24px; border-top: 1px solid var(--border-color); }
-.stat-item { display: flex; flex-direction: column; gap: 4px; }
-.stat-number { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; color: var(--text-main); }
-.stat-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 500; }
-
-.hero-right { display: flex; justify-content: center; }
-.auth-card { width: 100%; max-width: 400px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 22px; }
-.auth-header h3 { font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
-.auth-header p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
-.auth-perks { display: flex; flex-direction: column; gap: 12px; }
-.perk-item { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; color: var(--text-muted); }
-.google-auth-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background-color: #fff; color: #1f2937; font-size: 0.92rem; font-weight: 600; border: none; border-radius: var(--radius-sm); padding: 13px 18px; cursor: pointer; min-height: 44px; }
-
-.match-wrap { max-width: 720px; width: 100%; margin: 0 auto; padding: 20px 16px 60px; }
-.vs-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; }
-.vs-player { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; }
-.vs-player img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary-green); background-color: var(--bg-card); object-fit: cover; }
-.vs-label { font-family: var(--font-heading); font-weight: 800; color: var(--text-dim); }
-.game-stage { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 28px 20px; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-
-.toast-stack { position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 99998; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; pointer-events: none; max-width: calc(100vw - 28px); }
-.toast { pointer-events: auto; display: flex; align-items: center; gap: 10px; background-color: var(--bg-surface); border: 1px solid var(--border-highlight); border-left: 3px solid var(--primary-green); border-radius: var(--radius-sm); padding: 10px 14px; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5); font-size: 0.82rem; font-weight: 600; color: var(--text-main); max-width: 320px; }
-.toast.toast-debit { border-left-color: var(--accent-red); }
-.toast-amount.toast-credit-text { color: var(--primary-green); }
-.toast-amount.toast-debit-text { color: var(--accent-red); }
-.toast-desc { color: var(--text-muted); font-weight: 500; font-size: 0.74rem; }
-
-.arena-turn-indicator { display: flex; align-items: center; justify-content: center; gap: 8px; margin: -6px 0 18px; padding: 8px 16px; border-radius: 999px; background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); width: fit-content; margin-left: auto; margin-right: auto; }
-.turn-dot { width: 8px; height: 8px; border-radius: 50%; }
-.turn-dot-you { background-color: var(--primary-green); }
-.turn-dot-opp { background-color: var(--accent-red); }
-.turn-text { font-family: var(--font-heading); font-weight: 700; font-size: 0.92rem; }
-.turn-text-you { color: var(--primary-green); }
-.turn-text-opp { color: var(--accent-red); }
-  </style>
-</head>
-<body class="app-body">
-  <div id="page-landing">
-    <header class="top-nav">
-      <div class="nav-container">
-        <div class="brand-logo"><svg class="logo-svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg><span class="logo-text">ARENA</span></div>
-        <div class="nav-actions"><button id="nav-login-btn" class="btn-secondary" type="button">Sign In</button><button id="nav-signup-btn" class="btn-primary" type="button">Get Started</button></div>
-      </div>
-    </header>
-    <main class="hero-section">
-      <div class="hero-container">
-        <div class="hero-left">
-          <h1 class="hero-title">Play Skill Games. <br/><span class="highlight-green">Win Real Tokens.</span></h1>
-          <p class="hero-subtitle">Compete in instant 1v1 duels with verified payments.</p>
-        </div>
-        <div class="hero-right">
-          <div class="auth-card">
-            <div class="auth-header"><h3>Create an Account</h3><p>Sign in to claim ₹1,000 welcome tokens</p></div>
-            <button id="google-login-btn" class="google-auth-btn" type="button">Continue with Google</button>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
-
-  <div id="loading" class="center-screen hidden">
-    <div class="loader-container"><div class="spinner"></div><p class="loading-text">Connecting to Arena Network...</p></div>
-  </div>
-
-  <div id="dashboard" class="app-wrap hidden">
-    <header class="top-nav">
-      <div class="nav-container">
-        <div class="brand-logo" id="nav-brand-logo"><svg class="logo-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg><span class="logo-text">ARENA</span></div>
-        <nav class="nav-tabs">
-          <button class="tab-btn active" data-target="view-earn" type="button">Earn</button>
-          <button class="tab-btn" data-target="view-matches" type="button">My Matches</button>
-          <button class="tab-btn" data-target="view-cashout" type="button">Cashout</button>
-          <button class="tab-btn" data-target="view-rewards" type="button">Rewards</button>
-        </nav>
-        <div class="user-stats-bar">
-          <button id="wallet-badge-btn" class="token-badge" type="button"><span class="token-icon-wrap">₹</span><span id="balance-value" class="token-count">1,000</span></button>
-          <button id="profile-nav-btn" class="user-profile-chip" type="button"><img id="avatar" class="user-avatar" src="" alt="Avatar" /><span id="player-name" class="user-name">Vishal</span></button>
-        </div>
-      </div>
-    </header>
-
-    <main class="app-main">
-      <section id="view-earn" class="app-view active">
-        <div class="cashout-progress-banner">
-          <div class="progress-info"><span class="progress-title">Next Cashout Threshold</span><span id="progress-text" class="progress-nums">₹1,000 / ₹2,500 Threshold</span></div>
-          <div class="progress-track"><div id="progress-fill" class="progress-bar" style="width: 40%;"></div></div>
-        </div>
-        <div class="hero-banner"><span class="badge-tag">INSTANT 1V1 DUELS</span><h2>Challenge Players &amp; Win Real Tokens</h2><p>Entry: <strong>₹50</strong> • Winner Reward: <strong>₹90</strong></p></div>
-        <div class="filter-bar">
-          <button class="filter-chip active" data-category="all" type="button">All Games</button>
-          <button class="filter-chip" data-category="reflex" type="button">Reflex Speed</button>
-          <button class="filter-chip" data-category="math" type="button">Math Calculations</button>
-          <button class="filter-chip" data-category="brain" type="button">Memory &amp; Brain</button>
-        </div>
-        <div class="games-grid" id="gamesGrid"></div>
-      </section>
-
-      <section id="view-profile" class="app-view">
-        <div class="profile-header-card">
-          <div class="profile-left"><img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" /><div class="profile-meta"><h2 id="profile-display-name">Vishal</h2><p class="join-date">Arena Member • Verified Account</p></div></div>
-          <div class="profile-stats-grid"><div class="stat-box"><span class="stat-box-num" id="stat-total-earnings">₹1,000</span><span class="stat-box-lbl">Balance</span></div><div class="stat-box"><span class="stat-box-num" id="stat-matches-played">0</span><span class="stat-box-lbl">Matches</span></div></div>
-        </div>
-        <div class="section-card">
-          <h3>Account</h3>
-          <div class="profile-menu-list">
-            <button class="menu-row" id="menu-addtokens-btn" type="button"><div class="menu-row-icon">🪙</div><div class="menu-row-text"><span class="menu-row-title">Add Tokens via Paytm / UPI</span><span class="menu-row-sub">Scan QR &amp; Enter UTR</span></div><span class="menu-row-arrow">›</span></button>
-            <button class="menu-row" id="menu-transactions-btn" type="button"><div class="menu-row-icon">📋</div><div class="menu-row-text"><span class="menu-row-title">Token Transactions</span><span class="menu-row-sub">Credit and debit history</span></div><span class="menu-row-arrow">›</span></button>
-            <button class="menu-row" id="menu-refer-btn" type="button"><div class="menu-row-icon">🎁</div><div class="menu-row-text"><span class="menu-row-title">Refer &amp; Earn</span><span class="menu-row-sub">Earn ₹100 per friend</span></div><span class="menu-row-arrow">›</span></button>
-            <button class="menu-row menu-row-danger" id="menu-logout-btn" type="button"><div class="menu-row-icon">🚪</div><div class="menu-row-text"><span class="menu-row-title">Log Out</span></div><span class="menu-row-arrow">›</span></button>
-          </div>
-        </div>
-      </section>
-
-      <section id="view-ledger" class="app-view">
-        <div class="section-card"><button class="back-link" id="ledger-back-btn" type="button">‹ Back to Profile</button><h3>Token Transactions</h3><div class="table-wrap"><table class="ledger-table"><thead><tr><th>Description</th><th>Type</th><th>Amount</th><th>Time</th></tr></thead><tbody id="ledger-body"></tbody></table></div></div>
-      </section>
-
-      <section id="view-refer" class="app-view">
-        <div class="section-card"><button class="back-link" id="refer-back-btn" type="button">‹ Back to Profile</button><h3>Refer &amp; Earn</h3><div class="refer-code-box"><span class="refer-code-lbl">Your Code</span><div class="refer-code-row"><span id="my-referral-code" class="refer-code-value">—</span><button id="copy-referral-btn" class="btn-secondary" type="button">Copy</button></div></div><div class="refer-redeem-box"><input type="text" id="referral-input" class="name-input" placeholder="Referral code" /><button id="submit-referral-btn" class="btn-primary" type="button">Submit</button><p id="referral-status-msg" class="refer-status-msg"></p></div></div>
-      </section>
-
-      <!-- ADD TOKENS (PAYTM / UPI) -->
-      <section id="view-addtoken" class="app-view">
-        <div class="section-card">
-          <button class="back-link" id="addtoken-back-btn" type="button">‹ Back to Profile</button>
-          <h3>Add Tokens via Paytm / UPI</h3>
-          <p class="section-sub">Scan the QR scanner, complete the payment, and enter your 12-digit UTR ID to credit your wallet.</p>
-
-          <div class="paytm-card-display">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=paytm.s1ax1t9@pty%26pn=Paytm%20Merchant" alt="Paytm Scanner" />
-            <div class="upi-tag">UPI ID: paytm.s1ax1t9@pty</div>
-          </div>
-
-          <div class="addtoken-amount-grid">
-            <button class="amount-chip" data-amount="20" type="button">₹20</button>
-            <button class="amount-chip active" data-amount="50" type="button">₹50</button>
-            <button class="amount-chip" data-amount="100" type="button">₹100</button>
-            <button class="amount-chip" data-amount="200" type="button">₹200</button>
-          </div>
-
-          <div class="refer-redeem-box">
-            <span class="refer-code-lbl">Enter Deposit Amount &amp; 12-Digit Transaction (UTR) ID (Min: ₹1)</span>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <input type="number" id="addtoken-input" class="name-input" min="1" value="50" placeholder="Enter amount (₹) — Min ₹1" />
-              <input type="text" id="addtoken-utr-input" class="name-input" maxlength="16" placeholder="Paste 12-digit UPI / Paytm UTR number" />
-              <button id="addtoken-submit-btn" class="btn-primary" type="button">Verify &amp; Add to Wallet</button>
-            </div>
-            <p id="addtoken-status-msg" class="refer-status-msg"></p>
-          </div>
-        </div>
-      </section>
-
-      <section id="view-matches" class="app-view">
-        <div class="section-card"><h3>Match History</h3><div class="table-wrap"><table class="ledger-table"><thead><tr><th>Game</th><th>Opponent</th><th>Result</th><th>Reward</th><th>Time</th></tr></thead><tbody id="matches-body"></tbody></table></div></div>
-      </section>
-
-      <section id="view-cashout" class="app-view">
-        <div class="section-card"><h3>Cashout Vault</h3><p class="section-sub">Minimum payout threshold: ₹2,500.</p><button class="btn-primary" type="button" onclick="alert('Threshold: Reach ₹2,500.')">Request Cashout</button></div>
-      </section>
-
-      <section id="view-rewards" class="app-view">
-        <div class="section-card"><h3>Daily Rewards</h3><button class="btn-primary" type="button" onclick="alert('Daily bonus claimed: +₹50!')">Claim ₹50 Daily Bonus</button></div>
-      </section>
-    </main>
-
-    <!-- Matchmaking Modal -->
-    <div id="match-overlay" class="modal-overlay hidden">
-      <div class="modal-card">
-        <div class="radar-pulse"><div class="pulse-circle"></div>⚡</div>
-        <h3 id="match-title">Finding Opponent</h3>
-        <p class="modal-subtitle" id="match-status">Scanning live queue...</p>
-        <button id="cancel-match-btn" class="btn-cancel" type="button">Cancel</button>
-      </div>
-    </div>
-
-    <!-- Arena Game Modal -->
-    <div id="game-arena-overlay" class="modal-overlay hidden">
-      <div class="arena-card">
-        <div class="arena-header">
-          <div class="player-stat user-side" id="arena-user-side"><img id="arena-user-avatar" class="arena-avatar" src="" alt="You" /><span id="arena-user-name">You</span></div>
-          <div class="vs-badge">VS</div>
-          <div class="player-stat opp-side" id="arena-opp-side"><img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" /><span id="arena-opp-name">Opponent</span></div>
-        </div>
-        <div id="arena-stage" class="arena-stage"></div>
-      </div>
-    </div>
-
-    <!-- Logout Confirmation Modal -->
-    <div id="logout-confirm-overlay" class="modal-overlay hidden">
-      <div class="modal-card">
-        <h3>Log Out?</h3>
-        <p class="modal-subtitle">You'll need to sign in again to access your wallet.</p>
-        <div class="result-btn-row">
-          <button id="logout-cancel-btn" class="btn-secondary" type="button">Cancel</button>
-          <button id="logout-confirm-btn" class="btn-primary" type="button">Log Out</button>
-        </div>
-      </div>
-    </div>
-
-    <footer class="app-footer">
-      <div class="footer-container">
-        <div><div class="brand-logo">⚡ ARENA</div><p class="footer-desc">Arena is a 1v1 skill-based gaming platform.</p></div>
-      </div>
-      <div class="footer-bottom"><p>© 2026 Arena Technologies. All rights reserved.</p></div>
-    </footer>
-  </div>
-
-  <div id="page-match" class="hidden">
-    <p id="match-loading" class="center-screen loading-text">Loading match...</p>
-    <div id="match-root" class="match-wrap hidden">
-      <div class="vs-bar">
-        <div class="vs-player"><img id="me-avatar" src="" alt="You" /><span id="me-name">You</span></div>
-        <span class="vs-label">VS</span>
-        <div class="vs-player"><span id="opp-name">Opponent</span><img id="opp-avatar" src="" alt="Opponent" /></div>
-      </div>
-      <div class="game-stage" id="stage"></div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5Zm1iaWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDE3NDIsImV4cCI6MjEwMzIxNzc0Mn0.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
-const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const googleLoginBtn = document.getElementById("google-login-btn");
-const navLoginBtn = document.getElementById("nav-login-btn");
-const navSignupBtn = document.getElementById("nav-signup-btn");
-
-async function triggerGoogleLogin() {
-  const redirectUrl = window.location.origin + window.location.pathname;
-  await client.auth.signInWithOAuth({ provider: "google", options: { redirectTo: redirectUrl } });
-}
-if (googleLoginBtn) googleLoginBtn.addEventListener("click", triggerGoogleLogin);
-if (navLoginBtn) navLoginBtn.addEventListener("click", triggerGoogleLogin);
-if (navSignupBtn) navSignupBtn.addEventListener("click", triggerGoogleLogin);
-
-const MATCH_ENTRY_FEE = 50;
-const MATCH_WIN_REWARD = 90;
-const BOT_WAIT_SECONDS = 5;
-
-const GAME_CATALOG = [
-  { type: "tictactoe", name: "Tic-Tac-Toe Blitz", desc: "Classic 3x3 grid combat.", icon: "❌", badge: "CLASSIC", category: "brain" },
-  { type: "reaction", name: "Reaction Duel", desc: "Click instantly when green.", icon: "⚡", badge: "REFLEX", category: "reflex" },
-  { type: "math", name: "Cyber Math", desc: "Mental arithmetic calculations.", icon: "🧮", badge: "MATH", category: "math" },
-  { type: "color", name: "Color Clash", desc: "Match text color semantics.", icon: "🎨", badge: "SPEED", category: "reflex" },
-  { type: "memory", name: "Memory Matrix", desc: "Recall spatial matrix sequences.", icon: "🧠", badge: "BRAIN", category: "brain" }
-];
-
-const INDIAN_BOT_POOL = [
-  { name: "Aarav Sharma", seed: "aarav" }, { name: "Priya Patel", seed: "priya" },
-  { name: "Rohan Verma", seed: "rohan" }, { name: "Ananya Singh", seed: "ananya" }
-];
-
-function formatRupees(amount) {
-  return "₹" + Number(amount || 0).toLocaleString("en-IN");
-}
-
-let currentUser = null;
-let currentBalance = 0;
-let matchHistory = [];
-let transactions = [];
-let activeOpponent = null;
-let activeGame = null;
-let inQueue = false;
-let queueTimer = null;
-let livePaymentChannel = null;
-
-const loadingEl = document.getElementById("loading");
-const dashEl = document.getElementById("dashboard");
-const balanceEl = document.getElementById("balance-value");
-const playerNameEl = document.getElementById("player-name");
-const avatarEl = document.getElementById("avatar");
-
-function renderGameCards() {
-  const grid = document.getElementById("gamesGrid");
-  if (!grid) return;
-  grid.innerHTML = GAME_CATALOG.map(g => `
-    <article class="game-card" data-category="${g.category}">
-      <div class="card-media banner-reaction"><span class="card-badge">${g.badge}</span><span>${g.icon}</span></div>
-      <div class="card-content">
-        <h3 class="card-title">${g.name}</h3><p class="card-desc">${g.desc}</p>
-        <div class="card-meta"><span>Fee: ₹50</span><span style="color:var(--primary-green);">+₹90 Reward</span></div>
-        <button class="play-btn" data-game="${g.name}" data-type="${g.type}" type="button">Play Match</button>
-      </div>
-    </article>
-  `).join("");
-
-  document.querySelectorAll(".play-btn").forEach(btn => {
-    btn.onclick = () => {
-      activeGame = { name: btn.getAttribute("data-game"), type: btn.getAttribute("data-type") };
-      if (currentBalance < MATCH_ENTRY_FEE) { alert("Insufficient balance. You need ₹50."); return; }
-      beginMatchmaking();
-    };
-  });
-}
-
-function showToast(desc, type, amount) {
-  const stack = document.getElementById("toast-stack");
-  if (!stack) return;
-  const isCredit = type === "credit";
-  const toast = document.createElement("div");
-  toast.className = "toast " + (isCredit ? "toast-credit" : "toast-debit");
-  toast.innerHTML = `
-    <span class="toast-text">
-      <span class="toast-amount ${isCredit ? 'toast-credit-text' : 'toast-debit-text'}">${isCredit ? '+' : '-'}${formatRupees(amount)}</span>
-      <span class="toast-desc">${desc}</span>
-    </span>`;
-  stack.appendChild(toast);
-  setTimeout(() => toast.remove(), 3200);
-}
-
-function flashBalance() {
-  if (!balanceEl) return;
-  balanceEl.classList.remove("balance-flash");
-  void balanceEl.offsetWidth;
-  balanceEl.classList.add("balance-flash");
-}
-
-async function loadWallet() {
-  try {
-    const { data } = await client.from("wallet").select("dummy_token").eq("user_id", currentUser.id).single();
-    currentBalance = data ? data.dummy_token : 0;
-  } catch (e) { currentBalance = 0; }
-}
-
-async function loadTransactions() {
-  try {
-    const { data } = await client.from("transactions").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false }).limit(30);
-    transactions = (data || []).map(t => ({ desc: t.description, type: t.type, amount: t.amount, date: new Date(t.created_at).toLocaleString() }));
-    renderLedger();
-  } catch (e) { transactions = []; }
-}
-
-async function loadMatchHistory() {
-  try {
-    const { data } = await client.from("match_history").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false }).limit(30);
-    matchHistory = (data || []).map(m => ({ game: m.game, opponent: m.opponent, result: m.result, reward: m.reward, date: new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }));
-    renderMatchHistory();
-  } catch (e) { matchHistory = []; }
-}
-
-function updateUI() {
-  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString("en-IN");
-  document.getElementById("stat-total-earnings").textContent = formatRupees(currentBalance);
-  document.getElementById("stat-matches-played").textContent = matchHistory.length;
-  document.getElementById("progress-text").textContent = formatRupees(currentBalance) + " / ₹2,500 Threshold";
-  document.getElementById("progress-fill").style.width = Math.min(100, Math.round((currentBalance / 2500) * 100)) + "%";
-  renderLedger();
-  renderMatchHistory();
-}
-
-function renderLedger() {
-  const tbody = document.getElementById("ledger-body");
-  if (!tbody) return;
-  tbody.innerHTML = transactions.length === 0 ? '<tr><td colspan="4">No transactions recorded</td></tr>' : transactions.map(tx => `
-    <tr>
-      <td>${tx.desc}</td>
-      <td><span class="${tx.type === 'credit' ? 'badge-credit' : 'badge-debit'}">${tx.type.toUpperCase()}</span></td>
-      <td style="color:${tx.type === 'credit' ? 'var(--primary-green)' : 'var(--accent-red)'}">${tx.type === 'credit' ? '+' : '-'}${formatRupees(tx.amount)}</td>
-      <td>${tx.date}</td>
-    </tr>`).join("");
-}
-
-function renderMatchHistory() {
-  const tbody = document.getElementById("matches-body");
-  if (!tbody) return;
-  tbody.innerHTML = matchHistory.length === 0 ? '<tr><td colspan="5">No matches played yet.</td></tr>' : matchHistory.map(m => `
-    <tr>
-      <td>${m.game}</td><td>${m.opponent}</td><td><span class="${m.result === 'VICTORY' ? 'badge-credit' : 'badge-debit'}">${m.result}</span></td>
-      <td style="color:${m.result === 'VICTORY' ? 'var(--primary-green)' : 'var(--accent-red)'}">${m.reward >= 0 ? '+' : ''}${formatRupees(m.reward)}</td><td>${m.date}</td>
-    </tr>`).join("");
-}
-
-// ----------------------------------------------------
-// PAYTM / UPI DEPOSIT VERIFICATION VIA RPC (Secure & Instant)
-// ----------------------------------------------------
-document.querySelectorAll(".amount-chip").forEach(chip => {
-  chip.onclick = () => {
-    document.querySelectorAll(".amount-chip").forEach(c => c.classList.remove("active"));
-    chip.classList.add("active");
-    document.getElementById("addtoken-input").value = chip.getAttribute("data-amount");
-  };
-});
-
-document.getElementById("addtoken-submit-btn")?.addEventListener("click", async () => {
-  const amount = parseFloat(document.getElementById("addtoken-input")?.value);
-  const utr = (document.getElementById("addtoken-utr-input")?.value || "").trim();
-  const statusMsg = document.getElementById("addtoken-status-msg");
-
-  if (!statusMsg) return;
-  statusMsg.className = "refer-status-msg";
-  statusMsg.textContent = "";
-
-  if (isNaN(amount) || amount < 1) {
-    statusMsg.textContent = "Please enter a valid amount (Minimum ₹1).";
-    statusMsg.className = "refer-status-msg error";
-    return;
-  }
-
-  if (!utr || utr.length < 8) {
-    statusMsg.textContent = "Please enter a valid 12-digit UTR number.";
-    statusMsg.className = "refer-status-msg error";
-    return;
-  }
-
-  document.getElementById("addtoken-submit-btn").disabled = true;
-  statusMsg.textContent = "Verifying UTR against bank records...";
-
-  try {
-    const { data, error } = await client.rpc("verify_and_credit_deposit", {
-      p_utr: utr,
-      p_amount: amount
+    document.getElementById("profile-nav-btn")?.addEventListener("click", () => switchView("view-profile"));
+    document.getElementById("nav-brand-logo")?.addEventListener("click", () => switchView("view-earn"));
+
+    filterChips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        filterChips.forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        const category = chip.getAttribute("data-category");
+        gameCards.forEach(card => {
+          if (category === "all" || card.getAttribute("data-category") === category) card.style.display = "flex";
+          else card.style.display = "none";
+        });
+      });
     });
 
-    if (error) {
-      statusMsg.textContent = "Error: " + error.message;
-      statusMsg.className = "refer-status-msg error";
-      return;
-    }
+    editNameBtn?.addEventListener("click", () => {
+      nameInput.value = playerNameEl.textContent;
+      nameEditBox.classList.remove("hidden");
+      nameInput.focus();
+    });
 
-    if (data && data.success) {
-      await loadWallet();
-      await loadTransactions();
-      updateUI();
-      flashBalance();
-      showToast("Deposit Credited", "credit", data.amount);
-      statusMsg.textContent = data.message;
-      statusMsg.className = "refer-status-msg success";
-      document.getElementById("addtoken-utr-input").value = "";
-    } else {
-      statusMsg.textContent = data?.message || "Invalid Transaction ID or Amount mismatch.";
-      statusMsg.className = "refer-status-msg error";
-    }
-  } catch (err) {
-    statusMsg.textContent = "Verification failed. Please try again.";
-    statusMsg.className = "refer-status-msg error";
-  } finally {
-    document.getElementById("addtoken-submit-btn").disabled = false;
-  }
-});
+    cancelNameBtn?.addEventListener("click", () => nameEditBox.classList.add("hidden"));
 
-function switchView(targetId) {
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll(".app-view").forEach(v => v.classList.remove("active"));
-  document.getElementById(targetId)?.classList.add("active");
-  document.querySelector(`[data-target="${targetId}"]`)?.classList.add("active");
-}
-document.querySelectorAll(".tab-btn").forEach(btn => btn.onclick = () => switchView(btn.getAttribute("data-target")));
-document.getElementById("profile-nav-btn").onclick = () => switchView("view-profile");
-document.getElementById("wallet-badge-btn").onclick = () => switchView("view-ledger");
-document.getElementById("menu-addtokens-btn").onclick = () => switchView("view-addtoken");
-document.getElementById("menu-transactions-btn").onclick = () => switchView("view-ledger");
-document.getElementById("menu-refer-btn").onclick = () => switchView("view-refer");
-document.getElementById("addtoken-back-btn").onclick = () => switchView("view-profile");
-document.getElementById("ledger-back-btn").onclick = () => switchView("view-profile");
-document.getElementById("refer-back-btn").onclick = () => switchView("view-profile");
+    saveNameBtn?.addEventListener("click", () => {
+      const newName = nameInput.value.trim();
+      if (newName.length < 2) { alert("Name must be at least 2 characters."); return; }
+      if (currentUser) localStorage.setItem("arena_name_" + currentUser.id, newName);
+      setUserDisplayName(newName);
+      nameEditBox.classList.add("hidden");
+    });
 
-document.getElementById("menu-logout-btn").onclick = () => document.getElementById("logout-confirm-overlay").classList.remove("hidden");
-document.getElementById("logout-cancel-btn").onclick = () => document.getElementById("logout-confirm-overlay").classList.add("hidden");
-document.getElementById("logout-confirm-btn").onclick = async () => {
-  await client.auth.signOut();
-  window.location.reload();
-};
+    // Paytm QR Deposit Verification handler
+    document.querySelectorAll(".amount-chip").forEach(chip => {
+      chip.onclick = () => {
+        document.querySelectorAll(".amount-chip").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        document.getElementById("deposit-amount-input").value = chip.getAttribute("data-amount");
+      };
+    });
 
-async function beginMatchmaking() {
-  inQueue = true;
-  document.getElementById("match-title").textContent = "Finding Opponent — " + activeGame.name;
-  document.getElementById("match-overlay").classList.remove("hidden");
+    document.getElementById("deposit-submit-btn")?.addEventListener("click", async () => {
+      const amount = parseFloat(document.getElementById("deposit-amount-input")?.value);
+      const utr = (document.getElementById("deposit-utr-input")?.value || "").trim();
+      const statusMsg = document.getElementById("deposit-status-msg");
 
-  try {
-    const { data: newBal, error } = await client.rpc("process_game_stake", { p_fee: MATCH_ENTRY_FEE, p_desc: "Stake Entry: " + activeGame.name });
-    if (error) throw error;
-    currentBalance = newBal;
-    updateUI();
-    showToast("Stake Entry: " + activeGame.name, "debit", MATCH_ENTRY_FEE);
-  } catch (e) {
-    document.getElementById("match-overlay").classList.add("hidden");
-    alert("Could not process entry stake: " + e.message);
-    inQueue = false;
-    return;
-  }
+      if (!statusMsg) return;
+      statusMsg.textContent = "";
 
-  queueTimer = setTimeout(() => {
-    if (!inQueue) return;
-    document.getElementById("match-overlay").classList.add("hidden");
-    inQueue = false;
-    const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
-    launchArena(bot);
-  }, 5000);
-}
-
-document.getElementById("cancel-match-btn").onclick = async () => {
-  if (!inQueue) return;
-  inQueue = false;
-  clearTimeout(queueTimer);
-  document.getElementById("match-overlay").classList.add("hidden");
-  await client.rpc("process_game_win", { p_reward: MATCH_ENTRY_FEE, p_game: activeGame.name, p_opponent: "Refund" });
-  await loadWallet();
-  updateUI();
-};
-
-function launchArena(opponent) {
-  activeOpponent = opponent;
-  document.getElementById("arena-user-name").textContent = document.getElementById("player-name").textContent;
-  document.getElementById("arena-user-avatar").src = document.getElementById("avatar").src;
-  document.getElementById("arena-opp-name").textContent = opponent.name;
-  document.getElementById("arena-opp-avatar").src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + opponent.seed;
-  document.getElementById("game-arena-overlay").classList.remove("hidden");
-
-  const stage = document.getElementById("arena-stage");
-  if (activeGame.type === "reaction") {
-    stage.innerHTML = '<div class="reaction-box reaction-wait" id="r-box"><h2>WAIT FOR GREEN...</h2></div>';
-    const box = document.getElementById("r-box");
-    let canClick = false, start = 0;
-    const delay = Math.floor(Math.random() * 2000) + 2200;
-    const timer = setTimeout(() => {
-      canClick = true; start = Date.now();
-      box.className = "reaction-box reaction-go";
-      box.innerHTML = "<h2>CLICK NOW!</h2>";
-    }, delay);
-
-    box.onclick = () => {
-      if (!canClick) { clearTimeout(timer); endDuel(false, "False start!"); }
-      else {
-        const time = Date.now() - start;
-        if (time < 380) endDuel(true, `Speed: ${time}ms (Superior speed!)`);
-        else endDuel(false, `Speed: ${time}ms (Opponent was faster)`);
+      if (isNaN(amount) || amount < 1) {
+        statusMsg.style.color = "var(--accent-red)";
+        statusMsg.textContent = "Please enter a valid deposit amount (Minimum ₹1).";
+        return;
       }
-    };
-  } else {
-    const a = Math.floor(Math.random() * 25) + 10, b = Math.floor(Math.random() * 25) + 10;
-    const correct = a + b;
-    stage.innerHTML = `<h2 style="margin-bottom:12px;">${a} + ${b} = ?</h2><div class="quiz-options"><button class="quiz-option" id="opt-1">${correct}</button><button class="quiz-option" id="opt-2">${correct + 4}</button></div>`;
-    document.getElementById("opt-1").onclick = () => endDuel(true, "Accurate fast calculation!");
-    document.getElementById("opt-2").onclick = () => endDuel(false, "Incorrect equation result selected.");
-  }
-}
 
-async function endDuel(won, analysisText) {
-  if (won) {
-    const { data: newBal } = await client.rpc("process_game_win", { p_reward: MATCH_WIN_REWARD, p_game: activeGame.name, p_opponent: activeOpponent.name });
-    currentBalance = newBal || (currentBalance + MATCH_WIN_REWARD);
-    showToast("Duel Victory: " + activeGame.name, "credit", MATCH_WIN_REWARD);
-  } else {
-    await client.rpc("process_game_loss", { p_game: activeGame.name, p_opponent: activeOpponent.name, p_fee: MATCH_ENTRY_FEE });
-  }
+      if (!utr || utr.length < 8) {
+        statusMsg.style.color = "var(--accent-red)";
+        statusMsg.textContent = "Please enter a valid 12-digit UTR number.";
+        return;
+      }
 
-  await loadMatchHistory();
-  await loadTransactions();
-  updateUI();
+      document.getElementById("deposit-submit-btn").disabled = true;
+      statusMsg.style.color = "var(--text-muted)";
+      statusMsg.textContent = "Verifying UTR against bank records...";
 
-  document.getElementById("arena-stage").innerHTML = `
-    <h2 style="color:${won ? 'var(--primary-green)' : 'var(--accent-red)'}; font-size:2rem;">${won ? 'VICTORY' : 'DEFEAT'}</h2>
-    <p style="font-size:0.85rem; color:var(--text-muted); margin:8px 0 16px;">${analysisText}</p>
-    <button class="btn-primary" style="width:100%;" onclick="document.getElementById('game-arena-overlay').classList.add('hidden');">Return to Lobby</button>
-  `;
-}
+      try {
+        const { data, error } = await client.rpc("verify_and_credit_deposit", {
+          p_utr: utr,
+          p_amount: amount
+        });
 
-async function initDashboard() {
-  renderGameCards();
-  await loadWallet();
-  await loadTransactions();
-  await loadMatchHistory();
-  
-  const { data } = await client.from("users").select("full_name").eq("id", currentUser.id).maybeSingle();
-  const name = data?.full_name || currentUser.user_metadata?.full_name || "Vishal";
-  document.getElementById("player-name").textContent = name;
-  document.getElementById("profile-display-name").textContent = name;
-  const avatarUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(name);
-  document.getElementById("avatar").src = avatarUrl;
-  document.getElementById("profile-view-avatar").src = avatarUrl;
+        if (error) {
+          statusMsg.style.color = "var(--accent-red)";
+          statusMsg.textContent = "Error: " + error.message;
+          return;
+        }
 
-  updateUI();
-  document.getElementById("loading").classList.add("hidden");
-  document.getElementById("dashboard").classList.remove("hidden");
-}
+        if (data && data.success) {
+          await loadWallet();
+          await loadTransactions();
+          updateUI();
+          showToast("Deposit Credited!", `+${data.amount} Tokens added to wallet via UTR ${utr}`);
+          statusMsg.style.color = "var(--primary-green)";
+          statusMsg.textContent = data.message;
+          document.getElementById("deposit-utr-input").value = "";
+        } else {
+          statusMsg.style.color = "var(--accent-red)";
+          statusMsg.textContent = data?.message || "Invalid UTR ID or Amount mismatch.";
+        }
+      } catch (err) {
+        statusMsg.style.color = "var(--accent-red)";
+        statusMsg.textContent = "Verification failed. Please try again.";
+      } finally {
+        document.getElementById("deposit-submit-btn").disabled = false;
+      }
+    });
 
-async function routeOnLoad() {
-  const { data: { session } } = await client.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    document.getElementById("page-landing").classList.add("hidden");
-    document.getElementById("loading").classList.remove("hidden");
-    await initDashboard();
-  } else {
-    document.getElementById("page-landing").classList.remove("hidden");
-    document.getElementById("dashboard").classList.add("hidden");
-    document.getElementById("loading").classList.add("hidden");
-  }
-}
+    playButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeGame = { name: btn.getAttribute("data-game"), type: btn.getAttribute("data-type") };
+        if (currentBalance < MATCH_ENTRY_FEE) { alert("Insufficient balance. You need " + MATCH_ENTRY_FEE + " tokens to enter."); return; }
+        startMatchmaking();
+      });
+    });
 
-routeOnLoad();
+    function startMatchmaking() {
+      if (matchTitle) matchTitle.textContent = "Finding Opponent for " + activeGame.name;
+      if (matchStatus) matchStatus.textContent = "Scanning active queue for live players...";
+      if (matchOverlay) matchOverlay.classList.remove("hidden");
+
+      const searchDuration = Math.floor(Math.random() * 2000) + 3000;
+      matchmakingTimer = setTimeout(() => {
+        const randomIndianBot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
+        pairMatch(randomIndianBot);
+      }, searchDuration);
+    }
+
+    function pairMatch(opponent) {
+      if (matchmakingTimer) clearTimeout(matchmakingTimer);
+      activeOpponent = opponent;
+      if (matchStatus) matchStatus.textContent = "Opponent Matched: " + opponent.name + "! Launching arena...";
+      setTimeout(() => {
+        if (matchOverlay) matchOverlay.classList.add("hidden");
+        launchArena(opponent);
+      }, 800);
+    }
+
+    cancelMatchBtn?.addEventListener("click", () => {
+      if (matchmakingTimer) clearTimeout(matchmakingTimer);
+      if (matchOverlay) matchOverlay.classList.add("hidden");
+    });
+
+    function launchArena(opponent) {
+      currentBalance -= MATCH_ENTRY_FEE;
+      if (currentUser) {
+        client.from("wallet").update({ dummy_token: currentBalance, updated_at: new Date().toISOString() }).eq("user_id", currentUser.id).then();
+      }
+      recordTransaction("Stake Entry: " + activeGame.name, "debit", MATCH_ENTRY_FEE);
+
+      const myName = playerNameEl.textContent;
+      arenaUserName.textContent = myName;
+      arenaUserAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + encodeURIComponent(myName);
+      arenaOppName.textContent = opponent.name;
+      arenaOppAvatar.src = "https://api.dicebear.com/7.x/identicon/svg?seed=" + opponent.seed;
+
+      arenaOverlay.classList.remove("hidden");
+      runReactionGame();
+    }
+
+    function runReactionGame() {
+      arenaStage.innerHTML = '<div id="reaction-box" class="reaction-box reaction-wait"><h2 style="font-size:1.4rem;">WAIT FOR GREEN...</h2><p style="font-size:0.8rem; margin-top:6px; opacity:0.85;">Click instantly when the box turns green</p></div>';
+      const box = document.getElementById("reaction-box");
+      let canClick = false, startTime = 0, finished = false;
+
+      const greenDelay = Math.floor(Math.random() * 2000) + 2000;
+      const timeoutId = setTimeout(() => {
+        if (finished) return;
+        canClick = true;
+        startTime = Date.now();
+        box.className = "reaction-box reaction-go";
+        box.querySelector("h2").textContent = "CLICK NOW!";
+      }, greenDelay);
+
+      box.addEventListener("click", () => {
+        if (finished) return;
+        finished = true;
+        if (!canClick) {
+          clearTimeout(timeoutId);
+          endDuel(false, "False Start! You clicked before signal.");
+        } else {
+          const userReaction = Date.now() - startTime;
+          const botReaction = Math.floor(Math.random() * 120) + 290;
+          if (userReaction < botReaction) endDuel(true, `Superior speed! Your reaction: ${userReaction}ms vs Opponent: ${botReaction}ms`);
+          else endDuel(false, `Opponent was faster (${botReaction}ms). Your speed: ${userReaction}ms`);
+        }
+      });
+    }
+
+    function endDuel(won, analysisText) {
+      if (won) {
+        currentBalance += MATCH_WIN_REWARD;
+        if (currentUser) {
+          client.from("wallet").update({ dummy_token: currentBalance, updated_at: new Date().toISOString() }).eq("user_id", currentUser.id).then();
+        }
+        recordTransaction("Duel Victory: " + activeGame.name, "credit", MATCH_WIN_REWARD);
+      }
+
+      matchHistory.unshift({
+        game: activeGame.name, opponent: activeOpponent.name,
+        result: won ? "VICTORY" : "DEFEAT", reward: won ? ("+" + MATCH_WIN_REWARD + " 🪙") : "-50 🪙",
+        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      saveMatches();
+      updateUI();
+
+      arenaStage.innerHTML = `
+        <div class="result-card">
+          <h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2>
+          <p style="font-weight:700; font-size:1.1rem; color:var(--text-main); margin-bottom:4px;">${won ? ('+' + MATCH_WIN_REWARD + ' Tokens Awarded') : '-50 Tokens Stake Lost'}</p>
+          <div class="result-analytics"><p style="margin-bottom:4px;"><strong>Performance Analytics:</strong></p><p>${analysisText}</p></div>
+          <div class="result-btn-row">
+            <button id="rematch-btn" class="btn-primary" type="button">Rematch</button>
+            <button id="return-dash-btn" class="btn-secondary" type="button">Dashboard</button>
+          </div>
+        </div>`;
+
+      document.getElementById("rematch-btn")?.addEventListener("click", () => { arenaOverlay.classList.add("hidden"); startMatchmaking(); });
+      document.getElementById("return-dash-btn")?.addEventListener("click", () => arenaOverlay.classList.add("hidden"));
+    }
+
+    logoutBtn?.addEventListener("click", async () => {
+      await client.auth.signOut();
+      window.location.reload();
+    });
+
+    const googleLoginBtn = document.getElementById("google-login-btn");
+    const navLoginBtn = document.getElementById("nav-login-btn");
+    const navSignupBtn = document.getElementById("nav-signup-btn");
+
+    async function triggerGoogleLogin() {
+      const redirectUrl = window.location.origin + window.location.pathname;
+      await client.auth.signInWithOAuth({ provider: "google", options: { redirectTo: redirectUrl } });
+    }
+    if (googleLoginBtn) googleLoginBtn.addEventListener("click", triggerGoogleLogin);
+    if (navLoginBtn) navLoginBtn.addEventListener("click", triggerGoogleLogin);
+    if (navSignupBtn) navSignupBtn.addEventListener("click", triggerGoogleLogin);
+
+    init();
   </script>
 </body>
 </html>
