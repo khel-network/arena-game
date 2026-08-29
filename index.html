@@ -1669,7 +1669,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  FIXED AUTH + SVG ICONS FOR GAME THUMBNAILS
+//  FIXED AUTH - with automatic redirect handling
 // ============================================================
 
 // ---- Supabase ----
@@ -1677,38 +1677,14 @@ const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5ZmJpY2UiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzY0MTc0MiwiZXhwIjoyMTAzMjE3NzQyfQ.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ---- Auth ----
-function checkForHashToken() {
-  const hash = window.location.hash;
-  if (!hash) return false;
-  try {
-    const params = new URLSearchParams(hash.substring(1));
-    const access_token = params.get('access_token');
-    const refresh_token = params.get('refresh_token');
-    if (access_token && refresh_token) {
-      client.auth.setSession({ access_token, refresh_token }).then(() => {
-        window.location.hash = ''; // clean URL
-        window.location.reload(); // force reload to pick up session
-      });
-      return true;
-    }
-  } catch (e) {}
-  return false;
-}
-
-// Check on load immediately
-if (!checkForHashToken()) {
-  // If no hash token, proceed normally
-}
-
-// Auth state listener
+// ---- Auth State Listener ----
 let authInitialized = false;
-client.auth.onAuthStateChange(async (event, session) => {
+client.auth.onAuthStateChange((event, session) => {
   console.log('Auth event:', event, session);
   if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
     if (!authInitialized) {
       authInitialized = true;
-      await initDashboard();
+      initDashboard();
     }
   } else if (event === 'SIGNED_OUT') {
     authInitialized = false;
@@ -1724,11 +1700,17 @@ const navSignupBtn = document.getElementById('nav-signup-btn');
 async function triggerGoogleLogin() {
   const btn = googleLoginBtn;
   if (btn) { btn.disabled = true; btn.querySelector('span').textContent = 'Connecting...'; }
+  
+  // Use the full URL of your site for the redirect
   const redirectUrl = window.location.origin + window.location.pathname;
+  
   const { error } = await client.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: redirectUrl }
+    options: { 
+      redirectTo: redirectUrl
+    }
   });
+  
   if (error) {
     alert('Login failed: ' + error.message);
     if (btn) { btn.disabled = false; btn.querySelector('span').textContent = 'Continue with Google'; }
@@ -2928,8 +2910,7 @@ async function initDashboard() {
 }
 
 async function routeOnLoad() {
-  // First check if we have a hash token (already handled at top, but double-check)
-  // If we already have a session, init dashboard.
+  // Check if we already have a session
   const { data: { session } } = await client.auth.getSession();
   if (session) {
     document.getElementById('page-landing')?.classList.add('hidden');
@@ -2944,27 +2925,6 @@ async function routeOnLoad() {
 window.addEventListener('beforeunload', () => {
   MatchRoom.cleanup();
 });
-
-// ---- After page load, also check for hash token again (in case the first check missed) ----
-setTimeout(() => {
-  if (!authInitialized) {
-    const hash = window.location.hash;
-    if (hash && hash.includes('access_token')) {
-      // Try to parse and set session
-      try {
-        const params = new URLSearchParams(hash.substring(1));
-        const access_token = params.get('access_token');
-        const refresh_token = params.get('refresh_token');
-        if (access_token && refresh_token) {
-          client.auth.setSession({ access_token, refresh_token }).then(() => {
-            window.location.hash = '';
-            window.location.reload();
-          });
-        }
-      } catch (e) {}
-    }
-  }
-}, 500);
 
 routeOnLoad();
 </script>
