@@ -13,10 +13,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     *:focus { outline: none; }
     *:focus-visible { outline: 2px solid #00e701; outline-offset: 2px; border-radius: 4px; }
-    * {
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
+    * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     html, body { overflow-x: hidden; width: 100%; max-width: 100%; }
     body {
       font-family: 'Inter', -apple-system, sans-serif;
@@ -494,7 +491,7 @@
       border-color: #00e701;
     }
 
-    /* ===== GAME CARDS – TALLER & TINY BADGE ===== */
+    /* ===== GAME CARDS – COMPACT ===== */
     .games-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -502,7 +499,7 @@
     }
     @media (min-width: 500px) {
       .games-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       }
     }
     .game-card {
@@ -514,7 +511,7 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1);
-      min-height: 200px; /* slightly taller */
+      min-height: 190px;
     }
     .game-card:hover {
       transform: translateY(-4px);
@@ -522,7 +519,7 @@
       box-shadow: 0 12px 32px 0 rgba(0,231,1,0.1);
     }
     .card-media {
-      height: 100px;
+      height: 80px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -530,16 +527,16 @@
       background: rgba(255,255,255,0.4);
     }
     .card-media span {
-      font-size: 2.4rem;
+      font-size: 2rem;
       line-height: 1;
     }
-    /* TINY BADGE – VERY SMALL */
+    /* TINY BADGE */
     .card-badge {
       position: absolute;
-      top: 6px;
-      left: 8px;
-      background: rgba(30,41,59,0.8);
-      padding: 2px 6px;
+      top: 4px;
+      left: 6px;
+      background: rgba(30,41,59,0.75);
+      padding: 1px 6px;
       border-radius: 100px;
       font-size: 0.45rem;
       font-weight: 700;
@@ -552,7 +549,7 @@
       text-overflow: ellipsis;
     }
     .card-content {
-      padding: 10px 12px 12px;
+      padding: 8px 10px 10px;
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -560,37 +557,37 @@
     .card-title {
       font-family: 'Space Grotesk', sans-serif;
       font-weight: 700;
-      font-size: 0.85rem;
-      margin-bottom: 2px;
+      font-size: 0.75rem;
+      margin-bottom: 1px;
       color: #1e293b;
       line-height: 1.2;
     }
     .card-desc {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       color: #556070;
       line-height: 1.3;
       flex: 1;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .card-meta {
       display: flex;
       justify-content: space-between;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: 600;
       color: #556070;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .card-meta .win { color: #00a301; }
     .play-btn {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
       background: #2563eb;
       color: #fff;
-      border-radius: 10px;
+      border-radius: 8px;
       font-weight: 700;
       transition: 0.2s;
-      font-size: 0.8rem;
-      min-height: 44px;
+      font-size: 0.7rem;
+      min-height: 36px;
       touch-action: manipulation;
     }
     .play-btn:hover { background: #1d4ed8; transform: scale(1.02); }
@@ -1053,15 +1050,15 @@
 
     .ttt-wrapper {
       position: relative;
-      width: 200px;
-      height: 200px;
+      width: 180px;
+      height: 180px;
       margin: 0 auto;
     }
     .ttt-board {
       display: grid;
       grid-template-columns: repeat(3,1fr);
-      width: 200px;
-      height: 200px;
+      width: 180px;
+      height: 180px;
       background: rgba(255,255,255,0.6);
       border-radius: 10px;
       padding: 4px;
@@ -1072,7 +1069,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 700;
       cursor: pointer;
       transition: 0.15s;
@@ -1087,8 +1084,8 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 200px;
-      height: 200px;
+      width: 180px;
+      height: 180px;
       pointer-events: none;
     }
     .ttt-winline {
@@ -1347,10 +1344,10 @@
       .profile-header-card { grid-template-columns: 1fr; }
       .addtoken-amount-grid { grid-template-columns: repeat(2,1fr); }
       .arena-card { padding: 14px; }
-      .ttt-wrapper { width: 170px; height: 170px; }
-      .ttt-board { width: 170px; height: 170px; }
-      .ttt-line-overlay { width: 170px; height: 170px; }
-      .ttt-cell { font-size: 1.8rem; }
+      .ttt-wrapper { width: 150px; height: 150px; }
+      .ttt-board { width: 150px; height: 150px; }
+      .ttt-line-overlay { width: 150px; height: 150px; }
+      .ttt-cell { font-size: 1.6rem; }
       #transaction-modal .modal-card { padding: 14px; }
       .nav-top-row .brand-small { font-size: 0.9rem; }
       .token-badge { font-size: 0.75rem; padding: 3px 10px 3px 4px; }
@@ -1359,10 +1356,10 @@
       .user-name { font-size: 0.7rem; max-width: 60px; }
       .tab-btn { font-size: 0.5rem; }
       .tab-btn svg { width: 18px; height: 18px; }
-      .card-media { height: 90px; }
-      .card-media span { font-size: 2rem; }
-      .card-title { font-size: 0.8rem; }
-      .card-desc { font-size: 0.6rem; }
+      .card-media { height: 70px; }
+      .card-media span { font-size: 1.6rem; }
+      .card-title { font-size: 0.7rem; }
+      .card-desc { font-size: 0.55rem; }
       .card-badge { font-size: 0.4rem; padding: 1px 5px; }
     }
     @media (max-width:400px){
@@ -1919,27 +1916,27 @@ function startPresenceHeartbeat() {
 }
 
 const GAME_CATALOG = [
-  { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat — get three in a row to win.', icon: '✖️', badge: 'CLASSIC', category: 'brain' },
+  { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat.', icon: '✖️', badge: 'CLASSIC', category: 'brain' },
   { type: 'rps', name: 'RPS Duel', desc: 'Best-of-5 rock, paper, scissors.', icon: '✊', badge: 'CLASSIC', category: 'strategy' },
-  { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four in a row.', icon: '🔴', badge: 'STRATEGY', category: 'strategy' },
-  { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board faster.', icon: '🧠', badge: 'BRAIN', category: 'brain' },
-  { type: 'scramble', name: 'Word Scramble', desc: 'Unscramble the word before your opponent.', icon: '🔤', badge: 'WORD', category: 'brain' },
-  { type: 'typing', name: 'Typing Race', desc: 'Type the sentence exactly, first to finish wins.', icon: '⌨️', badge: 'SPEED', category: 'reflex' },
-  { type: 'higherlower', name: 'Higher-Lower Duel', desc: 'Guess the secret number in fewest tries.', icon: '🎯', badge: 'LOGIC', category: 'brain' },
-  { type: 'snake', name: 'Snake Duel', desc: 'Eat, grow, survive — highest score wins.', icon: '🐍', badge: 'ARCADE', category: 'reflex' },
-  { type: 'simon', name: 'Simon Says', desc: 'Repeat the growing color pattern.', icon: '🎵', badge: 'MEMORY', category: 'brain' },
+  { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four.', icon: '🔴', badge: 'STRATEGY', category: 'strategy' },
+  { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board.', icon: '🧠', badge: 'BRAIN', category: 'brain' },
+  { type: 'scramble', name: 'Word Scramble', desc: 'Unscramble the word quickly.', icon: '🔤', badge: 'WORD', category: 'brain' },
+  { type: 'typing', name: 'Typing Race', desc: 'Type the sentence, first to finish.', icon: '⌨️', badge: 'SPEED', category: 'reflex' },
+  { type: 'higherlower', name: 'Higher-Lower', desc: 'Guess the secret number.', icon: '🎯', badge: 'LOGIC', category: 'brain' },
+  { type: 'snake', name: 'Snake Duel', desc: 'Eat, grow, survive — score wins.', icon: '🐍', badge: 'ARCADE', category: 'reflex' },
+  { type: 'simon', name: 'Simon Says', desc: 'Repeat the growing pattern.', icon: '🎵', badge: 'MEMORY', category: 'brain' },
   { type: 'dice', name: 'Dice Battle', desc: 'Push your luck rolling dice.', icon: '🎲', badge: 'LUCK', category: 'strategy' },
-  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5 seconds wins.', icon: '👆', badge: 'SPEED', category: 'reflex' },
-  { type: 'whack', name: 'Whack-a-Mole', desc: 'First to 15 correct hits wins.', icon: '🔨', badge: 'REFLEX', category: 'reflex' },
-  { type: 'recall', name: 'Sequence Recall', desc: 'Numbers flash briefly — tap them back.', icon: '🔢', badge: 'MEMORY', category: 'brain' },
-  { type: 'superttt', name: 'Tic-Tac-Toe Ultimate', desc: '3x3 grid of boards — win the meta-board.', icon: '🕹️', badge: 'STRATEGY', category: 'strategy' },
-  { type: 'slide', name: 'Slide Puzzle Race', desc: 'Solve the 15-puzzle before your opponent.', icon: '🧩', badge: 'PUZZLE', category: 'brain' },
-  { type: 'stroop', name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', icon: '🎨', badge: 'REFLEX', category: 'reflex' },
-  { type: 'reflex', name: 'Reflex Grid', desc: 'Tap the lit tile before it fades.', icon: '⚡', badge: 'REFLEX', category: 'reflex' },
-  { type: 'mathduel', name: 'Math Duel', desc: 'Solve 5 equations fastest to win.', icon: '➕', badge: 'MATH', category: 'math' },
-  { type: 'battleship', name: 'Battleship Mini', desc: 'Sink the hidden fleet in fewest shots.', icon: '🚢', badge: 'STRATEGY', category: 'strategy' },
-  { type: 'emojisprint', name: 'Emoji Memory Sprint', desc: 'Memory match with growing grid.', icon: '🌟', badge: 'MEMORY', category: 'brain' },
-  { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve 5 quick sums back-to-back.', icon: '🧮', badge: 'MATH', category: 'math' },
+  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5s wins.', icon: '👆', badge: 'SPEED', category: 'reflex' },
+  { type: 'whack', name: 'Whack-a-Mole', desc: 'First to 15 hits wins.', icon: '🔨', badge: 'REFLEX', category: 'reflex' },
+  { type: 'recall', name: 'Sequence Recall', desc: 'Numbers flash, tap them back.', icon: '🔢', badge: 'MEMORY', category: 'brain' },
+  { type: 'superttt', name: 'Tic-Tac-Toe Ultimate', desc: '3x3 grid of boards — meta-win.', icon: '🕹️', badge: 'STRATEGY', category: 'strategy' },
+  { type: 'slide', name: 'Slide Puzzle Race', desc: 'Solve the 15-puzzle.', icon: '🧩', badge: 'PUZZLE', category: 'brain' },
+  { type: 'stroop', name: 'Color Match Rush', desc: 'Fewest mistakes wins.', icon: '🎨', badge: 'REFLEX', category: 'reflex' },
+  { type: 'reflex', name: 'Reflex Grid', desc: 'Tap the lit tile before fade.', icon: '⚡', badge: 'REFLEX', category: 'reflex' },
+  { type: 'mathduel', name: 'Math Duel', desc: 'Solve 5 equations fastest.', icon: '➕', badge: 'MATH', category: 'math' },
+  { type: 'battleship', name: 'Battleship Mini', desc: 'Sink the hidden fleet.', icon: '🚢', badge: 'STRATEGY', category: 'strategy' },
+  { type: 'emojisprint', name: 'Emoji Memory Sprint', desc: 'Memory match with grid.', icon: '🌟', badge: 'MEMORY', category: 'brain' },
+  { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve 5 quick sums.', icon: '🧮', badge: 'MATH', category: 'math' },
 ];
 const BANNER_CLASSES = ['#fce7f3','#fef3c7','#dbeafe','#dcfce7','#fae8ff','#ffe4e6'];
 
@@ -1957,8 +1954,8 @@ function renderGameCards() {
         <div class="card-content">
           <h3 class="card-title">${g.name}</h3>
           <p class="card-desc">${g.desc}</p>
-          <div class="card-meta"><span>Fee: ₹50</span><span class="win">+₹90 Reward</span></div>
-          <button class="play-btn" data-game="${g.name}" data-type="${g.type}">Play Match</button>
+          <div class="card-meta"><span>₹50</span><span class="win">+₹90</span></div>
+          <button class="play-btn" data-game="${g.name}" data-type="${g.type}">Play</button>
         </div>
       </div>
     `;
@@ -2690,7 +2687,7 @@ function runTicTacToeGame() {
   function drawWinLine(line) {
     const svg = document.getElementById('ttt-line');
     if (!svg) return;
-    const cellSize = 62, gap = 4, step = cellSize + gap;
+    const cellSize = 58, gap = 4, step = cellSize + gap;
     const centers = [0,1,2,3,4,5,6,7,8].map(i => {
       const row = Math.floor(i / 3), col = i % 3;
       return [col * step + cellSize/2, row * step + cellSize/2];
@@ -2901,7 +2898,7 @@ function initTicTacToeLive(stageEl, iAmPlayer1) {
   function drawWinLine(line) {
     const svg = document.getElementById('ttt-line');
     if (!svg) return;
-    const cellSize = 62, gap = 4, step = cellSize + gap;
+    const cellSize = 58, gap = 4, step = cellSize + gap;
     const centers = [0,1,2,3,4,5,6,7,8].map(i => {
       const row = Math.floor(i/3), col = i%3;
       return [col*step + cellSize/2, row*step + cellSize/2];
