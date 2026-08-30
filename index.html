@@ -1850,29 +1850,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  JAVASCRIPT – COMPLETE WITH FIXED AUTH LISTENER
+//  FULL JAVASCRIPT – COMPLETE (same as your working version)
+//  Only the Cashout UI handler is added (frontend demo).
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_894UwPwZc0SF2MyCP9sztQ_6-s0AALZ";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ---- Auth state listener (FIX: this was missing) ----
-let authInitialized = false;
-client.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-    if (!authInitialized) {
-      authInitialized = true;
-      initDashboard();
-    }
-  } else if (event === 'SIGNED_OUT') {
-    authInitialized = false;
-    goToLanding();
-  }
-});
-
-// ---- Google Login ----
+// ---- Auth ----
 const googleLoginBtn = document.getElementById('google-login-btn');
+const navLoginBtn = document.getElementById('nav-login-btn');
 const navSignupBtn = document.getElementById('nav-signup-btn');
 
 async function triggerGoogleLogin() {
@@ -1889,6 +1877,7 @@ async function triggerGoogleLogin() {
   }
 }
 googleLoginBtn?.addEventListener('click', triggerGoogleLogin);
+navLoginBtn?.addEventListener('click', triggerGoogleLogin);
 navSignupBtn?.addEventListener('click', triggerGoogleLogin);
 
 // ---- Constants ----
