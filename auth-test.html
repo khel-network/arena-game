@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Auth Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Authentication Test</h1>
+  <button id="login">Login with Google</button>
+  <div id="status">Not logged in</div>
+  <div id="user"></div>
+
+  <script>
+    const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5ZmJpY2UiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzY0MTc0MiwiZXhwIjoyMTAzMjE3NzQyfQ.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const status = document.getElementById('status');
+    const userDiv = document.getElementById('user');
+
+    // 1. Check session on load
+    async function checkSession() {
+      const { data: { session } } = await client.auth.getSession();
+      if (session) {
+        status.textContent = 'Logged in ✅';
+        userDiv.textContent = 'User: ' + session.user.email;
+      } else {
+        status.textContent = 'Not logged in ❌';
+      }
+    }
+    checkSession();
+
+    // 2. Handle hash on load (to set session from OAuth redirect)
+    function handleHash() {
+      const hash = window.location.hash;
+      if (hash && hash.includes('access_token')) {
+        const params = new URLSearchParams(hash.substring(1));
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+        if (access_token && refresh_token) {
+          client.auth.setSession({ access_token, refresh_token }).then(() => {
+            // Clear hash
+            window.history.replaceState(null, '', window.location.pathname);
+            // Refresh user info
+            checkSession();
+          });
+        }
+      }
+    }
+    handleHash();
+
+    // 3. Listen for auth changes
+    client.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        status.textContent = 'Logged in ✅';
+        userDiv.textContent = 'User: ' + session.user.email;
+      } else if (event === 'SIGNED_OUT') {
+        status.textContent = 'Not logged in ❌';
+        userDiv.textContent = '';
+      }
+    });
+
+    // 4. Login button
+    document.getElementById('login').addEventListener('click', async () => {
+      const { error } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + window.location.pathname }
+      });
+      if (error) alert(error.message);
+    });
+  </script>
+</body>
+</html>
