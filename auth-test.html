@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Auth Test (final)</title>
+  <title>Auth Test - final</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
@@ -12,56 +12,128 @@
     .user { font-size: 16px; color: #333; }
     .success { color: #0a7e3c; }
     .error { color: #d93025; }
+    .log { background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
   </style>
 </head>
 <body>
-  <h1>🔐 Authentication Test v2 </h1>
+  <h1>🔐 Authentication Test (final)</h1>
   <button id="login">Login with Google</button>
   <div class="status" id="status">⏳ Checking...</div>
   <div class="user" id="user"></div>
+  <div class="log" id="log"></div>
 
   <script>
-    // ---- CORRECT URL (no /rest/v1/ at the end) ----
-    const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5ZmJpY2UiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzY0MTc0MiwiZXhwIjoyMTAzMjE3NzQyfQ.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
+    // ---- ⚠️ UPDATE THESE WITH YOUR ACTUAL SUPABASE CREDENTIALS ----
+    const SUPABASE_URL = "https://sqldlartqohvhayfmbie.supabase.co"; // from your dashboard
+    const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE"; // from your dashboard
+    // -----------------------------------------------------------
 
-    console.log('🔧 Using URL:', SUPABASE_URL);
+    // Log everything
+    function log(msg) {
+      const el = document.getElementById('log');
+      el.textContent += msg + '\n';
+      console.log(msg);
+    }
+
+    log('🚀 Auth test started.');
+    log('🔧 Using URL: ' + SUPABASE_URL);
+
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const status = document.getElementById('status');
     const userDiv = document.getElementById('user');
 
-    // ---- Check session ----
+    // ---- 1. Handle redirect hash manually ----
+    function handleRedirect() {
+      const hash = window.location.hash;
+      log('🔍 Hash: ' + hash);
+      if (!hash || !hash.includes('access_token')) {
+        log('ℹ️ No access_token in hash.');
+        return false;
+      }
+      try {
+        const params = new URLSearchParams(hash.substring(1));
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+        log('🔑 Tokens found: access_token=' + (access_token ? 'yes' : 'no') + ', refresh_token=' + (refresh_token ? 'yes' : 'no'));
+        if (access_token && refresh_token) {
+          // Store tokens in localStorage manually
+          const storageKey = 'sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token';
+          const tokenData = {
+            access_token: access_token,
+            refresh_token: refresh_token,
+            expires_in: 3600,
+            token_type: 'bearer',
+            user: null
+          };
+          localStorage.setItem(storageKey, JSON.stringify(tokenData));
+          log('✅ Tokens stored in localStorage. Reloading...');
+          // Clear hash and reload to let the client pick up the session
+          window.location.hash = '';
+          window.location.reload();
+          return true;
+        }
+      } catch (e) {
+        log('❌ Hash parsing error: ' + e.message);
+      }
+      return false;
+    }
+
+    // ---- 2. Check for existing session ----
     async function checkSession() {
       try {
         const { data: { session }, error } = await client.auth.getSession();
         if (error) {
-          console.error('❌ getSession error:', error);
+          log('❌ getSession error: ' + error.message);
           status.textContent = '❌ Error: ' + error.message;
           status.className = 'status error';
           return;
         }
         if (session) {
+          log('✅ Session found: ' + session.user.email);
           status.textContent = '✅ Logged in';
           status.className = 'status success';
           userDiv.textContent = 'User: ' + session.user.email;
-          console.log('✅ Session found:', session.user.email);
         } else {
+          log('ℹ️ No session found.');
+          // Try to recover from localStorage
+          const storageKey = 'sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token';
+          const stored = localStorage.getItem(storageKey);
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              if (parsed.access_token) {
+                log('🔄 Found stored token, attempting setSession...');
+                const { data, error } = await client.auth.setSession({
+                  access_token: parsed.access_token,
+                  refresh_token: parsed.refresh_token
+                });
+                if (error) {
+                  log('❌ setSession error: ' + error.message);
+                } else if (data && data.session) {
+                  log('✅ Session restored from localStorage.');
+                  status.textContent = '✅ Logged in (restored)';
+                  status.className = 'status success';
+                  userDiv.textContent = 'User: ' + data.session.user.email;
+                  return;
+                }
+              }
+            } catch (e) {
+              log('❌ Error parsing stored token: ' + e.message);
+            }
+          }
           status.textContent = '❌ Not logged in';
           status.className = 'status error';
           userDiv.textContent = '';
-          console.log('ℹ️ No session found.');
         }
       } catch (e) {
-        console.error('❌ Check session error:', e);
-        status.textContent = '❌ Error: ' + e.message;
-        status.className = 'status error';
+        log('❌ checkSession exception: ' + e.message);
       }
     }
 
-    // ---- Auth state listener ----
+    // ---- 3. Auth state listener (backup) ----
     client.auth.onAuthStateChange((event, session) => {
-      console.log('📡 Auth event:', event, session ? 'session present' : 'no session');
+      log('📡 Auth event: ' + event + (session ? ' (session present)' : ' (no session)'));
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         status.textContent = '✅ Logged in';
         status.className = 'status success';
@@ -73,43 +145,36 @@
       }
     });
 
-    // ---- Login button ----
+    // ---- 4. Login button ----
     document.getElementById('login').addEventListener('click', async () => {
-      console.log('🔄 Login clicked.');
+      log('🔄 Login clicked.');
       const redirectTo = window.location.origin + window.location.pathname;
-      console.log('🔗 Redirecting to:', redirectTo);
+      log('🔗 Redirecting to: ' + redirectTo);
       try {
         const { error } = await client.auth.signInWithOAuth({
           provider: 'google',
           options: { redirectTo: redirectTo }
         });
         if (error) {
-          console.error('❌ Login error:', error);
+          log('❌ Login error: ' + error.message);
           alert('Login error: ' + error.message);
         } else {
-          console.log('⏳ Redirecting to Google...');
+          log('⏳ Redirecting to Google...');
         }
       } catch (e) {
-        console.error('❌ Login exception:', e);
+        log('❌ Login exception: ' + e.message);
         alert('Login exception: ' + e.message);
       }
     });
 
-    // ---- Handle redirect hash ----
-    (function handleHash() {
-      const hash = window.location.hash;
-      console.log('🔍 Hash on load:', hash);
-      if (hash && hash.includes('access_token')) {
-        console.log('✅ access_token found in hash!');
-        // The client will automatically handle this on refresh,
-        // but we need to keep the hash until the client processes it.
-        // The client will clear it after it's done.
-      }
-    })();
-
-    // ---- Run ----
-    console.log('🚀 Auth test starting...');
-    checkSession();
+    // ---- 5. Run ----
+    // Check if we came back from Google with a hash
+    const handled = handleRedirect();
+    if (!handled) {
+      // If we didn't handle a redirect, check session normally
+      checkSession();
+    }
+    // If handled, the page will reload, so no further actions needed.
   </script>
 </body>
 </html>
