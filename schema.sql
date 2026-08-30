@@ -336,3 +336,5 @@ drop trigger if exists on_payment_approved on public.payment_requests;
 create trigger on_payment_approved
   before update on public.payment_requests
   for each row execute procedure public.process_payment_approval();
+-- Add column to track daily reward claims
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS last_daily_claim timestamptz;
