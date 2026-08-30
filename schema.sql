@@ -1,4 +1,4 @@
-\-- ============================================================
+-- ============================================================
 -- Arena - MASTER SCHEMA v2 (safe to re-run, never deletes data)
 -- Matches the new single-file index.html (presence-based
 -- matchmaking, transaction ledger, match history, referrals).
@@ -18,6 +18,8 @@ create table if not exists public.users (
 alter table public.users add column if not exists last_seen timestamptz not null default now();
 alter table public.users add column if not exists referral_code text;
 alter table public.users add column if not exists referred_by uuid references public.users (id);
+-- ✅ DAILY REWARD TRACKING (added here for clean setup)
+alter table public.users add column if not exists last_daily_claim timestamptz;
 
 create unique index if not exists users_referral_code_key
   on public.users (referral_code) where referral_code is not null;
@@ -336,5 +338,3 @@ drop trigger if exists on_payment_approved on public.payment_requests;
 create trigger on_payment_approved
   before update on public.payment_requests
   for each row execute procedure public.process_payment_approval();
--- Add column to track daily reward claims
-ALTER TABLE public.users ADD COLUMN IF NOT EXISTS last_daily_claim timestamptz;
