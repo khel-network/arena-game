@@ -17,12 +17,7 @@
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
     }
-    html, body {
-      overflow-x: hidden;
-      width: 100%;
-      max-width: 100%;
-      height: 100%;
-    }
+    html, body { overflow-x: hidden; width: 100%; max-width: 100%; }
     body {
       font-family: 'Inter', -apple-system, sans-serif;
       background: #f4f7f8;
@@ -37,8 +32,7 @@
     .background-blobs {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      z-index: -1;
-      overflow: hidden;
+      z-index: -1; overflow: hidden;
       pointer-events: none;
     }
     .blob {
@@ -48,14 +42,13 @@
       opacity: 0.6;
       animation: float 15s infinite ease-in-out;
     }
-    .blob-1 { width: 400px; height: 400px; background: linear-gradient(135deg, #ff7e5f, #feb47b); top: -100px; left: -100px; animation-delay: 0s; }
+    .blob-1 { width: 400px; height: 400px; background: linear-gradient(135deg, #ff7e5f, #feb47b); top: -100px; left: -100px; }
     .blob-2 { width: 500px; height: 500px; background: linear-gradient(135deg, #8e2de2, #4a00e0); bottom: -150px; right: -150px; animation-delay: -5s; }
     .blob-3 { width: 300px; height: 300px; background: linear-gradient(135deg, #11998e, #38ef7d); top: 40%; left: 60%; animation-delay: -10s; }
-    .blob-4 { width: 200px; height: 200px; background: rgba(0,231,1,0.15); top: 10%; right: 20%; animation-delay: -3s; filter: blur(80px); }
     @keyframes float {
-      0% { transform: translate(0,0) scale(1); }
-      50% { transform: translate(30px,-30px) scale(1.1); }
-      100% { transform: translate(0,0) scale(1); }
+      0% { transform: translate(0,0); }
+      50% { transform: translate(30px,-30px); }
+      100% { transform: translate(0,0); }
     }
     button, input, select, textarea { font: inherit; }
     button { cursor: pointer; border: none; outline: none; background: none; color: inherit; touch-action: manipulation; }
@@ -70,26 +63,9 @@
       border-radius: 20px;
     }
 
-    /* ===== LANDING PAGE – CENTERED, ANIMATED ===== */
-    #page-landing {
-      min-height: 100vh;
-      background: transparent;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      animation: fadeIn 1s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    /* ===== LANDING PAGE ===== */
+    #page-landing { min-height: 100vh; background: transparent; display: flex; flex-direction: column; }
     .landing-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
       padding: 14px 20px;
       display: flex;
       justify-content: space-between;
@@ -97,7 +73,6 @@
       backdrop-filter: blur(12px);
       background: rgba(255,255,255,0.45);
       border-bottom: 1px solid rgba(255,255,255,0.7);
-      z-index: 10;
       flex-wrap: nowrap;
       gap: 8px;
     }
@@ -143,81 +118,74 @@
     }
     .btn-primary:hover { background: #00c601; transform: scale(1.02); }
 
-    .hero-landing {
+    .hero {
+      flex: 1;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      max-width: 480px;
+      padding: 24px 16px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
       width: 100%;
-      margin-top: 60px; /* offset fixed nav */
-      gap: 20px;
+      gap: 30px;
+      flex-wrap: wrap;
     }
-    .hero-landing .tagline {
-      text-align: center;
-    }
-    .hero-landing .tagline .badge {
+    .hero-left { flex: 1 1 300px; min-width: 240px; }
+    .hero-left .badge {
       display: inline-block;
       background: rgba(0,231,1,0.12);
       color: #00a301;
-      padding: 4px 14px;
+      padding: 4px 12px;
       border-radius: 100px;
       font-size: 0.7rem;
       font-weight: 600;
       letter-spacing: 0.04em;
-      margin-bottom: 10px;
+      margin-bottom: 16px;
       border: 1px solid rgba(0,231,1,0.2);
     }
-    .hero-landing .tagline h1 {
+    .hero-left h1 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 800;
-      line-height: 1.2;
+      line-height: 1.1;
+      margin-bottom: 12px;
       color: #1e293b;
     }
-    .hero-landing .tagline h1 .highlight { color: #00a301; }
-    .hero-landing .tagline p {
+    .hero-left h1 .highlight { color: #00a301; }
+    .hero-left p {
       font-size: 0.95rem;
       color: #556070;
-      margin-top: 8px;
+      max-width: 440px;
+      margin-bottom: 20px;
       line-height: 1.5;
     }
-
-    .auth-card-centered {
-      width: 100%;
-      max-width: 360px;
-      margin: 0 auto;
+    .hero-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+    .hero-stats .stat { display: flex; flex-direction: column; }
+    .hero-stats .stat .number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #1e293b;
+    }
+    .hero-stats .stat .label { font-size: 0.75rem; color: #556070; }
+    .hero-right { flex: 0 0 320px; min-width: 260px; max-width: 100%; }
+    .auth-card {
       background: rgba(255,255,255,0.55);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(255,255,255,0.7);
       border-radius: 24px;
-      padding: 28px 24px;
+      padding: 24px 20px;
       box-shadow: 0 8px 32px 0 rgba(31,38,135,0.15);
-      text-align: center;
-      animation: slideUp 1s ease 0.2s both;
     }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .auth-card-centered h3 {
+    .auth-card h3 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       font-weight: 700;
+      margin-bottom: 4px;
       color: #1e293b;
     }
-    .auth-card-centered .sub {
-      color: #556070;
-      font-size: 0.85rem;
-      margin-bottom: 16px;
-    }
-    .auth-perks {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 20px;
-      text-align: left;
-    }
+    .auth-card .sub { color: #556070; font-size: 0.85rem; margin-bottom: 16px; }
+    .auth-perks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
     .auth-perks .perk {
       display: flex;
       align-items: center;
@@ -232,24 +200,75 @@
       justify-content: center;
       gap: 10px;
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       background: #fff;
       color: #1a1a2e;
       border-radius: 12px;
       font-weight: 600;
       font-size: 0.95rem;
-      transition: 0.3s;
+      transition: 0.2s;
+      margin-bottom: 12px;
       border: 1px solid rgba(0,0,0,0.05);
       touch-action: manipulation;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .google-btn:hover { transform: translateY(-2px); background: #f0f0f0; box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
-    .google-btn:active { transform: scale(0.97); }
-    .auth-footnote {
-      font-size: 0.7rem;
-      color: #8895b0;
+    .google-btn:hover { transform: scale(1.02); background: #f0f0f0; }
+    .auth-footnote { font-size: 0.7rem; color: #8895b0; text-align: center; }
+
+    /* ---- Email/Password login fields ---- */
+    .email-auth-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0 8px;
+    }
+    .email-auth-fields input {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+      transition: 0.2s;
+      width: 100%;
+    }
+    .email-auth-fields input:focus {
+      outline: none;
+      border-color: #00e701;
+      box-shadow: 0 0 0 3px rgba(0,231,1,0.1);
+    }
+    .email-auth-row {
+      display: flex;
+      gap: 8px;
+    }
+    .email-auth-row .btn-primary,
+    .email-auth-row .btn-secondary {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.85rem;
       text-align: center;
-      margin-top: 12px;
+      min-height: 40px;
+      touch-action: manipulation;
+    }
+    .email-auth-row .btn-secondary {
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(0,0,0,0.08);
+      color: #1e293b;
+    }
+    .email-auth-row .btn-secondary:hover { background: rgba(255,255,255,0.9); }
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #8895b0;
+      font-size: 0.75rem;
+      margin: 2px 0 6px;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(0,0,0,0.06);
     }
 
     /* ===== DASHBOARD – Mobile‑optimised ===== */
@@ -495,7 +514,7 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1);
-      min-height: 200px;
+      min-height: 200px; /* slightly taller */
     }
     .game-card:hover {
       transform: translateY(-4px);
@@ -514,24 +533,23 @@
       font-size: 2.4rem;
       line-height: 1;
     }
-    /* EXTREMELY TINY BADGE */
+    /* TINY BADGE – VERY SMALL */
     .card-badge {
       position: absolute;
-      top: 4px;
-      left: 6px;
-      background: rgba(30,41,59,0.7);
-      padding: 1px 4px;
+      top: 6px;
+      left: 8px;
+      background: rgba(30,41,59,0.8);
+      padding: 2px 6px;
       border-radius: 100px;
-      font-size: 0.35rem;
+      font-size: 0.45rem;
       font-weight: 700;
       letter-spacing: 0.04em;
       color: #fff;
       text-transform: uppercase;
-      max-width: calc(100% - 12px);
+      max-width: calc(100% - 16px);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      line-height: 1.4;
     }
     .card-content {
       padding: 10px 12px 12px;
@@ -1321,38 +1339,10 @@
     }
     .cashout-info-note strong { color: #1e293b; }
 
-    /* ===== DAILY REWARD CARD ===== */
-    .daily-reward-box {
-      background: rgba(255,255,255,0.4);
-      border: 1px solid rgba(255,255,255,0.7);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-      margin-top: 12px;
-    }
-    .daily-reward-box .reward-amount {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #00a301;
-    }
-    .daily-reward-box .reward-label {
-      font-size: 0.7rem;
-      color: #556070;
-      margin-bottom: 8px;
-    }
-    .daily-reward-box .reward-status {
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-top: 6px;
-    }
-    .daily-reward-box .reward-status.claimed { color: #f16464; }
-    .daily-reward-box .reward-status.available { color: #00a301; }
-
     /* ===== RESPONSIVE ===== */
     @media (max-width:640px){
-      .hero-landing .tagline h1 { font-size: 1.8rem; }
-      .auth-card-centered { padding: 20px 16px; }
+      .hero-left h1 { font-size: 1.6rem; }
+      .hero-right { flex: 1 1 100%; }
       .games-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
       .profile-header-card { grid-template-columns: 1fr; }
       .addtoken-amount-grid { grid-template-columns: repeat(2,1fr); }
@@ -1373,11 +1363,11 @@
       .card-media span { font-size: 2rem; }
       .card-title { font-size: 0.8rem; }
       .card-desc { font-size: 0.6rem; }
-      .card-badge { font-size: 0.3rem; padding: 1px 3px; }
+      .card-badge { font-size: 0.4rem; padding: 1px 5px; }
     }
     @media (max-width:400px){
       .games-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .hero-landing .tagline h1 { font-size: 1.5rem; }
+      .hero-left h1 { font-size: 1.4rem; }
     }
   </style>
 </head>
@@ -1388,10 +1378,9 @@
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
   <div class="blob blob-3"></div>
-  <div class="blob blob-4"></div>
 </div>
 
-<!-- ===== LANDING PAGE (No email/password, centered) ===== -->
+<!-- ===== LANDING PAGE ===== -->
 <div id="page-landing">
   <nav class="landing-nav">
     <div class="brand">
@@ -1401,42 +1390,61 @@
       ARENA
     </div>
     <div class="nav-actions">
-      <button id="nav-signup-btn" class="btn-primary" style="display:none;">Get Started</button>
+      <button id="nav-login-btn" class="btn-outline">Sign In</button>
+      <button id="nav-signup-btn" class="btn-primary">Get Started</button>
     </div>
   </nav>
 
-  <div class="hero-landing">
-    <div class="tagline">
+  <div class="hero">
+    <div class="hero-left">
       <div class="badge">⚡ Verified 1v1 Skill Duels</div>
       <h1>Play Skill Games.<br/><span class="highlight">Win Real Tokens.</span></h1>
       <p>Compete against players in fast‑paced duels. Instant matchmaking, fair play, and immediate token rewards.</p>
+      <div class="hero-stats">
+        <div class="stat"><span class="number">1,000</span><span class="label">Welcome Tokens</span></div>
+        <div class="stat"><span class="number">&lt; 10s</span><span class="label">Match Queues</span></div>
+        <div class="stat"><span class="number">100%</span><span class="label">Skill‑Based</span></div>
+      </div>
     </div>
 
-    <div class="auth-card-centered">
-      <h3>Welcome Back</h3>
-      <p class="sub">Sign in to claim your 1,000 tokens and enter live matches</p>
-      <div class="auth-perks">
-        <div class="perk">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          <span><strong>1,000 Tokens</strong> instantly credited</span>
+    <div class="hero-right">
+      <div class="auth-card">
+        <h3>Create an Account</h3>
+        <p class="sub">Sign in to claim your 1,000 tokens and enter live matches</p>
+        <div class="auth-perks">
+          <div class="perk">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span><strong>1,000 Tokens</strong> instantly credited</span>
+          </div>
+          <div class="perk">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Encrypted &amp; secure authentication</span>
+          </div>
         </div>
-        <div class="perk">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Encrypted &amp; secure authentication</span>
+
+        <div class="email-auth-fields">
+          <input type="email" id="email-input" placeholder="Email address" />
+          <input type="password" id="password-input" placeholder="Password (min 6 chars)" />
+          <div class="email-auth-row">
+            <button id="email-login-btn" class="btn-primary" style="background:#00e701; color:#000;">Sign In</button>
+            <button id="email-signup-btn" class="btn-secondary">Create Account</button>
+          </div>
         </div>
+
+        <div class="auth-divider">or continue with</div>
+
+        <button id="google-login-btn" class="google-btn">
+          <svg width="18" height="18" viewBox="0 0 48 48">
+            <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
+            <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
+            <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
+            <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+
+        <p class="auth-footnote">By continuing, you agree to the Arena Terms of Service.</p>
       </div>
-
-      <button id="google-login-btn" class="google-btn">
-        <svg width="18" height="18" viewBox="0 0 48 48">
-          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
-          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
-          <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
-          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/>
-        </svg>
-        <span>Continue with Google</span>
-      </button>
-
-      <p class="auth-footnote">By continuing, you agree to the Arena Terms of Service.</p>
     </div>
   </div>
 </div>
@@ -1488,7 +1496,6 @@
   </header>
 
   <main class="app-main">
-    <!-- EARN VIEW -->
     <section id="view-earn" class="app-view active">
       <div class="cashout-progress-banner">
         <div class="progress-row">
@@ -1517,7 +1524,6 @@
       <div class="games-grid" id="gamesGrid"></div>
     </section>
 
-    <!-- PROFILE VIEW -->
     <section id="view-profile" class="app-view">
       <div class="profile-header-card">
         <div class="profile-left">
@@ -1623,7 +1629,6 @@
       </div>
     </section>
 
-    <!-- TRANSACTIONS VIEW -->
     <section id="view-ledger" class="app-view">
       <div class="section-card">
         <button class="back-link" id="ledger-back-btn">‹ Back to Profile</button>
@@ -1638,7 +1643,6 @@
       </div>
     </section>
 
-    <!-- REFER VIEW -->
     <section id="view-refer" class="app-view">
       <div class="section-card">
         <button class="back-link" id="refer-back-btn">‹ Back to Profile</button>
@@ -1673,7 +1677,6 @@
       </div>
     </section>
 
-    <!-- ADD TOKENS VIEW -->
     <section id="view-addtoken" class="app-view">
       <div class="section-card">
         <button class="back-link" id="addtoken-back-btn">‹ Back to Profile</button>
@@ -1703,7 +1706,6 @@
       </div>
     </section>
 
-    <!-- MATCH HISTORY VIEW -->
     <section id="view-matches" class="app-view">
       <div class="section-card">
         <h3>Match History</h3>
@@ -1717,7 +1719,6 @@
       </div>
     </section>
 
-    <!-- CASHOUT VIEW -->
     <section id="view-cashout" class="app-view">
       <div class="section-card">
         <h3>Cashout Vault</h3>
@@ -1748,24 +1749,18 @@
       </div>
     </section>
 
-    <!-- REWARDS VIEW – with Daily Reward Claim -->
     <section id="view-rewards" class="app-view">
       <div class="section-card">
         <h3>Daily Rewards</h3>
-        <p class="section-sub">Login every day to claim your free tokens</p>
-
-        <div class="daily-reward-box" id="daily-reward-box">
-          <div class="reward-label">Daily Bonus</div>
-          <div class="reward-amount">₹50</div>
-          <div id="daily-reward-status" class="reward-status available">✨ Claim Now</div>
-          <button id="claim-daily-btn" class="btn-primary" style="margin-top:10px; width:100%;">Claim Bonus</button>
-          <div id="daily-reward-timer" style="font-size:0.7rem; color:#6a7a94; margin-top:6px;"></div>
+        <p class="section-sub">Daily streak login bonus</p>
+        <div class="stat-box" style="margin-top:12px;">
+          <span class="stat-box-num">Day 1 Streak</span>
+          <button class="btn-primary" style="margin-top:12px; max-width:220px;" onclick="alert('Daily reward claimed: +₹50!')">Claim ₹50 Daily Bonus</button>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Modals -->
   <div id="match-overlay" class="modal-overlay hidden">
     <div class="modal-card">
       <div style="margin-bottom:10px;">
@@ -1827,7 +1822,6 @@
   </footer>
 </div>
 
-<!-- ===== LIVE MATCH PAGE ===== -->
 <div id="page-match" class="hidden">
   <p id="match-loading" class="center-screen loading-text" style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#f4f7f8;">Loading match...</p>
   <div id="match-root" class="match-wrap hidden" style="padding:16px; max-width:600px; margin:0 auto;">
@@ -1846,7 +1840,6 @@
   </div>
 </div>
 
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
@@ -2059,12 +2052,7 @@ const txModal = document.getElementById('transaction-modal');
 const txModalClose = document.getElementById('tx-modal-close');
 const txListContainer = document.getElementById('tx-list-container');
 
-// ---- Daily Reward DOM ----
-const dailyRewardStatus = document.getElementById('daily-reward-status');
-const claimDailyBtn = document.getElementById('claim-daily-btn');
-const dailyTimer = document.getElementById('daily-reward-timer');
-
-// ---- Cashout UI ----
+// ========== Cashout UI ==========
 const cashoutSubmitBtn = document.getElementById('cashout-submit-btn');
 const cashoutUpi = document.getElementById('cashout-upi');
 const cashoutAmount = document.getElementById('cashout-amount');
@@ -2077,99 +2065,12 @@ function updateCashoutUI() {
   }
 }
 
-// ---- Override updateUI to include cashout & daily reward ----
 const originalUpdateUI = updateUI;
 updateUI = function() {
   originalUpdateUI();
   updateCashoutUI();
-  updateDailyRewardUI();
 };
 
-// ---- Daily Reward Logic ----
-async function checkDailyRewardStatus() {
-  if (!currentUser) return;
-  try {
-    const { data, error } = await client
-      .from('users')
-      .select('last_daily_claim')
-      .eq('id', currentUser.id)
-      .single();
-    if (error) throw error;
-    const lastClaim = data?.last_daily_claim ? new Date(data.last_daily_claim) : null;
-    const now = new Date();
-    const today = new Date(now);
-    today.setHours(0,0,0,0);
-    const claimedToday = lastClaim && lastClaim >= today;
-    return { claimedToday, lastClaim };
-  } catch (e) {
-    console.warn('Failed to check daily reward:', e);
-    return { claimedToday: false, lastClaim: null };
-  }
-}
-
-async function updateDailyRewardUI() {
-  if (!currentUser) return;
-  const status = await checkDailyRewardStatus();
-  if (!dailyRewardStatus || !claimDailyBtn) return;
-
-  if (status.claimedToday) {
-    dailyRewardStatus.textContent = '✅ Claimed Today';
-    dailyRewardStatus.className = 'reward-status claimed';
-    claimDailyBtn.disabled = true;
-    claimDailyBtn.style.opacity = '0.6';
-    const now = new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24,0,0,0);
-    const diff = midnight - now;
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    dailyTimer.textContent = `Next claim available in ${hours}h ${minutes}m`;
-  } else {
-    dailyRewardStatus.textContent = '✨ Available!';
-    dailyRewardStatus.className = 'reward-status available';
-    claimDailyBtn.disabled = false;
-    claimDailyBtn.style.opacity = '1';
-    dailyTimer.textContent = '';
-  }
-}
-
-async function claimDailyReward() {
-  if (!currentUser) return;
-  const status = await checkDailyRewardStatus();
-  if (status.claimedToday) {
-    alert('You already claimed your daily reward today.');
-    return;
-  }
-
-  claimDailyBtn.disabled = true;
-  claimDailyBtn.textContent = 'Claiming...';
-
-  try {
-    const now = new Date().toISOString();
-    const { error: updateErr } = await client
-      .from('users')
-      .update({ last_daily_claim: now })
-      .eq('id', currentUser.id);
-    if (updateErr) throw updateErr;
-
-    await persistWalletDelta(50);
-    await recordTransaction('Daily Reward Bonus', 'credit', 50);
-
-    await updateUI();
-    alert('🎉 Daily reward of ₹50 claimed!');
-  } catch (e) {
-    alert('Error claiming reward: ' + e.message);
-    console.error(e);
-  } finally {
-    claimDailyBtn.disabled = false;
-    claimDailyBtn.textContent = 'Claim Bonus';
-    await updateDailyRewardUI();
-  }
-}
-
-claimDailyBtn?.addEventListener('click', claimDailyReward);
-
-// ---- Cashout submit ----
 cashoutSubmitBtn?.addEventListener('click', function() {
   const upi = cashoutUpi?.value.trim();
   const amount = parseFloat(cashoutAmount?.value);
@@ -2194,7 +2095,7 @@ cashoutSubmitBtn?.addEventListener('click', function() {
   cashoutStatus.className = 'refer-status-msg success';
 });
 
-// ---- All original JS functions (unchanged) ----
+// ========== All original JS functions ==========
 async function loadUserName() {
   const meta = currentUser.user_metadata || {};
   const localName = localStorage.getItem('arena_name_' + currentUser.id);
@@ -2318,7 +2219,6 @@ function updateUI() {
   renderMatchHistory();
   renderTxModalList();
   updateCashoutUI();
-  updateDailyRewardUI();
 }
 
 function renderLedger() {
@@ -2515,7 +2415,6 @@ saveNameBtn?.addEventListener('click', async () => {
   }
 });
 
-// ---- Matchmaking (unchanged) ----
 async function findAndClaimOpponent() {
   const { data: match, error } = await client.rpc('claim_opponent', { p_game_type: activeGame.type, p_entry_fee: MATCH_ENTRY_FEE });
   if (error || !match || !match.id) return null;
@@ -2663,33 +2562,519 @@ function launchArena(opponent) {
   else runReactionGame();
 }
 
-// ---- Game functions (unchanged) ----
-function runReactionGame() { /* ... */ }
-function runCyberMathGame() { /* ... */ }
-function runColorClashGame() { /* ... */ }
-function runMemoryMatrixGame() { /* ... */ }
-function runTicTacToeGame() { /* ... */ }
-function endDuel(won, analysisText) { /* ... */ }
+function runReactionGame() {
+  arenaStage.innerHTML = `<div class="reaction-box reaction-wait" id="reaction-box"><h2>WAIT FOR GREEN...</h2><p style="margin-top:6px;font-size:0.7rem;opacity:0.85">Click instantly when the box turns green</p></div>`;
+  const box = document.getElementById('reaction-box');
+  let canClick = false, startTime = 0, finished = false;
+  const greenDelay = Math.floor(Math.random() * 2200) + 2400;
+  const timeoutId = setTimeout(() => {
+    if (finished) return;
+    canClick = true;
+    startTime = Date.now();
+    box.className = 'reaction-box reaction-go';
+    box.querySelector('h2').textContent = 'CLICK NOW!';
+  }, greenDelay);
+  box.addEventListener('click', () => {
+    if (finished) return;
+    finished = true;
+    if (!canClick) { clearTimeout(timeoutId); endDuel(false, 'False Start!'); }
+    else {
+      const userReaction = Date.now() - startTime;
+      const botReaction = Math.floor(Math.random() * 120) + 290;
+      if (userReaction < botReaction) endDuel(true, 'Your reaction: ' + userReaction + 'ms vs Opponent: ' + botReaction + 'ms');
+      else endDuel(false, 'Opponent faster (' + botReaction + 'ms). Your speed: ' + userReaction + 'ms');
+    }
+  });
+}
 
-// ---- MatchRoom (unchanged) ----
-const MatchRoom = (() => { /* ... */ })();
+function runCyberMathGame() {
+  const n1 = Math.floor(Math.random() * 30) + 12;
+  const n2 = Math.floor(Math.random() * 30) + 12;
+  const correct = n1 + n2;
+  const wrong = correct + (Math.random() > 0.5 ? 4 : -5);
+  const leftIsCorrect = Math.random() > 0.5;
+  const optA = leftIsCorrect ? correct : wrong;
+  const optB = leftIsCorrect ? wrong : correct;
+  arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">Fast Equation Solve</p><div class="math-problem">${n1} + ${n2} = ?</div><div class="quiz-options"><button class="quiz-option" id="opt-a">${optA}</button><button class="quiz-option" id="opt-b">${optB}</button></div></div>`;
+  let answered = false;
+  const botAnswerTimer = setTimeout(() => { if (!answered) { answered = true; endDuel(false, 'Opponent calculated first!'); } }, 2000 + Math.random() * 1000);
+  function pickAnswer(val) { if (answered) return; answered = true; clearTimeout(botAnswerTimer); if (val === correct) endDuel(true, 'Accurate calculation!'); else endDuel(false, 'Incorrect answer.'); }
+  document.getElementById('opt-a')?.addEventListener('click', () => pickAnswer(optA));
+  document.getElementById('opt-b')?.addEventListener('click', () => pickAnswer(optB));
+}
 
-// ---- Live game handlers (unchanged) ----
-function initReactionLive(stageEl, iAmPlayer1) { /* ... */ }
-function initTicTacToeLive(stageEl, iAmPlayer1) { /* ... */ }
-async function showResultLive(stageEl, result, detail) { /* ... */ }
-async function goToMatch(matchId, gameType) { /* ... */ }
-async function returnToDashboardFromMatch() { /* ... */ }
-function goToLanding() { /* ... */ }
-async function initDashboard() { /* ... */ }
-async function routeOnLoad() { /* ... */ }
-function setArenaTurn(who) { /* ... */ }
+function runColorClashGame() {
+  const colors = [{ text: 'RED', css: '#ef4444' }, { text: 'BLUE', css: '#38bdf8' }, { text: 'GREEN', css: '#00e701' }];
+  const targetWord = colors[Math.floor(Math.random() * colors.length)];
+  const fontColor = colors[Math.floor(Math.random() * colors.length)];
+  arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">Does the word match the font color?</p><div class="quiz-question" style="color:${fontColor.css}; font-size:1.8rem; font-weight:700;">${targetWord.text}</div><div class="quiz-options"><button class="quiz-option" id="match-yes">YES (MATCH)</button><button class="quiz-option" id="match-no">NO (DIFFERENT)</button></div></div>`;
+  const isMatching = targetWord.text === fontColor.text;
+  let done = false;
+  function evaluate(answer) { if (done) return; done = true; if (answer === isMatching) endDuel(true, 'Correct cognitive distinction!'); else endDuel(false, 'Incorrect mismatch.'); }
+  document.getElementById('match-yes')?.addEventListener('click', () => evaluate(true));
+  document.getElementById('match-no')?.addEventListener('click', () => evaluate(false));
+}
 
-// ---- Boot ----
+function runMemoryMatrixGame() {
+  let tilesHtml = '';
+  for (let i = 0; i < 9; i++) tilesHtml += `<div class="matrix-tile" data-idx="${i}" style="width:50px;height:50px;background:rgba(0,0,0,0.05);border-radius:8px;cursor:pointer;border:1px solid rgba(0,0,0,0.1)"></div>`;
+  arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">Memorize the active green tile</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:180px;margin:12px auto">${tilesHtml}</div></div>`;
+  const tiles = document.querySelectorAll('.matrix-tile');
+  const activeIndex = Math.floor(Math.random() * 9);
+  setTimeout(() => {
+    if (tiles[activeIndex]) tiles[activeIndex].style.background = '#00e701';
+    setTimeout(() => {
+      if (tiles[activeIndex]) tiles[activeIndex].style.background = 'rgba(0,0,0,0.05)';
+      tiles.forEach(t => {
+        t.addEventListener('click', () => {
+          const clickedIdx = parseInt(t.getAttribute('data-idx'));
+          if (clickedIdx === activeIndex) endDuel(true, 'Flawless spatial memory!');
+          else endDuel(false, 'Incorrect quadrant selected.');
+        });
+      });
+    }, 800);
+  }, 400);
+}
+
+function runTicTacToeGame() {
+  const board = Array(9).fill(null);
+  const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  let playerTurn = true;
+  let over = false;
+
+  function renderBoard() {
+    if (!over) setArenaTurn(playerTurn ? 'you' : 'opp');
+    let cellsHtml = '';
+    board.forEach((val, i) => {
+      cellsHtml += `<div class="ttt-cell${val ? ' filled' : ''}" data-idx="${i}">${val || ''}</div>`;
+    });
+    arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">You are X · Opponent is O</p><div class="ttt-wrapper"><div class="ttt-board" id="ttt-board">${cellsHtml}</div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg></div></div>`;
+    if (playerTurn && !over) {
+      document.querySelectorAll('#ttt-board .ttt-cell').forEach(cell => {
+        cell.addEventListener('click', () => handlePlayerMove(parseInt(cell.getAttribute('data-idx'), 10)));
+      });
+    }
+  }
+
+  function handlePlayerMove(idx) {
+    if (over || !playerTurn || board[idx]) return;
+    board[idx] = 'X';
+    playerTurn = false;
+    renderBoard();
+    if (checkEnd()) return;
+    setTimeout(botMove, 2000 + Math.random() * 1000);
+  }
+
+  function botMove() {
+    if (over) return;
+    const idx = pickBotMove();
+    board[idx] = 'O';
+    playerTurn = true;
+    renderBoard();
+    checkEnd();
+  }
+
+  function pickBotMove() {
+    const empty = board.map((v, i) => (v ? null : i)).filter(v => v !== null);
+    for (const i of empty) { board[i] = 'O'; if (hasWinner('O')) { board[i] = null; return i; } board[i] = null; }
+    for (const i of empty) { board[i] = 'X'; if (hasWinner('X')) { board[i] = null; return i; } board[i] = null; }
+    if (!board[4]) return 4;
+    const corners = [0,2,6,8].filter(i => !board[i]);
+    if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
+    return empty[Math.floor(Math.random() * empty.length)];
+  }
+
+  function hasWinner(symbol) { return WIN_LINES.some(line => line.every(i => board[i] === symbol)); }
+  function findWinningLine(symbol) { return WIN_LINES.find(line => line.every(i => board[i] === symbol)); }
+
+  function drawWinLine(line) {
+    const svg = document.getElementById('ttt-line');
+    if (!svg) return;
+    const cellSize = 62, gap = 4, step = cellSize + gap;
+    const centers = [0,1,2,3,4,5,6,7,8].map(i => {
+      const row = Math.floor(i / 3), col = i % 3;
+      return [col * step + cellSize/2, row * step + cellSize/2];
+    });
+    const [x1, y1] = centers[line[0]];
+    const [x2, y2] = centers[line[2]];
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    path.setAttribute('x1', x1); path.setAttribute('y1', y1);
+    path.setAttribute('x2', x1); path.setAttribute('y2', y1);
+    path.setAttribute('class', 'ttt-winline');
+    svg.appendChild(path);
+    requestAnimationFrame(() => {
+      path.style.transition = 'x2 0.35s ease, y2 0.35s ease';
+      path.setAttribute('x2', x2); path.setAttribute('y2', y2);
+    });
+  }
+
+  function checkEnd() {
+    const xLine = findWinningLine('X');
+    if (xLine) { over = true; renderBoard(); drawWinLine(xLine); setTimeout(() => endDuel(true, 'Winning line!'), 650); return true; }
+    const oLine = findWinningLine('O');
+    if (oLine) { over = true; renderBoard(); drawWinLine(oLine); setTimeout(() => endDuel(false, 'Opponent won.'), 650); return true; }
+    if (board.every(c => c)) { over = true; setTimeout(endDrawnMatch, 400); return true; }
+    return false;
+  }
+
+  async function endDrawnMatch() {
+    try { await persistWalletDelta(MATCH_ENTRY_FEE); await recordTransaction('Stake Refunded', 'credit', MATCH_ENTRY_FEE); await recordMatch(activeGame.name, activeOpponent.name, 'DRAW', 0); } catch (e) {}
+    updateUI();
+    document.getElementById('arena-turn-indicator')?.classList.add('hidden');
+    arenaStage.innerHTML = `<div class="result-card"><h2 style="color:var(--text-main)">DRAW</h2><p style="font-weight:700;color:#8895b0">Stake Refunded</p><div class="result-analytics"><div>Stalemate — entry fee refunded.</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#00e701;color:#000;">Dashboard</button></div></div>`;
+    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance.'); return; } beginMatchmaking(); });
+    document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); });
+  }
+
+  renderBoard();
+}
+
+async function endDuel(won, analysisText) {
+  let reward = -MATCH_ENTRY_FEE;
+  if (won) {
+    try { await persistWalletDelta(MATCH_WIN_REWARD); await recordTransaction('Duel Victory', 'credit', MATCH_WIN_REWARD); reward = MATCH_WIN_REWARD; } catch (e) {}
+  }
+  await recordMatch(activeGame.name, activeOpponent.name, won ? 'VICTORY' : 'DEFEAT', reward);
+  updateUI();
+  document.getElementById('arena-turn-indicator')?.classList.add('hidden');
+  const rewardLine = won ? '+' + formatRupees(MATCH_WIN_REWARD) + ' Awarded' : formatRupees(-MATCH_ENTRY_FEE) + ' Stake Lost';
+  arenaStage.innerHTML = `<div class="result-card"><h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2><p style="font-weight:700;color:#8895b0">${rewardLine}</p><div class="result-analytics"><div>${analysisText}</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#00e701;color:#000;">Dashboard</button></div></div>`;
+  document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance.'); return; } beginMatchmaking(); });
+  document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); });
+}
+
+const MatchRoom = (() => {
+  let match = null, myId = null, opponentId = null, iAmPlayer1 = false, channel = null, finished = false;
+  const handlers = {};
+  let activityCallback = null;
+  function onActivity(cb) { activityCallback = cb; }
+  async function init(matchId, userId) {
+    myId = userId;
+    const { data, error } = await client.from('matches').select('*').eq('id', matchId).single();
+    if (error || !data) throw new Error('Match not found');
+    match = data;
+    iAmPlayer1 = match.player1_id === myId;
+    opponentId = iAmPlayer1 ? match.player2_id : match.player1_id;
+    channel = client.channel('match-' + matchId, { config: { broadcast: { self: false } } });
+    channel.on('broadcast', { event: 'move' }, (payload) => {
+      const { type, data } = payload.payload;
+      if (activityCallback) activityCallback(type, data);
+      if (handlers[type]) handlers[type](data);
+    });
+    await new Promise(resolve => channel.subscribe(status => { if (status === 'SUBSCRIBED') resolve(); }));
+    return { match, opponentId, iAmPlayer1 };
+  }
+  function send(type, data) { channel.send({ type: 'broadcast', event: 'move', payload: { type, data } }); }
+  function onMessage(type, handler) { handlers[type] = handler; }
+  async function finish(result) {
+    if (finished) return;
+    finished = true;
+    await client.from('matches').update({ status: 'finished', winner_id: result === 'win' ? myId : result === 'lose' ? opponentId : null, finished_at: new Date().toISOString() }).eq('id', match.id).eq('status', 'active');
+    if (result === 'win') {
+      const payout = Math.round(match.entry_fee * 1.8);
+      const { data: wallet } = await client.from('wallet').select('dummy_token').eq('user_id', myId).single();
+      await client.from('wallet').update({ dummy_token: (wallet?.dummy_token || 0) + payout, updated_at: new Date().toISOString() }).eq('user_id', myId);
+      return payout;
+    }
+    if (result === 'draw') {
+      const { data: wallet } = await client.from('wallet').select('dummy_token').eq('user_id', myId).single();
+      await client.from('wallet').update({ dummy_token: (wallet?.dummy_token || 0) + match.entry_fee, updated_at: new Date().toISOString() }).eq('user_id', myId);
+    }
+    return 0;
+  }
+  function cleanup() { if (channel) client.removeChannel(channel); }
+  return { init, send, onMessage, finish, cleanup, onActivity, get match() { return match; } };
+})();
+
+function initReactionLive(stageEl, iAmPlayer1) {
+  stageEl.innerHTML = `<p class="subtitle">Waiting for both players...</p><div class="reaction-box reaction-wait" id="pad">Get ready...</div>`;
+  const pad = () => document.getElementById('pad');
+  let goTime = null, myTime = null, opponentTime = null, armed = false;
+
+  function startRound() {
+    armed = true;
+    pad().className = 'reaction-box reaction-wait';
+    pad().textContent = 'Wait for green...';
+    const delay = 1500 + Math.random() * 3000;
+    setTimeout(() => {
+      if (!armed) return;
+      goTime = performance.now();
+      pad().className = 'reaction-box reaction-go';
+      pad().textContent = 'CLICK NOW!';
+    }, delay);
+  }
+
+  stageEl.addEventListener('click', (e) => {
+    if (!e.target.closest('#pad') || myTime !== null) return;
+    if (!goTime) {
+      pad().className = 'reaction-box reaction-wait';
+      pad().textContent = 'Too early! You lose this round.';
+      myTime = 99999;
+      MatchRoom.send('reaction_result', { time: myTime });
+      checkOutcome();
+      return;
+    }
+    myTime = performance.now() - goTime;
+    pad().textContent = `You: ${myTime.toFixed(0)}ms`;
+    MatchRoom.send('reaction_result', { time: myTime });
+    checkOutcome();
+  });
+
+  MatchRoom.onMessage('reaction_result', (data) => {
+    opponentTime = data.time;
+    checkOutcome();
+  });
+
+  MatchRoom.onMessage('start_round', () => startRound());
+
+  function checkOutcome() {
+    if (myTime === null || opponentTime === null) return;
+    let result;
+    if (myTime < opponentTime) result = 'win';
+    else if (myTime > opponentTime) result = 'lose';
+    else result = 'draw';
+    showResultLive(stageEl, result, {
+      mine: myTime >= 99999 ? 'Too early' : `${myTime.toFixed(0)}ms`,
+      theirs: opponentTime >= 99999 ? 'Too early' : `${opponentTime.toFixed(0)}ms`
+    });
+  }
+
+  if (iAmPlayer1) {
+    MatchRoom.send('start_round', {});
+    startRound();
+  }
+}
+
+function initTicTacToeLive(stageEl, iAmPlayer1) {
+  const mySymbol = iAmPlayer1 ? 'X' : 'O';
+  const theirSymbol = iAmPlayer1 ? 'O' : 'X';
+  let board = Array(9).fill(null);
+  let myTurn = iAmPlayer1;
+  let over = false;
+  const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+  function render() {
+    stageEl.innerHTML = `<p class="subtitle">You are <strong>${mySymbol}</strong></p><div class="ttt-wrapper"><div class="ttt-board" id="board"></div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg></div>`;
+    const boardEl = document.getElementById('board');
+    board.forEach((val, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'ttt-cell' + (val ? ' filled ' + val : '');
+      cell.textContent = val || '';
+      cell.addEventListener('click', () => handleClick(i));
+      boardEl.appendChild(cell);
+    });
+  }
+
+  function handleClick(i) {
+    if (over || !myTurn || board[i]) return;
+    playMove(i, mySymbol);
+    MatchRoom.send('ttt_move', { index: i });
+  }
+
+  MatchRoom.onMessage('ttt_move', (data) => playMove(data.index, theirSymbol));
+
+  function playMove(index, symbol) {
+    board[index] = symbol;
+    myTurn = symbol !== mySymbol;
+    render();
+    checkEnd();
+  }
+
+  function checkEnd() {
+    const winner = WIN_LINES.find(line => board[line[0]] && board[line[0]] === board[line[1]] && board[line[1]] === board[line[2]]);
+    if (winner) {
+      over = true;
+      drawWinLine(winner);
+      const winSymbol = board[winner[0]];
+      setTimeout(() => {
+        const result = winSymbol === mySymbol ? 'win' : 'lose';
+        showResultLive(stageEl, result, {});
+      }, 600);
+      return;
+    }
+    if (board.every(c => c)) {
+      over = true;
+      showResultLive(stageEl, 'draw', {});
+    }
+  }
+
+  function drawWinLine(line) {
+    const svg = document.getElementById('ttt-line');
+    if (!svg) return;
+    const cellSize = 62, gap = 4, step = cellSize + gap;
+    const centers = [0,1,2,3,4,5,6,7,8].map(i => {
+      const row = Math.floor(i/3), col = i%3;
+      return [col*step + cellSize/2, row*step + cellSize/2];
+    });
+    const [x1,y1] = centers[line[0]], [x2,y2] = centers[line[2]];
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    path.setAttribute('x1', x1); path.setAttribute('y1', y1); path.setAttribute('x2', x1); path.setAttribute('y2', y1);
+    path.setAttribute('class', 'ttt-winline');
+    svg.appendChild(path);
+    requestAnimationFrame(() => {
+      path.style.transition = 'x2 0.35s ease, y2 0.35s ease';
+      path.setAttribute('x2', x2); path.setAttribute('y2', y2);
+    });
+  }
+
+  render();
+}
+
+async function showResultLive(stageEl, result, detail) {
+  const payout = await MatchRoom.finish(result);
+  const label = result === 'win' ? 'VICTORY' : result === 'lose' ? 'DEFEAT' : 'DRAW';
+  const cls = result === 'win' ? 'win-text' : result === 'lose' ? 'lose-text' : 'draw-text';
+  const emoji = result === 'win' ? '🎉' : result === 'lose' ? '😞' : '🤝';
+  const tokenLine = result === 'win' ? `<p>+${formatRupees(payout)}</p>` : result === 'draw' ? `<p>Entry fee refunded</p>` : `<p>-${formatRupees(MatchRoom.match.entry_fee)}</p>`;
+  const detailLine = detail ? `<p class="subtitle">You: ${detail.mine} · Opponent: ${detail.theirs}</p>` : '';
+  stageEl.innerHTML = `
+    <div class="result-card" style="position:relative;">
+      ${result === 'win' ? `<div class="confetti-layer" id="confetti-layer"></div>` : ''}
+      <h2 class="${cls}">${emoji} ${label}</h2>
+      ${detailLine}
+      ${tokenLine}
+      <div class="result-btn-row">
+        <button class="btn-secondary" id="rematch-btn">Rematch</button>
+        <button class="btn-primary" id="return-dash-btn" style="background:#00e701;color:#000;">Dashboard</button>
+      </div>
+    </div>
+  `;
+  if (result === 'win') {
+    const layer = document.getElementById('confetti-layer');
+    if (layer) {
+      const colors = ['#00e701', '#38bdf8', '#f59e0b', '#f16464', '#a78bfa'];
+      for (let i = 0; i < 40; i++) {
+        const piece = document.createElement('span');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = Math.random() * 0.4 + 's';
+        piece.style.animationDuration = 1.6 + Math.random() * 1.2 + 's';
+        piece.style.transform = 'rotate(' + Math.floor(Math.random() * 360) + 'deg)';
+        layer.appendChild(piece);
+      }
+    }
+  }
+  document.getElementById('rematch-btn')?.addEventListener('click', () => {
+    arenaOverlay.classList.add('hidden');
+    if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance.'); return; }
+    beginMatchmaking();
+  });
+  document.getElementById('return-dash-btn')?.addEventListener('click', () => {
+    arenaOverlay.classList.add('hidden');
+    returnToDashboardFromMatch();
+  });
+}
+
+async function goToMatch(matchId, gameType) {
+  document.getElementById('dashboard')?.classList.add('hidden');
+  document.getElementById('page-match')?.classList.remove('hidden');
+  const matchLoading = document.getElementById('match-loading');
+  const matchRoot = document.getElementById('match-root');
+  if (matchLoading) { matchLoading.textContent = 'Loading match...'; matchLoading.classList.remove('hidden'); }
+  if (matchRoot) matchRoot.classList.add('hidden');
+
+  let roomInfo;
+  try {
+    roomInfo = await MatchRoom.init(matchId, currentUser.id);
+  } catch (e) {
+    if (matchLoading) matchLoading.textContent = 'Match expired.';
+    return;
+  }
+
+  const { data: profiles } = await client.from('users').select('id, full_name, avatar_url').in('id', [roomInfo.match.player1_id, roomInfo.match.player2_id]);
+  const me = profiles.find(p => p.id === currentUser.id);
+  const opp = profiles.find(p => p.id === roomInfo.opponentId);
+  const meNameEl = document.getElementById('me-name');
+  const meAvatarEl = document.getElementById('me-avatar');
+  const oppNameEl = document.getElementById('opp-name');
+  const oppAvatarEl = document.getElementById('opp-avatar');
+  if (meNameEl) meNameEl.textContent = me?.full_name || 'You';
+  if (meAvatarEl) meAvatarEl.src = me?.avatar_url || '';
+  if (oppNameEl) oppNameEl.textContent = opp?.full_name || 'Opponent';
+  if (oppAvatarEl) oppAvatarEl.src = opp?.avatar_url || '';
+
+  if (matchLoading) matchLoading.classList.add('hidden');
+  if (matchRoot) matchRoot.classList.remove('hidden');
+
+  const stage = document.getElementById('stage');
+  stage.innerHTML = '';
+
+  if (gameType === 'tictactoe') {
+    initTicTacToeLive(stage, roomInfo.iAmPlayer1);
+  } else if (gameType === 'reaction') {
+    initReactionLive(stage, roomInfo.iAmPlayer1);
+  } else {
+    stage.innerHTML = `<p class="loading-text">Live mode for this game is coming soon.</p><button id="back-to-lobby-btn" class="btn-primary" style="background:#00e701;color:#000;padding:10px 20px;border-radius:10px;font-weight:700;margin-top:10px;">Back to Lobby</button>`;
+    document.getElementById('back-to-lobby-btn')?.addEventListener('click', returnToDashboardFromMatch);
+  }
+}
+
+async function returnToDashboardFromMatch() {
+  MatchRoom.cleanup();
+  document.getElementById('page-match')?.classList.add('hidden');
+  document.getElementById('dashboard')?.classList.remove('hidden');
+  try { await loadWallet(); await loadTransactions(); await loadMatchHistory(); updateUI(); } catch (e) {}
+}
+
+function goToLanding() {
+  document.getElementById('page-landing')?.classList.remove('hidden');
+  document.getElementById('loading')?.classList.add('hidden');
+  document.getElementById('dashboard')?.classList.add('hidden');
+  document.getElementById('page-match')?.classList.add('hidden');
+}
+
+async function initDashboard() {
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { goToLanding(); return; }
+    currentUser = session.user;
+    if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '—';
+    await loadUserName();
+    await loadWallet();
+    await loadTransactions();
+    await loadMatchHistory();
+    await loadReferralInfo();
+    updateUI();
+    startPresenceHeartbeat();
+  } catch (e) { console.error(e); } finally {
+    document.getElementById('loading')?.classList.add('hidden');
+    document.getElementById('dashboard')?.classList.remove('hidden');
+  }
+}
+
+async function routeOnLoad() {
+  const { data: { session } } = await client.auth.getSession();
+  if (session) {
+    document.getElementById('page-landing')?.classList.add('hidden');
+    document.getElementById('loading')?.classList.remove('hidden');
+    await initDashboard();
+  } else {
+    goToLanding();
+  }
+}
+
 window.addEventListener('beforeunload', () => {
   MatchRoom.cleanup();
 });
+
 routeOnLoad();
+
+function setArenaTurn(who) {
+  const indicator = document.getElementById('arena-turn-indicator');
+  if (!indicator) return;
+  const dot = document.getElementById('turn-dot');
+  const text = document.getElementById('turn-indicator-text');
+  if (who === 'you') {
+    dot.className = 'turn-dot turn-dot-you';
+    text.textContent = 'Your Turn';
+    text.style.color = '#00a301';
+  } else {
+    dot.className = 'turn-dot turn-dot-opp';
+    text.textContent = 'Opponent\'s Turn';
+    text.style.color = '#38bdf8';
+  }
+}
 
 </script>
 </body>
