@@ -2,137 +2,114 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Auth Test (aggressive)</title>
+  <title>Auth Test (final)</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+    button { padding: 12px 24px; font-size: 16px; cursor: pointer; background: #4285f4; color: white; border: none; border-radius: 8px; }
+    button:hover { background: #357abd; }
+    .status { margin: 20px 0; font-size: 18px; font-weight: bold; }
+    .user { font-size: 16px; color: #333; }
+    .success { color: #0a7e3c; }
+    .error { color: #d93025; }
+  </style>
 </head>
 <body>
-  <h1>Authentication Test V1</h1>
+  <h1>🔐 Authentication Test v2 </h1>
   <button id="login">Login with Google</button>
-  <div id="status">Checking...</div>
-  <div id="user"></div>
+  <div class="status" id="status">⏳ Checking...</div>
+  <div class="user" id="user"></div>
 
   <script>
-    const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co/rest/v1/";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5Zm1iaWNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDE3NDIsImV4cCI6MjEwMzIxNzc0Mn0.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
+    // ---- CORRECT URL (no /rest/v1/ at the end) ----
+    const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5ZmJpY2UiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzY0MTc0MiwiZXhwIjoyMTAzMjE3NzQyfQ.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
+
+    console.log('🔧 Using URL:', SUPABASE_URL);
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const status = document.getElementById('status');
     const userDiv = document.getElementById('user');
 
-    // ---- Helper: manually set session ----
-    async function setSessionFromHash() {
-      const hash = window.location.hash;
-      if (!hash || !hash.includes('access_token')) return false;
-
-      const params = new URLSearchParams(hash.substring(1));
-      const access_token = params.get('access_token');
-      const refresh_token = params.get('refresh_token');
-
-      if (!access_token || !refresh_token) return false;
-
+    // ---- Check session ----
+    async function checkSession() {
       try {
-        // First, try to set the session using the official method
-        const { data, error } = await client.auth.setSession({
-          access_token,
-          refresh_token
-        });
-
+        const { data: { session }, error } = await client.auth.getSession();
         if (error) {
-          console.error('setSession error:', error);
-          return false;
+          console.error('❌ getSession error:', error);
+          status.textContent = '❌ Error: ' + error.message;
+          status.className = 'status error';
+          return;
         }
-
-        if (data && data.session) {
-          console.log('✅ Session set successfully via setSession');
-          // Clear hash
-          window.history.replaceState(null, '', window.location.pathname);
-          // Update UI
-          await updateUI();
-          return true;
+        if (session) {
+          status.textContent = '✅ Logged in';
+          status.className = 'status success';
+          userDiv.textContent = 'User: ' + session.user.email;
+          console.log('✅ Session found:', session.user.email);
+        } else {
+          status.textContent = '❌ Not logged in';
+          status.className = 'status error';
+          userDiv.textContent = '';
+          console.log('ℹ️ No session found.');
         }
       } catch (e) {
-        console.error('setSession exception:', e);
-      }
-
-      return false;
-    }
-
-    // ---- Update UI ----
-    async function updateUI() {
-      const { data: { session }, error } = await client.auth.getSession();
-      if (error) {
-        console.error('getSession error:', error);
-        status.textContent = '❌ Error getting session';
-        return;
-      }
-      if (session) {
-        status.textContent = '✅ Logged in';
-        userDiv.textContent = 'User: ' + session.user.email;
-      } else {
-        status.textContent = '❌ Not logged in';
-        userDiv.textContent = '';
-      }
-    }
-
-    // ---- Main init ----
-    async function init() {
-      // Step 1: Check if we have a hash
-      const hashHandled = await setSessionFromHash();
-      if (hashHandled) {
-        // We've set the session, but we might need to wait for the auth listener
-        // to fire. Let's also force a refresh after a short delay.
-        setTimeout(async () => {
-          await updateUI();
-        }, 500);
-        return;
-      }
-
-      // Step 2: If no hash, just check for existing session
-      await updateUI();
-
-      // Step 3: If still not logged in, but we have a stored token (fallback)
-      const storageKey = 'sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token';
-      const stored = localStorage.getItem(storageKey);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed.access_token) {
-            console.log('Found stored token, trying to refresh session...');
-            const { data, error } = await client.auth.setSession({
-              access_token: parsed.access_token,
-              refresh_token: parsed.refresh_token
-            });
-            if (!error && data && data.session) {
-              await updateUI();
-            }
-          }
-        } catch (e) {}
+        console.error('❌ Check session error:', e);
+        status.textContent = '❌ Error: ' + e.message;
+        status.className = 'status error';
       }
     }
 
     // ---- Auth state listener ----
     client.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event:', event, session ? 'session present' : 'no session');
+      console.log('📡 Auth event:', event, session ? 'session present' : 'no session');
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         status.textContent = '✅ Logged in';
+        status.className = 'status success';
         userDiv.textContent = 'User: ' + session.user.email;
       } else if (event === 'SIGNED_OUT') {
         status.textContent = '❌ Not logged in';
+        status.className = 'status error';
         userDiv.textContent = '';
       }
     });
 
     // ---- Login button ----
     document.getElementById('login').addEventListener('click', async () => {
-      const { error } = await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin + window.location.pathname }
-      });
-      if (error) alert(error.message);
+      console.log('🔄 Login clicked.');
+      const redirectTo = window.location.origin + window.location.pathname;
+      console.log('🔗 Redirecting to:', redirectTo);
+      try {
+        const { error } = await client.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: redirectTo }
+        });
+        if (error) {
+          console.error('❌ Login error:', error);
+          alert('Login error: ' + error.message);
+        } else {
+          console.log('⏳ Redirecting to Google...');
+        }
+      } catch (e) {
+        console.error('❌ Login exception:', e);
+        alert('Login exception: ' + e.message);
+      }
     });
 
+    // ---- Handle redirect hash ----
+    (function handleHash() {
+      const hash = window.location.hash;
+      console.log('🔍 Hash on load:', hash);
+      if (hash && hash.includes('access_token')) {
+        console.log('✅ access_token found in hash!');
+        // The client will automatically handle this on refresh,
+        // but we need to keep the hash until the client processes it.
+        // The client will clear it after it's done.
+      }
+    })();
+
     // ---- Run ----
-    init();
+    console.log('🚀 Auth test starting...');
+    checkSession();
   </script>
 </body>
 </html>
