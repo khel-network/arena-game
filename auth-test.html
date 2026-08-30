@@ -2,118 +2,124 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Auth Test (with logs)</title>
+  <title>Auth Test (manual)</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <h1>Authentication Test</h1>
   <button id="login">Login with Google</button>
-  <div id="status">Checking...</div>
+  <div id="status">Not logged in</div>
   <div id="user"></div>
-  <div id="hash" style="font-size:12px; color:#666;"></div>
 
   <script>
-    console.log('🚀 Auth test started.');
     const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxbGRhbHJxb2h2aGF5ZmJpY2UiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzY0MTc0MiwiZXhwIjoyMTAzMjE3NzQyfQ.EQnqjW1HNCL9rt6SX5vgPGNX4Lgwdu6ch3HDiRSe77I";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const status = document.getElementById('status');
     const userDiv = document.getElementById('user');
-    const hashDiv = document.getElementById('hash');
 
-    // 1. Show current hash
-    function showHash() {
-      hashDiv.textContent = 'Hash: ' + window.location.hash;
-    }
-    showHash();
-
-    // 2. Try to set session from hash
-    function trySetSessionFromHash() {
+    // --- 1. Handle the redirect hash manually ---
+    function handleRedirect() {
       const hash = window.location.hash;
-      if (!hash || !hash.includes('access_token')) {
-        console.log('ℹ️ No access_token in hash.');
-        return false;
-      }
+      if (!hash || !hash.includes('access_token')) return false;
+
       try {
         const params = new URLSearchParams(hash.substring(1));
         const access_token = params.get('access_token');
         const refresh_token = params.get('refresh_token');
-        console.log('🔑 Tokens found:', { access_token: !!access_token, refresh_token: !!refresh_token });
+        const expires_in = params.get('expires_in');
+
         if (access_token && refresh_token) {
-          client.auth.setSession({ access_token, refresh_token }).then(() => {
-            console.log('✅ Session set from hash.');
-            // Clear hash
-            window.history.replaceState(null, '', window.location.pathname);
-            showHash();
-            updateUI();
-          }).catch(err => {
-            console.error('❌ setSession error:', err);
-          });
+          console.log('✅ Tokens found in hash.');
+
+          // Store the tokens manually in localStorage
+          const storageKey = 'sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token';
+          const tokenData = {
+            access_token: access_token,
+            refresh_token: refresh_token,
+            expires_in: expires_in || 3600,
+            token_type: 'bearer',
+            user: null // will be filled later
+          };
+          localStorage.setItem(storageKey, JSON.stringify(tokenData));
+
+          // Also store the user info if available
+          // We'll fetch it on next page load
+
+          // Clear the hash and reload to avoid double-processing
+          window.location.hash = '';
+          window.location.reload();
           return true;
         }
       } catch (e) {
-        console.error('❌ Hash parse error:', e);
+        console.error('Hash parsing error:', e);
       }
       return false;
     }
 
-    // 3. Update UI with session
-    async function updateUI() {
+    // --- 2. Check for existing session ---
+    async function checkSession() {
       const { data: { session } } = await client.auth.getSession();
-      console.log('📦 Session:', session ? 'present' : 'null');
       if (session) {
-        status.textContent = 'Logged in ✅';
+        status.textContent = '✅ Logged in';
         userDiv.textContent = 'User: ' + session.user.email;
       } else {
-        status.textContent = 'Not logged in ❌';
+        // Try to get from localStorage manually
+        const storageKey = 'sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token';
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (parsed.access_token) {
+              // Try to set session from stored token
+              const { data, error } = await client.auth.setSession({
+                access_token: parsed.access_token,
+                refresh_token: parsed.refresh_token
+              });
+              if (data && data.session) {
+                status.textContent = '✅ Logged in (from localStorage)';
+                userDiv.textContent = 'User: ' + data.session.user.email;
+                return;
+              }
+            }
+          } catch (e) {}
+        }
+        status.textContent = '❌ Not logged in';
         userDiv.textContent = '';
       }
     }
 
-    // 4. Run on load
-    async function init() {
-      // First, try to set session from hash (if this is a callback)
-      const handled = trySetSessionFromHash();
-      // Then check session
-      await updateUI();
-      // If no session, but we have a hash that wasn't handled (maybe setSession failed),
-      // try again after a short delay (in case the session is set asynchronously)
-      if (!handled && window.location.hash && window.location.hash.includes('access_token')) {
-        setTimeout(async () => {
-          console.log('⏳ Retrying session set from hash after 500ms...');
-          trySetSessionFromHash();
-          await updateUI();
-        }, 500);
+    // --- 3. Run on load ---
+    (async function init() {
+      // First, check if we just came back from Google (hash present)
+      const handled = handleRedirect();
+      if (handled) {
+        // The page will reload, so we stop here.
+        return;
       }
-    }
-    init();
+      // Otherwise, check for an existing session
+      await checkSession();
+    })();
 
-    // 5. Listen for auth changes
+    // --- 4. Auth state listener (backup) ---
     client.auth.onAuthStateChange((event, session) => {
-      console.log('📡 Auth event:', event, session ? 'session present' : 'no session');
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        status.textContent = 'Logged in ✅';
+        status.textContent = '✅ Logged in';
         userDiv.textContent = 'User: ' + session.user.email;
       } else if (event === 'SIGNED_OUT') {
-        status.textContent = 'Not logged in ❌';
+        status.textContent = '❌ Not logged in';
         userDiv.textContent = '';
       }
     });
 
-    // 6. Login button
+    // --- 5. Login button ---
     document.getElementById('login').addEventListener('click', async () => {
-      console.log('🔄 Login button clicked.');
       const { error } = await client.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: window.location.origin + window.location.pathname }
       });
-      if (error) {
-        console.error('❌ Login error:', error);
-        alert(error.message);
-      } else {
-        console.log('⏳ Redirecting to Google...');
-      }
+      if (error) alert(error.message);
     });
   </script>
 </body>
