@@ -2,13 +2,13 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Auth Test (manual)</title>
+  <title>Auth Test (aggressive)</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <h1>Authentication Test</h1>
   <button id="login">Login with Google</button>
-  <div id="status">Not logged in</div>
+  <div id="status">Checking...</div>
   <div id="user"></div>
 
   <script>
@@ -19,91 +19,100 @@
     const status = document.getElementById('status');
     const userDiv = document.getElementById('user');
 
-    // --- 1. Handle the redirect hash manually ---
-    function handleRedirect() {
+    // ---- Helper: manually set session ----
+    async function setSessionFromHash() {
       const hash = window.location.hash;
       if (!hash || !hash.includes('access_token')) return false;
 
+      const params = new URLSearchParams(hash.substring(1));
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+
+      if (!access_token || !refresh_token) return false;
+
       try {
-        const params = new URLSearchParams(hash.substring(1));
-        const access_token = params.get('access_token');
-        const refresh_token = params.get('refresh_token');
-        const expires_in = params.get('expires_in');
+        // First, try to set the session using the official method
+        const { data, error } = await client.auth.setSession({
+          access_token,
+          refresh_token
+        });
 
-        if (access_token && refresh_token) {
-          console.log('✅ Tokens found in hash.');
+        if (error) {
+          console.error('setSession error:', error);
+          return false;
+        }
 
-          // Store the tokens manually in localStorage
-          const storageKey = 'sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token';
-          const tokenData = {
-            access_token: access_token,
-            refresh_token: refresh_token,
-            expires_in: expires_in || 3600,
-            token_type: 'bearer',
-            user: null // will be filled later
-          };
-          localStorage.setItem(storageKey, JSON.stringify(tokenData));
-
-          // Also store the user info if available
-          // We'll fetch it on next page load
-
-          // Clear the hash and reload to avoid double-processing
-          window.location.hash = '';
-          window.location.reload();
+        if (data && data.session) {
+          console.log('✅ Session set successfully via setSession');
+          // Clear hash
+          window.history.replaceState(null, '', window.location.pathname);
+          // Update UI
+          await updateUI();
           return true;
         }
       } catch (e) {
-        console.error('Hash parsing error:', e);
+        console.error('setSession exception:', e);
       }
+
       return false;
     }
 
-    // --- 2. Check for existing session ---
-    async function checkSession() {
-      const { data: { session } } = await client.auth.getSession();
+    // ---- Update UI ----
+    async function updateUI() {
+      const { data: { session }, error } = await client.auth.getSession();
+      if (error) {
+        console.error('getSession error:', error);
+        status.textContent = '❌ Error getting session';
+        return;
+      }
       if (session) {
         status.textContent = '✅ Logged in';
         userDiv.textContent = 'User: ' + session.user.email;
       } else {
-        // Try to get from localStorage manually
-        const storageKey = 'sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token';
-        const stored = localStorage.getItem(storageKey);
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            if (parsed.access_token) {
-              // Try to set session from stored token
-              const { data, error } = await client.auth.setSession({
-                access_token: parsed.access_token,
-                refresh_token: parsed.refresh_token
-              });
-              if (data && data.session) {
-                status.textContent = '✅ Logged in (from localStorage)';
-                userDiv.textContent = 'User: ' + data.session.user.email;
-                return;
-              }
-            }
-          } catch (e) {}
-        }
         status.textContent = '❌ Not logged in';
         userDiv.textContent = '';
       }
     }
 
-    // --- 3. Run on load ---
-    (async function init() {
-      // First, check if we just came back from Google (hash present)
-      const handled = handleRedirect();
-      if (handled) {
-        // The page will reload, so we stop here.
+    // ---- Main init ----
+    async function init() {
+      // Step 1: Check if we have a hash
+      const hashHandled = await setSessionFromHash();
+      if (hashHandled) {
+        // We've set the session, but we might need to wait for the auth listener
+        // to fire. Let's also force a refresh after a short delay.
+        setTimeout(async () => {
+          await updateUI();
+        }, 500);
         return;
       }
-      // Otherwise, check for an existing session
-      await checkSession();
-    })();
 
-    // --- 4. Auth state listener (backup) ---
+      // Step 2: If no hash, just check for existing session
+      await updateUI();
+
+      // Step 3: If still not logged in, but we have a stored token (fallback)
+      const storageKey = 'sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token';
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.access_token) {
+            console.log('Found stored token, trying to refresh session...');
+            const { data, error } = await client.auth.setSession({
+              access_token: parsed.access_token,
+              refresh_token: parsed.refresh_token
+            });
+            if (!error && data && data.session) {
+              await updateUI();
+            }
+          }
+        } catch (e) {}
+      }
+    }
+
+    // ---- Auth state listener ----
     client.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event, session ? 'session present' : 'no session');
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         status.textContent = '✅ Logged in';
         userDiv.textContent = 'User: ' + session.user.email;
@@ -113,7 +122,7 @@
       }
     });
 
-    // --- 5. Login button ---
+    // ---- Login button ----
     document.getElementById('login').addEventListener('click', async () => {
       const { error } = await client.auth.signInWithOAuth({
         provider: 'google',
@@ -121,6 +130,9 @@
       });
       if (error) alert(error.message);
     });
+
+    // ---- Run ----
+    init();
   </script>
 </body>
 </html>
