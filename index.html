@@ -9,6 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f4f7f8'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
+  
+  <!-- ===== ZAPUPI SDK ===== -->
+  <script src="https://zapupi.com/single-html-web-kit.js"></script>
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     *:focus { outline: none; }
@@ -1836,6 +1840,7 @@
       </div>
     </section>
 
+    <!-- ===== ADD FUNDS SECTION (UPDATED WITH ZAPUPI) ===== -->
     <section id="view-addtoken" class="app-view">
       <div class="section-card">
         <h3>💰 Add Funds to Wallet</h3>
@@ -1894,7 +1899,7 @@
         </div>
 
         <button id="initiatePaymentBtn" class="pay-now-btn">
-          <i class="fas fa-qrcode"></i> Generate QR & Pay Now
+          <i class="fas fa-qrcode"></i> Pay with ZapUPI
         </button>
 
         <div style="margin-top:16px; padding-top:16px; border-top:1px solid rgba(0,0,0,0.06);">
@@ -2070,7 +2075,7 @@
     <div class="payment-modal">
       <button class="close-btn" id="closePaymentModal"><i class="fas fa-times"></i></button>
       <h2>💳 Complete Payment</h2>
-      <p class="subtitle">Scan QR code with any UPI app to pay</p>
+      <p class="subtitle">You will be redirected to payment page</p>
 
       <div class="amount-display">
         <span class="label">Amount to Pay</span>
@@ -2078,19 +2083,9 @@
         <span class="label" id="bonusDisplay" style="color:#00a301; font-weight:600;">+10 Tokens Bonus</span>
       </div>
 
-      <div class="qr-container">
-        <img id="qrCodeImage" src="" alt="UPI QR Code" />
-        <div class="upi-id">paytm.s1ax1t9@pty</div>
-        <div class="instruction">Scan with Google Pay, PhonePe, Paytm or any UPI app</div>
-      </div>
-
-      <button id="openUpiAppBtn" class="upi-pay-btn">
-        <i class="fas fa-mobile-alt"></i> Open UPI App
-      </button>
-
       <div id="paymentStatus" class="payment-status waiting">
         <span class="spinner"></span>
-        <span>Waiting for payment...</span>
+        <span>Creating payment...</span>
       </div>
 
       <button id="cancelPaymentBtn" class="cancel-payment-btn">Cancel Payment</button>
@@ -2176,7 +2171,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  COMPLETE JAVASCRIPT WITH PAYMENT INTEGRATION
+//  COMPLETE JAVASCRIPT WITH ZAPUPI SINGLE HTML INTEGRATION
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -2184,242 +2179,158 @@ const SUPABASE_ANON_KEY = "sb_publishable_894UwPwZc0SF2MyCP9sztQ_6-s0AALZ";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
-//  PAYMENT CONFIGURATION
+//  ZAPUPI PAYMENT CALLBACKS - SINGLE HTML METHOD
 // ============================================================
 
-const UPI_ID = 'paytm.s1ax1t9@pty';
-const MERCHANT_NAME = 'Arena Games';
-const WEBHOOK_URL = 'https://arena-webhook.freepage.cc/webhook.php';
-const CHECK_STATUS_URL = 'https://arena-webhook.freepage.cc/check-status.php';
-
-// ============================================================
-//  PAYMENT FUNCTIONS
-// ============================================================
-
-let paymentCheckInterval = null;
-let currentOrderId = null;
-
-function generateOrderId() {
-    return 'ORD' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6).toUpperCase();
-}
-
-async function checkPaymentStatusFromWebhook(orderId) {
-    try {
-        const response = await fetch(`${CHECK_STATUS_URL}?order_id=${orderId}`);
-        const data = await response.json();
-        console.log('✅ Status check response:', data);
-        return data;
-    } catch (error) {
-        console.error('❌ Status check error:', error);
-        return { status: 'Pending' };
-    }
-}
-
-function showPaymentAnimation(amount) {
-    const overlay = document.getElementById('paymentAnimation');
-    const amountEl = document.getElementById('animAmount');
-    const container = document.getElementById('confettiContainer');
-    
-    amountEl.textContent = '₹' + amount;
-    overlay.classList.add('show');
-    
-    container.innerHTML = '';
-    const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#a29bfe', '#fd79a8', '#fdcb6e', '#00b894', '#e17055', '#6c5ce7'];
-    for (let i = 0; i < 50; i++) {
-        const piece = document.createElement('div');
-        piece.className = 'confetti-piece';
-        piece.style.left = Math.random() * 100 + '%';
-        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-        piece.style.width = (Math.random() * 8 + 4) + 'px';
-        piece.style.height = (Math.random() * 8 + 4) + 'px';
-        piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-        piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
-        piece.style.animationDelay = (Math.random() * 2) + 's';
-        container.appendChild(piece);
-    }
-    
-    setTimeout(() => {
-        overlay.classList.remove('show');
-        container.innerHTML = '';
-    }, 4000);
-}
-
-function addManualConfirmButton(orderId, tokens, amount) {
-    const statusEl = document.getElementById('paymentStatus');
-    const existingBtn = document.getElementById('manualConfirmBtn');
-    if (existingBtn) existingBtn.remove();
-    
-    const confirmBtn = document.createElement('button');
-    confirmBtn.id = 'manualConfirmBtn';
-    confirmBtn.style.cssText = `
-        width: 100%;
-        padding: 12px;
-        margin-top: 10px;
-        background: #00e701;
-        color: #000;
-        font-weight: 700;
-        border-radius: 10px;
-        font-size: 0.9rem;
-        border: none;
-        cursor: pointer;
-    `;
-    confirmBtn.innerHTML = '✅ I Have Paid (Confirm Manually)';
-    confirmBtn.onclick = async function() {
-        this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming...';
-        await new Promise(resolve => setTimeout(resolve, 1000));
+ZapUPI.setPaymentCallbacks({
+    onSuccess: function(orderId) {
+        console.log('✅ Payment Success! Order:', orderId);
         
-        await creditTokens(tokens, amount);
-        await recordTransaction(`💳 Manual Confirmation: ₹${amount} → ${tokens} Tokens`, 'credit', tokens);
-        await loadWallet();
-        await loadTransactions();
+        // Show success animation
+        const amount = document.getElementById('paymentAmount')?.textContent || '0';
+        showPaymentAnimation(amount);
+        
+        // Refresh wallet from database
+        loadWallet();
+        loadTransactions();
         updateUI();
         
-        statusEl.className = 'payment-status success';
-        statusEl.innerHTML = `
-            <i class="fas fa-check-circle" style="font-size:1.2rem; color:#065f46;"></i>
-            <span>✅ Payment Confirmed! ₹${amount} credited (${tokens} Tokens)</span>
-        `;
-        showPaymentAnimation(amount);
-        showToast(`✅ ₹${amount} added! ${tokens} tokens credited`, 'credit', tokens);
-        setTimeout(() => { closePaymentModal(); }, 3000);
-    };
-    statusEl.parentNode.appendChild(confirmBtn);
-}
+        showToast('✅ Payment Successful! Tokens credited.', 'credit');
+        
+        // Close payment modal
+        setTimeout(function() {
+            closePaymentModal();
+        }, 3000);
+    },
+    onFailed: function(orderId) {
+        console.log('❌ Payment Failed. Order:', orderId);
+        showToast('❌ Payment Failed. Please try again.', 'error');
+        
+        const statusEl = document.getElementById('paymentStatus');
+        if (statusEl) {
+            statusEl.className = 'payment-status error';
+            statusEl.innerHTML = `
+                <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
+                <span>Payment Failed. Please try again.</span>
+            `;
+        }
+    },
+    onTimeout: function(orderId) {
+        console.log('⏰ Payment Timeout. Order:', orderId);
+        showToast('⏰ Payment timeout. Please try again.', 'error');
+        
+        const statusEl = document.getElementById('paymentStatus');
+        if (statusEl) {
+            statusEl.className = 'payment-status error';
+            statusEl.innerHTML = `
+                <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
+                <span>Payment timeout. Please try again.</span>
+            `;
+        }
+    },
+});
 
-document.getElementById('initiatePaymentBtn')?.addEventListener('click', async function() {
+// ============================================================
+//  PAYMENT BUTTON HANDLER
+// ============================================================
+
+document.getElementById('initiatePaymentBtn')?.addEventListener('click', function() {
     const customAmount = parseInt(document.getElementById('customAmount').value) || 0;
     
+    // Min ₹1 for testing
     if (customAmount < 1) {
         showToast('Minimum amount is ₹1 for testing', 'error');
         return;
     }
     
+    // Calculate bonus tokens
     let bonus = 0;
     const selectedPackage = document.querySelector('.package-card.selected');
     if (selectedPackage) {
         bonus = parseInt(selectedPackage.dataset.bonus) || 0;
     }
     const tokens = customAmount + Math.floor(customAmount * bonus / 100);
-    const orderId = generateOrderId();
     
+    // Generate unique order ID
+    const orderId = 'ORD' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6).toUpperCase();
+    
+    // Show loading state
     this.disabled = true;
     this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating payment...';
     
-    const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${customAmount}&cu=INR&tn=${orderId}`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiLink)}`;
-    const paymentData = { qr_code: qrUrl, txn_id: orderId, order_id: orderId };
+    // Show payment modal
+    const modal = document.getElementById('paymentModal');
+    const amountDisplay = document.getElementById('paymentAmount');
+    const bonusDisplay = document.getElementById('bonusDisplay');
+    const statusEl = document.getElementById('paymentStatus');
     
-    this.disabled = false;
-    this.innerHTML = '<i class="fas fa-qrcode"></i> Generate QR & Pay Now';
+    amountDisplay.textContent = customAmount;
     
-    if (paymentData && paymentData.qr_code) {
-        const modal = document.getElementById('paymentModal');
-        const qrImg = document.getElementById('qrCodeImage');
-        const amountDisplay = document.getElementById('paymentAmount');
-        const bonusDisplay = document.getElementById('bonusDisplay');
-        
-        amountDisplay.textContent = customAmount;
-        qrImg.src = paymentData.qr_code;
-        qrImg.alt = `UPI QR Code for ₹${customAmount}`;
-        
-        if (bonus > 0) {
-            bonusDisplay.textContent = `+${bonus}% Bonus → ${tokens} Tokens`;
-        } else {
-            bonusDisplay.textContent = `${tokens} Tokens`;
-        }
-        
-        currentOrderId = orderId;
-        modal.dataset.orderId = orderId;
-        modal.dataset.tokens = tokens;
-        modal.dataset.amount = customAmount;
-        
-        modal.classList.remove('hidden');
-        
-        const statusEl = document.getElementById('paymentStatus');
-        statusEl.className = 'payment-status waiting';
-        statusEl.innerHTML = `<span class="spinner"></span><span>Waiting for payment...</span>`;
-        
-        startPaymentMonitoring(orderId, tokens, customAmount);
-        
-        setTimeout(() => {
-            addManualConfirmButton(orderId, tokens, customAmount);
-        }, 5000);
+    if (bonus > 0) {
+        bonusDisplay.textContent = `+${bonus}% Bonus → ${tokens} Tokens`;
     } else {
-        showToast('Failed to create payment. Please try again.', 'error');
+        bonusDisplay.textContent = `${tokens} Tokens`;
     }
+    
+    statusEl.className = 'payment-status waiting';
+    statusEl.innerHTML = `<span class="spinner"></span><span>Creating payment...</span>`;
+    
+    modal.classList.remove('hidden');
+    
+    // Store order details for later use
+    modal.dataset.orderId = orderId;
+    modal.dataset.tokens = tokens;
+    modal.dataset.amount = customAmount;
+    
+    // ============================================================
+    //  ZAPUPI CREATE ORDER
+    // ============================================================
+    
+    ZapUPI.createOrder(
+        {
+            zap_key: 'zapce570e67le2f07f3bc9837566a44ec4c', // Your Zap Key
+            order_id: orderId,
+            amount: customAmount.toString(),
+            // customer_mobile: '9876543210', // Optional
+            // remark: 'Arena | ' + (currentUser?.id || 'guest'), // Optional
+        },
+        {
+            onResponse: function(paymentUrl, orderId, data) {
+                console.log('✅ Order created:', orderId);
+                console.log('💰 Payment URL:', paymentUrl);
+                
+                statusEl.innerHTML = `<span class="spinner"></span><span>Opening payment page...</span>`;
+                
+                // IMPORTANT: Load payment in SAME tab
+                ZapUPI.loadPayment(paymentUrl);
+                
+                // Reset button
+                document.getElementById('initiatePaymentBtn').disabled = false;
+                document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
+            },
+            onError: function(err) {
+                console.error('❌ Order creation error:', err);
+                statusEl.className = 'payment-status error';
+                statusEl.innerHTML = `
+                    <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
+                    <span>Error: ${err}</span>
+                `;
+                showToast('Failed to create payment: ' + err, 'error');
+                document.getElementById('initiatePaymentBtn').disabled = false;
+                document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
+            }
+        }
+    );
 });
 
-function startPaymentMonitoring(orderId, tokens, amount) {
-    const statusEl = document.getElementById('paymentStatus');
-    let attempts = 0;
-    const MAX_ATTEMPTS = 60;
-    
-    if (paymentCheckInterval) clearInterval(paymentCheckInterval);
-    
-    paymentCheckInterval = setInterval(async () => {
-        attempts++;
-        const status = await checkPaymentStatusFromWebhook(orderId);
-        console.log(`Attempt ${attempts}:`, status);
-        
-        if (status && status.status === 'Success') {
-            clearInterval(paymentCheckInterval);
-            
-            statusEl.className = 'payment-status success';
-            statusEl.innerHTML = `
-                <i class="fas fa-check-circle" style="font-size:1.2rem; color:#065f46;"></i>
-                <span>✅ Payment Received! ₹${amount} credited (${tokens} Tokens)</span>
-            `;
-            
-            const manualBtn = document.getElementById('manualConfirmBtn');
-            if (manualBtn) manualBtn.remove();
-            
-            await creditTokens(tokens, amount);
-            await recordTransaction(`💳 UPI Payment: ₹${amount} → ${tokens} Tokens (Order: ${orderId})`, 'credit', tokens);
-            await loadWallet();
-            await loadTransactions();
-            updateUI();
-            showPaymentAnimation(amount);
-            showToast(`✅ ₹${amount} added! ${tokens} tokens credited`, 'credit', tokens);
-            
-            setTimeout(() => { closePaymentModal(); }, 3000);
-            return;
-        }
-        
-        if (attempts >= MAX_ATTEMPTS) {
-            clearInterval(paymentCheckInterval);
-            statusEl.className = 'payment-status error';
-            statusEl.innerHTML = `
-                <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
-                <span>⏰ Payment timeout. Please try again.</span>
-            `;
-            return;
-        }
-        
-        const dots = '.'.repeat(attempts % 4);
-        statusEl.className = 'payment-status checking';
-        statusEl.innerHTML = `
-            <span class="spinner"></span>
-            <span>Checking payment status${dots}</span>
-        `;
-    }, 3000);
-}
+// ============================================================
+//  MODAL CONTROLS
+// ============================================================
 
 function closePaymentModal() {
     const modal = document.getElementById('paymentModal');
     modal.classList.add('hidden');
-    if (paymentCheckInterval) clearInterval(paymentCheckInterval);
-    currentOrderId = null;
-    const manualBtn = document.getElementById('manualConfirmBtn');
-    if (manualBtn) manualBtn.remove();
 }
-
-document.getElementById('openUpiAppBtn')?.addEventListener('click', function() {
-    const amount = document.getElementById('paymentAmount').textContent;
-    const orderId = document.getElementById('paymentModal').dataset.orderId || currentOrderId;
-    const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${orderId}`;
-    window.location.href = upiLink;
-});
 
 document.getElementById('cancelPaymentBtn')?.addEventListener('click', closePaymentModal);
 document.getElementById('closePaymentModal')?.addEventListener('click', closePaymentModal);
@@ -2427,39 +2338,8 @@ document.getElementById('paymentModal')?.addEventListener('click', function(e) {
     if (e.target === this) closePaymentModal();
 });
 
-document.getElementById('addtoken-submit-btn')?.addEventListener('click', async function() {
-    const utr = document.getElementById('addtoken-utr-input').value.trim();
-    const statusMsg = document.getElementById('addtoken-status-msg');
-    if (!utr || utr.length < 8) {
-        statusMsg.textContent = 'Please enter a valid UTR number.';
-        statusMsg.className = 'refer-status-msg error';
-        return;
-    }
-    statusMsg.textContent = 'Submitting...';
-    statusMsg.className = 'refer-status-msg';
-    this.disabled = true;
-    
-    try {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        const amount = parseInt(document.getElementById('customAmount').value) || 50;
-        let bonus = 0;
-        const selectedPackage = document.querySelector('.package-card.selected');
-        if (selectedPackage) bonus = parseInt(selectedPackage.dataset.bonus) || 0;
-        const tokens = amount + Math.floor(amount * bonus / 100);
-        await creditTokens(tokens, amount);
-        document.getElementById('addtoken-utr-input').value = '';
-        statusMsg.textContent = `✅ UTR submitted! ₹${amount} credited (${tokens} Tokens)`;
-        statusMsg.className = 'refer-status-msg success';
-        showPaymentAnimation(amount);
-    } catch (err) {
-        statusMsg.textContent = 'Failed to submit UTR. Please try again.';
-        statusMsg.className = 'refer-status-msg error';
-    }
-    this.disabled = false;
-});
-
 // ============================================================
-//  ORIGINAL FUNCTIONS
+//  ORIGINAL FUNCTIONS - Preserved
 // ============================================================
 
 // Auth
@@ -2961,7 +2841,7 @@ cashoutSubmitBtn?.addEventListener('click', function() {
     cashoutStatus.className = 'refer-status-msg success';
 });
 
-// Matchmaking (simplified version)
+// Matchmaking (preserved)
 async function findAndClaimOpponent() {
     const { data: match, error } = await client.rpc('claim_opponent', { p_game_type: activeGame.type, p_entry_fee: MATCH_ENTRY_FEE });
     if (error || !match || !match.id) return null;
