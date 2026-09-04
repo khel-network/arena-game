@@ -469,7 +469,6 @@
     .hero-banner p strong { color: #1e293b; }
     .hero-banner p .reward { color: #00a301; }
 
-    /* ===== FILTER BAR - FIXED ALIGNMENT ===== */
     .filter-bar {
       display: flex;
       gap: 8px;
@@ -547,22 +546,24 @@
     }
     .card-badge {
       position: absolute;
-      top: 4px;
-      left: 6px;
-      background: rgba(30,41,59,0.75);
-      padding: 1px 6px;
+      top: 6px;
+      left: 8px;
+      background: rgba(30,41,59,0.8);
+      padding: 2px 6px !important;
       border-radius: 100px;
-      font-size: 9px;
+      font-size: 9px !important;
       font-weight: 700;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em !important;
       color: #fff;
       text-transform: uppercase;
-      max-width: calc(100% - 16px);
+      max-width: calc(100% - 16px) !important;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-height: 16px;
-      line-height: 1.2;
+      line-height: 1.4 !important;
+      text-size-adjust: 100%;
+      -webkit-text-size-adjust: 100%;
+      -moz-text-size-adjust: 100%;
     }
     .card-content {
       padding: 8px 10px 10px;
@@ -1103,29 +1104,6 @@
       color: #6a7a94;
       margin-top: 4px;
     }
-    .qr-container .expiry-timer {
-      font-size: 0.7rem;
-      color: #f16464;
-      font-weight: 600;
-      margin-top: 4px;
-    }
-    .qr-expired-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-weight: 700;
-      font-size: 1.1rem;
-    }
-    .qr-expired-overlay .sub {
-      font-size: 0.7rem;
-      opacity: 0.8;
-    }
     .payment-status {
       display: flex;
       align-items: center;
@@ -1611,7 +1589,7 @@
       .card-title { font-size: 12px; }
       .card-desc { font-size: 9px; }
       .card-meta { font-size: 9px; }
-      .card-badge { font-size: 8px; padding: 1px 5px; max-height: 14px; }
+      .card-badge { font-size: 8px !important; padding: 1px 5px !important; }
       .payment-modal { padding: 16px; }
       .qr-container img { width: 160px; height: 160px; }
       .payment-modal h2 { font-size: 1.1rem; }
@@ -1918,11 +1896,6 @@
         <img id="qrCodeImage" src="" alt="UPI QR Code" />
         <div class="upi-id" id="upiIdDisplay">paytm.s1ax1t9@pty</div>
         <div class="instruction">Scan with Google Pay, PhonePe, Paytm or any UPI app</div>
-        <div class="expiry-timer" id="expiryTimer">⏱️ QR expires in 2:00</div>
-        <div id="qrExpiredOverlay" class="qr-expired-overlay hidden">
-          <span>⏰ QR Expired</span>
-          <span class="sub">Please generate a new QR</span>
-        </div>
       </div>
 
       <button id="openUpiAppBtn" class="upi-pay-btn">
@@ -2004,7 +1977,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  COMPLETE JAVASCRIPT – SMM Style Payment System
+//  COMPLETE JAVASCRIPT – With Payment Integration
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -2043,7 +2016,8 @@ const LIVE_ENABLED_TYPES = ['tictactoe'];
 const PRESENCE_HEARTBEAT_MS = 8000;
 const UPI_ID = "paytm.s1ax1t9@pty";
 const MERCHANT_NAME = "Arena Games";
-const QR_EXPIRY_SECONDS = 120; // 2 minutes
+const WEBHOOK_URL = 'https://arena-webhook.freepage.cc/webhook.php';
+const CHECK_STATUS_URL = 'https://arena-webhook.freepage.cc/check-status.php';
 
 let presenceHeartbeatTimer = null;
 let currentUser = null;
@@ -2057,16 +2031,13 @@ let queueChannel = null;
 let inQueue = false;
 
 // ============================================================
-//  PAYMENT SYSTEM – SMM STYLE WITH QR CODE
+//  PAYMENT SYSTEM – With Real Webhook Integration
 // ============================================================
 
 let paymentCheckInterval = null;
 let paymentTimeout = null;
 let isPaymentProcessing = false;
-let currentTransactionId = null;
-let qrExpiryTimer = null;
-let expirySeconds = QR_EXPIRY_SECONDS;
-let isQrExpired = false;
+let currentOrderId = null;
 
 // Package selection
 document.querySelectorAll('.package-card').forEach(card => {
@@ -2086,302 +2057,209 @@ document.getElementById('customAmount')?.addEventListener('input', function() {
   }
 });
 
-// Generate unique transaction ID
-function generateTransactionId() {
-  return 'TXN' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6).toUpperCase();
+// Generate order ID
+function generateOrderId() {
+    return 'ORD' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6).toUpperCase();
 }
 
-// Generate QR Code with transaction ID
-function generateQRCode(amount, upiId, merchantName, txnId) {
-  // Include transaction ID in UPI link for tracking
-  const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${txnId}`;
-  return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiLink)}`;
+// ===== CREATE UPI PAYMENT =====
+async function createUPIPayment(amount, orderId) {
+    try {
+        const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${orderId}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiLink)}`;
+        
+        return {
+            success: true,
+            qr_code: qrUrl,
+            txn_id: orderId,
+            order_id: orderId
+        };
+    } catch (error) {
+        console.error('Payment creation error:', error);
+        return null;
+    }
 }
 
-// ===== START QR EXPIRY TIMER =====
-function startQrExpiryTimer() {
-  expirySeconds = QR_EXPIRY_SECONDS;
-  isQrExpired = false;
-  const timerEl = document.getElementById('expiryTimer');
-  const overlayEl = document.getElementById('qrExpiredOverlay');
-  
-  if (timerEl) timerEl.classList.remove('hidden');
-  if (overlayEl) overlayEl.classList.add('hidden');
-  
-  qrExpiryTimer = setInterval(() => {
-    expirySeconds--;
-    const mins = Math.floor(expirySeconds / 60);
-    const secs = expirySeconds % 60;
-    if (timerEl) {
-      timerEl.textContent = `⏱️ QR expires in ${mins}:${secs.toString().padStart(2, '0')}`;
+// ===== CHECK PAYMENT STATUS FROM WEBHOOK =====
+async function checkPaymentStatus(orderId) {
+    try {
+        const response = await fetch(`${CHECK_STATUS_URL}?order_id=${orderId}`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Status check error:', error);
+        return { status: 'Pending' };
     }
-    
-    if (expirySeconds <= 0) {
-      clearInterval(qrExpiryTimer);
-      isQrExpired = true;
-      if (timerEl) timerEl.textContent = '⏰ QR Expired';
-      if (overlayEl) overlayEl.classList.remove('hidden');
-      
-      // Show expired status
-      const statusEl = document.getElementById('paymentStatus');
-      statusEl.className = 'payment-status error';
-      statusEl.innerHTML = `
-        <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
-        <span>QR expired. Please generate a new one.</span>
-      `;
-      
-      // Clean up
-      clearInterval(paymentCheckInterval);
-      clearTimeout(paymentTimeout);
-      isPaymentProcessing = false;
-    }
-  }, 1000);
 }
 
 // ===== INITIATE PAYMENT =====
-document.getElementById('initiatePaymentBtn')?.addEventListener('click', function() {
-  const customAmount = parseInt(document.getElementById('customAmount').value) || 0;
-  
-  if (customAmount < 5) {
-    showToast('Minimum amount is ₹5', 'error');
-    return;
-  }
-  if (customAmount > 100000) {
-    showToast('Maximum amount is ₹1,00,000', 'error');
-    return;
-  }
+document.getElementById('initiatePaymentBtn')?.addEventListener('click', async function() {
+    const customAmount = parseInt(document.getElementById('customAmount').value) || 0;
+    
+    if (customAmount < 5) {
+        showToast('Minimum amount is ₹5', 'error');
+        return;
+    }
+    if (customAmount > 100000) {
+        showToast('Maximum amount is ₹1,00,000', 'error');
+        return;
+    }
 
-  let bonus = 0;
-  const selectedPackage = document.querySelector('.package-card.selected');
-  if (selectedPackage) {
-    bonus = parseInt(selectedPackage.dataset.bonus) || 0;
-  }
-  const tokens = customAmount + Math.floor(customAmount * bonus / 100);
-  
-  // Generate unique transaction ID
-  currentTransactionId = generateTransactionId();
-  openPaymentModal(customAmount, tokens, bonus);
+    // Calculate bonus
+    let bonus = 0;
+    const selectedPackage = document.querySelector('.package-card.selected');
+    if (selectedPackage) {
+        bonus = parseInt(selectedPackage.dataset.bonus) || 0;
+    }
+    const tokens = customAmount + Math.floor(customAmount * bonus / 100);
+    const orderId = generateOrderId();
+    
+    // Show loading
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating payment...';
+    
+    // Create payment
+    const paymentData = await createUPIPayment(customAmount, orderId);
+    
+    this.disabled = false;
+    this.innerHTML = '<i class="fas fa-qrcode"></i> Generate QR & Pay Now';
+    
+    if (paymentData && paymentData.qr_code) {
+        // Show payment modal
+        const modal = document.getElementById('paymentModal');
+        const qrImg = document.getElementById('qrCodeImage');
+        const amountDisplay = document.getElementById('paymentAmount');
+        const bonusDisplay = document.getElementById('bonusDisplay');
+        
+        amountDisplay.textContent = customAmount;
+        qrImg.src = paymentData.qr_code;
+        qrImg.alt = `UPI QR Code for ₹${customAmount}`;
+        
+        if (bonus > 0) {
+            bonusDisplay.textContent = `+${bonus}% Bonus → ${tokens} Tokens`;
+        } else {
+            bonusDisplay.textContent = `${tokens} Tokens`;
+        }
+        
+        // Store order details
+        currentOrderId = orderId;
+        modal.dataset.orderId = orderId;
+        modal.dataset.tokens = tokens;
+        modal.dataset.amount = customAmount;
+        
+        // Show modal
+        modal.classList.remove('hidden');
+        
+        // Reset status
+        const statusEl = document.getElementById('paymentStatus');
+        statusEl.className = 'payment-status waiting';
+        statusEl.innerHTML = `
+            <span class="spinner"></span>
+            <span>Waiting for payment...</span>
+        `;
+        
+        // Start monitoring
+        startPaymentMonitoring(orderId, tokens, customAmount);
+        
+    } else {
+        showToast('Failed to create payment. Please try again.', 'error');
+    }
 });
 
-// ===== OPEN PAYMENT MODAL =====
-function openPaymentModal(amount, tokens, bonus) {
-  const modal = document.getElementById('paymentModal');
-  const qrImg = document.getElementById('qrCodeImage');
-  const amountDisplay = document.getElementById('paymentAmount');
-  const bonusDisplay = document.getElementById('bonusDisplay');
-  const upiDisplay = document.getElementById('upiIdDisplay');
-  const statusEl = document.getElementById('paymentStatus');
-  const overlayEl = document.getElementById('qrExpiredOverlay');
-  
-  // Reset state
-  isQrExpired = false;
-  isPaymentProcessing = false;
-  if (overlayEl) overlayEl.classList.add('hidden');
-  
-  // Set values
-  amountDisplay.textContent = amount;
-  upiDisplay.textContent = UPI_ID;
-  
-  if (bonus > 0) {
-    bonusDisplay.textContent = `+${bonus}% Bonus → ${tokens} Tokens`;
-  } else {
-    bonusDisplay.textContent = `${tokens} Tokens`;
-  }
-  
-  // Generate QR with transaction ID
-  const qrUrl = generateQRCode(amount, UPI_ID, MERCHANT_NAME, currentTransactionId);
-  qrImg.src = qrUrl;
-  qrImg.alt = `UPI QR Code for ₹${amount}`;
-  
-  // Reset status
-  statusEl.className = 'payment-status waiting';
-  statusEl.innerHTML = `<span class="spinner"></span><span>Waiting for payment...</span>`;
-  
-  // Show modal
-  modal.classList.remove('hidden');
-  
-  // Start QR expiry timer
-  startQrExpiryTimer();
-  
-  // Start payment monitoring
-  startPaymentMonitoring(amount, tokens);
-}
-
-// ===== START PAYMENT MONITORING =====
-function startPaymentMonitoring(amount, tokens) {
-  if (isPaymentProcessing) return;
-  isPaymentProcessing = true;
-  
-  const statusEl = document.getElementById('paymentStatus');
-  const startTime = Date.now();
-  const TIMEOUT_MS = QR_EXPIRY_SECONDS * 1000;
-  let attempts = 0;
-  let isPaymentVerified = false;
-  
-  // Poll every 2 seconds for payment status
-  paymentCheckInterval = setInterval(async () => {
-    attempts++;
-    const elapsed = Date.now() - startTime;
+// ===== PAYMENT MONITORING =====
+function startPaymentMonitoring(orderId, tokens, amount) {
+    const statusEl = document.getElementById('paymentStatus');
+    let attempts = 0;
+    const MAX_ATTEMPTS = 60; // 60 * 3s = 3 minutes
     
-    // Check if QR is expired
-    if (isQrExpired) {
-      clearInterval(paymentCheckInterval);
-      clearTimeout(paymentTimeout);
-      isPaymentProcessing = false;
-      statusEl.className = 'payment-status error';
-      statusEl.innerHTML = `
-        <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
-        <span>QR expired. Please generate a new QR.</span>
-      `;
-      return;
+    if (paymentCheckInterval) {
+        clearInterval(paymentCheckInterval);
     }
     
-    // In production, this would call your backend API to check payment status
-    // For demo, we simulate payment verification with realistic timing
-    // After 8-15 seconds, simulate successful payment (like real UPI)
-    if (attempts > 5 && Math.random() < 0.10 && !isPaymentVerified) {
-      // Simulate payment received
-      isPaymentVerified = true;
-      await handlePaymentSuccess(amount, tokens);
-      return;
-    }
-    
-    if (elapsed > TIMEOUT_MS) {
-      await handlePaymentTimeout();
-      return;
-    }
-    
-    // Update status with checking animation
-    const dots = '.'.repeat(attempts % 4);
-    statusEl.className = 'payment-status checking';
-    statusEl.innerHTML = `
-      <span class="spinner"></span>
-      <span>Checking payment status${dots}</span>
-    `;
-    
-  }, 2000); // Poll every 2 seconds
-  
-  // Set timeout for QR expiry
-  paymentTimeout = setTimeout(async () => {
-    if (!isPaymentVerified) {
-      await handlePaymentTimeout();
-    }
-  }, TIMEOUT_MS);
-}
-
-// ===== HANDLE PAYMENT SUCCESS =====
-async function handlePaymentSuccess(amount, tokens) {
-  if (!isPaymentProcessing) return;
-  isPaymentProcessing = false;
-  
-  clearInterval(paymentCheckInterval);
-  clearTimeout(paymentTimeout);
-  clearInterval(qrExpiryTimer);
-  
-  const statusEl = document.getElementById('paymentStatus');
-  statusEl.className = 'payment-status success';
-  statusEl.innerHTML = `
-    <i class="fas fa-check-circle" style="font-size:1.2rem; color:#065f46;"></i>
-    <span>✅ Payment Received! ₹${amount} credited (${tokens} Tokens)</span>
-  `;
-  
-  // Credit tokens to wallet
-  await creditTokens(tokens, amount);
-  
-  // Close modal after delay
-  setTimeout(() => {
-    closePaymentModal();
-  }, 2500);
-}
-
-// ===== HANDLE PAYMENT TIMEOUT =====
-async function handlePaymentTimeout() {
-  if (!isPaymentProcessing) return;
-  isPaymentProcessing = false;
-  
-  clearInterval(paymentCheckInterval);
-  clearTimeout(paymentTimeout);
-  clearInterval(qrExpiryTimer);
-  
-  const statusEl = document.getElementById('paymentStatus');
-  statusEl.className = 'payment-status error';
-  statusEl.innerHTML = `
-    <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
-    <span>⏰ Payment timeout. Please try again.</span>
-  `;
-}
-
-// ===== CREDIT TOKENS TO WALLET =====
-async function creditTokens(tokens, amount) {
-  try {
-    // Update wallet in database
-    await persistWalletDelta(tokens);
-    
-    // Record transaction
-    await recordTransaction(
-      `💳 UPI Payment: ₹${amount} → ${tokens} Tokens (TXN: ${currentTransactionId})`,
-      'credit',
-      tokens
-    );
-    
-    // Update UI
-    await loadWallet();
-    await loadTransactions();
-    updateUI();
-    
-    showToast(`✅ ₹${amount} added! ${tokens} tokens credited`, 'credit', tokens);
-  } catch (error) {
-    console.error('Credit failed:', error);
-    showToast('Payment credited but wallet update failed. Contact support.', 'error', 0);
-  }
+    paymentCheckInterval = setInterval(async () => {
+        attempts++;
+        
+        // Check REAL payment status from webhook
+        const status = await checkPaymentStatus(orderId);
+        
+        if (status && status.status === 'Success') {
+            // Payment successful!
+            clearInterval(paymentCheckInterval);
+            
+            statusEl.className = 'payment-status success';
+            statusEl.innerHTML = `
+                <i class="fas fa-check-circle" style="font-size:1.2rem; color:#065f46;"></i>
+                <span>✅ Payment Received! ₹${amount} credited (${tokens} Tokens)</span>
+            `;
+            
+            // Credit tokens
+            await creditTokens(tokens, amount);
+            await recordTransaction(`💳 UPI Payment: ₹${amount} → ${tokens} Tokens (Order: ${orderId})`, 'credit', tokens);
+            await loadWallet();
+            await loadTransactions();
+            updateUI();
+            
+            showToast(`✅ ₹${amount} added! ${tokens} tokens credited`, 'credit', tokens);
+            
+            setTimeout(() => {
+                closePaymentModal();
+            }, 3000);
+            return;
+        }
+        
+        if (attempts >= MAX_ATTEMPTS) {
+            clearInterval(paymentCheckInterval);
+            statusEl.className = 'payment-status error';
+            statusEl.innerHTML = `
+                <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
+                <span>⏰ Payment timeout. Please try again.</span>
+            `;
+            return;
+        }
+        
+        // Update waiting message
+        const dots = '.'.repeat(attempts % 4);
+        statusEl.className = 'payment-status waiting';
+        statusEl.innerHTML = `
+            <span class="spinner"></span>
+            <span>Checking payment status${dots}</span>
+        `;
+        
+    }, 3000);
 }
 
 // ===== CLOSE PAYMENT MODAL =====
 function closePaymentModal() {
-  const modal = document.getElementById('paymentModal');
-  modal.classList.add('hidden');
-  
-  clearInterval(paymentCheckInterval);
-  clearTimeout(paymentTimeout);
-  clearInterval(qrExpiryTimer);
-  isPaymentProcessing = false;
-  isQrExpired = false;
-  currentTransactionId = null;
-  
-  const statusEl = document.getElementById('paymentStatus');
-  statusEl.className = 'payment-status waiting';
-  statusEl.innerHTML = `<span class="spinner"></span><span>Waiting for payment...</span>`;
-  
-  const overlayEl = document.getElementById('qrExpiredOverlay');
-  if (overlayEl) overlayEl.classList.add('hidden');
+    const modal = document.getElementById('paymentModal');
+    modal.classList.add('hidden');
+    if (paymentCheckInterval) {
+        clearInterval(paymentCheckInterval);
+    }
+    currentOrderId = null;
 }
 
 // ===== OPEN UPI APP =====
 document.getElementById('openUpiAppBtn')?.addEventListener('click', function() {
-  if (isQrExpired) {
-    showToast('QR expired. Please generate a new QR.', 'error');
-    return;
-  }
-  
-  const amount = document.getElementById('paymentAmount').textContent;
-  const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${currentTransactionId}`;
-  window.location.href = upiLink;
-  
-  setTimeout(async () => {
-    try {
-      await navigator.clipboard.writeText(UPI_ID);
-      showToast('📋 UPI ID copied! Open your UPI app and pay.', 'credit', 0);
-    } catch (e) {
-      // Silent fallback
-    }
-  }, 500);
+    const amount = document.getElementById('paymentAmount').textContent;
+    const orderId = document.getElementById('paymentModal').dataset.orderId || currentOrderId;
+    const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${orderId}`;
+    window.location.href = upiLink;
+    
+    setTimeout(async () => {
+        try {
+            await navigator.clipboard.writeText(UPI_ID);
+            showToast('📋 UPI ID copied! Open your UPI app and pay.', 'credit', 0);
+        } catch (e) {
+            // Silent fallback
+        }
+    }, 500);
 });
 
 // ===== CANCEL PAYMENT =====
 document.getElementById('cancelPaymentBtn')?.addEventListener('click', closePaymentModal);
 document.getElementById('closePaymentModal')?.addEventListener('click', closePaymentModal);
 document.getElementById('paymentModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closePaymentModal();
+    if (e.target === this) closePaymentModal();
 });
 
 // ===== UTR SUBMIT (backup) =====
