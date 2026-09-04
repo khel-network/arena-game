@@ -277,7 +277,7 @@
       background: rgba(0,0,0,0.06);
     }
 
-    /* ===== DASHBOARD – Mobile‑optimised ===== */
+    /* ===== DASHBOARD ===== */
     .app-wrap { min-height: 100vh; background: transparent; }
     .top-nav {
       background: rgba(255,255,255,0.45);
@@ -365,7 +365,7 @@
     }
     .user-name { font-weight: 600; font-size: 0.8rem; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #1e293b; }
 
-    /* ---- Mobile-friendly tabs ---- */
+    /* ---- Tabs ---- */
     .nav-tabs {
       display: flex;
       justify-content: space-around;
@@ -469,29 +469,35 @@
     .hero-banner p strong { color: #1e293b; }
     .hero-banner p .reward { color: #00a301; }
 
+    /* ===== FILTER BAR - FIXED ALIGNMENT ===== */
     .filter-bar {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       overflow-x: auto;
-      margin-bottom: 12px;
-      padding-bottom: 4px;
+      padding: 8px 0;
+      margin-bottom: 16px;
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
+      flex-wrap: nowrap;
+      align-items: center;
     }
     .filter-bar::-webkit-scrollbar { display: none; }
     .filter-chip {
-      padding: 4px 12px;
-      background: rgba(255,255,255,0.45);
-      border: 1px solid rgba(255,255,255,0.7);
+      padding: 6px 16px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.8);
       border-radius: 100px;
       color: #556070;
       font-weight: 600;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       white-space: nowrap;
       transition: 0.2s;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       flex-shrink: 0;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       touch-action: manipulation;
     }
     .filter-chip.active, .filter-chip:hover {
@@ -500,7 +506,7 @@
       border-color: #00e701;
     }
 
-    /* ===== GAME CARDS – COMPACT ===== */
+    /* ===== GAME CARDS ===== */
     .games-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -557,9 +563,6 @@
       text-overflow: ellipsis;
       max-height: 16px;
       line-height: 1.2;
-      text-size-adjust: 100%;
-      -webkit-text-size-adjust: 100%;
-      -moz-text-size-adjust: 100%;
     }
     .card-content {
       padding: 8px 10px 10px;
@@ -891,68 +894,397 @@
     .refer-status-msg.success { color: #00a301; }
     .refer-status-msg.error { color: #f16464; }
 
-    .addtoken-amount-grid {
+    /* ===== ADD TOKENS SECTION ===== */
+    .package-grid {
       display: grid;
-      grid-template-columns: repeat(4,1fr);
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
       gap: 8px;
-      margin: 10px 0 12px;
+      margin: 12px 0;
     }
-    .amount-chip {
-      background: rgba(255,255,255,0.45);
-      border: 1px solid rgba(255,255,255,0.7);
+    .package-card {
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.8);
       border-radius: 10px;
-      padding: 10px;
-      font-weight: 700;
+      padding: 10px 8px;
       text-align: center;
-      transition: 0.2s;
       cursor: pointer;
-      color: #1e293b;
-      font-size: 0.8rem;
-      touch-action: manipulation;
+      transition: 0.25s ease;
+      position: relative;
     }
-    .amount-chip.active, .amount-chip:hover {
+    .package-card:hover { transform: translateY(-2px); border-color: #00e701; }
+    .package-card.selected {
+      border-color: #00e701;
+      background: rgba(0,231,1,0.06);
+      box-shadow: 0 0 0 2px #00e701;
+    }
+    .package-card .badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #f59e0b;
+      color: #fff;
+      font-size: 0.5rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 12px;
+    }
+    .package-card .price {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #1e293b;
+    }
+    .package-card .tokens {
+      font-size: 0.65rem;
+      color: #6a7a94;
+    }
+    .package-card .bonus {
+      font-size: 0.55rem;
+      color: #00a301;
+      font-weight: 600;
+    }
+    .custom-amount-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 10px;
+      margin: 8px 0 12px;
+    }
+    .custom-amount-input input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+      min-width: 60px;
+    }
+    .custom-amount-input input:focus { outline: none; }
+    .custom-amount-input .currency {
+      font-weight: 700;
+      color: #6a7a94;
+    }
+    .custom-amount-input .min-label {
+      font-size: 0.6rem;
+      color: #6a7a94;
+    }
+    .pay-now-btn {
+      width: 100%;
+      padding: 14px;
       background: #00e701;
       color: #000;
-      border-color: #00e701;
+      font-weight: 700;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 50px;
     }
-    .qr-box-wrap {
+    .pay-now-btn:hover { background: #00c601; transform: scale(1.02); }
+    .pay-now-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ===== PAYMENT MODAL ===== */
+    .payment-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+    .payment-modal {
       background: #fff;
-      color: #000;
-      max-width: 160px;
-      margin: 10px auto;
-      padding: 10px;
-      border-radius: 10px;
-      border: 2px solid rgba(0,0,0,0.1);
+      border-radius: 24px;
+      max-width: 420px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+      animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .payment-modal .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 1.5rem;
+      color: #6a7a94;
+      cursor: pointer;
+      transition: 0.2s;
+      background: none;
+      border: none;
+      padding: 8px;
+      z-index: 1;
+    }
+    .payment-modal .close-btn:hover { color: #1e293b; transform: rotate(90deg); }
+    .payment-modal h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      color: #1e293b;
+    }
+    .payment-modal .subtitle {
+      color: #6a7a94;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+    .payment-modal .amount-display {
+      text-align: center;
+      padding: 16px;
+      background: rgba(0,231,1,0.06);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(0,231,1,0.1);
+    }
+    .payment-modal .amount-display .rupee {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #00a301;
+    }
+    .payment-modal .amount-display .label {
+      font-size: 0.75rem;
+      color: #6a7a94;
+    }
+    .qr-container {
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 16px 0;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 2px dashed rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+      position: relative;
     }
-    .qr-box-wrap img {
-      width: 130px;
-      height: 130px;
+    .qr-container img {
+      width: 200px;
+      height: 200px;
+      border-radius: 8px;
+      image-rendering: pixelated;
+      background: #fff;
+      padding: 8px;
+    }
+    .qr-container .upi-id {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #1e293b;
+      margin-top: 8px;
+      background: rgba(0,0,0,0.04);
+      padding: 4px 16px;
       border-radius: 6px;
     }
-    .qr-box-wrap .upi-id {
-      font-weight: 700;
+    .qr-container .instruction {
       font-size: 0.7rem;
+      color: #6a7a94;
       margin-top: 4px;
-      color: #0a0f1a;
     }
-
-    .back-link {
-      background: none;
-      border: none;
-      color: #556070;
+    .qr-container .expiry-timer {
+      font-size: 0.7rem;
+      color: #f16464;
       font-weight: 600;
-      font-size: 0.75rem;
-      cursor: pointer;
-      padding: 0;
-      margin-bottom: 8px;
-      display: inline-block;
-      touch-action: manipulation;
+      margin-top: 4px;
     }
-    .back-link:hover { color: #00a301; }
+    .qr-expired-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .qr-expired-overlay .sub {
+      font-size: 0.7rem;
+      opacity: 0.8;
+    }
+    .payment-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin: 12px 0;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .payment-status.waiting {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .payment-status.checking {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .payment-status.success {
+      background: #d1fae5;
+      color: #065f46;
+      animation: pulseGreen 1s ease;
+    }
+    .payment-status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { background: #d1fae5; }
+      50% { background: #6ee7b7; }
+    }
+    .payment-status .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-top-color: #f59e0b;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .payment-modal .upi-pay-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px;
+      background: #00e701;
+      color: #000;
+      font-weight: 700;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      transition: 0.2s;
+      margin-top: 8px;
+      min-height: 50px;
+    }
+    .payment-modal .upi-pay-btn:hover { background: #00c601; transform: scale(1.02); }
+    .payment-modal .upi-pay-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .payment-modal .cancel-payment-btn {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      color: #6a7a94;
+      font-weight: 600;
+      margin-top: 8px;
+      transition: 0.2s;
+      min-height: 44px;
+    }
+    .payment-modal .cancel-payment-btn:hover { background: rgba(0,0,0,0.04); }
 
+    /* ===== CASHOUT FORM ===== */
+    .cashout-form-box {
+      background: rgba(255,255,255,0.4);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .cashout-form-box .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .cashout-form-box .field-group label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #6a7a94;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .cashout-form-box .field-group input {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+      width: 100%;
+    }
+    .cashout-form-box .field-group input:focus {
+      outline: none;
+      border-color: #00e701;
+      box-shadow: 0 0 0 3px rgba(0,231,1,0.1);
+    }
+    .cashout-info-note {
+      font-size: 0.7rem;
+      color: #6a7a94;
+      background: rgba(255,255,255,0.3);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-top: 8px;
+      border-left: 3px solid #f5c842;
+    }
+    .cashout-info-note strong { color: #1e293b; }
+
+    /* ===== TOAST ===== */
+    .toast-stack {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 320px;
+      width: 100%;
+    }
+    .toast {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-left: 4px solid #00e701;
+      padding: 12px 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      animation: slideIn 0.3s ease;
+      font-size: 0.8rem;
+      color: #1e293b;
+    }
+    .toast-success { border-left-color: #00e701; }
+    .toast-error { border-left-color: #f16464; }
+    .toast .icon { font-size: 1.2rem; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .toast-out { opacity: 0; transform: translateX(30px); transition: 0.3s ease; }
+
+    /* ===== MODALS ===== */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -1014,17 +1346,6 @@
       touch-action: manipulation;
     }
     .btn-secondary:hover { background: rgba(0,0,0,0.05); }
-    .btn-primary {
-      background: #00e701;
-      color: #000;
-      font-weight: 700;
-      padding: 8px 14px;
-      border-radius: 10px;
-      flex: 1;
-      text-align: center;
-      touch-action: manipulation;
-    }
-    .btn-primary:hover { background: #00c601; }
 
     .arena-header {
       display: flex;
@@ -1172,42 +1493,35 @@
     .quiz-option.wrong { background: #f16464; color: #fff; }
     .subtitle { font-size: 0.75rem; color: #556070; margin-bottom: 6px; }
 
-    .toast-stack {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-width: 280px;
-      width: 100%;
+    .confetti-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 10;
     }
-    .toast {
-      background: rgba(255,255,255,0.9);
+    .confetti-piece {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      opacity: 0.9;
+      animation: confettiFall 2s ease-out forwards;
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+      100% { transform: translateY(250px) rotate(720deg) scale(0.2); opacity: 0; }
+    }
+
+    .app-footer {
+      margin-top: auto;
+      border-top: 1px solid rgba(255,255,255,0.7);
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.5);
       backdrop-filter: blur(12px);
-      border-left: 4px solid #00e701;
-      padding: 8px 14px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-      animation: slideIn 0.3s ease;
-      font-size: 0.75rem;
-      color: #1e293b;
-    }
-    .toast-debit { border-left-color: #f16464; }
-    .toast-credit-text { color: #00a301; font-weight: 700; }
-    .toast-debit-text { color: #f16464; font-weight: 700; }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(30px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    .toast-out {
-      opacity: 0;
-      transform: translateX(30px);
-      transition: 0.25s ease;
+      text-align: center;
+      font-size: 0.65rem;
+      color: #6a7a94;
     }
 
     #transaction-modal {
@@ -1273,366 +1587,12 @@
     .tx-item .amount.debit { color: #f16464; }
     .tx-item .date { font-size: 0.6rem; color: #6a7a94; margin-left: 6px; }
 
-    .confetti-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 10;
-    }
-    .confetti-piece {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
-      opacity: 0.9;
-      animation: confettiFall 2s ease-out forwards;
-    }
-    @keyframes confettiFall {
-      0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
-      100% { transform: translateY(250px) rotate(720deg) scale(0.2); opacity: 0; }
-    }
-
-    .app-footer {
-      margin-top: auto;
-      border-top: 1px solid rgba(255,255,255,0.7);
-      padding: 12px 16px;
-      background: rgba(255,255,255,0.5);
-      backdrop-filter: blur(12px);
-      text-align: center;
-      font-size: 0.65rem;
-      color: #6a7a94;
-    }
-
-    /* ===== CASHOUT FORM ===== */
-    .cashout-form-box {
-      background: rgba(255,255,255,0.4);
-      border: 1px solid rgba(255,255,255,0.7);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-    .cashout-form-box .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-    .cashout-form-box .field-group label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #6a7a94;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .cashout-form-box .field-group input {
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.08);
-      background: rgba(255,255,255,0.7);
-      font-size: 0.9rem;
-      width: 100%;
-    }
-    .cashout-form-box .field-group input:focus {
-      outline: none;
-      border-color: #00e701;
-      box-shadow: 0 0 0 3px rgba(0,231,1,0.1);
-    }
-    .cashout-info-note {
-      font-size: 0.7rem;
-      color: #6a7a94;
-      background: rgba(255,255,255,0.3);
-      padding: 8px 12px;
-      border-radius: 8px;
-      margin-top: 8px;
-      border-left: 3px solid #f5c842;
-    }
-    .cashout-info-note strong { color: #1e293b; }
-
-    /* ===== PAYMENT MODAL ===== */
-    .payment-modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      padding: 16px;
-      animation: fadeIn 0.3s ease;
-    }
-    .payment-modal {
-      background: #fff;
-      border-radius: 24px;
-      max-width: 420px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 24px;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.2);
-      animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      position: relative;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(30px) scale(0.95); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .payment-modal .close-btn {
-      position: absolute;
-      top: 12px;
-      right: 16px;
-      font-size: 1.5rem;
-      color: #6a7a94;
-      cursor: pointer;
-      transition: 0.2s;
-      background: none;
-      border: none;
-      padding: 8px;
-      z-index: 1;
-    }
-    .payment-modal .close-btn:hover { color: #1e293b; transform: rotate(90deg); }
-    .payment-modal h2 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.3rem;
-      font-weight: 800;
-      margin-bottom: 4px;
-      color: #1e293b;
-    }
-    .payment-modal .subtitle {
-      color: #6a7a94;
-      font-size: 0.85rem;
-      margin-bottom: 20px;
-    }
-    .payment-modal .amount-display {
-      text-align: center;
-      padding: 16px;
-      background: rgba(0,231,1,0.06);
-      border-radius: 12px;
-      margin-bottom: 16px;
-      border: 1px solid rgba(0,231,1,0.1);
-    }
-    .payment-modal .amount-display .rupee {
-      font-size: 2rem;
-      font-weight: 800;
-      color: #00a301;
-    }
-    .payment-modal .amount-display .label {
-      font-size: 0.75rem;
-      color: #6a7a94;
-    }
-    .qr-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 16px 0;
-      background: #f8fafc;
-      border-radius: 12px;
-      border: 2px dashed rgba(0,0,0,0.06);
-      margin-bottom: 16px;
-    }
-    .qr-container img {
-      width: 200px;
-      height: 200px;
-      border-radius: 8px;
-      image-rendering: pixelated;
-      background: #fff;
-      padding: 8px;
-    }
-    .qr-container .upi-id {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: #1e293b;
-      margin-top: 8px;
-      background: rgba(0,0,0,0.04);
-      padding: 4px 16px;
-      border-radius: 6px;
-    }
-    .qr-container .instruction {
-      font-size: 0.7rem;
-      color: #6a7a94;
-      margin-top: 4px;
-    }
-    .payment-status {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      border-radius: 10px;
-      margin: 12px 0;
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-    .payment-status.waiting {
-      background: #fef3c7;
-      color: #92400e;
-    }
-    .payment-status.success {
-      background: #d1fae5;
-      color: #065f46;
-      animation: pulseGreen 1s ease;
-    }
-    .payment-status.error {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-    @keyframes pulseGreen {
-      0%, 100% { background: #d1fae5; }
-      50% { background: #6ee7b7; }
-    }
-    .payment-status .spinner {
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(0,0,0,0.1);
-      border-top-color: #f59e0b;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .payment-modal .upi-pay-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding: 14px;
-      background: #00e701;
-      color: #000;
-      font-weight: 700;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      transition: 0.2s;
-      margin-top: 8px;
-      min-height: 50px;
-    }
-    .payment-modal .upi-pay-btn:hover { background: #00c601; transform: scale(1.02); }
-    .payment-modal .upi-pay-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-    .payment-modal .cancel-payment-btn {
-      width: 100%;
-      padding: 12px;
-      background: transparent;
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 12px;
-      color: #6a7a94;
-      font-weight: 600;
-      margin-top: 8px;
-      transition: 0.2s;
-      min-height: 44px;
-    }
-    .payment-modal .cancel-payment-btn:hover { background: rgba(0,0,0,0.04); }
-
-    /* Package Cards for Add Token */
-    .package-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 8px;
-      margin: 12px 0;
-    }
-    .package-card {
-      background: rgba(255,255,255,0.6);
-      border: 1px solid rgba(255,255,255,0.8);
-      border-radius: 10px;
-      padding: 10px 8px;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.25s ease;
-      position: relative;
-    }
-    .package-card:hover { transform: translateY(-2px); border-color: #00e701; }
-    .package-card.selected {
-      border-color: #00e701;
-      background: rgba(0,231,1,0.06);
-      box-shadow: 0 0 0 2px #00e701;
-    }
-    .package-card .badge {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      background: #f59e0b;
-      color: #fff;
-      font-size: 0.5rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 12px;
-    }
-    .package-card .price {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1rem;
-      font-weight: 800;
-      color: #1e293b;
-    }
-    .package-card .tokens {
-      font-size: 0.65rem;
-      color: #6a7a94;
-    }
-    .package-card .bonus {
-      font-size: 0.55rem;
-      color: #00a301;
-      font-weight: 600;
-    }
-    .custom-amount-input {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      background: rgba(255,255,255,0.6);
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 10px;
-      margin: 8px 0 12px;
-    }
-    .custom-amount-input input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #1e293b;
-      min-width: 60px;
-    }
-    .custom-amount-input input:focus { outline: none; }
-    .custom-amount-input .currency {
-      font-weight: 700;
-      color: #6a7a94;
-    }
-    .custom-amount-input .min-label {
-      font-size: 0.6rem;
-      color: #6a7a94;
-    }
-    .pay-now-btn {
-      width: 100%;
-      padding: 14px;
-      background: #00e701;
-      color: #000;
-      font-weight: 700;
-      border-radius: 12px;
-      font-size: 1rem;
-      transition: 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      min-height: 50px;
-    }
-    .pay-now-btn:hover { background: #00c601; transform: scale(1.02); }
-
     /* RESPONSIVE */
     @media (max-width:640px){
       .hero-left h1 { font-size: 1.6rem; }
       .hero-right { flex: 1 1 100%; }
       .games-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
       .profile-header-card { grid-template-columns: 1fr; }
-      .addtoken-amount-grid { grid-template-columns: repeat(2,1fr); }
       .arena-card { padding: 14px; }
       .ttt-wrapper { width: 150px; height: 150px; }
       .ttt-board { width: 150px; height: 150px; }
@@ -1656,6 +1616,7 @@
       .qr-container img { width: 160px; height: 160px; }
       .payment-modal h2 { font-size: 1.1rem; }
       .package-grid { grid-template-columns: repeat(3, 1fr); }
+      .filter-chip { font-size: 0.65rem; padding: 4px 12px; min-height: 28px; }
     }
     @media (max-width:400px){
       .games-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1794,10 +1755,10 @@
       <div class="cashout-progress-banner">
         <div class="progress-row">
           <span>Next Cashout Threshold</span>
-          <span class="value" id="progress-text">₹1,200 / ₹2,500</span>
+          <span class="value" id="progress-text">₹950 / ₹2,500</span>
         </div>
         <div class="progress-track">
-          <div class="progress-fill" id="progress-fill" style="width:48%;"></div>
+          <div class="progress-fill" id="progress-fill" style="width:38%;"></div>
         </div>
       </div>
 
@@ -1864,25 +1825,35 @@
     <section id="view-addtoken" class="app-view">
       <div class="section-card">
         <h3>💰 Add Funds to Wallet</h3>
-        <p class="section-sub">Choose a package or enter custom amount. Min ₹20</p>
+        <p class="section-sub">Choose a package or enter custom amount. Min ₹5</p>
 
         <!-- Quick Packages -->
         <div class="package-grid" id="packageGrid">
-          <div class="package-card" data-amount="20" data-bonus="0">
-            <span class="price">₹20</span>
-            <span class="tokens">20 Tokens</span>
+          <div class="package-card" data-amount="5" data-bonus="0">
+            <span class="price">₹5</span>
+            <span class="tokens">5 Tokens</span>
           </div>
-          <div class="package-card" data-amount="50" data-bonus="10">
+          <div class="package-card" data-amount="10" data-bonus="10">
             <span class="badge">+10%</span>
-            <span class="price">₹50</span>
-            <span class="tokens">55 Tokens</span>
-            <span class="bonus">+5 Bonus</span>
+            <span class="price">₹10</span>
+            <span class="tokens">11 Tokens</span>
           </div>
-          <div class="package-card selected" data-amount="100" data-bonus="20">
+          <div class="package-card" data-amount="20" data-bonus="10">
+            <span class="price">₹20</span>
+            <span class="tokens">22 Tokens</span>
+            <span class="bonus">+2 Bonus</span>
+          </div>
+          <div class="package-card selected" data-amount="50" data-bonus="20">
             <span class="badge">🔥 Best</span>
+            <span class="price">₹50</span>
+            <span class="tokens">60 Tokens</span>
+            <span class="bonus">+10 Bonus</span>
+          </div>
+          <div class="package-card" data-amount="100" data-bonus="25">
+            <span class="badge">+25%</span>
             <span class="price">₹100</span>
-            <span class="tokens">120 Tokens</span>
-            <span class="bonus">+20 Bonus</span>
+            <span class="tokens">125 Tokens</span>
+            <span class="bonus">+25 Bonus</span>
           </div>
           <div class="package-card" data-amount="200" data-bonus="30">
             <span class="badge">+30%</span>
@@ -1907,8 +1878,8 @@
         <!-- Custom Amount -->
         <div class="custom-amount-input">
           <span class="currency">₹</span>
-          <input type="number" id="customAmount" value="100" min="20" step="10" placeholder="Enter amount" />
-          <span class="min-label">Min ₹20</span>
+          <input type="number" id="customAmount" value="50" min="5" step="5" placeholder="Enter amount" />
+          <span class="min-label">Min ₹5</span>
         </div>
 
         <!-- Pay Now Button -->
@@ -1939,14 +1910,19 @@
 
       <div class="amount-display">
         <span class="label">Amount to Pay</span>
-        <div class="rupee">₹<span id="paymentAmount">100</span></div>
-        <span class="label" id="bonusDisplay" style="color:#00a301; font-weight:600;">+20 Tokens Bonus</span>
+        <div class="rupee">₹<span id="paymentAmount">50</span></div>
+        <span class="label" id="bonusDisplay" style="color:#00a301; font-weight:600;">+10 Tokens Bonus</span>
       </div>
 
-      <div class="qr-container">
+      <div class="qr-container" id="qrContainer">
         <img id="qrCodeImage" src="" alt="UPI QR Code" />
         <div class="upi-id" id="upiIdDisplay">paytm.s1ax1t9@pty</div>
         <div class="instruction">Scan with Google Pay, PhonePe, Paytm or any UPI app</div>
+        <div class="expiry-timer" id="expiryTimer">⏱️ QR expires in 2:00</div>
+        <div id="qrExpiredOverlay" class="qr-expired-overlay hidden">
+          <span>⏰ QR Expired</span>
+          <span class="sub">Please generate a new QR</span>
+        </div>
       </div>
 
       <button id="openUpiAppBtn" class="upi-pay-btn">
@@ -1956,7 +1932,7 @@
       <!-- Payment Status -->
       <div id="paymentStatus" class="payment-status waiting">
         <span class="spinner"></span>
-        <span>Waiting for payment confirmation...</span>
+        <span>Waiting for payment...</span>
       </div>
 
       <button id="cancelPaymentBtn" class="cancel-payment-btn">Cancel Payment</button>
@@ -2028,7 +2004,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  COMPLETE JAVASCRIPT – Payment Integration Only
+//  COMPLETE JAVASCRIPT – SMM Style Payment System
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -2067,6 +2043,7 @@ const LIVE_ENABLED_TYPES = ['tictactoe'];
 const PRESENCE_HEARTBEAT_MS = 8000;
 const UPI_ID = "paytm.s1ax1t9@pty";
 const MERCHANT_NAME = "Arena Games";
+const QR_EXPIRY_SECONDS = 120; // 2 minutes
 
 let presenceHeartbeatTimer = null;
 let currentUser = null;
@@ -2086,6 +2063,10 @@ let inQueue = false;
 let paymentCheckInterval = null;
 let paymentTimeout = null;
 let isPaymentProcessing = false;
+let currentTransactionId = null;
+let qrExpiryTimer = null;
+let expirySeconds = QR_EXPIRY_SECONDS;
+let isQrExpired = false;
 
 // Package selection
 document.querySelectorAll('.package-card').forEach(card => {
@@ -2100,22 +2081,69 @@ document.querySelectorAll('.package-card').forEach(card => {
 // Custom amount input sync
 document.getElementById('customAmount')?.addEventListener('input', function() {
   const val = parseInt(this.value) || 0;
-  if (val >= 20) {
+  if (val >= 5) {
     document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
   }
 });
 
-function generateQRCode(amount, upiId, merchantName) {
-  const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR`;
+// Generate unique transaction ID
+function generateTransactionId() {
+  return 'TXN' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6).toUpperCase();
+}
+
+// Generate QR Code with transaction ID
+function generateQRCode(amount, upiId, merchantName, txnId) {
+  // Include transaction ID in UPI link for tracking
+  const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${txnId}`;
   return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiLink)}`;
+}
+
+// ===== START QR EXPIRY TIMER =====
+function startQrExpiryTimer() {
+  expirySeconds = QR_EXPIRY_SECONDS;
+  isQrExpired = false;
+  const timerEl = document.getElementById('expiryTimer');
+  const overlayEl = document.getElementById('qrExpiredOverlay');
+  
+  if (timerEl) timerEl.classList.remove('hidden');
+  if (overlayEl) overlayEl.classList.add('hidden');
+  
+  qrExpiryTimer = setInterval(() => {
+    expirySeconds--;
+    const mins = Math.floor(expirySeconds / 60);
+    const secs = expirySeconds % 60;
+    if (timerEl) {
+      timerEl.textContent = `⏱️ QR expires in ${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    if (expirySeconds <= 0) {
+      clearInterval(qrExpiryTimer);
+      isQrExpired = true;
+      if (timerEl) timerEl.textContent = '⏰ QR Expired';
+      if (overlayEl) overlayEl.classList.remove('hidden');
+      
+      // Show expired status
+      const statusEl = document.getElementById('paymentStatus');
+      statusEl.className = 'payment-status error';
+      statusEl.innerHTML = `
+        <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
+        <span>QR expired. Please generate a new one.</span>
+      `;
+      
+      // Clean up
+      clearInterval(paymentCheckInterval);
+      clearTimeout(paymentTimeout);
+      isPaymentProcessing = false;
+    }
+  }, 1000);
 }
 
 // ===== INITIATE PAYMENT =====
 document.getElementById('initiatePaymentBtn')?.addEventListener('click', function() {
   const customAmount = parseInt(document.getElementById('customAmount').value) || 0;
   
-  if (customAmount < 20) {
-    showToast('Minimum amount is ₹20', 'error');
+  if (customAmount < 5) {
+    showToast('Minimum amount is ₹5', 'error');
     return;
   }
   if (customAmount > 100000) {
@@ -2129,6 +2157,9 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
     bonus = parseInt(selectedPackage.dataset.bonus) || 0;
   }
   const tokens = customAmount + Math.floor(customAmount * bonus / 100);
+  
+  // Generate unique transaction ID
+  currentTransactionId = generateTransactionId();
   openPaymentModal(customAmount, tokens, bonus);
 });
 
@@ -2140,7 +2171,14 @@ function openPaymentModal(amount, tokens, bonus) {
   const bonusDisplay = document.getElementById('bonusDisplay');
   const upiDisplay = document.getElementById('upiIdDisplay');
   const statusEl = document.getElementById('paymentStatus');
+  const overlayEl = document.getElementById('qrExpiredOverlay');
   
+  // Reset state
+  isQrExpired = false;
+  isPaymentProcessing = false;
+  if (overlayEl) overlayEl.classList.add('hidden');
+  
+  // Set values
   amountDisplay.textContent = amount;
   upiDisplay.textContent = UPI_ID;
   
@@ -2150,14 +2188,22 @@ function openPaymentModal(amount, tokens, bonus) {
     bonusDisplay.textContent = `${tokens} Tokens`;
   }
   
-  const qrUrl = generateQRCode(amount, UPI_ID, MERCHANT_NAME);
+  // Generate QR with transaction ID
+  const qrUrl = generateQRCode(amount, UPI_ID, MERCHANT_NAME, currentTransactionId);
   qrImg.src = qrUrl;
   qrImg.alt = `UPI QR Code for ₹${amount}`;
   
+  // Reset status
   statusEl.className = 'payment-status waiting';
-  statusEl.innerHTML = `<span class="spinner"></span><span>Waiting for payment confirmation...</span>`;
+  statusEl.innerHTML = `<span class="spinner"></span><span>Waiting for payment...</span>`;
   
+  // Show modal
   modal.classList.remove('hidden');
+  
+  // Start QR expiry timer
+  startQrExpiryTimer();
+  
+  // Start payment monitoring
   startPaymentMonitoring(amount, tokens);
 }
 
@@ -2168,16 +2214,34 @@ function startPaymentMonitoring(amount, tokens) {
   
   const statusEl = document.getElementById('paymentStatus');
   const startTime = Date.now();
-  const TIMEOUT_MS = 120000;
+  const TIMEOUT_MS = QR_EXPIRY_SECONDS * 1000;
   let attempts = 0;
+  let isPaymentVerified = false;
   
-  // Simulate payment verification with mock check
+  // Poll every 2 seconds for payment status
   paymentCheckInterval = setInterval(async () => {
     attempts++;
     const elapsed = Date.now() - startTime;
     
-    // Simulate payment received after 8-15 seconds (mimics real UPI flow)
-    if (attempts > 5 && Math.random() < 0.12) {
+    // Check if QR is expired
+    if (isQrExpired) {
+      clearInterval(paymentCheckInterval);
+      clearTimeout(paymentTimeout);
+      isPaymentProcessing = false;
+      statusEl.className = 'payment-status error';
+      statusEl.innerHTML = `
+        <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
+        <span>QR expired. Please generate a new QR.</span>
+      `;
+      return;
+    }
+    
+    // In production, this would call your backend API to check payment status
+    // For demo, we simulate payment verification with realistic timing
+    // After 8-15 seconds, simulate successful payment (like real UPI)
+    if (attempts > 5 && Math.random() < 0.10 && !isPaymentVerified) {
+      // Simulate payment received
+      isPaymentVerified = true;
       await handlePaymentSuccess(amount, tokens);
       return;
     }
@@ -2187,13 +2251,21 @@ function startPaymentMonitoring(amount, tokens) {
       return;
     }
     
+    // Update status with checking animation
     const dots = '.'.repeat(attempts % 4);
-    statusEl.innerHTML = `<span class="spinner"></span><span>Waiting for payment confirmation${dots}</span>`;
+    statusEl.className = 'payment-status checking';
+    statusEl.innerHTML = `
+      <span class="spinner"></span>
+      <span>Checking payment status${dots}</span>
+    `;
     
-  }, 1500);
+  }, 2000); // Poll every 2 seconds
   
+  // Set timeout for QR expiry
   paymentTimeout = setTimeout(async () => {
-    await handlePaymentTimeout();
+    if (!isPaymentVerified) {
+      await handlePaymentTimeout();
+    }
   }, TIMEOUT_MS);
 }
 
@@ -2204,6 +2276,7 @@ async function handlePaymentSuccess(amount, tokens) {
   
   clearInterval(paymentCheckInterval);
   clearTimeout(paymentTimeout);
+  clearInterval(qrExpiryTimer);
   
   const statusEl = document.getElementById('paymentStatus');
   statusEl.className = 'payment-status success';
@@ -2212,8 +2285,10 @@ async function handlePaymentSuccess(amount, tokens) {
     <span>✅ Payment Received! ₹${amount} credited (${tokens} Tokens)</span>
   `;
   
+  // Credit tokens to wallet
   await creditTokens(tokens, amount);
   
+  // Close modal after delay
   setTimeout(() => {
     closePaymentModal();
   }, 2500);
@@ -2226,6 +2301,7 @@ async function handlePaymentTimeout() {
   
   clearInterval(paymentCheckInterval);
   clearTimeout(paymentTimeout);
+  clearInterval(qrExpiryTimer);
   
   const statusEl = document.getElementById('paymentStatus');
   statusEl.className = 'payment-status error';
@@ -2233,21 +2309,26 @@ async function handlePaymentTimeout() {
     <i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i>
     <span>⏰ Payment timeout. Please try again.</span>
   `;
-  
-  setTimeout(() => {
-    statusEl.className = 'payment-status waiting';
-    statusEl.innerHTML = `<span>Click "Cancel" to try again</span>`;
-  }, 3000);
 }
 
 // ===== CREDIT TOKENS TO WALLET =====
 async function creditTokens(tokens, amount) {
   try {
+    // Update wallet in database
     await persistWalletDelta(tokens);
-    await recordTransaction(`💳 UPI Payment: ₹${amount} → ${tokens} Tokens`, 'credit', tokens);
+    
+    // Record transaction
+    await recordTransaction(
+      `💳 UPI Payment: ₹${amount} → ${tokens} Tokens (TXN: ${currentTransactionId})`,
+      'credit',
+      tokens
+    );
+    
+    // Update UI
     await loadWallet();
     await loadTransactions();
     updateUI();
+    
     showToast(`✅ ₹${amount} added! ${tokens} tokens credited`, 'credit', tokens);
   } catch (error) {
     console.error('Credit failed:', error);
@@ -2259,27 +2340,39 @@ async function creditTokens(tokens, amount) {
 function closePaymentModal() {
   const modal = document.getElementById('paymentModal');
   modal.classList.add('hidden');
+  
   clearInterval(paymentCheckInterval);
   clearTimeout(paymentTimeout);
+  clearInterval(qrExpiryTimer);
   isPaymentProcessing = false;
+  isQrExpired = false;
+  currentTransactionId = null;
   
   const statusEl = document.getElementById('paymentStatus');
   statusEl.className = 'payment-status waiting';
-  statusEl.innerHTML = `<span class="spinner"></span><span>Waiting for payment confirmation...</span>`;
+  statusEl.innerHTML = `<span class="spinner"></span><span>Waiting for payment...</span>`;
+  
+  const overlayEl = document.getElementById('qrExpiredOverlay');
+  if (overlayEl) overlayEl.classList.add('hidden');
 }
 
 // ===== OPEN UPI APP =====
 document.getElementById('openUpiAppBtn')?.addEventListener('click', function() {
+  if (isQrExpired) {
+    showToast('QR expired. Please generate a new QR.', 'error');
+    return;
+  }
+  
   const amount = document.getElementById('paymentAmount').textContent;
-  const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR`;
+  const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${currentTransactionId}`;
   window.location.href = upiLink;
   
   setTimeout(async () => {
     try {
       await navigator.clipboard.writeText(UPI_ID);
-      showToast('📋 UPI ID copied! Open your UPI app and pay manually.', 'credit', 0);
+      showToast('📋 UPI ID copied! Open your UPI app and pay.', 'credit', 0);
     } catch (e) {
-      alert(`Pay to: ${UPI_ID}\nAmount: ₹${amount}`);
+      // Silent fallback
     }
   }, 500);
 });
@@ -2308,7 +2401,12 @@ document.getElementById('addtoken-submit-btn')?.addEventListener('click', async 
     // Simulate UTR verification
     await new Promise(resolve => setTimeout(resolve, 1500));
     const amount = parseInt(document.getElementById('customAmount').value) || 50;
-    const tokens = amount + Math.floor(amount * 0.2);
+    let bonus = 0;
+    const selectedPackage = document.querySelector('.package-card.selected');
+    if (selectedPackage) {
+      bonus = parseInt(selectedPackage.dataset.bonus) || 0;
+    }
+    const tokens = amount + Math.floor(amount * bonus / 100);
     await creditTokens(tokens, amount);
     document.getElementById('addtoken-utr-input').value = '';
     statusMsg.textContent = `✅ UTR submitted! ₹${amount} credited (${tokens} Tokens)`;
@@ -2474,10 +2572,10 @@ function showToast(message, type = 'credit', amount = 0) {
   if (!stack) return;
   const isCredit = type === 'credit';
   const toast = document.createElement('div');
-  toast.className = `toast ${isCredit ? 'toast-credit' : 'toast-debit'}`;
+  toast.className = `toast ${isCredit ? 'toast-success' : 'toast-error'}`;
   const icon = isCredit ? '✅' : '❌';
   const amtText = amount > 0 ? (isCredit ? '+' : '-') + formatRupees(Math.abs(amount)) : '';
-  toast.innerHTML = `<span>${icon} ${message} ${amtText}</span>`;
+  toast.innerHTML = `<span class="icon">${icon}</span> <span>${message} ${amtText}</span>`;
   stack.appendChild(toast);
   setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 4000);
 }
@@ -2724,6 +2822,7 @@ submitReferralBtn?.addEventListener('click', async () => {
   submitReferralBtn.disabled = false;
 });
 
+// ---- Filter Chips ----
 filterChips.forEach(chip => {
   chip.addEventListener('click', () => {
     filterChips.forEach(c => c.classList.remove('active'));
