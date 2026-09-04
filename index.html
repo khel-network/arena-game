@@ -1644,13 +1644,539 @@
 </head>
 <body>
 
-<!-- ===== Rest of your HTML remains the same ===== -->
-<!-- [All HTML content stays exactly as you had it] -->
+<!-- Background Blobs -->
+<div class="background-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<!-- ===== LANDING PAGE ===== -->
+<div id="page-landing">
+  <nav class="landing-nav">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+      </svg>
+      ARENA
+    </div>
+    <div class="nav-actions">
+      <button id="nav-login-btn" class="btn-outline">Sign In</button>
+      <button id="nav-signup-btn" class="btn-primary">Get Started</button>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-left">
+      <div class="badge">⚡ Verified 1v1 Skill Duels</div>
+      <h1>Play Skill Games.<br/><span class="highlight">Win Real Tokens.</span></h1>
+      <p>Compete against players in fast‑paced duels. Instant matchmaking, fair play, and immediate token rewards.</p>
+      <div class="hero-stats">
+        <div class="stat"><span class="number">1,000</span><span class="label">Welcome Tokens</span></div>
+        <div class="stat"><span class="number">&lt; 10s</span><span class="label">Match Queues</span></div>
+        <div class="stat"><span class="number">100%</span><span class="label">Skill‑Based</span></div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="auth-card">
+        <h3>Create an Account</h3>
+        <p class="sub">Sign in to claim your 1,000 tokens and enter live matches</p>
+        <div class="auth-perks">
+          <div class="perk">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span><strong>1,000 Tokens</strong> instantly credited</span>
+          </div>
+          <div class="perk">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Encrypted &amp; secure authentication</span>
+          </div>
+        </div>
+
+        <div class="email-auth-fields">
+          <input type="email" id="email-input" placeholder="Email address" />
+          <input type="password" id="password-input" placeholder="Password (min 6 chars)" />
+          <div class="email-auth-row">
+            <button id="email-login-btn" class="btn-primary" style="background:#00e701; color:#000;">Sign In</button>
+            <button id="email-signup-btn" class="btn-secondary">Create Account</button>
+          </div>
+        </div>
+
+        <div class="auth-divider">or continue with</div>
+
+        <button id="google-login-btn" class="google-btn">
+          <svg width="18" height="18" viewBox="0 0 48 48">
+            <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
+            <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/>
+            <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/>
+            <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+
+        <p class="auth-footnote">By continuing, you agree to the Arena Terms of Service.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast stack -->
+<div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboard" class="app-wrap hidden">
+  <header class="top-nav">
+    <div class="nav-container">
+      <div class="nav-top-row">
+        <div class="brand-small" id="nav-brand-logo" style="cursor:pointer;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+          ARENA
+        </div>
+        <div class="user-stats-bar">
+          <button id="wallet-badge-btn" class="token-badge" title="View transactions">
+            <span class="rupee-circle">₹</span>
+            <span id="balance-value">1,000</span>
+          </button>
+          <button id="profile-nav-btn" class="user-profile-chip">
+            <img id="avatar" class="user-avatar" src="" alt="Avatar" />
+            <span id="player-name" class="user-name">Player</span>
+          </button>
+        </div>
+      </div>
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-target="view-earn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+          <span>Earn</span>
+        </button>
+        <button class="tab-btn" data-target="view-matches">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Matches</span>
+        </button>
+        <button class="tab-btn" data-target="view-cashout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <span>Cashout</span>
+        </button>
+        <button class="tab-btn" data-target="view-addtoken">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span>Add Funds</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Earn View -->
+    <section id="view-earn" class="app-view active">
+      <div class="cashout-progress-banner">
+        <div class="progress-row">
+          <span>Next Cashout Threshold</span>
+          <span class="value" id="progress-text">₹950 / ₹2,500</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:38%;"></div>
+        </div>
+      </div>
+
+      <div class="hero-banner">
+        <div class="tag">INSTANT 1V1 DUELS</div>
+        <h2>Challenge Players &amp; Win Real Tokens</h2>
+        <p>Entry: <strong>₹50</strong> • Winner Reward: <strong class="reward">₹90</strong> (Net +₹40)</p>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-chip active" data-category="all">All Games</button>
+        <button class="filter-chip" data-category="reflex">Reflex Speed</button>
+        <button class="filter-chip" data-category="math">Math</button>
+        <button class="filter-chip" data-category="brain">Memory &amp; Brain</button>
+        <button class="filter-chip" data-category="strategy">Strategy</button>
+      </div>
+
+      <div class="games-grid" id="gamesGrid"></div>
+    </section>
+
+    <section id="view-matches" class="app-view">
+      <div class="section-card">
+        <h3>Match History</h3>
+        <p class="section-sub">Your recent 1v1 duel records</p>
+        <div class="table-wrap">
+          <table class="ledger-table">
+            <thead><tr><th>Game</th><th>Opponent</th><th>Result</th><th>Reward</th><th>Time</th></tr></thead>
+            <tbody id="matches-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-cashout" class="app-view">
+      <div class="section-card">
+        <h3>Cashout Vault</h3>
+        <p class="section-sub">Withdraw your tokens to your bank account via UPI</p>
+        <div class="stat-box" style="margin-top:12px; margin-bottom:16px;">
+          <span class="stat-box-num" id="cashout-balance">₹0</span>
+          <span class="stat-box-lbl">Available Balance</span>
+          <p style="font-size:0.75rem; color:#556070; margin-top:4px;">Minimum withdrawal: ₹2,500</p>
+        </div>
+        <div class="cashout-form-box">
+          <div class="field-group">
+            <label for="cashout-upi">UPI ID (Google Pay / PhonePe / Paytm)</label>
+            <input type="text" id="cashout-upi" placeholder="e.g. user@upi" />
+          </div>
+          <div class="field-group">
+            <label for="cashout-amount">Amount to Withdraw (₹)</label>
+            <input type="number" id="cashout-amount" placeholder="Enter amount" min="2500" step="100" />
+          </div>
+          <button id="cashout-submit-btn" class="btn-primary" style="width:100%;">Submit Withdrawal Request</button>
+          <div class="cashout-info-note">
+            ⏳ <strong>Processing Time:</strong> Withdrawals are processed within <strong>7–8 hours</strong> and will reflect in your UPI account after verification.
+          </div>
+          <p id="cashout-status-msg" class="refer-status-msg" style="margin-top:8px;"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-addtoken" class="app-view">
+      <div class="section-card">
+        <h3>💰 Add Funds to Wallet</h3>
+        <p class="section-sub">Choose a package or enter custom amount. Min ₹1 (Testing)</p>
+
+        <div class="package-grid" id="packageGrid">
+          <div class="package-card" data-amount="1" data-bonus="0">
+            <span class="price">₹1</span>
+            <span class="tokens">1 Token</span>
+          </div>
+          <div class="package-card" data-amount="5" data-bonus="0">
+            <span class="price">₹5</span>
+            <span class="tokens">5 Tokens</span>
+          </div>
+          <div class="package-card" data-amount="10" data-bonus="10">
+            <span class="badge">+10%</span>
+            <span class="price">₹10</span>
+            <span class="tokens">11 Tokens</span>
+          </div>
+          <div class="package-card selected" data-amount="50" data-bonus="20">
+            <span class="badge">🔥 Best</span>
+            <span class="price">₹50</span>
+            <span class="tokens">60 Tokens</span>
+            <span class="bonus">+10 Bonus</span>
+          </div>
+          <div class="package-card" data-amount="100" data-bonus="25">
+            <span class="badge">+25%</span>
+            <span class="price">₹100</span>
+            <span class="tokens">125 Tokens</span>
+            <span class="bonus">+25 Bonus</span>
+          </div>
+          <div class="package-card" data-amount="200" data-bonus="30">
+            <span class="badge">+30%</span>
+            <span class="price">₹200</span>
+            <span class="tokens">260 Tokens</span>
+            <span class="bonus">+60 Bonus</span>
+          </div>
+          <div class="package-card" data-amount="500" data-bonus="40">
+            <span class="badge">+40%</span>
+            <span class="price">₹500</span>
+            <span class="tokens">700 Tokens</span>
+            <span class="bonus">+200 Bonus</span>
+          </div>
+          <div class="package-card" data-amount="1000" data-bonus="50">
+            <span class="badge">+50%</span>
+            <span class="price">₹1000</span>
+            <span class="tokens">1500 Tokens</span>
+            <span class="bonus">+500 Bonus</span>
+          </div>
+        </div>
+
+        <div class="custom-amount-input">
+          <span class="currency">₹</span>
+          <input type="number" id="customAmount" value="50" min="1" step="1" placeholder="Enter amount" />
+          <span class="min-label">Min ₹1</span>
+        </div>
+
+        <button id="initiatePaymentBtn" class="pay-now-btn">
+          <i class="fas fa-qrcode"></i> Generate QR & Pay Now
+        </button>
+
+        <div style="margin-top:16px; padding-top:16px; border-top:1px solid rgba(0,0,0,0.06);">
+          <p style="font-size:0.7rem; color:#6a7a94; margin-bottom:8px;">Already paid? Submit UTR for manual verification</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <input type="text" id="addtoken-utr-input" class="name-input" maxlength="16" placeholder="Paste 12-digit UTR" style="flex:1; min-width:120px;" />
+            <button id="addtoken-submit-btn" class="btn-primary" style="background:#2563eb; color:#fff;">Submit UTR</button>
+          </div>
+          <p id="addtoken-status-msg" class="refer-status-msg" style="margin-top:4px;"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile View -->
+    <section id="view-profile" class="app-view">
+      <div class="profile-header-card">
+        <div class="profile-left">
+          <img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" />
+          <div class="profile-meta">
+            <div class="name-edit-group">
+              <h2 id="profile-display-name">Player</h2>
+              <button id="edit-name-btn" class="icon-btn" title="Edit Name">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+              </button>
+            </div>
+            <div id="name-edit-box" class="name-edit-box hidden">
+              <input type="text" id="name-input" class="name-input" maxlength="20" placeholder="New username" />
+              <button id="save-name-btn" class="btn-save">Save</button>
+              <button id="cancel-name-btn" class="btn-cancel-sm">Cancel</button>
+            </div>
+            <p class="join-date">Arena Member • Verified Account</p>
+            <div class="level-pill">
+              <span>Level <strong id="user-level">1</strong></span>
+              <div class="level-bar-bg"><div class="level-bar-fill" style="width:48%;"></div></div>
+              <span class="xp-text">480 / 1,000 XP</span>
+            </div>
+          </div>
+        </div>
+        <div class="profile-stats-grid">
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-total-earnings">₹1,200</span>
+            <span class="stat-box-lbl">Token Balance</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-matches-played">0</span>
+            <span class="stat-box-lbl">Matches Played</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-win-rate">0%</span>
+            <span class="stat-box-lbl">Win Rate</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-tokens-won">+₹0</span>
+            <span class="stat-box-lbl">Duel Profit</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3>Account</h3>
+        <p class="section-sub">Manage your wallet, profile and referral program</p>
+        <div class="profile-menu-list">
+          <div class="menu-row menu-row-static">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><path d="M2 6h20v12H2z"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Signed in as</span>
+              <span class="menu-row-sub" id="profile-email">—</span>
+            </div>
+          </div>
+
+          <button class="menu-row" id="menu-transactions-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Token Transactions</span>
+              <span class="menu-row-sub">View your full credit &amp; debit history</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+
+          <button class="menu-row" id="menu-addtokens-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Add Tokens</span>
+              <span class="menu-row-sub">Top up your wallet balance</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+
+          <button class="menu-row" id="menu-refer-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Refer &amp; Earn</span>
+              <span class="menu-row-sub">Invite friends, earn bonus tokens</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+
+          <button class="menu-row menu-row-danger" id="menu-logout-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Log Out</span>
+              <span class="menu-row-sub">Sign out of your Arena account</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ledger View -->
+    <section id="view-ledger" class="app-view">
+      <div class="section-card">
+        <button class="back-link" id="ledger-back-btn">‹ Back to Profile</button>
+        <h3>Token Transactions</h3>
+        <p class="section-sub">Live record of credit and debit events</p>
+        <div class="table-wrap">
+          <table class="ledger-table">
+            <thead><tr><th>Description</th><th>Type</th><th>Amount</th><th>Date &amp; Time</th></tr></thead>
+            <tbody id="ledger-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Refer View -->
+    <section id="view-refer" class="app-view">
+      <div class="section-card">
+        <button class="back-link" id="refer-back-btn">‹ Back to Profile</button>
+        <h3>Refer &amp; Earn</h3>
+        <p class="section-sub">Invite friends to Arena and earn free tokens together</p>
+        <div class="refer-info-grid">
+          <div class="refer-info-box">
+            <span class="refer-info-num">₹100</span>
+            <span class="refer-info-lbl">You get, per friend who joins</span>
+          </div>
+          <div class="refer-info-box">
+            <span class="refer-info-num">₹300</span>
+            <span class="refer-info-lbl">Your friend gets, on signup</span>
+          </div>
+        </div>
+        <p class="refer-explainer">Share your referral code below. When a friend enters it, they instantly receive ₹300 in tokens and you receive ₹100 — for every friend you refer, with no limit.</p>
+        <div class="refer-code-box">
+          <span class="refer-code-lbl">Your Referral Code</span>
+          <div class="refer-code-row">
+            <span id="my-referral-code" class="refer-code-value">—</span>
+            <button id="copy-referral-btn" class="btn-secondary">Copy</button>
+          </div>
+        </div>
+        <div class="refer-redeem-box">
+          <span class="refer-code-lbl">Have a Referral Code?</span>
+          <div class="refer-redeem-row">
+            <input type="text" id="referral-input" class="name-input" maxlength="12" placeholder="Enter code e.g. VISHA859" />
+            <button id="submit-referral-btn" class="btn-primary">Submit</button>
+          </div>
+          <p id="referral-status-msg" class="refer-status-msg"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== PAYMENT MODAL ===== -->
+  <div id="paymentModal" class="payment-modal-overlay hidden">
+    <div class="payment-modal">
+      <button class="close-btn" id="closePaymentModal"><i class="fas fa-times"></i></button>
+      <h2>💳 Complete Payment</h2>
+      <p class="subtitle">Scan QR code with any UPI app to pay</p>
+
+      <div class="amount-display">
+        <span class="label">Amount to Pay</span>
+        <div class="rupee">₹<span id="paymentAmount">50</span></div>
+        <span class="label" id="bonusDisplay" style="color:#00a301; font-weight:600;">+10 Tokens Bonus</span>
+      </div>
+
+      <div class="qr-container">
+        <img id="qrCodeImage" src="" alt="UPI QR Code" />
+        <div class="upi-id">paytm.s1ax1t9@pty</div>
+        <div class="instruction">Scan with Google Pay, PhonePe, Paytm or any UPI app</div>
+      </div>
+
+      <button id="openUpiAppBtn" class="upi-pay-btn">
+        <i class="fas fa-mobile-alt"></i> Open UPI App
+      </button>
+
+      <div id="paymentStatus" class="payment-status waiting">
+        <span class="spinner"></span>
+        <span>Waiting for payment...</span>
+      </div>
+
+      <button id="cancelPaymentBtn" class="cancel-payment-btn">Cancel Payment</button>
+    </div>
+  </div>
+
+  <!-- ===== PAYMENT SUCCESS ANIMATION ===== -->
+  <div id="paymentAnimation" class="payment-animation-overlay">
+    <div class="checkmark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17L4 12" stroke-dasharray="100" stroke-dashoffset="100" />
+      </svg>
+    </div>
+    <div class="success-text">Payment Successful!</div>
+    <div class="amount-text" id="animAmount">₹50</div>
+    <div class="sub-text">Tokens have been credited to your wallet</div>
+  </div>
+
+  <div id="confettiContainer" class="confetti-container"></div>
+
+  <!-- Match Overlay -->
+  <div id="match-overlay" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div style="margin-bottom:10px;">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#00e701" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+      </div>
+      <h3 id="match-title">Finding Opponent</h3>
+      <p class="modal-subtitle" id="match-status">Scanning live queue for players...</p>
+      <div class="modal-fee-notice" style="background:rgba(0,0,0,0.05); border-radius:10px; padding:6px; margin-bottom:12px; color:#556070; font-size:0.8rem;">Entry Stake: <strong style="color:#b8860b;">₹50</strong></div>
+      <button id="cancel-match-btn" class="btn-cancel">Cancel Queue</button>
+    </div>
+  </div>
+
+  <div id="game-arena-overlay" class="modal-overlay hidden">
+    <div class="arena-card">
+      <div class="arena-header">
+        <div class="player-stat user-side" id="arena-user-side">
+          <img id="arena-user-avatar" class="arena-avatar" src="" alt="You" />
+          <span id="arena-user-name" class="arena-name">You</span>
+        </div>
+        <span class="vs-badge">VS</span>
+        <div class="player-stat opp-side" id="arena-opp-side">
+          <img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
+          <span id="arena-opp-name" class="arena-name">Opponent</span>
+        </div>
+      </div>
+      <div class="arena-turn-indicator hidden" id="arena-turn-indicator">
+        <span class="turn-dot turn-dot-you" id="turn-dot"></span>
+        <span class="turn-text turn-text-you" id="turn-indicator-text">Your Turn</span>
+      </div>
+      <div id="arena-stage" class="arena-stage"></div>
+    </div>
+  </div>
+
+  <div id="logout-confirm-overlay" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3>Log Out?</h3>
+      <p class="modal-subtitle">You'll need to sign in again to access your wallet and matches.</p>
+      <div class="result-btn-row">
+        <button id="logout-cancel-btn" class="btn-secondary">Cancel</button>
+        <button id="logout-confirm-btn" class="btn-primary">Log Out</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="transaction-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="tx-modal-header">
+        <h3>Token Transactions</h3>
+        <button id="tx-modal-close" class="tx-close-btn">✕</button>
+      </div>
+      <div class="tx-modal-content" id="tx-modal-body">
+        <div class="tx-list" id="tx-list-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>© 2026 Arena Technologies. All rights reserved.</p>
+  </footer>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  COMPLETE JAVASCRIPT WITH ZAPUPI PAYMENT INTEGRATION
+//  COMPLETE JAVASCRIPT WITH PAYMENT INTEGRATION
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -1658,7 +2184,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_894UwPwZc0SF2MyCP9sztQ_6-s0AALZ";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
-//  PAYMENT CONFIGURATION - UPDATED WITH CORRECT URLS
+//  PAYMENT CONFIGURATION
 // ============================================================
 
 const UPI_ID = 'paytm.s1ax1t9@pty';
@@ -1677,10 +2203,6 @@ function generateOrderId() {
     return 'ORD' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6).toUpperCase();
 }
 
-// ============================================================
-//  CHECK PAYMENT STATUS FROM WEBHOOK
-// ============================================================
-
 async function checkPaymentStatusFromWebhook(orderId) {
     try {
         const response = await fetch(`${CHECK_STATUS_URL}?order_id=${orderId}`);
@@ -1692,10 +2214,6 @@ async function checkPaymentStatusFromWebhook(orderId) {
         return { status: 'Pending' };
     }
 }
-
-// ============================================================
-//  PAYMENT ANIMATION
-// ============================================================
 
 function showPaymentAnimation(amount) {
     const overlay = document.getElementById('paymentAnimation');
@@ -1725,10 +2243,6 @@ function showPaymentAnimation(amount) {
         container.innerHTML = '';
     }, 4000);
 }
-
-// ============================================================
-//  MANUAL CONFIRM BUTTON (For Testing)
-// ============================================================
 
 function addManualConfirmButton(orderId, tokens, amount) {
     const statusEl = document.getElementById('paymentStatus');
@@ -1773,14 +2287,9 @@ function addManualConfirmButton(orderId, tokens, amount) {
     statusEl.parentNode.appendChild(confirmBtn);
 }
 
-// ============================================================
-//  PAYMENT BUTTON HANDLER - Min ₹1 for Testing
-// ============================================================
-
 document.getElementById('initiatePaymentBtn')?.addEventListener('click', async function() {
     const customAmount = parseInt(document.getElementById('customAmount').value) || 0;
     
-    // Min ₹1 for testing
     if (customAmount < 1) {
         showToast('Minimum amount is ₹1 for testing', 'error');
         return;
@@ -1797,7 +2306,6 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', async f
     this.disabled = true;
     this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating payment...';
     
-    // Generate UPI QR directly
     const upiLink = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${customAmount}&cu=INR&tn=${orderId}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiLink)}`;
     const paymentData = { qr_code: qrUrl, txn_id: orderId, order_id: orderId };
@@ -1832,10 +2340,8 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', async f
         statusEl.className = 'payment-status waiting';
         statusEl.innerHTML = `<span class="spinner"></span><span>Waiting for payment...</span>`;
         
-        // Start monitoring
         startPaymentMonitoring(orderId, tokens, customAmount);
         
-        // Show manual confirm button after 5 seconds
         setTimeout(() => {
             addManualConfirmButton(orderId, tokens, customAmount);
         }, 5000);
@@ -1844,21 +2350,15 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', async f
     }
 });
 
-// ============================================================
-//  PAYMENT MONITORING - UPDATED
-// ============================================================
-
 function startPaymentMonitoring(orderId, tokens, amount) {
     const statusEl = document.getElementById('paymentStatus');
     let attempts = 0;
-    const MAX_ATTEMPTS = 60; // 3 minutes
+    const MAX_ATTEMPTS = 60;
     
     if (paymentCheckInterval) clearInterval(paymentCheckInterval);
     
     paymentCheckInterval = setInterval(async () => {
         attempts++;
-        
-        // Check payment status from webhook
         const status = await checkPaymentStatusFromWebhook(orderId);
         console.log(`Attempt ${attempts}:`, status);
         
@@ -1871,7 +2371,6 @@ function startPaymentMonitoring(orderId, tokens, amount) {
                 <span>✅ Payment Received! ₹${amount} credited (${tokens} Tokens)</span>
             `;
             
-            // Remove manual button if exists
             const manualBtn = document.getElementById('manualConfirmBtn');
             if (manualBtn) manualBtn.remove();
             
@@ -1906,10 +2405,6 @@ function startPaymentMonitoring(orderId, tokens, amount) {
     }, 3000);
 }
 
-// ============================================================
-//  MODAL CONTROLS
-// ============================================================
-
 function closePaymentModal() {
     const modal = document.getElementById('paymentModal');
     modal.classList.add('hidden');
@@ -1931,10 +2426,6 @@ document.getElementById('closePaymentModal')?.addEventListener('click', closePay
 document.getElementById('paymentModal')?.addEventListener('click', function(e) {
     if (e.target === this) closePaymentModal();
 });
-
-// ============================================================
-//  UTR SUBMIT (Backup)
-// ============================================================
 
 document.getElementById('addtoken-submit-btn')?.addEventListener('click', async function() {
     const utr = document.getElementById('addtoken-utr-input').value.trim();
@@ -1968,12 +2459,1191 @@ document.getElementById('addtoken-submit-btn')?.addEventListener('click', async 
 });
 
 // ============================================================
-//  [REST OF YOUR ORIGINAL JAVASCRIPT - PRESERVED]
-//  This includes: Auth, Wallet, Matchmaking, Games, etc.
+//  ORIGINAL FUNCTIONS
 // ============================================================
 
-// [All your existing functions remain exactly as they were]
+// Auth
+const googleLoginBtn = document.getElementById('google-login-btn');
+const navLoginBtn = document.getElementById('nav-login-btn');
+const navSignupBtn = document.getElementById('nav-signup-btn');
 
+async function triggerGoogleLogin() {
+    const btn = googleLoginBtn;
+    if (btn) { btn.disabled = true; btn.querySelector('span').textContent = 'Connecting...'; }
+    const redirectUrl = window.location.origin + window.location.pathname;
+    const { error } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: redirectUrl }
+    });
+    if (error) {
+        alert('Login failed: ' + error.message);
+        if (btn) { btn.disabled = false; btn.querySelector('span').textContent = 'Continue with Google'; }
+    }
+}
+googleLoginBtn?.addEventListener('click', triggerGoogleLogin);
+navLoginBtn?.addEventListener('click', triggerGoogleLogin);
+navSignupBtn?.addEventListener('click', triggerGoogleLogin);
+
+// Constants
+const MATCH_ENTRY_FEE = 50;
+const MATCH_WIN_REWARD = 90;
+const BOT_WAIT_SECONDS = 5;
+const BOT_MOVE_MIN_MS = 2000;
+const BOT_MOVE_MAX_MS = 3000;
+const LIVE_ENABLED_TYPES = ['tictactoe'];
+const PRESENCE_HEARTBEAT_MS = 8000;
+let presenceHeartbeatTimer = null;
+let currentUser = null;
+let currentBalance = 0;
+let matchHistory = [];
+let transactions = [];
+let activeOpponent = null;
+let activeGame = null;
+let matchmakingTimer = null;
+let queueChannel = null;
+let inQueue = false;
+
+function isTabActive() {
+    return document.visibilityState === 'visible' && document.hasFocus();
+}
+
+async function touchPresence() {
+    if (!currentUser) return;
+    if (!isTabActive()) return;
+    try {
+        await client.from('users').update({ last_seen: new Date().toISOString() }).eq('id', currentUser.id);
+    } catch (err) { console.warn('Presence heartbeat failed:', err); }
+}
+
+function startPresenceHeartbeat() {
+    touchPresence();
+    if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
+    presenceHeartbeatTimer = setInterval(touchPresence, PRESENCE_HEARTBEAT_MS);
+    document.addEventListener('visibilitychange', () => { if (isTabActive()) touchPresence(); });
+    window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
+}
+
+const GAME_CATALOG = [
+    { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat.', icon: '✖️', badge: 'CLASSIC', category: 'brain' },
+    { type: 'rps', name: 'RPS Duel', desc: 'Best-of-5 rock, paper, scissors.', icon: '✊', badge: 'CLASSIC', category: 'strategy' },
+    { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four.', icon: '🔴', badge: 'STRATEGY', category: 'strategy' },
+    { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board.', icon: '🧠', badge: 'BRAIN', category: 'brain' },
+    { type: 'scramble', name: 'Word Scramble', desc: 'Unscramble the word quickly.', icon: '🔤', badge: 'WORD', category: 'brain' },
+    { type: 'typing', name: 'Typing Race', desc: 'Type the sentence, first to finish.', icon: '⌨️', badge: 'SPEED', category: 'reflex' },
+    { type: 'higherlower', name: 'Higher-Lower', desc: 'Guess the secret number.', icon: '🎯', badge: 'LOGIC', category: 'brain' },
+    { type: 'snake', name: 'Snake Duel', desc: 'Eat, grow, survive — score wins.', icon: '🐍', badge: 'ARCADE', category: 'reflex' },
+    { type: 'simon', name: 'Simon Says', desc: 'Repeat the growing pattern.', icon: '🎵', badge: 'MEMORY', category: 'brain' },
+    { type: 'dice', name: 'Dice Battle', desc: 'Push your luck rolling dice.', icon: '🎲', badge: 'LUCK', category: 'strategy' },
+    { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5s wins.', icon: '👆', badge: 'SPEED', category: 'reflex' },
+    { type: 'whack', name: 'Whack-a-Mole', desc: 'First to 15 hits wins.', icon: '🔨', badge: 'REFLEX', category: 'reflex' },
+    { type: 'recall', name: 'Sequence Recall', desc: 'Numbers flash, tap them back.', icon: '🔢', badge: 'MEMORY', category: 'brain' },
+    { type: 'superttt', name: 'Tic-Tac-Toe Ultimate', desc: '3x3 grid of boards — meta-win.', icon: '🕹️', badge: 'STRATEGY', category: 'strategy' },
+    { type: 'slide', name: 'Slide Puzzle Race', desc: 'Solve the 15-puzzle.', icon: '🧩', badge: 'PUZZLE', category: 'brain' },
+    { type: 'stroop', name: 'Color Match Rush', desc: 'Fewest mistakes wins.', icon: '🎨', badge: 'REFLEX', category: 'reflex' },
+    { type: 'reflex', name: 'Reflex Grid', desc: 'Tap the lit tile before fade.', icon: '⚡', badge: 'REFLEX', category: 'reflex' },
+    { type: 'mathduel', name: 'Math Duel', desc: 'Solve 5 equations fastest.', icon: '➕', badge: 'MATH', category: 'math' },
+    { type: 'battleship', name: 'Battleship Mini', desc: 'Sink the hidden fleet.', icon: '🚢', badge: 'STRATEGY', category: 'strategy' },
+    { type: 'emojisprint', name: 'Emoji Memory Sprint', desc: 'Memory match with grid.', icon: '🌟', badge: 'MEMORY', category: 'brain' },
+    { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve 5 quick sums.', icon: '🧮', badge: 'MATH', category: 'math' },
+];
+const BANNER_CLASSES = ['#fce7f3','#fef3c7','#dbeafe','#dcfce7','#fae8ff','#ffe4e6'];
+
+function renderGameCards() {
+    const grid = document.getElementById('gamesGrid');
+    if (!grid) return;
+    grid.innerHTML = GAME_CATALOG.map((g, i) => {
+        const bg = BANNER_CLASSES[i % BANNER_CLASSES.length];
+        return `
+            <div class="game-card" data-category="${g.category}">
+                <div class="card-media" style="background:${bg};">
+                    <span class="card-badge">${g.badge}</span>
+                    <span>${g.icon}</span>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">${g.name}</h3>
+                    <p class="card-desc">${g.desc}</p>
+                    <div class="card-meta"><span>₹50</span><span class="win">+₹90</span></div>
+                    <button class="play-btn" data-game="${g.name}" data-type="${g.type}">Play</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+renderGameCards();
+
+const INDIAN_BOT_POOL = [
+    { name: 'Aarav Sharma', seed: 'aarav' }, { name: 'Priya Patel', seed: 'priya' },
+    { name: 'Rohan Verma', seed: 'rohan' }, { name: 'Ananya Singh', seed: 'ananya' },
+    { name: 'Vikram Malhotra', seed: 'vikram' }, { name: 'Sneha Reddy', seed: 'sneha' },
+    { name: 'Aditya Kumar', seed: 'aditya' }, { name: 'Neha Gupta', seed: 'neha' },
+    { name: 'Karan Mehta', seed: 'karan' }, { name: 'Divya Roy', seed: 'divya' },
+    { name: 'Arjun Chopra', seed: 'arjun' }, { name: 'Riya Sen', seed: 'riya' },
+    { name: 'Ishaan Kapoor', seed: 'ishaan' }, { name: 'Meera Nair', seed: 'meera' },
+    { name: 'Rahul Iyer', seed: 'rahul' }, { name: 'Kavya Joshi', seed: 'kavya' }
+];
+
+function formatRupees(amount) {
+    const n = Number(amount) || 0;
+    const sign = n < 0 ? '-' : '';
+    return sign + '₹' + Math.abs(n).toLocaleString('en-IN');
+}
+
+// DOM refs
+const balanceEl = document.getElementById('balance-value');
+const playerNameEl = document.getElementById('player-name');
+const avatarEl = document.getElementById('avatar');
+const profileDisplayName = document.getElementById('profile-display-name');
+const profileViewAvatar = document.getElementById('profile-view-avatar');
+const editNameBtn = document.getElementById('edit-name-btn');
+const nameEditBox = document.getElementById('name-edit-box');
+const nameInput = document.getElementById('name-input');
+const saveNameBtn = document.getElementById('save-name-btn');
+const cancelNameBtn = document.getElementById('cancel-name-btn');
+const profileEmailEl = document.getElementById('profile-email');
+const walletBadgeBtn = document.getElementById('wallet-badge-btn');
+const menuTransactionsBtn = document.getElementById('menu-transactions-btn');
+const menuLogoutBtn = document.getElementById('menu-logout-btn');
+const logoutConfirmOverlay = document.getElementById('logout-confirm-overlay');
+const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
+const logoutCancelBtn = document.getElementById('logout-cancel-btn');
+const ledgerBackBtn = document.getElementById('ledger-back-btn');
+const referBackBtn = document.getElementById('refer-back-btn');
+const myReferralCodeEl = document.getElementById('my-referral-code');
+const copyReferralBtn = document.getElementById('copy-referral-btn');
+const referralInput = document.getElementById('referral-input');
+const submitReferralBtn = document.getElementById('submit-referral-btn');
+const referralStatusMsg = document.getElementById('referral-status-msg');
+const tabButtons = document.querySelectorAll('.tab-btn');
+const appViews = document.querySelectorAll('.app-view');
+const filterChips = document.querySelectorAll('.filter-chip');
+const matchOverlay = document.getElementById('match-overlay');
+const cancelMatchBtn = document.getElementById('cancel-match-btn');
+const matchTitle = document.getElementById('match-title');
+const matchStatus = document.getElementById('match-status');
+const arenaOverlay = document.getElementById('game-arena-overlay');
+const arenaUserAvatar = document.getElementById('arena-user-avatar');
+const arenaUserName = document.getElementById('arena-user-name');
+const arenaOppAvatar = document.getElementById('arena-opp-avatar');
+const arenaOppName = document.getElementById('arena-opp-name');
+const arenaStage = document.getElementById('arena-stage');
+const txModal = document.getElementById('transaction-modal');
+const txModalClose = document.getElementById('tx-modal-close');
+const txListContainer = document.getElementById('tx-list-container');
+
+function showToast(message, type = 'credit', amount = 0) {
+    const stack = document.getElementById('toast-stack');
+    if (!stack) return;
+    const isCredit = type === 'credit';
+    const toast = document.createElement('div');
+    toast.className = `toast ${isCredit ? 'toast-success' : 'toast-error'}`;
+    const icon = isCredit ? '✅' : '❌';
+    const amtText = amount > 0 ? (isCredit ? '+' : '-') + formatRupees(Math.abs(amount)) : '';
+    toast.innerHTML = `<span class="icon">${icon}</span> <span>${message} ${amtText}</span>`;
+    stack.appendChild(toast);
+    setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 4000);
+}
+
+// Wallet Functions
+async function loadUserName() {
+    const meta = currentUser.user_metadata || {};
+    const localName = localStorage.getItem('arena_name_' + currentUser.id);
+    const fallbackName = localName || meta.full_name || meta.name || (currentUser.email ? currentUser.email.split('@')[0] : 'Player');
+    let dbName = null;
+    try {
+        const { data: profileRow } = await client.from('users').select('full_name').eq('id', currentUser.id).maybeSingle();
+        dbName = profileRow?.full_name || null;
+    } catch (e) {}
+    const initialName = dbName || fallbackName;
+    setUserDisplayName(initialName);
+    if (dbName !== initialName) syncProfileToDatabase(initialName);
+}
+
+async function syncProfileToDatabase(name) {
+    const avatarUrl = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(name);
+    try {
+        await client.from('users').upsert({ id: currentUser.id, email: currentUser.email, full_name: name, avatar_url: avatarUrl });
+    } catch (e) {}
+}
+
+function setUserDisplayName(name) {
+    if (playerNameEl) playerNameEl.textContent = name;
+    if (profileDisplayName) profileDisplayName.textContent = name;
+    const avatarUrl = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(name);
+    if (avatarEl) avatarEl.src = avatarUrl;
+    if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
+}
+
+async function loadWallet() {
+    try {
+        const { data: wallet, error } = await client.from('wallet').select('dummy_token').eq('user_id', currentUser.id).single();
+        if (error) throw error;
+        currentBalance = (wallet && typeof wallet.dummy_token === 'number') ? wallet.dummy_token : 0;
+    } catch (e) { currentBalance = 0; }
+}
+
+async function persistWalletDelta(delta) {
+    const { data: wallet, error } = await client.from('wallet').select('dummy_token').eq('user_id', currentUser.id).single();
+    if (error || !wallet) throw error || new Error('Wallet not found');
+    const newBalance = Math.max(0, (wallet.dummy_token || 0) + delta);
+    const { error: updErr } = await client.from('wallet').update({ dummy_token: newBalance, updated_at: new Date().toISOString() }).eq('user_id', currentUser.id);
+    if (updErr) throw updErr;
+    currentBalance = newBalance;
+    return newBalance;
+}
+
+async function creditTokens(tokens, amount) {
+    await persistWalletDelta(tokens);
+}
+
+async function loadTransactions() {
+    try {
+        const { data, error } = await client.from('transactions').select('description, type, amount, created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
+        if (error) throw error;
+        transactions = (data || []).map(t => ({ desc: t.description, type: t.type, amount: t.amount, date: new Date(t.created_at).toLocaleString() }));
+    } catch (e) { transactions = []; }
+}
+
+async function recordTransaction(desc, type, amount) {
+    transactions.unshift({ desc, type, amount, date: new Date().toLocaleString() });
+    updateUI();
+    try {
+        await client.from('transactions').insert({ user_id: currentUser.id, description: desc, type, amount });
+    } catch (e) {}
+}
+
+async function loadMatchHistory() {
+    try {
+        const { data, error } = await client.from('match_history').select('game, opponent, result, reward, created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
+        if (error) throw error;
+        matchHistory = (data || []).map(m => ({ game: m.game, opponent: m.opponent, result: m.result, reward: m.reward, date: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }));
+    } catch (e) { matchHistory = []; }
+}
+
+async function recordMatch(game, opponent, result, reward) {
+    matchHistory.unshift({ game, opponent, result, reward, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+    updateUI();
+    try {
+        await client.from('match_history').insert({ user_id: currentUser.id, game, opponent, result, reward });
+    } catch (e) {}
+}
+
+function updateUI() {
+    if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString('en-IN');
+    const progressPercent = Math.min(100, Math.round((currentBalance / 2500) * 100));
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    if (progressFill) progressFill.style.width = progressPercent + '%';
+    if (progressText) progressText.textContent = formatRupees(currentBalance) + ' / ' + formatRupees(2500) + ' Cashout Threshold';
+    const totalMatches = matchHistory.length;
+    const wins = matchHistory.filter(m => m.result === 'VICTORY').length;
+    const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
+    const totalWonTokens = wins * MATCH_WIN_REWARD;
+    const statEarnings = document.getElementById('stat-total-earnings');
+    const statMatches = document.getElementById('stat-matches-played');
+    const statRate = document.getElementById('stat-win-rate');
+    const statWon = document.getElementById('stat-tokens-won');
+    if (statEarnings) statEarnings.textContent = formatRupees(currentBalance);
+    if (statMatches) statMatches.textContent = totalMatches;
+    if (statRate) statRate.textContent = winRate + '%';
+    if (statWon) statWon.textContent = '+' + formatRupees(totalWonTokens);
+    renderLedger();
+    renderMatchHistory();
+    renderTxModalList();
+    updateCashoutUI();
+}
+
+function renderLedger() {
+    const tbody = document.getElementById('ledger-body');
+    if (!tbody) return;
+    if (transactions.length === 0) { tbody.innerHTML = '<tr><td colspan="4">No transactions recorded</td></tr>'; return; }
+    tbody.innerHTML = transactions.map(tx => {
+        const isCredit = tx.type === 'credit';
+        const sign = isCredit ? '+' : '-';
+        const color = isCredit ? '#00a301' : '#f16464';
+        const badgeClass = isCredit ? 'badge-credit' : 'badge-debit';
+        return `<tr><td>${tx.desc}</td><td><span class="${badgeClass}">${tx.type.toUpperCase()}</span></td><td style="color:${color}">${sign}${formatRupees(tx.amount)}</td><td>${tx.date}</td></tr>`;
+    }).join('');
+}
+
+function renderMatchHistory() {
+    const tbody = document.getElementById('matches-body');
+    if (!tbody) return;
+    if (matchHistory.length === 0) { tbody.innerHTML = '<tr><td colspan="5">No matches played yet.</td></tr>'; return; }
+    tbody.innerHTML = matchHistory.map(m => {
+        const isWin = m.result === 'VICTORY';
+        const color = isWin ? '#00a301' : '#f16464';
+        const badgeClass = isWin ? 'badge-credit' : 'badge-debit';
+        const rewardText = (m.reward >= 0 ? '+' : '') + formatRupees(m.reward);
+        return `<tr><td>${m.game}</td><td>${m.opponent}</td><td><span class="${badgeClass}">${m.result}</span></td><td style="color:${color}">${rewardText}</td><td>${m.date}</td></tr>`;
+    }).join('');
+}
+
+function renderTxModalList() {
+    if (!txListContainer) return;
+    if (transactions.length === 0) {
+        txListContainer.innerHTML = '<p style="color:#556070; text-align:center; padding:12px 0;">No transactions yet.</p>';
+        return;
+    }
+    txListContainer.innerHTML = transactions.map(tx => {
+        const isCredit = tx.type === 'credit';
+        const sign = isCredit ? '+' : '-';
+        const cls = isCredit ? 'credit' : 'debit';
+        return `<div class="tx-item">
+            <span class="desc">${tx.desc}</span>
+            <span class="amount ${cls}">${sign}${formatRupees(tx.amount)}</span>
+            <span class="date">${tx.date}</span>
+        </div>`;
+    }).join('');
+}
+
+function openTxModal() {
+    renderTxModalList();
+    txModal.classList.remove('hidden');
+}
+function closeTxModal() {
+    txModal.classList.add('hidden');
+}
+walletBadgeBtn?.addEventListener('click', openTxModal);
+txModalClose?.addEventListener('click', closeTxModal);
+txModal?.addEventListener('click', (e) => { if (e.target === txModal) closeTxModal(); });
+
+function switchView(targetId) {
+    tabButtons.forEach(b => b.classList.remove('active'));
+    appViews.forEach(v => v.classList.remove('active'));
+    const targetTab = Array.from(tabButtons).find(b => b.getAttribute('data-target') === targetId);
+    if (targetTab) targetTab.classList.add('active');
+    const targetView = document.getElementById(targetId);
+    if (targetView) targetView.classList.add('active');
+}
+tabButtons.forEach(btn => btn.addEventListener('click', () => switchView(btn.getAttribute('data-target'))));
+document.getElementById('profile-nav-btn')?.addEventListener('click', () => switchView('view-profile'));
+document.getElementById('nav-brand-logo')?.addEventListener('click', () => switchView('view-earn'));
+menuTransactionsBtn?.addEventListener('click', () => switchView('view-ledger'));
+document.getElementById('menu-addtokens-btn')?.addEventListener('click', () => switchView('view-addtoken'));
+document.getElementById('menu-refer-btn')?.addEventListener('click', () => switchView('view-refer'));
+
+menuLogoutBtn?.addEventListener('click', () => logoutConfirmOverlay?.classList.remove('hidden'));
+logoutCancelBtn?.addEventListener('click', () => logoutConfirmOverlay?.classList.add('hidden'));
+logoutConfirmBtn?.addEventListener('click', async () => {
+    logoutConfirmBtn.disabled = true;
+    if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
+    await client.auth.signOut();
+    logoutConfirmBtn.disabled = false;
+    logoutConfirmOverlay?.classList.add('hidden');
+    currentUser = null;
+    goToLanding();
+});
+ledgerBackBtn?.addEventListener('click', () => switchView('view-profile'));
+referBackBtn?.addEventListener('click', () => switchView('view-profile'));
+
+function generateReferralCode(email) {
+    const local = (email || 'player').split('@')[0].replace(/[^a-zA-Z]/g, '').toUpperCase();
+    const prefix = (local + 'XXXXX').slice(0, 5);
+    const digits = Math.floor(100 + Math.random() * 900);
+    return prefix + digits;
+}
+async function loadReferralInfo() {
+    if (!myReferralCodeEl) return;
+    try {
+        const { data: row, error } = await client.from('users').select('referral_code').eq('id', currentUser.id).maybeSingle();
+        if (error) throw error;
+        let code = row && row.referral_code;
+        if (!code) {
+            for (let attempt = 0; attempt < 4 && !code; attempt++) {
+                const candidate = generateReferralCode(currentUser.email);
+                const { error: upErr } = await client.from('users').update({ referral_code: candidate }).eq('id', currentUser.id);
+                if (!upErr) code = candidate;
+            }
+        }
+        myReferralCodeEl.textContent = code || '—';
+    } catch (e) { myReferralCodeEl.textContent = 'Unavailable'; }
+}
+
+copyReferralBtn?.addEventListener('click', async () => {
+    const code = myReferralCodeEl?.textContent || '';
+    if (!code || code === '—' || code === 'Unavailable') return;
+    try { await navigator.clipboard.writeText(code); copyReferralBtn.textContent = 'Copied!'; setTimeout(() => { copyReferralBtn.textContent = 'Copy'; }, 1500); } catch (e) {}
+});
+
+submitReferralBtn?.addEventListener('click', async () => {
+    const code = (referralInput?.value || '').trim().toUpperCase();
+    if (!referralStatusMsg) return;
+    referralStatusMsg.className = 'refer-status-msg';
+    referralStatusMsg.textContent = '';
+    if (!code) { referralStatusMsg.textContent = 'Please enter a code.'; referralStatusMsg.className = 'refer-status-msg error'; return; }
+    submitReferralBtn.disabled = true;
+    try {
+        const { data, error } = await client.rpc('redeem_referral_code', { p_code: code });
+        if (error) throw error;
+        if (data && data.success) {
+            referralStatusMsg.textContent = data.message || 'Referral applied!';
+            referralStatusMsg.className = 'refer-status-msg success';
+            referralInput.value = '';
+            await loadWallet(); await loadTransactions(); updateUI();
+        } else {
+            referralStatusMsg.textContent = (data && data.message) || 'Code invalid.';
+            referralStatusMsg.className = 'refer-status-msg error';
+        }
+    } catch (e) { referralStatusMsg.textContent = 'Referral program not set up.'; referralStatusMsg.className = 'refer-status-msg error'; }
+    submitReferralBtn.disabled = false;
+});
+
+filterChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+        filterChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const category = chip.getAttribute('data-category');
+        document.querySelectorAll('.game-card').forEach(card => {
+            card.style.display = (category === 'all' || card.getAttribute('data-category') === category) ? 'flex' : 'none';
+        });
+    });
+});
+
+editNameBtn?.addEventListener('click', () => {
+    nameInput.value = playerNameEl.textContent;
+    nameEditBox.classList.remove('hidden');
+    nameInput.focus();
+});
+cancelNameBtn?.addEventListener('click', () => nameEditBox.classList.add('hidden'));
+saveNameBtn?.addEventListener('click', async () => {
+    const newName = nameInput.value.trim();
+    if (newName.length < 2) { alert('Name must be at least 2 characters.'); return; }
+    setUserDisplayName(newName);
+    nameEditBox.classList.add('hidden');
+    if (currentUser) {
+        localStorage.setItem('arena_name_' + currentUser.id, newName);
+        saveNameBtn.disabled = true;
+        try { await syncProfileToDatabase(newName); } catch (err) {}
+        saveNameBtn.disabled = false;
+    }
+});
+
+// Cashout UI
+const cashoutSubmitBtn = document.getElementById('cashout-submit-btn');
+const cashoutUpi = document.getElementById('cashout-upi');
+const cashoutAmount = document.getElementById('cashout-amount');
+const cashoutStatus = document.getElementById('cashout-status-msg');
+const cashoutBalanceDisplay = document.getElementById('cashout-balance');
+
+function updateCashoutUI() {
+    if (cashoutBalanceDisplay) {
+        cashoutBalanceDisplay.textContent = formatRupees(currentBalance);
+    }
+}
+
+const originalUpdateUI = updateUI;
+updateUI = function() {
+    originalUpdateUI();
+    updateCashoutUI();
+};
+
+cashoutSubmitBtn?.addEventListener('click', function() {
+    const upi = cashoutUpi?.value.trim();
+    const amount = parseFloat(cashoutAmount?.value);
+    if (!cashoutStatus) return;
+    cashoutStatus.className = 'refer-status-msg';
+    if (!upi || upi.length < 3) {
+        cashoutStatus.textContent = 'Please enter a valid UPI ID.';
+        cashoutStatus.className = 'refer-status-msg error';
+        return;
+    }
+    if (!amount || amount < 2500) {
+        cashoutStatus.textContent = 'Minimum withdrawal is ₹2,500.';
+        cashoutStatus.className = 'refer-status-msg error';
+        return;
+    }
+    if (amount > currentBalance) {
+        cashoutStatus.textContent = 'Insufficient balance.';
+        cashoutStatus.className = 'refer-status-msg error';
+        return;
+    }
+    cashoutStatus.textContent = `Withdrawal request for ₹${amount} to ${upi} submitted. It will be processed in 7–8 hours.`;
+    cashoutStatus.className = 'refer-status-msg success';
+});
+
+// Matchmaking (simplified version)
+async function findAndClaimOpponent() {
+    const { data: match, error } = await client.rpc('claim_opponent', { p_game_type: activeGame.type, p_entry_fee: MATCH_ENTRY_FEE });
+    if (error || !match || !match.id) return null;
+    return match;
+}
+
+async function beginMatchmaking() {
+    inQueue = true;
+    if (matchTitle) matchTitle.textContent = 'Finding Opponent — ' + activeGame.name;
+    if (matchStatus) matchStatus.textContent = 'Deducting entry stake...';
+    if (matchOverlay) matchOverlay.classList.remove('hidden');
+
+    await touchPresence();
+
+    try {
+        await persistWalletDelta(-MATCH_ENTRY_FEE);
+        await recordTransaction('Stake Entry: ' + activeGame.name, 'debit', MATCH_ENTRY_FEE);
+    } catch (e) {
+        console.error(e);
+        if (matchOverlay) matchOverlay.classList.add('hidden');
+        alert('Could not process entry stake. Please try again.');
+        inQueue = false;
+        return;
+    }
+
+    if (!LIVE_ENABLED_TYPES.includes(activeGame.type)) {
+        if (matchStatus) matchStatus.textContent = 'Matching you with an opponent...';
+        setTimeout(() => {
+            const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
+            if (matchStatus) matchStatus.textContent = 'Matched with ' + bot.name;
+            setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); inQueue = false; launchArena(bot); }, 700);
+        }, 900);
+        return;
+    }
+
+    if (matchStatus) matchStatus.textContent = 'Scanning live queue...';
+    const foundMatch = await findAndClaimOpponent();
+    if (foundMatch) {
+        if (matchStatus) matchStatus.textContent = 'Live opponent found! Launching...';
+        cleanupQueue();
+        setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); goToMatch(foundMatch.id, activeGame.type); }, 600);
+        return;
+    }
+
+    await client.from('matchmaking_queue').upsert({ user_id: currentUser.id, game_type: activeGame.type });
+
+    queueChannel = client.channel('queue-watch-' + currentUser.id)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'matches', filter: 'player2_id=eq.' + currentUser.id }, (payload) => {
+            if (!inQueue) return;
+            cleanupQueue();
+            if (matchStatus) matchStatus.textContent = 'Live opponent found! Launching...';
+            setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); goToMatch(payload.new.id, activeGame.type); }, 500);
+        })
+        .subscribe();
+
+    let secondsLeft = BOT_WAIT_SECONDS;
+    if (matchStatus) matchStatus.textContent = 'Waiting for a live player... (' + secondsLeft + 's)';
+
+    const presenceInterval = setInterval(touchPresence, 3000);
+
+    matchmakingTimer = setInterval(async () => {
+        if (!inQueue) { clearInterval(presenceInterval); return; }
+        secondsLeft -= 1;
+
+        if (secondsLeft > 0) {
+            if (matchStatus) matchStatus.textContent = 'Waiting for a live player... (' + secondsLeft + 's)';
+
+            const liveMatch = await findAndClaimOpponent();
+            if (liveMatch) {
+                cleanupQueue();
+                clearInterval(presenceInterval);
+                if (matchStatus) matchStatus.textContent = 'Live opponent found! Launching...';
+                setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); goToMatch(liveMatch.id, activeGame.type); }, 400);
+                return;
+            }
+
+            const { data: mine } = await client.from('matches').select('id').or('player1_id.eq.' + currentUser.id + ',player2_id.eq.' + currentUser.id).eq('status', 'active').order('created_at', { ascending: false }).limit(1);
+            if (mine && mine.length > 0) {
+                cleanupQueue();
+                clearInterval(presenceInterval);
+                if (matchStatus) matchStatus.textContent = 'Live opponent found! Launching...';
+                setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); goToMatch(mine[0].id, activeGame.type); }, 400);
+            }
+            return;
+        }
+
+        cleanupQueue();
+        clearInterval(presenceInterval);
+        await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+        const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
+        if (matchStatus) matchStatus.textContent = 'No live players — matched with ' + bot.name;
+        setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); launchArena(bot); }, 900);
+    }, 1000);
+}
+
+function cleanupQueue() {
+    inQueue = false;
+    if (matchmakingTimer) { clearInterval(matchmakingTimer); matchmakingTimer = null; }
+    if (queueChannel) { client.removeChannel(queueChannel); queueChannel = null; }
+}
+
+cancelMatchBtn?.addEventListener('click', async () => {
+    const wasInQueue = inQueue;
+    cleanupQueue();
+    if (matchOverlay) matchOverlay.classList.add('hidden');
+    if (currentUser && wasInQueue) {
+        await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+        try { await persistWalletDelta(MATCH_ENTRY_FEE); await recordTransaction('Stake Refunded', 'credit', MATCH_ENTRY_FEE); } catch (e) {}
+    }
+});
+
+window.addEventListener('pagehide', () => {
+    if (inQueue && currentUser) client.from('matchmaking_queue').delete().eq('user_id', currentUser.id).then(() => {}, () => {});
+});
+
+document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
+    const btn = e.target.closest('.play-btn');
+    if (!btn) return;
+    const gameName = btn.getAttribute('data-game');
+    const gameType = btn.getAttribute('data-type');
+    if (!gameName || !gameType) return;
+    activeGame = { name: gameName, type: gameType };
+    if (currentBalance < MATCH_ENTRY_FEE) {
+        alert('Insufficient balance. Need ' + formatRupees(MATCH_ENTRY_FEE));
+        return;
+    }
+    beginMatchmaking();
+});
+
+function launchArena(opponent) {
+    activeOpponent = opponent;
+    const myName = playerNameEl.textContent;
+    arenaUserName.textContent = myName;
+    arenaUserAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(myName);
+    arenaOppName.textContent = opponent.name;
+    arenaOppAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + opponent.seed;
+    arenaOverlay.classList.remove('hidden');
+    document.getElementById('arena-turn-indicator')?.classList.remove('hidden');
+    setArenaTurn('you');
+
+    if (activeGame.type === 'math') runCyberMathGame();
+    else if (activeGame.type === 'memory') runMemoryMatrixGame();
+    else if (activeGame.type === 'color') runColorClashGame();
+    else if (activeGame.type === 'tictactoe') runTicTacToeGame();
+    else runReactionGame();
+}
+
+// [Game functions - preserved]
+function runReactionGame() {
+    arenaStage.innerHTML = `<div class="reaction-box reaction-wait" id="reaction-box"><h2>WAIT FOR GREEN...</h2><p style="margin-top:6px;font-size:0.7rem;opacity:0.85">Click instantly when the box turns green</p></div>`;
+    const box = document.getElementById('reaction-box');
+    let canClick = false, startTime = 0, finished = false;
+    const greenDelay = Math.floor(Math.random() * 2200) + 2400;
+    const timeoutId = setTimeout(() => {
+        if (finished) return;
+        canClick = true;
+        startTime = Date.now();
+        box.className = 'reaction-box reaction-go';
+        box.querySelector('h2').textContent = 'CLICK NOW!';
+    }, greenDelay);
+    box.addEventListener('click', () => {
+        if (finished) return;
+        finished = true;
+        if (!canClick) { clearTimeout(timeoutId); endDuel(false, 'False Start!'); }
+        else {
+            const userReaction = Date.now() - startTime;
+            const botReaction = Math.floor(Math.random() * 120) + 290;
+            if (userReaction < botReaction) endDuel(true, 'Your reaction: ' + userReaction + 'ms vs Opponent: ' + botReaction + 'ms');
+            else endDuel(false, 'Opponent faster (' + botReaction + 'ms). Your speed: ' + userReaction + 'ms');
+        }
+    });
+}
+
+function runCyberMathGame() {
+    const n1 = Math.floor(Math.random() * 30) + 12;
+    const n2 = Math.floor(Math.random() * 30) + 12;
+    const correct = n1 + n2;
+    const wrong = correct + (Math.random() > 0.5 ? 4 : -5);
+    const leftIsCorrect = Math.random() > 0.5;
+    const optA = leftIsCorrect ? correct : wrong;
+    const optB = leftIsCorrect ? wrong : correct;
+    arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">Fast Equation Solve</p><div class="math-problem">${n1} + ${n2} = ?</div><div class="quiz-options"><button class="quiz-option" id="opt-a">${optA}</button><button class="quiz-option" id="opt-b">${optB}</button></div></div>`;
+    let answered = false;
+    const botAnswerTimer = setTimeout(() => { if (!answered) { answered = true; endDuel(false, 'Opponent calculated first!'); } }, 2000 + Math.random() * 1000);
+    function pickAnswer(val) { if (answered) return; answered = true; clearTimeout(botAnswerTimer); if (val === correct) endDuel(true, 'Accurate calculation!'); else endDuel(false, 'Incorrect answer.'); }
+    document.getElementById('opt-a')?.addEventListener('click', () => pickAnswer(optA));
+    document.getElementById('opt-b')?.addEventListener('click', () => pickAnswer(optB));
+}
+
+function runColorClashGame() {
+    const colors = [{ text: 'RED', css: '#ef4444' }, { text: 'BLUE', css: '#38bdf8' }, { text: 'GREEN', css: '#00e701' }];
+    const targetWord = colors[Math.floor(Math.random() * colors.length)];
+    const fontColor = colors[Math.floor(Math.random() * colors.length)];
+    arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">Does the word match the font color?</p><div class="quiz-question" style="color:${fontColor.css}; font-size:1.8rem; font-weight:700;">${targetWord.text}</div><div class="quiz-options"><button class="quiz-option" id="match-yes">YES (MATCH)</button><button class="quiz-option" id="match-no">NO (DIFFERENT)</button></div></div>`;
+    const isMatching = targetWord.text === fontColor.text;
+    let done = false;
+    function evaluate(answer) { if (done) return; done = true; if (answer === isMatching) endDuel(true, 'Correct cognitive distinction!'); else endDuel(false, 'Incorrect mismatch.'); }
+    document.getElementById('match-yes')?.addEventListener('click', () => evaluate(true));
+    document.getElementById('match-no')?.addEventListener('click', () => evaluate(false));
+}
+
+function runMemoryMatrixGame() {
+    let tilesHtml = '';
+    for (let i = 0; i < 9; i++) tilesHtml += `<div class="matrix-tile" data-idx="${i}" style="width:50px;height:50px;background:rgba(0,0,0,0.05);border-radius:8px;cursor:pointer;border:1px solid rgba(0,0,0,0.1)"></div>`;
+    arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">Memorize the active green tile</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:180px;margin:12px auto">${tilesHtml}</div></div>`;
+    const tiles = document.querySelectorAll('.matrix-tile');
+    const activeIndex = Math.floor(Math.random() * 9);
+    setTimeout(() => {
+        if (tiles[activeIndex]) tiles[activeIndex].style.background = '#00e701';
+        setTimeout(() => {
+            if (tiles[activeIndex]) tiles[activeIndex].style.background = 'rgba(0,0,0,0.05)';
+            tiles.forEach(t => {
+                t.addEventListener('click', () => {
+                    const clickedIdx = parseInt(t.getAttribute('data-idx'));
+                    if (clickedIdx === activeIndex) endDuel(true, 'Flawless spatial memory!');
+                    else endDuel(false, 'Incorrect quadrant selected.');
+                });
+            });
+        }, 800);
+    }, 400);
+}
+
+function runTicTacToeGame() {
+    const board = Array(9).fill(null);
+    const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    let playerTurn = true;
+    let over = false;
+
+    function renderBoard() {
+        if (!over) setArenaTurn(playerTurn ? 'you' : 'opp');
+        let cellsHtml = '';
+        board.forEach((val, i) => {
+            cellsHtml += `<div class="ttt-cell${val ? ' filled' : ''}" data-idx="${i}">${val || ''}</div>`;
+        });
+        arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">You are X · Opponent is O</p><div class="ttt-wrapper"><div class="ttt-board" id="ttt-board">${cellsHtml}</div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg></div></div>`;
+        if (playerTurn && !over) {
+            document.querySelectorAll('#ttt-board .ttt-cell').forEach(cell => {
+                cell.addEventListener('click', () => handlePlayerMove(parseInt(cell.getAttribute('data-idx'), 10)));
+            });
+        }
+    }
+
+    function handlePlayerMove(idx) {
+        if (over || !playerTurn || board[idx]) return;
+        board[idx] = 'X';
+        playerTurn = false;
+        renderBoard();
+        if (checkEnd()) return;
+        setTimeout(botMove, 2000 + Math.random() * 1000);
+    }
+
+    function botMove() {
+        if (over) return;
+        const idx = pickBotMove();
+        board[idx] = 'O';
+        playerTurn = true;
+        renderBoard();
+        checkEnd();
+    }
+
+    function pickBotMove() {
+        const empty = board.map((v, i) => (v ? null : i)).filter(v => v !== null);
+        for (const i of empty) { board[i] = 'O'; if (hasWinner('O')) { board[i] = null; return i; } board[i] = null; }
+        for (const i of empty) { board[i] = 'X'; if (hasWinner('X')) { board[i] = null; return i; } board[i] = null; }
+        if (!board[4]) return 4;
+        const corners = [0,2,6,8].filter(i => !board[i]);
+        if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
+        return empty[Math.floor(Math.random() * empty.length)];
+    }
+
+    function hasWinner(symbol) { return WIN_LINES.some(line => line.every(i => board[i] === symbol)); }
+    function findWinningLine(symbol) { return WIN_LINES.find(line => line.every(i => board[i] === symbol)); }
+
+    function drawWinLine(line) {
+        const svg = document.getElementById('ttt-line');
+        if (!svg) return;
+        const cellSize = 58, gap = 4, step = cellSize + gap;
+        const centers = [0,1,2,3,4,5,6,7,8].map(i => {
+            const row = Math.floor(i / 3), col = i % 3;
+            return [col * step + cellSize/2, row * step + cellSize/2];
+        });
+        const [x1, y1] = centers[line[0]];
+        const [x2, y2] = centers[line[2]];
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        path.setAttribute('x1', x1); path.setAttribute('y1', y1);
+        path.setAttribute('x2', x1); path.setAttribute('y2', y1);
+        path.setAttribute('class', 'ttt-winline');
+        svg.appendChild(path);
+        requestAnimationFrame(() => {
+            path.style.transition = 'x2 0.35s ease, y2 0.35s ease';
+            path.setAttribute('x2', x2); path.setAttribute('y2', y2);
+        });
+    }
+
+    function checkEnd() {
+        const xLine = findWinningLine('X');
+        if (xLine) { over = true; renderBoard(); drawWinLine(xLine); setTimeout(() => endDuel(true, 'Winning line!'), 650); return true; }
+        const oLine = findWinningLine('O');
+        if (oLine) { over = true; renderBoard(); drawWinLine(oLine); setTimeout(() => endDuel(false, 'Opponent won.'), 650); return true; }
+        if (board.every(c => c)) { over = true; setTimeout(endDrawnMatch, 400); return true; }
+        return false;
+    }
+
+    async function endDrawnMatch() {
+        try { await persistWalletDelta(MATCH_ENTRY_FEE); await recordTransaction('Stake Refunded', 'credit', MATCH_ENTRY_FEE); await recordMatch(activeGame.name, activeOpponent.name, 'DRAW', 0); } catch (e) {}
+        updateUI();
+        document.getElementById('arena-turn-indicator')?.classList.add('hidden');
+        arenaStage.innerHTML = `<div class="result-card"><h2 style="color:var(--text-main)">DRAW</h2><p style="font-weight:700;color:#8895b0">Stake Refunded</p><div class="result-analytics"><div>Stalemate — entry fee refunded.</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#00e701;color:#000;">Dashboard</button></div></div>`;
+        document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance.'); return; } beginMatchmaking(); });
+        document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); });
+    }
+
+    renderBoard();
+}
+
+async function endDuel(won, analysisText) {
+    let reward = -MATCH_ENTRY_FEE;
+    if (won) {
+        try { await persistWalletDelta(MATCH_WIN_REWARD); await recordTransaction('Duel Victory', 'credit', MATCH_WIN_REWARD); reward = MATCH_WIN_REWARD; } catch (e) {}
+    }
+    await recordMatch(activeGame.name, activeOpponent.name, won ? 'VICTORY' : 'DEFEAT', reward);
+    updateUI();
+    document.getElementById('arena-turn-indicator')?.classList.add('hidden');
+    const rewardLine = won ? '+' + formatRupees(MATCH_WIN_REWARD) + ' Awarded' : formatRupees(-MATCH_ENTRY_FEE) + ' Stake Lost';
+    arenaStage.innerHTML = `<div class="result-card"><h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2><p style="font-weight:700;color:#8895b0">${rewardLine}</p><div class="result-analytics"><div>${analysisText}</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#00e701;color:#000;">Dashboard</button></div></div>`;
+    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance.'); return; } beginMatchmaking(); });
+    document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); });
+}
+
+const MatchRoom = (() => {
+    let match = null, myId = null, opponentId = null, iAmPlayer1 = false, channel = null, finished = false;
+    const handlers = {};
+    let activityCallback = null;
+    function onActivity(cb) { activityCallback = cb; }
+    async function init(matchId, userId) {
+        myId = userId;
+        const { data, error } = await client.from('matches').select('*').eq('id', matchId).single();
+        if (error || !data) throw new Error('Match not found');
+        match = data;
+        iAmPlayer1 = match.player1_id === myId;
+        opponentId = iAmPlayer1 ? match.player2_id : match.player1_id;
+        channel = client.channel('match-' + matchId, { config: { broadcast: { self: false } } });
+        channel.on('broadcast', { event: 'move' }, (payload) => {
+            const { type, data } = payload.payload;
+            if (activityCallback) activityCallback(type, data);
+            if (handlers[type]) handlers[type](data);
+        });
+        await new Promise(resolve => channel.subscribe(status => { if (status === 'SUBSCRIBED') resolve(); }));
+        return { match, opponentId, iAmPlayer1 };
+    }
+    function send(type, data) { channel.send({ type: 'broadcast', event: 'move', payload: { type, data } }); }
+    function onMessage(type, handler) { handlers[type] = handler; }
+    async function finish(result) {
+        if (finished) return;
+        finished = true;
+        await client.from('matches').update({ status: 'finished', winner_id: result === 'win' ? myId : result === 'lose' ? opponentId : null, finished_at: new Date().toISOString() }).eq('id', match.id).eq('status', 'active');
+        if (result === 'win') {
+            const payout = Math.round(match.entry_fee * 1.8);
+            const { data: wallet } = await client.from('wallet').select('dummy_token').eq('user_id', myId).single();
+            await client.from('wallet').update({ dummy_token: (wallet?.dummy_token || 0) + payout, updated_at: new Date().toISOString() }).eq('user_id', myId);
+            return payout;
+        }
+        if (result === 'draw') {
+            const { data: wallet } = await client.from('wallet').select('dummy_token').eq('user_id', myId).single();
+            await client.from('wallet').update({ dummy_token: (wallet?.dummy_token || 0) + match.entry_fee, updated_at: new Date().toISOString() }).eq('user_id', myId);
+        }
+        return 0;
+    }
+    function cleanup() { if (channel) client.removeChannel(channel); }
+    return { init, send, onMessage, finish, cleanup, onActivity, get match() { return match; } };
+})();
+
+function initReactionLive(stageEl, iAmPlayer1) {
+    stageEl.innerHTML = `<p class="subtitle">Waiting for both players...</p><div class="reaction-box reaction-wait" id="pad">Get ready...</div>`;
+    const pad = () => document.getElementById('pad');
+    let goTime = null, myTime = null, opponentTime = null, armed = false;
+
+    function startRound() {
+        armed = true;
+        pad().className = 'reaction-box reaction-wait';
+        pad().textContent = 'Wait for green...';
+        const delay = 1500 + Math.random() * 3000;
+        setTimeout(() => {
+            if (!armed) return;
+            goTime = performance.now();
+            pad().className = 'reaction-box reaction-go';
+            pad().textContent = 'CLICK NOW!';
+        }, delay);
+    }
+
+    stageEl.addEventListener('click', (e) => {
+        if (!e.target.closest('#pad') || myTime !== null) return;
+        if (!goTime) {
+            pad().className = 'reaction-box reaction-wait';
+            pad().textContent = 'Too early! You lose this round.';
+            myTime = 99999;
+            MatchRoom.send('reaction_result', { time: myTime });
+            checkOutcome();
+            return;
+        }
+        myTime = performance.now() - goTime;
+        pad().textContent = `You: ${myTime.toFixed(0)}ms`;
+        MatchRoom.send('reaction_result', { time: myTime });
+        checkOutcome();
+    });
+
+    MatchRoom.onMessage('reaction_result', (data) => {
+        opponentTime = data.time;
+        checkOutcome();
+    });
+
+    MatchRoom.onMessage('start_round', () => startRound());
+
+    function checkOutcome() {
+        if (myTime === null || opponentTime === null) return;
+        let result;
+        if (myTime < opponentTime) result = 'win';
+        else if (myTime > opponentTime) result = 'lose';
+        else result = 'draw';
+        showResultLive(stageEl, result, {
+            mine: myTime >= 99999 ? 'Too early' : `${myTime.toFixed(0)}ms`,
+            theirs: opponentTime >= 99999 ? 'Too early' : `${opponentTime.toFixed(0)}ms`
+        });
+    }
+
+    if (iAmPlayer1) {
+        MatchRoom.send('start_round', {});
+        startRound();
+    }
+}
+
+function initTicTacToeLive(stageEl, iAmPlayer1) {
+    const mySymbol = iAmPlayer1 ? 'X' : 'O';
+    const theirSymbol = iAmPlayer1 ? 'O' : 'X';
+    let board = Array(9).fill(null);
+    let myTurn = iAmPlayer1;
+    let over = false;
+    const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+    function render() {
+        stageEl.innerHTML = `<p class="subtitle">You are <strong>${mySymbol}</strong></p><div class="ttt-wrapper"><div class="ttt-board" id="board"></div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg></div>`;
+        const boardEl = document.getElementById('board');
+        board.forEach((val, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'ttt-cell' + (val ? ' filled ' + val : '');
+            cell.textContent = val || '';
+            cell.addEventListener('click', () => handleClick(i));
+            boardEl.appendChild(cell);
+        });
+    }
+
+    function handleClick(i) {
+        if (over || !myTurn || board[i]) return;
+        playMove(i, mySymbol);
+        MatchRoom.send('ttt_move', { index: i });
+    }
+
+    MatchRoom.onMessage('ttt_move', (data) => playMove(data.index, theirSymbol));
+
+    function playMove(index, symbol) {
+        board[index] = symbol;
+        myTurn = symbol !== mySymbol;
+        render();
+        checkEnd();
+    }
+
+    function checkEnd() {
+        const winner = WIN_LINES.find(line => board[line[0]] && board[line[0]] === board[line[1]] && board[line[1]] === board[line[2]]);
+        if (winner) {
+            over = true;
+            drawWinLine(winner);
+            const winSymbol = board[winner[0]];
+            setTimeout(() => {
+                const result = winSymbol === mySymbol ? 'win' : 'lose';
+                showResultLive(stageEl, result, {});
+            }, 600);
+            return;
+        }
+        if (board.every(c => c)) {
+            over = true;
+            showResultLive(stageEl, 'draw', {});
+        }
+    }
+
+    function drawWinLine(line) {
+        const svg = document.getElementById('ttt-line');
+        if (!svg) return;
+        const cellSize = 58, gap = 4, step = cellSize + gap;
+        const centers = [0,1,2,3,4,5,6,7,8].map(i => {
+            const row = Math.floor(i/3), col = i%3;
+            return [col*step + cellSize/2, row*step + cellSize/2];
+        });
+        const [x1,y1] = centers[line[0]], [x2,y2] = centers[line[2]];
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        path.setAttribute('x1', x1); path.setAttribute('y1', y1); path.setAttribute('x2', x1); path.setAttribute('y2', y1);
+        path.setAttribute('class', 'ttt-winline');
+        svg.appendChild(path);
+        requestAnimationFrame(() => {
+            path.style.transition = 'x2 0.35s ease, y2 0.35s ease';
+            path.setAttribute('x2', x2); path.setAttribute('y2', y2);
+        });
+    }
+
+    render();
+}
+
+async function showResultLive(stageEl, result, detail) {
+    const payout = await MatchRoom.finish(result);
+    const label = result === 'win' ? 'VICTORY' : result === 'lose' ? 'DEFEAT' : 'DRAW';
+    const cls = result === 'win' ? 'win-text' : result === 'lose' ? 'lose-text' : 'draw-text';
+    const emoji = result === 'win' ? '🎉' : result === 'lose' ? '😞' : '🤝';
+    const tokenLine = result === 'win' ? `<p>+${formatRupees(payout)}</p>` : result === 'draw' ? `<p>Entry fee refunded</p>` : `<p>-${formatRupees(MatchRoom.match.entry_fee)}</p>`;
+    const detailLine = detail ? `<p class="subtitle">You: ${detail.mine} · Opponent: ${detail.theirs}</p>` : '';
+    stageEl.innerHTML = `
+        <div class="result-card" style="position:relative;">
+            ${result === 'win' ? `<div class="confetti-layer" id="confetti-layer"></div>` : ''}
+            <h2 class="${cls}">${emoji} ${label}</h2>
+            ${detailLine}
+            ${tokenLine}
+            <div class="result-btn-row">
+                <button class="btn-secondary" id="rematch-btn">Rematch</button>
+                <button class="btn-primary" id="return-dash-btn" style="background:#00e701;color:#000;">Dashboard</button>
+            </div>
+        </div>
+    `;
+    if (result === 'win') {
+        const layer = document.getElementById('confetti-layer');
+        if (layer) {
+            const colors = ['#00e701', '#38bdf8', '#f59e0b', '#f16464', '#a78bfa'];
+            for (let i = 0; i < 40; i++) {
+                const piece = document.createElement('span');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + '%';
+                piece.style.background = colors[i % colors.length];
+                piece.style.animationDelay = Math.random() * 0.4 + 's';
+                piece.style.animationDuration = 1.6 + Math.random() * 1.2 + 's';
+                piece.style.transform = 'rotate(' + Math.floor(Math.random() * 360) + 'deg)';
+                layer.appendChild(piece);
+            }
+        }
+    }
+    document.getElementById('rematch-btn')?.addEventListener('click', () => {
+        arenaOverlay.classList.add('hidden');
+        if (currentBalance < MATCH_ENTRY_FEE) { alert('Insufficient balance.'); return; }
+        beginMatchmaking();
+    });
+    document.getElementById('return-dash-btn')?.addEventListener('click', () => {
+        arenaOverlay.classList.add('hidden');
+        returnToDashboardFromMatch();
+    });
+}
+
+async function goToMatch(matchId, gameType) {
+    document.getElementById('dashboard')?.classList.add('hidden');
+    document.getElementById('page-match')?.classList.remove('hidden');
+    const matchLoading = document.getElementById('match-loading');
+    const matchRoot = document.getElementById('match-root');
+    if (matchLoading) { matchLoading.textContent = 'Loading match...'; matchLoading.classList.remove('hidden'); }
+    if (matchRoot) matchRoot.classList.add('hidden');
+
+    let roomInfo;
+    try {
+        roomInfo = await MatchRoom.init(matchId, currentUser.id);
+    } catch (e) {
+        if (matchLoading) matchLoading.textContent = 'Match expired.';
+        return;
+    }
+
+    const { data: profiles } = await client.from('users').select('id, full_name, avatar_url').in('id', [roomInfo.match.player1_id, roomInfo.match.player2_id]);
+    const me = profiles.find(p => p.id === currentUser.id);
+    const opp = profiles.find(p => p.id === roomInfo.opponentId);
+    const meNameEl = document.getElementById('me-name');
+    const meAvatarEl = document.getElementById('me-avatar');
+    const oppNameEl = document.getElementById('opp-name');
+    const oppAvatarEl = document.getElementById('opp-avatar');
+    if (meNameEl) meNameEl.textContent = me?.full_name || 'You';
+    if (meAvatarEl) meAvatarEl.src = me?.avatar_url || '';
+    if (oppNameEl) oppNameEl.textContent = opp?.full_name || 'Opponent';
+    if (oppAvatarEl) oppAvatarEl.src = opp?.avatar_url || '';
+
+    if (matchLoading) matchLoading.classList.add('hidden');
+    if (matchRoot) matchRoot.classList.remove('hidden');
+
+    const stage = document.getElementById('stage');
+    stage.innerHTML = '';
+
+    if (gameType === 'tictactoe') {
+        initTicTacToeLive(stage, roomInfo.iAmPlayer1);
+    } else if (gameType === 'reaction') {
+        initReactionLive(stage, roomInfo.iAmPlayer1);
+    } else {
+        stage.innerHTML = `<p class="loading-text">Live mode for this game is coming soon.</p><button id="back-to-lobby-btn" class="btn-primary" style="background:#00e701;color:#000;padding:10px 20px;border-radius:10px;font-weight:700;margin-top:10px;">Back to Lobby</button>`;
+        document.getElementById('back-to-lobby-btn')?.addEventListener('click', returnToDashboardFromMatch);
+    }
+}
+
+async function returnToDashboardFromMatch() {
+    MatchRoom.cleanup();
+    document.getElementById('page-match')?.classList.add('hidden');
+    document.getElementById('dashboard')?.classList.remove('hidden');
+    try { await loadWallet(); await loadTransactions(); await loadMatchHistory(); updateUI(); } catch (e) {}
+}
+
+function goToLanding() {
+    document.getElementById('page-landing')?.classList.remove('hidden');
+    document.getElementById('loading')?.classList.add('hidden');
+    document.getElementById('dashboard')?.classList.add('hidden');
+    document.getElementById('page-match')?.classList.add('hidden');
+}
+
+async function initDashboard() {
+    try {
+        const { data: { session } } = await client.auth.getSession();
+        if (!session) { goToLanding(); return; }
+        currentUser = session.user;
+        if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '—';
+        await loadUserName();
+        await loadWallet();
+        await loadTransactions();
+        await loadMatchHistory();
+        await loadReferralInfo();
+        updateUI();
+        startPresenceHeartbeat();
+    } catch (e) { console.error(e); } finally {
+        document.getElementById('loading')?.classList.add('hidden');
+        document.getElementById('dashboard')?.classList.remove('hidden');
+    }
+}
+
+async function routeOnLoad() {
+    const { data: { session } } = await client.auth.getSession();
+    if (session) {
+        document.getElementById('page-landing')?.classList.add('hidden');
+        document.getElementById('loading')?.classList.remove('hidden');
+        await initDashboard();
+    } else {
+        goToLanding();
+    }
+}
+
+window.addEventListener('beforeunload', () => {
+    MatchRoom.cleanup();
+});
+
+routeOnLoad();
+
+function setArenaTurn(who) {
+    const indicator = document.getElementById('arena-turn-indicator');
+    if (!indicator) return;
+    const dot = document.getElementById('turn-dot');
+    const text = document.getElementById('turn-indicator-text');
+    if (who === 'you') {
+        dot.className = 'turn-dot turn-dot-you';
+        text.textContent = 'Your Turn';
+        text.style.color = '#00a301';
+    } else {
+        dot.className = 'turn-dot turn-dot-opp';
+        text.textContent = 'Opponent\'s Turn';
+        text.style.color = '#38bdf8';
+    }
+}
+
+// Package selection
+document.querySelectorAll('.package-card').forEach(card => {
+    card.addEventListener('click', function() {
+        document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        const amount = parseInt(this.dataset.amount);
+        document.getElementById('customAmount').value = amount;
+    });
+});
+
+document.getElementById('customAmount')?.addEventListener('input', function() {
+    const val = parseInt(this.value) || 0;
+    if (val >= 1) {
+        document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+    }
+});
+
+document.getElementById('menu-transactions-btn')?.addEventListener('click', () => switchView('view-ledger'));
+document.getElementById('menu-addtokens-btn')?.addEventListener('click', () => switchView('view-addtoken'));
+document.getElementById('menu-refer-btn')?.addEventListener('click', () => switchView('view-refer'));
 </script>
 </body>
 </html>
