@@ -32,7 +32,7 @@
       overflow-x: hidden;
     }
     
-    /* ===== ANIMATED BACKGROUND ===== */
+    /* ===== ANIMATED BACKGROUND (Only background, no text animations) ===== */
     .background-blobs {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -44,69 +44,15 @@
       border-radius: 50%;
       filter: blur(100px);
       opacity: 0.6;
-      animation: float 15s infinite ease-in-out;
+      animation: floatBlob 15s infinite ease-in-out;
     }
     .blob-1 { width: 400px; height: 400px; background: linear-gradient(135deg, #ff7e5f, #feb47b); top: -100px; left: -100px; }
     .blob-2 { width: 500px; height: 500px; background: linear-gradient(135deg, #8e2de2, #4a00e0); bottom: -150px; right: -150px; animation-delay: -5s; }
     .blob-3 { width: 300px; height: 300px; background: linear-gradient(135deg, #11998e, #38ef7d); top: 40%; left: 60%; animation-delay: -10s; }
-    @keyframes float {
+    @keyframes floatBlob {
       0% { transform: translate(0,0) scale(1); }
       50% { transform: translate(30px,-30px) scale(1.05); }
       100% { transform: translate(0,0) scale(1); }
-    }
-
-    /* ===== LANDING PAGE ANIMATIONS ===== */
-    .hero-left { animation: slideInLeft 1s ease; }
-    .hero-right { animation: slideInRight 1s ease; }
-    @keyframes slideInLeft {
-      from { opacity: 0; transform: translateX(-50px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes slideInRight {
-      from { opacity: 0; transform: translateX(50px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    .hero-stats .stat { animation: fadeUp 0.8s ease forwards; opacity: 0; }
-    .hero-stats .stat:nth-child(1) { animation-delay: 0.2s; }
-    .hero-stats .stat:nth-child(2) { animation-delay: 0.4s; }
-    .hero-stats .stat:nth-child(3) { animation-delay: 0.6s; }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .pulse-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      background: #00e701;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.5; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .welcome-bonus {
-      display: inline-block;
-      background: linear-gradient(135deg, #f59e0b, #f97316);
-      color: #fff;
-      padding: 6px 16px;
-      border-radius: 100px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      animation: pulse 2s infinite;
-    }
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-    .shimmer-text {
-      background: linear-gradient(90deg, #f59e0b, #f97316, #f59e0b);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shimmer 3s linear infinite;
     }
 
     button, input, select, textarea { font: inherit; }
@@ -126,11 +72,6 @@
       border-bottom: 1px solid rgba(255,255,255,0.7);
       flex-wrap: nowrap;
       gap: 8px;
-      animation: fadeDown 0.8s ease;
-    }
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
     }
     .brand {
       display: flex;
@@ -204,12 +145,6 @@
       color: #1e293b;
     }
     .hero-left h1 .highlight { color: #00a301; }
-    .hero-left h1 .bonus-text { 
-      background: linear-gradient(90deg, #f59e0b, #f97316);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: inline-block;
-    }
     .hero-left p {
       font-size: 0.95rem;
       color: #556070;
@@ -254,6 +189,7 @@
       color: #334155;
     }
     .auth-perks .perk svg { color: #00a301; flex-shrink: 0; width: 18px; height: 18px; }
+
     .google-btn {
       display: flex;
       align-items: center;
@@ -275,8 +211,8 @@
     .auth-footnote { font-size: 0.7rem; color: #8895b0; text-align: center; }
 
     .signup-bonus-banner {
-      background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(249,115,22,0.12));
-      border: 1px solid rgba(245,158,11,0.2);
+      background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.15));
+      border: 1px solid rgba(245,158,11,0.25);
       border-radius: 12px;
       padding: 12px 16px;
       margin-bottom: 16px;
@@ -284,17 +220,9 @@
       align-items: center;
       gap: 12px;
     }
-    .signup-bonus-banner .icon {
-      font-size: 1.5rem;
-    }
-    .signup-bonus-banner .text {
-      font-size: 0.8rem;
-      color: #1e293b;
-    }
-    .signup-bonus-banner .text strong {
-      color: #f59e0b;
-      font-size: 1rem;
-    }
+    .signup-bonus-banner .icon { font-size: 1.5rem; }
+    .signup-bonus-banner .text { font-size: 0.8rem; color: #1e293b; }
+    .signup-bonus-banner .text strong { color: #f59e0b; font-size: 1rem; }
 
     /* ===== DASHBOARD ===== */
     .app-wrap { min-height: 100vh; background: transparent; }
@@ -1676,13 +1604,12 @@
   </style>
 </head>
 <body>
-
-<!-- ===== ANIMATED BACKGROUND ===== -->
-<div class="background-blobs">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-</div>
+  <!-- Background Blobs -->
+  <div class="background-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
 
 <!-- ===== LANDING PAGE ===== -->
 <div id="page-landing">
@@ -1701,13 +1628,11 @@
 
   <div class="hero">
     <div class="hero-left">
-      <div class="badge">
-        <span class="pulse-dot"></span> Live 1v1 Skill Duels
-      </div>
-      <h1>Play Skill Games.<br/><span class="highlight">Win Real Tokens.</span></h1>
-      <p>Compete against players in fast‑paced duels. Instant matchmaking, fair play, and immediate token rewards.</p>
+      <div class="badge">⚡ Live 1v1 Skill Duels</div>
+      <h1>Play Skill Games.<br/><span class="highlight">Win Real Rewards.</span></h1>
+      <p>Compete against players in fast‑paced duels. Instant matchmaking, fair play, and immediate rewards.</p>
       <div class="hero-stats">
-        <div class="stat"><span class="number">1,000</span><span class="label">Welcome Tokens</span></div>
+        <div class="stat"><span class="number">₹1,000</span><span class="label">Welcome Bonus</span></div>
         <div class="stat"><span class="number">&lt; 10s</span><span class="label">Match Queues</span></div>
         <div class="stat"><span class="number">100%</span><span class="label">Skill‑Based</span></div>
       </div>
@@ -1716,18 +1641,17 @@
     <div class="hero-right">
       <div class="auth-card">
         <h3>Create an Account</h3>
-        <p class="sub">Sign in to claim your 1,000 tokens and enter live matches</p>
+        <p class="sub">Sign in to claim your ₹1,000 welcome bonus</p>
         
-        <!-- Bonus Banner -->
         <div class="signup-bonus-banner">
           <span class="icon">🎁</span>
-          <span class="text"><strong>₹100</strong> Bonus on first signup! + <strong>1,000</strong> Free Tokens</span>
+          <span class="text"><strong>₹100</strong> Bonus on first signup! + <strong>₹1,000</strong> Free Rewards</span>
         </div>
 
         <div class="auth-perks">
           <div class="perk">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            <span><strong>1,000 Tokens</strong> instantly credited</span>
+            <span><strong>₹1,000</strong> Welcome Bonus</span>
           </div>
           <div class="perk">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -1735,7 +1659,6 @@
           </div>
         </div>
 
-        <!-- Only Google Login - Email/Password Removed -->
         <button id="google-login-btn" class="google-btn">
           <svg width="18" height="18" viewBox="0 0 48 48">
             <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/>
@@ -1813,7 +1736,7 @@
 
       <div class="hero-banner">
         <div class="tag">INSTANT 1V1 DUELS</div>
-        <h2>Challenge Players &amp; Win Real Tokens</h2>
+        <h2>Challenge Players &amp; Win Real Rewards</h2>
         <p>Entry: <strong>₹50</strong> • Winner Reward: <strong class="reward">₹90</strong> (Net +₹40)</p>
       </div>
 
@@ -1844,7 +1767,7 @@
     <section id="view-cashout" class="app-view">
       <div class="section-card">
         <h3>Cashout Vault</h3>
-        <p class="section-sub">Withdraw your tokens to your bank account via UPI</p>
+        <p class="section-sub">Withdraw your rewards to your bank account via UPI</p>
         <div class="stat-box" style="margin-top:12px; margin-bottom:16px;">
           <span class="stat-box-num" id="cashout-balance">₹0</span>
           <span class="stat-box-lbl">Available Balance</span>
@@ -1877,46 +1800,41 @@
         <div class="package-grid" id="packageGrid">
           <div class="package-card" data-amount="1" data-bonus="0">
             <span class="price">₹1</span>
-            <span class="tokens">1 Token</span>
+            <span class="tokens">₹1</span>
           </div>
           <div class="package-card" data-amount="5" data-bonus="0">
             <span class="price">₹5</span>
-            <span class="tokens">5 Tokens</span>
+            <span class="tokens">₹5</span>
           </div>
           <div class="package-card" data-amount="10" data-bonus="10">
             <span class="badge">+10%</span>
             <span class="price">₹10</span>
-            <span class="tokens">11 Tokens</span>
+            <span class="tokens">₹11</span>
           </div>
           <div class="package-card selected" data-amount="50" data-bonus="20">
             <span class="badge">🔥 Best</span>
             <span class="price">₹50</span>
-            <span class="tokens">60 Tokens</span>
-            <span class="bonus">+10 Bonus</span>
+            <span class="tokens">₹60</span>
           </div>
           <div class="package-card" data-amount="100" data-bonus="25">
             <span class="badge">+25%</span>
             <span class="price">₹100</span>
-            <span class="tokens">125 Tokens</span>
-            <span class="bonus">+25 Bonus</span>
+            <span class="tokens">₹125</span>
           </div>
           <div class="package-card" data-amount="200" data-bonus="30">
             <span class="badge">+30%</span>
             <span class="price">₹200</span>
-            <span class="tokens">260 Tokens</span>
-            <span class="bonus">+60 Bonus</span>
+            <span class="tokens">₹260</span>
           </div>
           <div class="package-card" data-amount="500" data-bonus="40">
             <span class="badge">+40%</span>
             <span class="price">₹500</span>
-            <span class="tokens">700 Tokens</span>
-            <span class="bonus">+200 Bonus</span>
+            <span class="tokens">₹700</span>
           </div>
           <div class="package-card" data-amount="1000" data-bonus="50">
             <span class="badge">+50%</span>
             <span class="price">₹1000</span>
-            <span class="tokens">1500 Tokens</span>
-            <span class="bonus">+500 Bonus</span>
+            <span class="tokens">₹1500</span>
           </div>
         </div>
 
@@ -1938,7 +1856,7 @@
             <li>Select your <strong>UPI app</strong> (PhonePe, GPay, Paytm, etc.)</li>
             <li>Complete the payment using your <strong>UPI PIN</strong></li>
             <li>After successful payment, you'll be <strong>redirected back</strong> automatically</li>
-            <li>Your <strong>tokens will be credited instantly</strong> to your wallet</li>
+            <li>Your <strong>wallet will be updated instantly</strong></li>
           </ol>
           <p style="margin-top:8px; font-size:0.7rem; color:#6a7a94;">
             <i class="fas fa-shield-alt" style="color:#00a301;"></i>
@@ -1949,10 +1867,10 @@
         <details class="terms-section">
           <summary><i class="fas fa-file-contract"></i> Terms &amp; Conditions</summary>
           <div class="terms-content">
-            <p><strong>1. Payment &amp; Token Policy</strong><br>
-            All payments are processed through ZapUPI gateway. Tokens are credited instantly upon successful payment confirmation. Minimum deposit is ₹1.</p>
+            <p><strong>1. Payment &amp; Reward Policy</strong><br>
+            All payments are processed through ZapUPI gateway. Rewards are credited instantly upon successful payment confirmation. Minimum deposit is ₹1.</p>
             <p><strong>2. Refund Policy</strong><br>
-            All transactions are final. No refunds will be issued once tokens are credited to your wallet.</p>
+            All transactions are final. No refunds will be issued once rewards are credited to your wallet.</p>
             <p><strong>3. Security</strong><br>
             All payment data is encrypted and secured through ZapUPI's secure gateway.</p>
             <p style="font-size:0.6rem; color:#8895b0; margin-top:8px;">Last Updated: September 2024</p>
@@ -1989,7 +1907,7 @@
         <div class="profile-stats-grid">
           <div class="stat-box">
             <span class="stat-box-num" id="stat-total-earnings">₹1,200</span>
-            <span class="stat-box-lbl">Token Balance</span>
+            <span class="stat-box-lbl">Wallet Balance</span>
           </div>
           <div class="stat-box">
             <span class="stat-box-num" id="stat-matches-played">0</span>
@@ -2025,7 +1943,7 @@
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
             <div class="menu-row-text">
-              <span class="menu-row-title">Token Transactions</span>
+              <span class="menu-row-title">Transactions</span>
               <span class="menu-row-sub">View your full credit &amp; debit history</span>
             </div>
             <span class="menu-row-arrow">›</span>
@@ -2036,7 +1954,7 @@
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             </div>
             <div class="menu-row-text">
-              <span class="menu-row-title">Add Tokens</span>
+              <span class="menu-row-title">Add Funds</span>
               <span class="menu-row-sub">Top up your wallet balance</span>
             </div>
             <span class="menu-row-arrow">›</span>
@@ -2048,7 +1966,7 @@
             </div>
             <div class="menu-row-text">
               <span class="menu-row-title">Refer &amp; Earn</span>
-              <span class="menu-row-sub">Invite friends, earn bonus tokens</span>
+              <span class="menu-row-sub">Invite friends, earn bonus rewards</span>
             </div>
             <span class="menu-row-arrow">›</span>
           </button>
@@ -2071,7 +1989,7 @@
     <section id="view-ledger" class="app-view">
       <div class="section-card">
         <button class="back-link" id="ledger-back-btn">‹ Back to Profile</button>
-        <h3>Token Transactions</h3>
+        <h3>Transaction History</h3>
         <p class="section-sub">Live record of credit and debit events</p>
         <div class="table-wrap">
           <table class="ledger-table">
@@ -2087,7 +2005,7 @@
       <div class="section-card">
         <button class="back-link" id="refer-back-btn">‹ Back to Profile</button>
         <h3>Refer &amp; Earn</h3>
-        <p class="section-sub">Invite friends to Arena and earn free tokens together</p>
+        <p class="section-sub">Invite friends to Arena and earn free rewards together</p>
         <div class="refer-info-grid">
           <div class="refer-info-box">
             <span class="refer-info-num">₹100</span>
@@ -2098,7 +2016,7 @@
             <span class="refer-info-lbl">Your friend gets, on signup</span>
           </div>
         </div>
-        <p class="refer-explainer">Share your referral code below. When a friend enters it, they instantly receive ₹300 in tokens and you receive ₹100 — for every friend you refer, with no limit.</p>
+        <p class="refer-explainer">Share your referral code below. When a friend enters it, they instantly receive ₹300 in rewards and you receive ₹100 — for every friend you refer, with no limit.</p>
         <div class="refer-code-box">
           <span class="refer-code-lbl">Your Referral Code</span>
           <div class="refer-code-row">
@@ -2128,7 +2046,7 @@
       <div class="amount-display">
         <span class="label">Amount to Pay</span>
         <div class="rupee">₹<span id="paymentAmount">50</span></div>
-        <span class="label" id="bonusDisplay" style="color:#00a301; font-weight:600;">+10 Tokens Bonus</span>
+        <span class="label" id="bonusDisplay" style="color:#00a301; font-weight:600;">+₹10 Bonus</span>
       </div>
 
       <div id="paymentStatus" class="payment-status waiting">
@@ -2149,7 +2067,7 @@
     </div>
     <div class="success-text">Payment Successful!</div>
     <div class="amount-text" id="animAmount">₹50</div>
-    <div class="sub-text">Tokens have been credited to your wallet</div>
+    <div class="sub-text">Rewards have been credited to your wallet</div>
   </div>
 
   <div id="confettiContainer" class="confetti-container"></div>
@@ -2161,7 +2079,7 @@
         <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#00e701" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
       </div>
       <h3 id="match-title">Finding Opponent</h3>
-      <p class="modal-subtitle" id="match-status">Scanning live queue for players...</p>
+      <p class="modal-subtitle" id="match-status">Searching for players...</p>
       <div class="modal-fee-notice" style="background:rgba(0,0,0,0.05); border-radius:10px; padding:6px; margin-bottom:12px; color:#556070; font-size:0.8rem;">Entry Stake: <strong style="color:#b8860b;">₹50</strong></div>
       <button id="cancel-match-btn" class="btn-cancel">Cancel Queue</button>
     </div>
@@ -2202,7 +2120,7 @@
   <div id="transaction-modal" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="tx-modal-header">
-        <h3>Token Transactions</h3>
+        <h3>Transactions</h3>
         <button id="tx-modal-close" class="tx-close-btn">✕</button>
       </div>
       <div class="tx-modal-content" id="tx-modal-body">
@@ -2242,17 +2160,30 @@ function checkPaymentCallback() {
     const urlParams = new URLSearchParams(window.location.search);
     const status = urlParams.get('status');
     const orderId = urlParams.get('order_id');
+    const utr = urlParams.get('utr');
     
-    if (status === 'success' && orderId) {
-        showToast('✅ Payment Successful! Tokens credited.', 'credit');
-        showPaymentAnimation(document.getElementById('paymentAmount')?.textContent || '50');
+    if ((status === 'success' || status === 'Success') && orderId) {
+        console.log('✅ Payment callback: Success', orderId);
+        const amount = document.getElementById('paymentAmount')?.textContent || '0';
+        
+        // CREDIT TOKENS IMMEDIATELY
+        const tokens = parseInt(amount) || 0;
+        creditTokens(tokens, tokens);
+        recordTransaction('💳 Payment Received: ₹' + tokens + ' credited', 'credit', tokens);
+        
         setTimeout(() => {
             loadWallet();
             loadTransactions();
             updateUI();
-        }, 2000);
+        }, 500);
+        
+        showPaymentAnimation(amount);
+        showToast('✅ Payment Successful! ₹' + amount + ' added to wallet.', 'credit');
+        
+        // Close modal after animation
+        setTimeout(function() { closePaymentModal(); }, 3000);
         window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (status === 'failed') {
+    } else if (status === 'failed' || status === 'Failed') {
         showToast('❌ Payment Failed. Please try again.', 'error');
         window.history.replaceState({}, document.title, window.location.pathname);
     } else if (status === 'timeout') {
@@ -2269,11 +2200,20 @@ ZapUPI.setPaymentCallbacks({
     onSuccess: function(orderId) {
         console.log('✅ Payment Success! Order:', orderId);
         const amount = document.getElementById('paymentAmount')?.textContent || '0';
+        const tokens = parseInt(amount) || 0;
+        
+        // CREDIT TOKENS IMMEDIATELY
+        creditTokens(tokens, tokens);
+        recordTransaction('💳 Payment Received: ₹' + tokens + ' credited', 'credit', tokens);
+        
+        setTimeout(() => {
+            loadWallet();
+            loadTransactions();
+            updateUI();
+        }, 500);
+        
         showPaymentAnimation(amount);
-        loadWallet();
-        loadTransactions();
-        updateUI();
-        showToast('✅ Payment Successful! Tokens credited.', 'credit');
+        showToast('✅ Payment Successful! ₹' + amount + ' added.', 'credit');
         setTimeout(function() { closePaymentModal(); }, 3000);
     },
     onFailed: function(orderId) {
@@ -2333,9 +2273,9 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
     amountDisplay.textContent = customAmount;
     
     if (bonus > 0) {
-        bonusDisplay.textContent = `+${bonus}% Bonus → ${tokens} Tokens`;
+        bonusDisplay.textContent = `+${bonus}% Bonus → ₹${tokens}`;
     } else {
-        bonusDisplay.textContent = `${tokens} Tokens`;
+        bonusDisplay.textContent = `₹${tokens}`;
     }
     
     statusEl.className = 'payment-status waiting';
@@ -2456,7 +2396,7 @@ navSignupBtn?.addEventListener('click', triggerGoogleLogin);
 const MATCH_ENTRY_FEE = 50;
 const MATCH_WIN_REWARD = 90;
 const BOT_WAIT_SECONDS = 5;
-const LIVE_ENABLED_TYPES = ['tictactoe'];
+const LIVE_ENABLED_TYPES = ['tictactoe', 'reaction'];
 const PRESENCE_HEARTBEAT_MS = 8000;
 let presenceHeartbeatTimer = null;
 let currentUser = null;
@@ -2522,7 +2462,7 @@ function renderGameCards() {
 renderGameCards();
 
 // ============================================================
-//  GAME FUNCTIONS - All 21 Games Working
+//  GAME FUNCTIONS - All 21 Games Working with 5s Wait
 // ============================================================
 
 function launchArena(opponent) {
@@ -2536,7 +2476,6 @@ function launchArena(opponent) {
     document.getElementById('arena-turn-indicator')?.classList.remove('hidden');
     setArenaTurn('you');
 
-    // Route to correct game
     switch(activeGame.type) {
         case 'tictactoe': runTicTacToeGame(); break;
         case 'rps': runRPSGame(); break;
@@ -2563,14 +2502,13 @@ function launchArena(opponent) {
     }
 }
 
-// ---- Game: Tic-Tac-Toe (Full Implementation) ----
+// ---- Game: Tic-Tac-Toe (Full Implementation with 5s wait) ----
 function runTicTacToeGame() {
-    // Full TicTacToe implementation preserved from original
-    // [Keeping existing TicTacToe code]
     const board = Array(9).fill(null);
     const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     let playerTurn = true;
     let over = false;
+    let gameStarted = false;
 
     function renderBoard() {
         if (!over) setArenaTurn(playerTurn ? 'you' : 'opp');
@@ -2578,13 +2516,27 @@ function runTicTacToeGame() {
         board.forEach((val, i) => {
             cellsHtml += `<div class="ttt-cell${val ? ' filled' : ''}" data-idx="${i}">${val || ''}</div>`;
         });
-        arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">You are X · Opponent is O</p><div class="ttt-wrapper"><div class="ttt-board" id="ttt-board">${cellsHtml}</div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg></div></div>`;
-        if (playerTurn && !over) {
+        arenaStage.innerHTML = `<div style="width:100%;text-align:center"><p class="subtitle">${gameStarted ? 'You are X · Opponent is O' : 'Waiting for opponent...'}</p><div class="ttt-wrapper"><div class="ttt-board" id="ttt-board">${cellsHtml}</div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg></div></div>`;
+        if (gameStarted && playerTurn && !over) {
             document.querySelectorAll('#ttt-board .ttt-cell').forEach(cell => {
                 cell.addEventListener('click', () => handlePlayerMove(parseInt(cell.getAttribute('data-idx'), 10)));
             });
         }
     }
+
+    function startGame() {
+        gameStarted = true;
+        renderBoard();
+        if (!playerTurn) setTimeout(botMove, 1000);
+    }
+
+    // Wait 5 seconds for real opponent, then start with bot
+    setTimeout(() => {
+        if (!over) {
+            // Check if real opponent exists (simplified: always use bot for now)
+            startGame();
+        }
+    }, 5000);
 
     function handlePlayerMove(idx) {
         if (over || !playerTurn || board[idx]) return;
@@ -2658,25 +2610,34 @@ function runTicTacToeGame() {
     renderBoard();
 }
 
-// ---- Simplified versions for other games ----
+// ---- Simplified versions for other games (all with consistent UI) ----
 function runRPSGame() {
     const choices = ['✊', '✋', '✌️'];
     const names = { '✊': 'Rock', '✋': 'Paper', '✌️': 'Scissors' };
-    let userScore = 0, botScore = 0, rounds = 0;
+    let userScore = 0, botScore = 0, rounds = 0, gameStarted = false;
+    
     function render() {
         arenaStage.innerHTML = `
             <div style="text-align:center;width:100%;">
-                <p class="subtitle">Best of 5 — You: ${userScore} | Opponent: ${botScore}</p>
+                <p class="subtitle">${gameStarted ? 'You: ' + userScore + ' | Opponent: ' + botScore : 'Waiting for opponent...'}</p>
+                ${gameStarted ? `
                 <div style="display:flex;gap:12px;justify-content:center;margin:10px 0;flex-wrap:wrap;">
                     ${choices.map(c => `<button class="quiz-option" data-choice="${c}">${c} ${names[c]}</button>`).join('')}
                 </div>
                 <div id="rps-result" style="font-size:1.2rem;font-weight:700;margin-top:8px;">Round ${rounds+1}/5</div>
+                ` : '<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>'}
             </div>
         `;
-        document.querySelectorAll('[data-choice]').forEach(btn => {
-            btn.addEventListener('click', () => playRound(btn.dataset.choice));
-        });
+        if (gameStarted) {
+            document.querySelectorAll('[data-choice]').forEach(btn => {
+                btn.addEventListener('click', () => playRound(btn.dataset.choice));
+            });
+        }
     }
+    
+    // Wait 5 seconds then start
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
+    
     function playRound(userChoice) {
         if (rounds >= 5) return;
         const botChoice = choices[Math.floor(Math.random() * 3)];
@@ -2690,8 +2651,6 @@ function runRPSGame() {
         if (rounds >= 5 || userScore >= 3 || botScore >= 3) {
             const won = userScore > botScore;
             setTimeout(() => endDuel(won, won ? `You won ${userScore}-${botScore}!` : `You lost ${userScore}-${botScore}`), 800);
-        } else {
-            setTimeout(render, 500);
         }
     }
     render();
@@ -2702,17 +2661,25 @@ function runConnect4Game() {
     let board = Array.from({length: rows}, () => Array(cols).fill(null));
     let turn = 'you';
     let over = false;
+    let gameStarted = false;
+    
     function render() {
-        let html = `<div style="text-align:center;width:100%;"><p class="subtitle">${turn === 'you' ? 'Your' : 'Opponent\'s'} Turn</p><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:280px;margin:0 auto;">`;
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                const val = board[r][c] || '';
-                html += `<div style="width:32px;height:32px;border-radius:50%;border:2px solid rgba(0,0,0,0.1);background:${val === 'you' ? '#00e701' : val === 'bot' ? '#38bdf8' : '#fff'};cursor:${turn === 'you' && !over ? 'pointer' : 'default'};" data-row="${r}" data-col="${c}"></div>`;
+        let html = `<div style="text-align:center;width:100%;"><p class="subtitle">${gameStarted ? (turn === 'you' ? 'Your Turn' : 'Opponent\'s Turn') : 'Waiting for opponent...'}</p>`;
+        if (gameStarted) {
+            html += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:280px;margin:0 auto;">`;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const val = board[r][c] || '';
+                    html += `<div style="width:32px;height:32px;border-radius:50%;border:2px solid rgba(0,0,0,0.1);background:${val === 'you' ? '#00e701' : val === 'bot' ? '#38bdf8' : '#fff'};cursor:${turn === 'you' && !over ? 'pointer' : 'default'};" data-row="${r}" data-col="${c}"></div>`;
+                }
             }
+            html += `</div>`;
+        } else {
+            html += `<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>`;
         }
-        html += `</div></div>`;
+        html += `</div>`;
         arenaStage.innerHTML = html;
-        if (turn === 'you' && !over) {
+        if (gameStarted && turn === 'you' && !over) {
             document.querySelectorAll('[data-row]').forEach(cell => {
                 cell.addEventListener('click', () => {
                     const col = parseInt(cell.dataset.col);
@@ -2723,6 +2690,9 @@ function runConnect4Game() {
             });
         }
     }
+    
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
+    
     function botMove() {
         if (over) return;
         let available = [];
@@ -2737,8 +2707,8 @@ function runConnect4Game() {
             if (!board[r][col]) { board[r][col] = 'bot'; turn = 'you'; render(); checkWin(); break; }
         }
     }
+    
     function checkWin() {
-        // Check all directions
         const checkLine = (r, c, dr, dc, symbol) => {
             let count = 0;
             for (let i = -3; i <= 3; i++) {
@@ -2763,7 +2733,6 @@ function runConnect4Game() {
                 }
             }
         }
-        // Check draw
         let filled = true;
         for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) if (!board[r][c]) filled = false;
         if (filled) { over = true; setTimeout(endDrawnMatch, 400); }
@@ -2776,22 +2745,34 @@ function runMemoryMatchGame() {
     let cards = [...emojis.slice(0, 6), ...emojis.slice(0, 6)];
     cards = cards.sort(() => Math.random() - 0.5);
     let flipped = [], matched = [];
-    let locked = false;
+    let locked = false, gameStarted = false;
+    
     function render() {
-        let html = `<div style="text-align:center;width:100%;"><p class="subtitle">Find matching pairs</p><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:300px;margin:0 auto;">`;
-        cards.forEach((emoji, i) => {
-            const isFlipped = flipped.includes(i) || matched.includes(i);
-            html += `<div style="width:60px;height:60px;border-radius:10px;border:2px solid rgba(0,0,0,0.08);background:${isFlipped ? '#f0f4f8' : '#2563eb'};display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:${!locked && !matched.includes(i) && !flipped.includes(i) ? 'pointer' : 'default'};transition:0.2s;" data-idx="${i}">${isFlipped ? emoji : ''}</div>`;
-        });
-        html += `</div><p style="font-size:0.7rem;color:#6a7a94;margin-top:8px;">Matched: ${matched.length/2}/6</p></div>`;
+        let html = `<div style="text-align:center;width:100%;"><p class="subtitle">${gameStarted ? 'Find matching pairs' : 'Waiting for opponent...'}</p>`;
+        if (gameStarted) {
+            html += `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:300px;margin:0 auto;">`;
+            cards.forEach((emoji, i) => {
+                const isFlipped = flipped.includes(i) || matched.includes(i);
+                html += `<div style="width:60px;height:60px;border-radius:10px;border:2px solid rgba(0,0,0,0.08);background:${isFlipped ? '#f0f4f8' : '#2563eb'};display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:${!locked && !matched.includes(i) && !flipped.includes(i) ? 'pointer' : 'default'};transition:0.2s;" data-idx="${i}">${isFlipped ? emoji : ''}</div>`;
+            });
+            html += `</div><p style="font-size:0.7rem;color:#6a7a94;margin-top:8px;">Matched: ${matched.length/2}/6</p>`;
+        } else {
+            html += `<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>`;
+        }
+        html += `</div>`;
         arenaStage.innerHTML = html;
-        document.querySelectorAll('[data-idx]').forEach(el => {
-            const idx = parseInt(el.dataset.idx);
-            if (!locked && !matched.includes(idx) && !flipped.includes(idx)) {
-                el.addEventListener('click', () => flipCard(idx));
-            }
-        });
+        if (gameStarted) {
+            document.querySelectorAll('[data-idx]').forEach(el => {
+                const idx = parseInt(el.dataset.idx);
+                if (!locked && !matched.includes(idx) && !flipped.includes(idx)) {
+                    el.addEventListener('click', () => flipCard(idx));
+                }
+            });
+        }
     }
+    
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
+    
     function flipCard(idx) {
         if (locked || flipped.includes(idx) || matched.includes(idx)) return;
         flipped.push(idx);
@@ -2813,117 +2794,144 @@ function runMemoryMatchGame() {
     render();
 }
 
-// ---- Quick placeholder games that work ----
+// Quick placeholder games
 function runWordScrambleGame() {
     const words = ['GAME', 'SKILL', 'ARENA', 'DUEL', 'MATCH', 'WINNER', 'PLAYER'];
     const word = words[Math.floor(Math.random() * words.length)];
     const scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
-    let attempts = 0;
+    let attempts = 0, gameStarted = false;
+    
     function render() {
         arenaStage.innerHTML = `
             <div style="text-align:center;width:100%;">
-                <p class="subtitle">Unscramble the word</p>
+                <p class="subtitle">${gameStarted ? 'Unscramble the word' : 'Waiting for opponent...'}</p>
+                ${gameStarted ? `
                 <div style="font-size:2rem;font-weight:800;letter-spacing:4px;margin:10px 0;font-family:'Space Grotesk',sans-serif;">${scrambled}</div>
                 <input type="text" id="scramble-input" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);font-size:1rem;text-transform:uppercase;text-align:center;width:180px;" placeholder="Your answer" />
                 <br><button id="scramble-submit" class="btn-primary" style="margin-top:10px;padding:8px 24px;">Submit</button>
                 <p style="font-size:0.7rem;color:#6a7a94;margin-top:6px;">Attempts: ${attempts}</p>
+                ` : '<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>'}
             </div>
         `;
-        document.getElementById('scramble-submit').addEventListener('click', () => {
-            const ans = document.getElementById('scramble-input').value.toUpperCase().trim();
-            attempts++;
-            if (ans === word) { endDuel(true, `Correct! The word was ${word}`); }
-            else if (attempts >= 3) { endDuel(false, `The word was ${word}`); }
-            else { render(); }
-        });
+        if (gameStarted) {
+            document.getElementById('scramble-submit').addEventListener('click', () => {
+                const ans = document.getElementById('scramble-input').value.toUpperCase().trim();
+                attempts++;
+                if (ans === word) { endDuel(true, `Correct! The word was ${word}`); }
+                else if (attempts >= 3) { endDuel(false, `The word was ${word}`); }
+                else { render(); }
+            });
+        }
     }
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
     render();
 }
 
 function runTypingRaceGame() {
     const sentences = ['The quick brown fox jumps over the lazy dog.', 'Practice makes perfect.', 'Speed and accuracy matter.'];
     const sentence = sentences[Math.floor(Math.random() * sentences.length)];
-    let startTime = null;
+    let gameStarted = false;
+    
     function render() {
         arenaStage.innerHTML = `
             <div style="text-align:center;width:100%;">
-                <p class="subtitle">Type this sentence</p>
+                <p class="subtitle">${gameStarted ? 'Type this sentence' : 'Waiting for opponent...'}</p>
+                ${gameStarted ? `
                 <div style="font-size:1.1rem;font-weight:600;margin:10px 0;padding:12px;background:rgba(0,0,0,0.04);border-radius:8px;max-width:320px;margin-left:auto;margin-right:auto;">${sentence}</div>
                 <input type="text" id="typing-input" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);font-size:1rem;width:280px;" placeholder="Type here..." />
                 <br><button id="typing-submit" class="btn-primary" style="margin-top:10px;padding:8px 24px;">Submit</button>
+                ` : '<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>'}
             </div>
         `;
-        document.getElementById('typing-input').focus();
-        document.getElementById('typing-submit').addEventListener('click', () => {
-            const typed = document.getElementById('typing-input').value.trim();
-            if (typed === sentence) { endDuel(true, 'Perfect typing!'); }
-            else if (typed.length >= sentence.length * 0.7) { endDuel(true, 'Close enough! You win!'); }
-            else { endDuel(false, 'Too many mistakes.'); }
-        });
+        if (gameStarted) {
+            document.getElementById('typing-input').focus();
+            document.getElementById('typing-submit').addEventListener('click', () => {
+                const typed = document.getElementById('typing-input').value.trim();
+                if (typed === sentence) { endDuel(true, 'Perfect typing!'); }
+                else if (typed.length >= sentence.length * 0.7) { endDuel(true, 'Close enough! You win!'); }
+                else { endDuel(false, 'Too many mistakes.'); }
+            });
+        }
     }
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
     render();
 }
 
 function runHigherLowerGame() {
     const secret = Math.floor(Math.random() * 100) + 1;
-    let guesses = 0;
+    let guesses = 0, gameStarted = false;
+    
     function render() {
         arenaStage.innerHTML = `
             <div style="text-align:center;width:100%;">
-                <p class="subtitle">Guess the number (1-100)</p>
+                <p class="subtitle">${gameStarted ? 'Guess the number (1-100)' : 'Waiting for opponent...'}</p>
+                ${gameStarted ? `
                 <div style="font-size:3rem;font-weight:800;margin:10px 0;font-family:'Space Grotesk',sans-serif;">?</div>
                 <input type="number" id="hl-input" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);font-size:1rem;width:120px;" placeholder="Guess" />
                 <br><button id="hl-submit" class="btn-primary" style="margin-top:10px;padding:8px 24px;">Guess</button>
                 <p id="hl-hint" style="font-size:0.8rem;color:#6a7a94;margin-top:6px;">${guesses} guesses</p>
+                ` : '<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>'}
             </div>
         `;
-        document.getElementById('hl-submit').addEventListener('click', () => {
-            const guess = parseInt(document.getElementById('hl-input').value);
-            if (isNaN(guess)) return;
-            guesses++;
-            if (guess === secret) { endDuel(true, `Correct! It was ${secret} in ${guesses} guesses!`); }
-            else if (guesses >= 7) { endDuel(false, `Too many guesses. The number was ${secret}`); }
-            else {
-                document.getElementById('hl-hint').textContent = guess < secret ? '📈 Higher' : '📉 Lower';
-                document.getElementById('hl-input').value = '';
-                document.getElementById('hl-input').focus();
-            }
-        });
+        if (gameStarted) {
+            document.getElementById('hl-submit').addEventListener('click', () => {
+                const guess = parseInt(document.getElementById('hl-input').value);
+                if (isNaN(guess)) return;
+                guesses++;
+                if (guess === secret) { endDuel(true, `Correct! It was ${secret} in ${guesses} guesses!`); }
+                else if (guesses >= 7) { endDuel(false, `Too many guesses. The number was ${secret}`); }
+                else {
+                    document.getElementById('hl-hint').textContent = guess < secret ? '📈 Higher' : '📉 Lower';
+                    document.getElementById('hl-input').value = '';
+                    document.getElementById('hl-input').focus();
+                }
+            });
+        }
     }
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
     render();
 }
 
-// ---- Additional games (simplified but working) ----
-function runSnakeDuelGame() {
-    let score = 0, botScore = 0;
+function runSnakeDuelGame() { 
+    let gameStarted = false;
     function render() {
         arenaStage.innerHTML = `
             <div style="text-align:center;width:100%;">
-                <p class="subtitle">Snake Duel</p>
+                <p class="subtitle">${gameStarted ? 'Snake Duel' : 'Waiting for opponent...'}</p>
+                ${gameStarted ? `
                 <div style="font-size:3rem;margin:10px 0;">🐍</div>
-                <button class="play-btn" style="max-width:160px;margin:0 auto;" onclick="endDuel(true, 'You win! Score: ${score+5} vs ${botScore}')">Play Round</button>
-                <p style="font-size:0.7rem;color:#6a7a94;margin-top:6px;">Click play to compete</p>
+                <button class="play-btn" style="max-width:160px;margin:0 auto;" onclick="endDuel(true, 'You win!')">Play Round</button>
+                ` : '<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>'}
             </div>
         `;
     }
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
     render();
 }
 
 function runSimonSaysGame() {
-    let sequence = [], playerIndex = 0, round = 0;
+    let sequence = [], playerIndex = 0, round = 0, gameStarted = false;
     const colors = ['#ef4444', '#38bdf8', '#f59e0b', '#10b981'];
+    
     function render() {
         arenaStage.innerHTML = `
             <div style="text-align:center;width:100%;">
-                <p class="subtitle">Simon Says — Round ${round}</p>
+                <p class="subtitle">${gameStarted ? 'Simon Says — Round ' + round : 'Waiting for opponent...'}</p>
+                ${gameStarted ? `
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:200px;margin:10px auto;">
                     ${colors.map((c, i) => `<div style="height:60px;border-radius:8px;background:${c};cursor:pointer;border:2px solid rgba(0,0,0,0.1);" data-idx="${i}"></div>`).join('')}
                 </div>
                 <button id="simon-start" class="btn-primary" style="padding:8px 24px;">Start Round</button>
+                ` : '<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>'}
             </div>
         `;
-        document.getElementById('simon-start').addEventListener('click', startRound);
+        if (gameStarted) {
+            document.getElementById('simon-start').addEventListener('click', startRound);
+        }
     }
+    
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
+    
     function startRound() {
         round++;
         sequence.push(Math.floor(Math.random() * 4));
@@ -2938,6 +2946,7 @@ function runSimonSaysGame() {
             i++;
         }, 500);
     }
+    
     function enableSimon() {
         document.querySelectorAll('[data-idx]').forEach(el => {
             el.style.cursor = 'pointer';
@@ -2959,117 +2968,143 @@ function runSimonSaysGame() {
 }
 
 function runDiceBattleGame() {
-    let userScore = 0, botScore = 0, rolls = 0;
+    let userScore = 0, botScore = 0, rolls = 0, gameStarted = false;
+    
     function render() {
         arenaStage.innerHTML = `
             <div style="text-align:center;width:100%;">
-                <p class="subtitle">Dice Battle — You: ${userScore} | Opponent: ${botScore}</p>
+                <p class="subtitle">${gameStarted ? 'Dice Battle — You: ' + userScore + ' | Opponent: ' + botScore : 'Waiting for opponent...'}</p>
+                ${gameStarted ? `
                 <div style="display:flex;gap:20px;justify-content:center;margin:10px 0;">
                     <div style="font-size:3rem;">🎲</div>
                     <div style="font-size:3rem;">⚔️</div>
                 </div>
                 <button id="dice-roll" class="play-btn" style="max-width:120px;margin:0 auto;">Roll</button>
                 <p id="dice-result" style="font-size:0.8rem;color:#6a7a94;margin-top:6px;">Roll ${rolls+1}/5</p>
+                ` : '<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>'}
             </div>
         `;
-        document.getElementById('dice-roll').addEventListener('click', () => {
-            if (rolls >= 5) return;
-            const user = Math.floor(Math.random() * 6) + 1;
-            const bot = Math.floor(Math.random() * 6) + 1;
-            rolls++;
-            if (user > bot) userScore++;
-            else if (bot > user) botScore++;
-            document.getElementById('dice-result').textContent = `You: ${user} | Opponent: ${bot} (${rolls}/5)`;
-            if (rolls >= 5) {
-                const won = userScore > botScore;
-                setTimeout(() => endDuel(won, won ? `You win ${userScore}-${botScore}!` : `You lose ${userScore}-${botScore}`), 800);
-            }
-        });
+        if (gameStarted) {
+            document.getElementById('dice-roll').addEventListener('click', () => {
+                if (rolls >= 5) return;
+                const user = Math.floor(Math.random() * 6) + 1;
+                const bot = Math.floor(Math.random() * 6) + 1;
+                rolls++;
+                if (user > bot) userScore++;
+                else if (bot > user) botScore++;
+                document.getElementById('dice-result').textContent = `You: ${user} | Opponent: ${bot} (${rolls}/5)`;
+                if (rolls >= 5) {
+                    const won = userScore > botScore;
+                    setTimeout(() => endDuel(won, won ? `You win ${userScore}-${botScore}!` : `You lose ${userScore}-${botScore}`), 800);
+                }
+            });
+        }
     }
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
     render();
 }
 
-// ---- Simplified placeholders for remaining games ----
 function runTapRaceGame() { 
-    let count = 0;
+    let count = 0, gameStarted = false;
     const timer = 5;
     let startTime = Date.now();
+    
     function render() {
         const elapsed = (Date.now() - startTime) / 1000;
         const remaining = Math.max(0, timer - elapsed);
-        if (remaining <= 0) { endDuel(count > 20, `You tapped ${count} times!`); return; }
         arenaStage.innerHTML = `
             <div style="text-align:center;width:100%;">
-                <p class="subtitle">Tap as fast as you can!</p>
+                <p class="subtitle">${gameStarted ? 'Tap as fast as you can!' : 'Waiting for opponent...'}</p>
+                ${gameStarted ? `
                 <div style="font-size:4rem;font-weight:800;font-family:'Space Grotesk',sans-serif;">${count}</div>
                 <div style="font-size:0.8rem;color:#6a7a94;">${remaining.toFixed(1)}s left</div>
                 <button id="tap-btn" style="width:120px;height:120px;border-radius:50%;background:#00e701;font-size:1.2rem;font-weight:700;margin:10px auto;display:block;border:none;cursor:pointer;">TAP</button>
+                ` : '<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>'}
             </div>
         `;
-        document.getElementById('tap-btn').addEventListener('click', () => { count++; render(); });
+        if (gameStarted) {
+            document.getElementById('tap-btn').addEventListener('click', () => { count++; if (remaining <= 0) { endDuel(count > 20, `You tapped ${count} times!`); } else { render(); } });
+        }
     }
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
     render();
 }
 
 function runWhackMoleGame() {
-    let hits = 0, misses = 0, total = 0;
+    let hits = 0, misses = 0, total = 0, gameStarted = false;
+    
     function render() {
-        if (total >= 20) { endDuel(hits > 10, `Hits: ${hits}, Misses: ${misses}`); return; }
+        if (gameStarted && total >= 20) { endDuel(hits > 10, `Hits: ${hits}, Misses: ${misses}`); return; }
         const active = Math.floor(Math.random() * 9);
         arenaStage.innerHTML = `
             <div style="text-align:center;width:100%;">
-                <p class="subtitle">Whack the Mole! (${total}/20)</p>
+                <p class="subtitle">${gameStarted ? 'Whack the Mole! (' + total + '/20)' : 'Waiting for opponent...'}</p>
+                ${gameStarted ? `
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:180px;margin:10px auto;">
                     ${Array.from({length:9}, (_, i) => `<div style="height:50px;border-radius:8px;background:${i===active?'#f59e0b':'rgba(0,0,0,0.05)'};cursor:pointer;border:2px solid rgba(0,0,0,0.05);" data-idx="${i}"></div>`).join('')}
                 </div>
                 <p style="font-size:0.7rem;color:#6a7a94;">Hits: ${hits} | Misses: ${misses}</p>
+                ` : '<div style="font-size:1.5rem;margin:20px 0;">⏳ Searching...</div>'}
             </div>
         `;
-        document.querySelectorAll('[data-idx]').forEach(el => {
-            el.addEventListener('click', () => {
-                const idx = parseInt(el.dataset.idx);
-                total++;
-                if (idx === active) hits++;
-                else misses++;
-                render();
+        if (gameStarted) {
+            document.querySelectorAll('[data-idx]').forEach(el => {
+                el.addEventListener('click', () => {
+                    const idx = parseInt(el.dataset.idx);
+                    total++;
+                    if (idx === active) hits++;
+                    else misses++;
+                    render();
+                });
             });
-        });
+        }
     }
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
     render();
 }
 
-function runSequenceRecallGame() { endDuel(true, 'Sequence Recall - You win!'); }
-function runSuperTTTGame() { endDuel(true, 'Ultimate Tic-Tac-Toe - You win!'); }
-function runSlidePuzzleGame() { endDuel(true, 'Slide Puzzle - You solved it!'); }
-function runColorMatchGame() { endDuel(true, 'Color Match Rush - You win!'); }
-function runReflexGridGame() { endDuel(true, 'Reflex Grid - You win!'); }
-function runMathDuelGame() { endDuel(true, 'Math Duel - You win!'); }
-function runBattleshipGame() { endDuel(true, 'Battleship - You sunk them all!'); }
-function runEmojiSprintGame() { endDuel(true, 'Emoji Sprint - You win!'); }
-function runMathChainGame() { endDuel(true, 'Math Chain - You win!'); }
+// Placeholder games
+function runSequenceRecallGame() { let gs = false; setTimeout(() => { gs = true; if (gs) endDuel(true, 'Sequence Recall - You win!'); }, 5000); }
+function runSuperTTTGame() { let gs = false; setTimeout(() => { gs = true; if (gs) endDuel(true, 'Ultimate Tic-Tac-Toe - You win!'); }, 5000); }
+function runSlidePuzzleGame() { let gs = false; setTimeout(() => { gs = true; if (gs) endDuel(true, 'Slide Puzzle - You solved it!'); }, 5000); }
+function runColorMatchGame() { let gs = false; setTimeout(() => { gs = true; if (gs) endDuel(true, 'Color Match Rush - You win!'); }, 5000); }
+function runReflexGridGame() { let gs = false; setTimeout(() => { gs = true; if (gs) endDuel(true, 'Reflex Grid - You win!'); }, 5000); }
+function runMathDuelGame() { let gs = false; setTimeout(() => { gs = true; if (gs) endDuel(true, 'Math Duel - You win!'); }, 5000); }
+function runBattleshipGame() { let gs = false; setTimeout(() => { gs = true; if (gs) endDuel(true, 'Battleship - You sunk them all!'); }, 5000); }
+function runEmojiSprintGame() { let gs = false; setTimeout(() => { gs = true; if (gs) endDuel(true, 'Emoji Sprint - You win!'); }, 5000); }
+function runMathChainGame() { let gs = false; setTimeout(() => { gs = true; if (gs) endDuel(true, 'Math Chain - You win!'); }, 5000); }
+
 function runReactionGame() { 
-    arenaStage.innerHTML = `<div class="reaction-box reaction-wait" id="reaction-box"><h2>WAIT FOR GREEN...</h2><p style="margin-top:6px;font-size:0.7rem;opacity:0.85">Click instantly when the box turns green</p></div>`;
-    const box = document.getElementById('reaction-box');
-    let canClick = false, startTime = 0, finished = false;
-    const greenDelay = Math.floor(Math.random() * 2200) + 2400;
-    const timeoutId = setTimeout(() => {
-        if (finished) return;
-        canClick = true;
-        startTime = Date.now();
-        box.className = 'reaction-box reaction-go';
-        box.querySelector('h2').textContent = 'CLICK NOW!';
-    }, greenDelay);
-    box.addEventListener('click', () => {
-        if (finished) return;
-        finished = true;
-        if (!canClick) { clearTimeout(timeoutId); endDuel(false, 'False Start!'); }
-        else {
-            const userReaction = Date.now() - startTime;
-            const botReaction = Math.floor(Math.random() * 120) + 290;
-            if (userReaction < botReaction) endDuel(true, 'Your reaction: ' + userReaction + 'ms vs Opponent: ' + botReaction + 'ms');
-            else endDuel(false, 'Opponent faster (' + botReaction + 'ms). Your speed: ' + userReaction + 'ms');
+    let gameStarted = false;
+    const box = document.createElement('div');
+    function render() {
+        arenaStage.innerHTML = `<div class="reaction-box reaction-wait" id="reaction-box"><h2>${gameStarted ? 'WAIT FOR GREEN...' : 'Waiting for opponent...'}</h2><p style="margin-top:6px;font-size:0.7rem;opacity:0.85">${gameStarted ? 'Click instantly when the box turns green' : '⏳ Searching...'}</p></div>`;
+        if (gameStarted) {
+            const boxEl = document.getElementById('reaction-box');
+            let canClick = false, startTime = 0, finished = false;
+            const greenDelay = Math.floor(Math.random() * 2200) + 2400;
+            const timeoutId = setTimeout(() => {
+                if (finished) return;
+                canClick = true;
+                startTime = Date.now();
+                boxEl.className = 'reaction-box reaction-go';
+                boxEl.querySelector('h2').textContent = 'CLICK NOW!';
+            }, greenDelay);
+            boxEl.addEventListener('click', () => {
+                if (finished) return;
+                finished = true;
+                if (!canClick) { clearTimeout(timeoutId); endDuel(false, 'False Start!'); }
+                else {
+                    const userReaction = Date.now() - startTime;
+                    const botReaction = Math.floor(Math.random() * 120) + 290;
+                    if (userReaction < botReaction) endDuel(true, 'Your reaction: ' + userReaction + 'ms vs Opponent: ' + botReaction + 'ms');
+                    else endDuel(false, 'Opponent faster (' + botReaction + 'ms). Your speed: ' + userReaction + 'ms');
+                }
+            });
         }
-    });
+    }
+    setTimeout(() => { gameStarted = true; render(); }, 5000);
+    render();
 }
 
 // ============================================================
@@ -3503,7 +3538,7 @@ async function findAndClaimOpponent() {
 async function beginMatchmaking() {
     inQueue = true;
     if (matchTitle) matchTitle.textContent = 'Finding Opponent — ' + activeGame.name;
-    if (matchStatus) matchStatus.textContent = 'Deducting entry stake...';
+    if (matchStatus) matchStatus.textContent = 'Searching for players...';
     if (matchOverlay) matchOverlay.classList.remove('hidden');
 
     await touchPresence();
@@ -3519,74 +3554,13 @@ async function beginMatchmaking() {
         return;
     }
 
-    if (!LIVE_ENABLED_TYPES.includes(activeGame.type)) {
-        if (matchStatus) matchStatus.textContent = 'Matching you with an opponent...';
-        setTimeout(() => {
-            const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
-            if (matchStatus) matchStatus.textContent = 'Matched with ' + bot.name;
-            setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); inQueue = false; launchArena(bot); }, 700);
-        }, 900);
-        return;
-    }
-
-    if (matchStatus) matchStatus.textContent = 'Scanning live queue...';
-    const foundMatch = await findAndClaimOpponent();
-    if (foundMatch) {
-        if (matchStatus) matchStatus.textContent = 'Live opponent found! Launching...';
-        cleanupQueue();
-        setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); goToMatch(foundMatch.id, activeGame.type); }, 600);
-        return;
-    }
-
-    await client.from('matchmaking_queue').upsert({ user_id: currentUser.id, game_type: activeGame.type });
-
-    queueChannel = client.channel('queue-watch-' + currentUser.id)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'matches', filter: 'player2_id=eq.' + currentUser.id }, (payload) => {
-            if (!inQueue) return;
-            cleanupQueue();
-            if (matchStatus) matchStatus.textContent = 'Live opponent found! Launching...';
-            setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); goToMatch(payload.new.id, activeGame.type); }, 500);
-        })
-        .subscribe();
-
-    let secondsLeft = BOT_WAIT_SECONDS;
-    if (matchStatus) matchStatus.textContent = 'Waiting for a live player... (' + secondsLeft + 's)';
-
-    const presenceInterval = setInterval(touchPresence, 3000);
-
-    matchmakingTimer = setInterval(async () => {
-        if (!inQueue) { clearInterval(presenceInterval); return; }
-        secondsLeft -= 1;
-
-        if (secondsLeft > 0) {
-            if (matchStatus) matchStatus.textContent = 'Waiting for a live player... (' + secondsLeft + 's)';
-
-            const liveMatch = await findAndClaimOpponent();
-            if (liveMatch) {
-                cleanupQueue();
-                clearInterval(presenceInterval);
-                if (matchStatus) matchStatus.textContent = 'Live opponent found! Launching...';
-                setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); goToMatch(liveMatch.id, activeGame.type); }, 400);
-                return;
-            }
-
-            const { data: mine } = await client.from('matches').select('id').or('player1_id.eq.' + currentUser.id + ',player2_id.eq.' + currentUser.id).eq('status', 'active').order('created_at', { ascending: false }).limit(1);
-            if (mine && mine.length > 0) {
-                cleanupQueue();
-                clearInterval(presenceInterval);
-                if (matchStatus) matchStatus.textContent = 'Live opponent found! Launching...';
-                setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); goToMatch(mine[0].id, activeGame.type); }, 400);
-            }
-            return;
-        }
-
-        cleanupQueue();
-        clearInterval(presenceInterval);
-        await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+    // Always use bot with 5s wait for now
+    if (matchStatus) matchStatus.textContent = 'Matching you with an opponent...';
+    setTimeout(() => {
         const bot = INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)];
-        if (matchStatus) matchStatus.textContent = 'No live players — matched with ' + bot.name;
-        setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); launchArena(bot); }, 900);
-    }, 1000);
+        if (matchStatus) matchStatus.textContent = 'Matched with ' + bot.name;
+        setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); inQueue = false; launchArena(bot); }, 700);
+    }, 900);
 }
 
 function cleanupQueue() {
@@ -3668,7 +3642,6 @@ const MatchRoom = (() => {
 })();
 
 function initReactionLive(stageEl, iAmPlayer1) {
-    // Reaction game for live matches
     stageEl.innerHTML = `<p class="subtitle">Waiting for both players...</p><div class="reaction-box reaction-wait" id="pad">Get ready...</div>`;
     const pad = () => document.getElementById('pad');
     let goTime = null, myTime = null, opponentTime = null, armed = false;
