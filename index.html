@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f4f7f8'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%2300e701'/%3E%3C/svg%3E" />
   
-  <!-- ===== ZAPUPI SDK ===== -->
+  <!-- ZAPUPI SDK -->
   <script src="https://zapupi.com/single-html-web-kit.js"></script>
   
   <style>
@@ -31,7 +31,6 @@
       -moz-osx-font-smoothing: grayscale;
       overflow-x: hidden;
     }
-    
     .background-blobs {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -53,7 +52,6 @@
       50% { transform: translate(30px,-30px) scale(1.05); }
       100% { transform: translate(0,0) scale(1); }
     }
-
     button, input, select, textarea { font: inherit; }
     button { cursor: pointer; border: none; outline: none; background: none; color: inherit; touch-action: manipulation; }
     .hidden { display: none !important; }
@@ -1330,7 +1328,7 @@
     }
     .btn-secondary:hover { background: rgba(0,0,0,0.05); }
 
-    /* ===== ARENA HEADER WITH BACK BUTTON FIXED ===== */
+    /* ===== ARENA HEADER - BACK BUTTON FURTHER ABOVE ===== */
     .arena-header {
       display: flex;
       align-items: center;
@@ -1339,11 +1337,12 @@
       padding-bottom: 10px;
       border-bottom: 1px solid rgba(0,0,0,0.06);
       position: relative;
+      margin-top: 4px;
     }
     .arena-back-btn {
       position: absolute;
-      left: -4px;
-      top: -8px;
+      left: -6px;
+      top: -18px;
       padding: 8px 10px;
       color: #556070;
       font-size: 1.1rem;
@@ -1358,8 +1357,9 @@
       align-items: center;
       justify-content: center;
       z-index: 5;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-    .arena-back-btn:hover { color: #f16464; background: rgba(241,100,100,0.1); }
+    .arena-back-btn:hover { color: #f16464; background: rgba(241,100,100,0.12); transform: scale(1.05); }
 
     .player-stat {
       display: flex;
@@ -1617,6 +1617,7 @@
       .payment-modal h2 { font-size: 1.1rem; }
       .package-grid { grid-template-columns: repeat(3, 1fr); }
       .filter-chip { font-size: 0.65rem; padding: 4px 12px; min-height: 28px; }
+      .arena-back-btn { top: -20px; left: -4px; width: 34px; height: 34px; font-size: 1rem; }
     }
     @media (max-width:400px){
       .games-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -2194,7 +2195,7 @@ const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const ZAPUPI_API_KEY = 'zapce570e671e2f07f3bc9837566a44ec4c';
 const WEBHOOK_URL = 'https://arena-webhook.freepage.cc/webhook.php';
 const UPI_ID = 'paytm.s1ax1t9@pty';
-const SEARCH_SECONDS = 5;
+const SEARCH_SECONDS = 8; // 8 seconds matchmaking for real users
 
 // ============================================================
 //  CHECK URL PARAMETERS FOR PAYMENT CALLBACK
@@ -2210,11 +2211,9 @@ function checkPaymentCallback() {
         const amount = document.getElementById('paymentAmount')?.textContent || '0';
         const tokens = parseInt(amount) || 0;
         
-        // CREDIT TOKENS IMMEDIATELY
         creditTokens(tokens, tokens);
         recordTransaction('💳 Payment Received: ₹' + tokens + ' credited', 'credit', tokens);
         
-        // Update wallet WITHOUT refresh
         loadWallet();
         loadTransactions();
         updateUI();
@@ -2507,7 +2506,7 @@ function renderGameCards() {
 renderGameCards();
 
 // ============================================================
-//  MATCHMAKING - ALL GAMES WITH REAL USER SEARCH
+//  MATCHMAKING - ALL GAMES WITH REAL USER SEARCH (8 SECONDS)
 // ============================================================
 
 const INDIAN_BOT_POOL = [
@@ -2719,7 +2718,7 @@ async function endDuel(won, analysisText) {
 }
 
 // ============================================================
-//  MATCHMAKING - REAL USER SEARCH FOR 5 SECONDS
+//  MATCHMAKING - REAL USER SEARCH FOR 8 SECONDS
 // ============================================================
 
 async function beginMatchmaking() {
@@ -2755,7 +2754,7 @@ async function beginMatchmaking() {
     let searchTime = 0;
     let matched = false;
 
-    // Search for real opponent for 5 seconds
+    // Search for real opponent for 8 seconds
     const searchInterval = setInterval(async () => {
         searchTime++;
         if (matchStatus) {
@@ -2818,7 +2817,7 @@ async function beginMatchmaking() {
             console.warn('Queue check error:', e);
         }
 
-        // If 5 seconds passed and no real opponent, use bot
+        // If 8 seconds passed and no real opponent, use bot
         if (searchTime >= SEARCH_SECONDS && !matched) {
             clearInterval(searchInterval);
             // Remove from queue
@@ -3346,6 +3345,8 @@ checkPaymentCallback();
 console.log('✅ Arena Games loaded successfully!');
 console.log('🎮 Real matchmaking enabled for ALL games!');
 console.log('💰 Wallet auto-update working!');
+console.log('⏱️ 8-second real user search active!');
+console.log('🔙 Back button positioned further above profile icon!');
 </script>
 </body>
 </html>
