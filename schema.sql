@@ -1,7 +1,7 @@
-\-- ============================================================
--- Arena - MASTER SCHEMA v2 (safe to re-run, never deletes data)
--- Matches the new single-file index.html (presence-based
--- matchmaking, transaction ledger, match history, referrals).
+-- ============================================================
+-- SkillClash - MASTER SCHEMA v3
+-- Updated with new pricing: entry ₹15-25, rewards ₹25-45
+-- Cashout minimum ₹150, Welcome bonus ₹50
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -39,12 +39,12 @@ create policy "Users can insert their own profile"
   on public.users for insert with check (auth.uid() = id);
 
 -- ------------------------------------------------------------
--- WALLET
+-- WALLET - Default balance is now 50 (welcome bonus)
 -- ------------------------------------------------------------
 create table if not exists public.wallet (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.users (id) on delete cascade,
-  dummy_token integer not null default 1000 check (dummy_token >= 0),
+  dummy_token integer not null default 50 check (dummy_token >= 0),
   updated_at timestamptz not null default now()
 );
 alter table public.wallet enable row level security;
@@ -91,7 +91,7 @@ create table if not exists public.matches (
   player2_id uuid not null references public.users (id),
   status text not null default 'active',
   winner_id uuid references public.users (id),
-  entry_fee integer not null default 50,
+  entry_fee integer not null default 15,
   created_at timestamptz not null default now(),
   finished_at timestamptz
 );
@@ -156,7 +156,7 @@ create policy "Users can insert their own match history"
   on public.match_history for insert with check (auth.uid() = user_id);
 
 -- ------------------------------------------------------------
--- AUTO-PROVISION NEW USERS
+-- AUTO-PROVISION NEW USERS - Welcome bonus ₹50
 -- ------------------------------------------------------------
 create or replace function public.handle_new_user()
 returns trigger
@@ -174,7 +174,7 @@ begin
   on conflict (id) do nothing;
 
   insert into public.wallet (user_id, dummy_token)
-  values (new.id, 1000)
+  values (new.id, 50)  -- ₹50 welcome bonus
   on conflict (user_id) do nothing;
 
   return new;
@@ -190,7 +190,7 @@ create trigger on_auth_user_created
 -- CLAIM_OPPONENT: atomically pairs you with a genuinely-online
 -- waiting player, or returns null if none exist.
 -- ------------------------------------------------------------
-create or replace function public.claim_opponent(p_game_type text, p_entry_fee integer default 50)
+create or replace function public.claim_opponent(p_game_type text, p_entry_fee integer default 15)
 returns public.matches
 language plpgsql
 security definer
@@ -234,7 +234,7 @@ $$;
 grant execute on function public.claim_opponent(text, integer) to authenticated;
 
 -- ------------------------------------------------------------
--- REDEEM_REFERRAL_CODE
+-- REDEEM_REFERRAL_CODE - ₹50 for referrer and ₹50 for new user
 -- ------------------------------------------------------------
 create or replace function public.redeem_referral_code(p_code text)
 returns json
@@ -268,23 +268,24 @@ begin
 
   update public.users set referred_by = v_referrer_id where id = v_me;
 
-  update public.wallet set dummy_token = dummy_token + 300, updated_at = now() where user_id = v_me;
-  update public.wallet set dummy_token = dummy_token + 100, updated_at = now() where user_id = v_referrer_id;
+  -- ₹50 for new user, ₹50 for referrer
+  update public.wallet set dummy_token = dummy_token + 50, updated_at = now() where user_id = v_me;
+  update public.wallet set dummy_token = dummy_token + 50, updated_at = now() where user_id = v_referrer_id;
 
   insert into public.transactions (user_id, description, type, amount)
-  values (v_me, 'Referral bonus redeemed', 'credit', 300);
+  values (v_me, 'Referral bonus redeemed', 'credit', 50);
 
   insert into public.transactions (user_id, description, type, amount)
-  values (v_referrer_id, 'Referral bonus: friend joined', 'credit', 100);
+  values (v_referrer_id, 'Referral bonus: friend joined', 'credit', 50);
 
-  return json_build_object('success', true, 'message', 'Referral applied! You received 300 tokens.');
+  return json_build_object('success', true, 'message', 'Referral applied! You received 50 tokens.');
 end;
 $$;
 
 grant execute on function public.redeem_referral_code(text) to authenticated;
 
 -- ------------------------------------------------------------
--- PAYTM / UPI PAYMENT REQUESTS & AUTO-APPROVAL TRIGGER
+-- PAYMENT REQUESTS & AUTO-APPROVAL TRIGGER
 -- ------------------------------------------------------------
 create table if not exists public.payment_requests (
   id uuid primary key default gen_random_uuid(),
