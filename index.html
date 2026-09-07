@@ -2462,22 +2462,46 @@ const navLoginBtn = document.getElementById('nav-login-btn');
 const navSignupBtn = document.getElementById('nav-signup-btn');
 
 async function triggerGoogleLogin() {
-    const redirectUrl = 'https://skillclash.in';
-    const { error } = await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: redirectUrl }
-    });
-}
-    });
-    if (error) {
-        alert('Login failed: ' + error.message);
-        if (btn) { btn.disabled = false; btn.querySelector('span').textContent = 'Continue with Google'; }
+    const btn = googleLoginBtn || document.activeElement;
+    try {
+        if (btn) {
+            btn.disabled = true;
+            const span = btn.querySelector('span');
+            if (span) span.textContent = 'Connecting...';
+        }
+        
+        const redirectUrl = 'https://skillclash.in';
+        const { error } = await client.auth.signInWithOAuth({
+            provider: 'google',
+            options: { 
+                redirectTo: redirectUrl 
+            }
+        });
+        
+        if (error) {
+            console.error('Login error:', error);
+            alert('Login failed: ' + error.message);
+            if (btn) {
+                btn.disabled = false;
+                const span = btn.querySelector('span');
+                if (span) span.textContent = 'Continue with Google';
+            }
+        }
+    } catch (err) {
+        console.error('Unexpected error:', err);
+        alert('Login failed. Please try again.');
+        if (btn) {
+            btn.disabled = false;
+            const span = btn.querySelector('span');
+            if (span) span.textContent = 'Continue with Google';
+        }
     }
 }
+
+// Add event listeners
 googleLoginBtn?.addEventListener('click', triggerGoogleLogin);
 navLoginBtn?.addEventListener('click', triggerGoogleLogin);
 navSignupBtn?.addEventListener('click', triggerGoogleLogin);
-
 // ============================================================
 //  CONSTANTS
 // ============================================================
