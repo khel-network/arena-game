@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://zapupi.com/single-html-web-kit.js"></script>
 <style>
-  /* ===== LANDING + DASHBOARD STYLES ===== */
+  /* ===== RESET & BASE ===== */
   * { margin:0; padding:0; box-sizing:border-box; }
   *:focus-visible { outline:2px solid #00e701; outline-offset:2px; border-radius:4px; }
   * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -39,6 +39,7 @@
   .reveal.in { opacity:1; transform:translateY(0); }
   @media (prefers-reduced-motion: reduce) { .reveal { opacity:1; transform:none; transition:none; } .blob { animation:none; } }
 
+  /* ===== LANDING PAGE ===== */
   .site-nav {
     position:sticky; top:0; z-index:200;
     padding:12px 18px;
@@ -221,8 +222,8 @@
     .community-grid { grid-template-columns:repeat(5,1fr); }
   }
 
-  /* ===== DASHBOARD STYLES ===== */
-  .app-wrap { min-height: 100vh; background: transparent; }
+  /* ===== DASHBOARD ===== */
+  .app-wrap { min-height: 100vh; background: transparent; display: block; }
   .top-nav {
     background: rgba(255,255,255,0.45);
     backdrop-filter: blur(16px);
@@ -1116,7 +1117,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  SKILLCLASH - COMPLETE APPLICATION (FULLY WORKING)
+//  SKILLCLASH - COMPLETE APPLICATION
 // ============================================================
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_894UwPwZc0SF2MyCP9sztQ_6-s0AALZ";
@@ -1412,7 +1413,7 @@ saveNameBtn?.addEventListener('click', async () => {
   }
 });
 
-// PAYMENT SYSTEM - FULLY FIXED
+// PAYMENT SYSTEM
 document.getElementById('initiatePaymentBtn')?.addEventListener('click', function() {
   const customAmount = parseInt(document.getElementById('customAmount').value) || 0;
   if (customAmount < 1) { showToast('Minimum amount is ₹1', 'error'); return; }
