@@ -11,9 +11,8 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23fafafc'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%235b3df0'/%3E%3C/svg%3E" />
 <script src="https://zapupi.com/single-html-web-kit.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-  /* ===== All existing styles from previous version ===== */
+  /* ===== All styles from previous version ===== */
   * { margin:0; padding:0; box-sizing:border-box; }
   *:focus-visible { outline:2px solid #5b3df0; outline-offset:2px; border-radius:4px; }
   * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -41,6 +40,7 @@
 
   .grad-text { background:linear-gradient(90deg,#5b3df0 15%,#f0a742 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
 
+  /* NAV */
   .site-nav { position:sticky; top:0; z-index:200; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; background:rgba(250,250,252,.9); backdrop-filter:blur(10px); border-bottom:1px solid #eee9f7; }
   .brand { display:flex; align-items:center; gap:7px; font-family:'Poppins',sans-serif; font-weight:800; font-size:1.12rem; letter-spacing:-0.01em; }
   .brand svg { color:#161522; width:22px; height:22px; }
@@ -57,6 +57,7 @@
   .mobile-menu-inner a { padding:10px 6px; font-weight:600; font-size:.88rem; border-radius:8px; color:#4b4a5c; }
   .mobile-menu-inner a:hover { background:#f5f3fc; color:#161522; }
 
+  /* HERO */
   .hero-wrap { max-width:1200px; margin:0 auto; padding:30px 18px 8px; }
   .hero-badge { display:inline-flex; align-items:center; gap:7px; background:#fff; border:1px solid #eee9f7; color:#161522; padding:6px 15px; border-radius:100px; font-size:.75rem; font-weight:600; margin-bottom:18px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
   .hero-badge .dot { width:6px; height:6px; border-radius:50%; background:#16c46b; animation:pulseDot 1.6s infinite; }
@@ -1044,7 +1045,7 @@
   }
   .app-wrap .result-btn-row { display:flex; gap:8px; }
 
-  /* FIXED: Proper button styles for result buttons */
+  /* FIXED: Button styles */
   .app-wrap .result-btn-row .btn-secondary {
     background:transparent;
     border:1.5px solid #5b3df0;
@@ -1077,6 +1078,43 @@
     border:none;
   }
   .app-wrap .result-btn-row .btn-primary:hover {
+    background:#4a2fd0;
+    transform:scale(1.02);
+  }
+
+  /* FIXED: Cashout submit button style */
+  .app-wrap #cashout-submit-btn {
+    background:#5b3df0;
+    color:#fff;
+    padding:12px 20px;
+    border-radius:10px;
+    font-weight:700;
+    font-size:0.9rem;
+    border:none;
+    cursor:pointer;
+    transition:0.2s;
+    width:100%;
+    margin-top:10px;
+  }
+  .app-wrap #cashout-submit-btn:hover {
+    background:#4a2fd0;
+    transform:scale(1.02);
+  }
+
+  /* FIXED: Referral submit button style */
+  .app-wrap #submit-referral-btn {
+    background:#5b3df0;
+    color:#fff;
+    padding:8px 16px;
+    border-radius:8px;
+    font-weight:700;
+    font-size:0.8rem;
+    border:none;
+    cursor:pointer;
+    transition:0.2s;
+    white-space:nowrap;
+  }
+  .app-wrap #submit-referral-btn:hover {
     background:#4a2fd0;
     transform:scale(1.02);
   }
@@ -1637,7 +1675,6 @@
 
 <!-- ===== LANDING PAGE ===== -->
 <div id="page-landing">
-  <!-- NAV -->
   <nav class="site-nav">
     <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Skill<span class="clash">Clash</span></div>
     <div class="nav-right">
@@ -1648,7 +1685,7 @@
   </nav>
   <div class="mobile-menu" id="mobile-menu"><div class="mobile-menu-inner"><a href="#modes">Games</a><a href="#challenges">Tournaments</a><a href="#how-it-works">How It Works</a><a href="#faq">FAQ</a></div></div>
 
-  <!-- HERO -->
+  <!-- Hero Section -->
   <section class="hero-wrap">
     <div class="hero-left reveal">
       <div class="hero-badge"><span class="dot"></span> Live · India's Free-to-Play Skill Arena</div>
@@ -1680,7 +1717,7 @@
     </div>
   </section>
 
-  <!-- TRUST BADGES -->
+  <!-- Trust Badges -->
   <section class="section reveal">
     <div class="badge-grid">
       <div class="badge-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>FairPlay Enabled</span></div>
@@ -1692,7 +1729,7 @@
     </div>
   </section>
 
-  <!-- WHY CHOOSE US -->
+  <!-- Why Choose Us -->
   <section class="section reveal section-center">
     <div class="section-eyebrow-pill">Why players choose SkillClash</div>
     <h2 class="section-title">Built for serious <span class="grad-text">competitors</span></h2>
@@ -1707,7 +1744,7 @@
     </div>
   </section>
 
-  <!-- GAME MODES -->
+  <!-- Game Modes -->
   <section class="section reveal" id="modes">
     <div class="section-eyebrow-pill">One platform, many ways to compete</div>
     <h2 class="section-title">Every duel. <span class="grad-text">One arena.</span></h2>
@@ -1720,7 +1757,7 @@
     </div>
   </section>
 
-  <!-- LIVE CHALLENGES -->
+  <!-- Live Challenges -->
   <section class="section reveal" id="challenges">
     <div class="section-eyebrow-pill">Live now</div>
     <h2 class="section-title">Jump into a live <span class="grad-text">challenge</span></h2>
@@ -1756,7 +1793,7 @@
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
+  <!-- How It Works -->
   <section class="section reveal section-center" id="how-it-works">
     <div class="section-eyebrow-pill">How it works</div>
     <h2 class="section-title">Start Playing Now</h2>
@@ -1769,7 +1806,7 @@
     </div>
   </section>
 
-  <!-- COMPARISON -->
+  <!-- Comparison -->
   <section class="section reveal">
     <div class="section-eyebrow-pill">Why SkillClash</div>
     <h2 class="section-title">The <span class="grad-text">unfair advantage</span> other platforms don't offer</h2>
@@ -1796,7 +1833,7 @@
     </div>
   </section>
 
-  <!-- SCOREBOARD -->
+  <!-- Scoreboard -->
   <section class="section reveal section-center">
     <div class="section-eyebrow-pill">The scoreboard, live</div>
     <h2 class="section-title">A platform players win on, <span class="grad-text">every day.</span></h2>
@@ -1808,7 +1845,7 @@
     </div>
   </section>
 
-  <!-- TESTIMONIALS -->
+  <!-- Testimonials -->
   <section class="section reveal section-center">
     <div class="section-eyebrow-pill">Verified players</div>
     <h2 class="section-title">Real players. <span class="grad-text">Real progress.</span></h2>
@@ -1831,7 +1868,7 @@
     </div>
   </section>
 
-  <!-- COMMUNITY -->
+  <!-- Community -->
   <section class="section reveal section-center">
     <div class="section-eyebrow-pill">Community</div>
     <h2 class="section-title">Join 3L+ players in the <span class="grad-text">arena</span></h2>
@@ -1844,7 +1881,7 @@
     </div>
   </section>
 
-  <!-- CLOSING CTA -->
+  <!-- Closing CTA -->
   <div class="closing-cta reveal">
     <div class="badge-pill"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;"></span> Your next win is one match away</div>
     <h2>Sign up. Play. Climb the leaderboard.</h2>
@@ -1858,7 +1895,7 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
+  <!-- Footer -->
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-top">
@@ -1906,7 +1943,6 @@
 
 <!-- ===== DASHBOARD ===== -->
 <div id="dashboard" class="app-wrap hidden">
-  <!-- Dashboard content - same as before but with fixed result buttons -->
   <header class="top-nav">
     <div class="nav-container">
       <div class="nav-top-row">
@@ -2011,7 +2047,7 @@
             <label for="cashout-amount">Amount to Withdraw (₹)</label>
             <input type="number" id="cashout-amount" placeholder="Enter amount" min="150" step="10" />
           </div>
-          <button id="cashout-submit-btn" class="btn-primary" style="width:100%;">Submit Withdrawal Request</button>
+          <button id="cashout-submit-btn">Submit Withdrawal Request</button>
           <div class="cashout-info-note">
             ⏳ <strong>Processing Time:</strong> Withdrawals are processed within <strong>7–8 hours</strong> and will reflect in your UPI account after verification.
           </div>
@@ -2110,7 +2146,6 @@
 
     <!-- Profile View -->
     <section id="view-profile" class="app-view">
-      <!-- Profile content same as before -->
       <div class="profile-header-card">
         <div class="profile-left">
           <img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" />
@@ -2258,7 +2293,7 @@
           <span class="refer-code-lbl">Have a Referral Code?</span>
           <div class="refer-redeem-row">
             <input type="text" id="referral-input" class="name-input" maxlength="12" placeholder="Enter code e.g. VISHA859" />
-            <button id="submit-referral-btn" class="btn-primary">Submit</button>
+            <button id="submit-referral-btn">Submit</button>
           </div>
           <p id="referral-status-msg" class="refer-status-msg"></p>
         </div>
@@ -2266,7 +2301,7 @@
     </section>
   </main>
 
-  <!-- PAYMENT MODAL -->
+  <!-- Payment Modal -->
   <div id="paymentModal" class="payment-modal-overlay">
     <div class="payment-modal">
       <button class="close-btn" id="closePaymentModal"><i class="fas fa-times"></i></button>
@@ -2285,7 +2320,7 @@
     </div>
   </div>
 
-  <!-- PAYMENT SUCCESS ANIMATION -->
+  <!-- Payment Success Animation -->
   <div id="paymentAnimation" class="payment-animation-overlay">
     <div class="checkmark">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -2425,7 +2460,6 @@ let currentUser = null, currentBalance = 0, matchHistory = [], transactions = []
 let activeOpponent = null, activeGame = null, inQueue = false, isGameActive = false;
 let currentEntryFee = 15, currentReward = 25;
 let presenceHeartbeatTimer = null;
-let pendingMatch = null;
 
 // DOM refs
 const balanceEl = document.getElementById('balance-value');
@@ -2824,7 +2858,7 @@ function renderGameCards() {
 }
 renderGameCards();
 
-// ---- Matchmaking with improved real player matching ----
+// ---- Matchmaking ----
 const INDIAN_BOT_POOL = [
   { name: 'Aarav Sharma', seed: 'aarav' }, { name: 'Priya Patel', seed: 'priya' },
   { name: 'Rohan Verma', seed: 'rohan' }, { name: 'Ananya Singh', seed: 'ananya' },
@@ -2849,7 +2883,6 @@ async function beginMatchmaking() {
     searchTime++;
     if (matchStatus) matchStatus.textContent = 'Searching for players... (' + searchTime + '/' + SEARCH_SECONDS + 's)';
     try {
-      // Check for waiting players in queue (excluding self)
       const { data: queued } = await client.from('matchmaking_queue')
         .select('user_id,created_at')
         .eq('game_type', activeGame.type)
@@ -2858,12 +2891,9 @@ async function beginMatchmaking() {
         .limit(1);
       if (queued && queued.length > 0) {
         const oppId = queued[0].user_id;
-        // Get opponent name
         const { data: userData } = await client.from('users').select('full_name').eq('id', oppId).single();
-        // Remove both players from queue
         await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
         await client.from('matchmaking_queue').delete().eq('user_id', oppId);
-        // Create match record
         await client.from('matches').insert({ 
           game_type: activeGame.type, 
           player1_id: currentUser.id, 
@@ -2918,7 +2948,7 @@ function setArenaTurn(who) {
   if (who === 'you') { dot.className = 'turn-dot turn-dot-you'; text.textContent = 'Your Turn'; text.style.color = '#5b3df0'; } else { dot.className = 'turn-dot turn-dot-opp'; text.textContent = 'Opponent\'s Turn'; text.style.color = '#f0a742'; }
 }
 
-// ---- Game implementations ----
+// ===== GAME IMPLEMENTATIONS =====
 function runGame(type) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -2926,8 +2956,8 @@ function runGame(type) {
   currentEntryFee = price.entry;
   currentReward = price.reward;
 
+  // ---- TIC TAC TOE ----
   if (type === 'tictactoe') {
-    // Full Tic-Tac-Toe game
     const board = Array(9).fill(null);
     const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     let playerTurn = true, gameOver = false, moveLocked = false;
@@ -3038,10 +3068,9 @@ function runGame(type) {
     return;
   }
 
-  // Rock Paper Scissors
+  // ---- ROCK PAPER SCISSORS ----
   if (type === 'rps') {
     const choices = ['✊', '✋', '✌️'];
-    const names = ['Rock', 'Paper', 'Scissors'];
     let playerChoice = null;
     let botChoice = null;
     let gameResult = null;
@@ -3056,10 +3085,10 @@ function runGame(type) {
           <div><div style="font-size:2.5rem;margin:4px 0;">${botChoice || '❓'}</div><span style="font-size:0.7rem;color:#5c5a6e;">${activeOpponent.name}</span></div>
         </div>
         ${!playerChoice ? `<div class="quiz-options" style="gap:12px;">
-          ${choices.map((c, i) => `<button class="quiz-option" data-choice="${i}" style="font-size:1.8rem;padding:8px 20px;">${c}</button>`).join('')}
+          ${choices.map((c, i) => `<button class="quiz-option" data-choice="${i}" style="font-size:1.8rem;padding:8px 20px;background:#fff;border:1px solid #eee9f7;border-radius:10px;cursor:pointer;">${c}</button>`).join('')}
         </div>` : ''}
         ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : gameResult === 'lose' ? '😞 You Lose!' : '🤝 Draw!'}</div>` : ''}
-        ${gameResult ? `<button class="btn-primary" id="rps-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;">Play Again</button>` : ''}
+        ${gameResult ? `<button class="btn-primary" id="rps-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
       </div>`;
       
       document.querySelectorAll('.quiz-option').forEach(btn => {
@@ -3092,15 +3121,198 @@ function runGame(type) {
     return;
   }
 
-  // Default: Show game selection for other games
+  // ---- HIGHER LOWER ----
+  if (type === 'higherlower') {
+    let secretNumber = Math.floor(Math.random() * 100) + 1;
+    let guess = null;
+    let attempts = 0;
+    let gameOver = false;
+
+    function renderHL() {
+      stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
+        <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+        <div style="font-size:3rem;margin:10px 0;">🔢</div>
+        <p style="font-size:0.9rem;margin:8px 0;">${guess !== null ? `Your guess: ${guess} - ${guess === secretNumber ? '🎉 Correct!' : guess < secretNumber ? '⬆️ Higher!' : '⬇️ Lower!'}` : 'Guess a number between 1 and 100'}</p>
+        <p style="font-size:0.7rem;color:#5c5a6e;">Attempts: ${attempts}</p>
+        ${!gameOver ? `<div style="display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap;">
+          <input type="number" id="guess-input" min="1" max="100" style="padding:8px 12px;border:1px solid #eee9f7;border-radius:8px;width:100px;font-size:1rem;">
+          <button id="guess-btn" style="padding:8px 20px;background:#5b3df0;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Guess</button>
+        </div>` : ''}
+        ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : '😞 You Lose!'}</div>` : ''}
+        ${gameResult ? `<button class="btn-primary" id="hl-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
+      </div>`;
+      
+      document.getElementById('guess-btn')?.addEventListener('click', function() {
+        if (gameOver) return;
+        const input = document.getElementById('guess-input');
+        const val = parseInt(input.value);
+        if (isNaN(val) || val < 1 || val > 100) { alert('Please enter a number between 1 and 100'); return; }
+        guess = val;
+        attempts++;
+        if (guess === secretNumber) {
+          gameOver = true;
+          gameResult = 'win';
+          renderHL();
+          setTimeout(() => endDuel(true, 'You guessed correctly!'), 1000);
+        } else if (attempts >= 7) {
+          gameOver = true;
+          gameResult = 'lose';
+          renderHL();
+          setTimeout(() => endDuel(false, 'Out of attempts! The number was ' + secretNumber), 1000);
+        } else {
+          renderHL();
+        }
+      });
+      
+      document.getElementById('hl-rematch')?.addEventListener('click', function() {
+        secretNumber = Math.floor(Math.random() * 100) + 1;
+        guess = null;
+        attempts = 0;
+        gameOver = false;
+        gameResult = null;
+        renderHL();
+      });
+    }
+    renderHL();
+    return;
+  }
+
+  // ---- DICE BATTLE ----
+  if (type === 'dice') {
+    let playerRoll = null;
+    let botRoll = null;
+    let gameResult = null;
+    let rolled = false;
+
+    function renderDice() {
+      stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
+        <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+        <div style="display:flex;justify-content:space-around;margin:16px 0;">
+          <div><div style="font-size:3rem;margin:4px 0;">${playerRoll !== null ? ['⚀','⚁','⚂','⚃','⚄','⚅'][playerRoll-1] : '🎲'}</div><span style="font-size:0.7rem;color:#5c5a6e;">You</span></div>
+          <div style="font-size:2rem;color:#5c5a6e;">VS</div>
+          <div><div style="font-size:3rem;margin:4px 0;">${botRoll !== null ? ['⚀','⚁','⚂','⚃','⚄','⚅'][botRoll-1] : '🎲'}</div><span style="font-size:0.7rem;color:#5c5a6e;">${activeOpponent.name}</span></div>
+        </div>
+        ${!rolled ? `<button id="roll-btn" style="padding:10px 30px;background:#5b3df0;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">🎲 Roll Dice</button>` : ''}
+        ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : gameResult === 'lose' ? '😞 You Lose!' : '🤝 Draw!'}</div>` : ''}
+        ${gameResult ? `<button class="btn-primary" id="dice-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
+      </div>`;
+      
+      document.getElementById('roll-btn')?.addEventListener('click', function() {
+        if (rolled) return;
+        rolled = true;
+        playerRoll = Math.floor(Math.random() * 6) + 1;
+        botRoll = Math.floor(Math.random() * 6) + 1;
+        if (playerRoll > botRoll) gameResult = 'win';
+        else if (playerRoll < botRoll) gameResult = 'lose';
+        else gameResult = 'draw';
+        renderDice();
+        setTimeout(() => {
+          if (gameResult === 'win') endDuel(true, 'You rolled higher!');
+          else if (gameResult === 'lose') endDuel(false, 'Opponent rolled higher.');
+          else endDrawnMatch();
+        }, 1500);
+      });
+      
+      document.getElementById('dice-rematch')?.addEventListener('click', function() {
+        playerRoll = null; botRoll = null; gameResult = null; rolled = false;
+        renderDice();
+      });
+    }
+    renderDice();
+    return;
+  }
+
+  // ---- TAP RACE ----
+  if (type === 'tap') {
+    let playerTaps = 0;
+    let botTaps = 0;
+    let timeLeft = 5;
+    let gameRunning = false;
+    let gameResult = null;
+    let timerInterval = null;
+
+    function renderTap() {
+      stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
+        <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+        <div style="display:flex;justify-content:space-around;margin:12px 0;">
+          <div><div style="font-size:2rem;font-weight:800;color:#5b3df0;">${playerTaps}</div><span style="font-size:0.7rem;color:#5c5a6e;">You</span></div>
+          <div style="font-size:2rem;color:#5c5a6e;">VS</div>
+          <div><div style="font-size:2rem;font-weight:800;color:#f0a742;">${botTaps}</div><span style="font-size:0.7rem;color:#5c5a6e;">${activeOpponent.name}</span></div>
+        </div>
+        <div style="font-size:1.2rem;font-weight:700;margin:6px 0;">⏱️ ${timeLeft}s</div>
+        ${!gameRunning && !gameResult ? `<button id="tap-start-btn" style="padding:10px 30px;background:#16c46b;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">🚀 Start</button>` : ''}
+        ${gameRunning ? `<button id="tap-btn" style="padding:20px 40px;background:#5b3df0;color:#fff;border:none;border-radius:12px;font-weight:700;font-size:1.5rem;cursor:pointer;animation:pulse 1s infinite;">👆 TAP!</button>` : ''}
+        ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : '😞 You Lose!'}</div>` : ''}
+        ${gameResult ? `<button class="btn-primary" id="tap-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
+        <style>
+          @keyframes pulse {
+            0%,100% { transform:scale(1); }
+            50% { transform:scale(1.05); }
+          }
+        </style>
+      </div>`;
+      
+      document.getElementById('tap-start-btn')?.addEventListener('click', function() {
+        playerTaps = 0;
+        botTaps = 0;
+        timeLeft = 5;
+        gameRunning = true;
+        gameResult = null;
+        renderTap();
+        // Bot taps randomly
+        let botInterval = setInterval(() => {
+          if (gameRunning) {
+            botTaps += Math.floor(Math.random() * 3) + 1;
+            renderTap();
+          }
+        }, 200);
+        // Timer
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          renderTap();
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            clearInterval(botInterval);
+            gameRunning = false;
+            if (playerTaps > botTaps) gameResult = 'win';
+            else if (playerTaps < botTaps) gameResult = 'lose';
+            else gameResult = 'draw';
+            renderTap();
+            setTimeout(() => {
+              if (gameResult === 'win') endDuel(true, 'You tapped more!');
+              else if (gameResult === 'lose') endDuel(false, 'Opponent tapped more.');
+              else endDrawnMatch();
+            }, 1000);
+          }
+        }, 1000);
+      });
+      
+      document.getElementById('tap-btn')?.addEventListener('click', function() {
+        if (!gameRunning) return;
+        playerTaps++;
+        renderTap();
+      });
+      
+      document.getElementById('tap-rematch')?.addEventListener('click', function() {
+        playerTaps = 0; botTaps = 0; timeLeft = 5; gameRunning = false; gameResult = null;
+        if (timerInterval) clearInterval(timerInterval);
+        renderTap();
+      });
+    }
+    renderTap();
+    return;
+  }
+
+  // ---- Default for other games ----
   stage.innerHTML = `<div style="text-align:center;padding:20px;width:100%;">
     <h3 style="font-family:'Poppins',sans-serif;font-size:1.1rem;">${activeGame.name}</h3>
     <p style="color:#5c5a6e;margin:6px 0;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+    <p style="font-size:0.9rem;color:#5c5a6e;margin:12px 0;">Game in development</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:12px 0;">
-      <button class="play-btn" style="max-width:160px;margin:4px auto;background:#5b3df0;color:#fff;" onclick="window.endDuel(true,'You won this round!')">Win Round</button>
-      <button class="play-btn" style="max-width:160px;margin:4px auto;background:#e2555a;color:#fff;" onclick="window.endDuel(false,'You lost this round.')">Lose Round</button>
+      <button class="play-btn" style="max-width:160px;margin:4px auto;background:#5b3df0;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;" onclick="window.endDuel(true,'You won this round!')">Win Round</button>
+      <button class="play-btn" style="max-width:160px;margin:4px auto;background:#e2555a;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;" onclick="window.endDuel(false,'You lost this round.')">Lose Round</button>
     </div>
-    <p style="font-size:0.7rem;color:#918fa3;margin-top:6px;">Click Win or Lose to simulate the game result</p>
+    <p style="font-size:0.7rem;color:#918fa3;margin-top:6px;">More games coming soon!</p>
   </div>`;
 }
 
