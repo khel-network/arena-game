@@ -13,7 +13,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-  /* ===== LANDING PAGE STYLES ===== */
+  /* ===== All existing styles from previous version ===== */
   * { margin:0; padding:0; box-sizing:border-box; }
   *:focus-visible { outline:2px solid #5b3df0; outline-offset:2px; border-radius:4px; }
   * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -1044,6 +1044,43 @@
   }
   .app-wrap .result-btn-row { display:flex; gap:8px; }
 
+  /* FIXED: Proper button styles for result buttons */
+  .app-wrap .result-btn-row .btn-secondary {
+    background:transparent;
+    border:1.5px solid #5b3df0;
+    color:#5b3df0;
+    padding:10px 20px;
+    border-radius:10px;
+    font-weight:700;
+    font-size:0.85rem;
+    flex:1;
+    text-align:center;
+    transition:0.2s;
+    cursor:pointer;
+  }
+  .app-wrap .result-btn-row .btn-secondary:hover {
+    background:#5b3df0;
+    color:#fff;
+    transform:scale(1.02);
+  }
+  .app-wrap .result-btn-row .btn-primary {
+    background:#5b3df0;
+    color:#fff;
+    padding:10px 20px;
+    border-radius:10px;
+    font-weight:700;
+    font-size:0.85rem;
+    flex:1;
+    text-align:center;
+    transition:0.2s;
+    cursor:pointer;
+    border:none;
+  }
+  .app-wrap .result-btn-row .btn-primary:hover {
+    background:#4a2fd0;
+    transform:scale(1.02);
+  }
+
   .app-wrap .cashout-form-box {
     background:rgba(255,255,255,0.4);
     border:1px solid #eee9f7;
@@ -1867,9 +1904,9 @@
 <!-- ===== TOAST STACK ===== -->
 <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
 
-<!-- ===== DASHBOARD (hidden until login) ===== -->
+<!-- ===== DASHBOARD ===== -->
 <div id="dashboard" class="app-wrap hidden">
-  <!-- NAV -->
+  <!-- Dashboard content - same as before but with fixed result buttons -->
   <header class="top-nav">
     <div class="nav-container">
       <div class="nav-top-row">
@@ -2073,6 +2110,7 @@
 
     <!-- Profile View -->
     <section id="view-profile" class="app-view">
+      <!-- Profile content same as before -->
       <div class="profile-header-card">
         <div class="profile-left">
           <img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" />
@@ -2387,6 +2425,7 @@ let currentUser = null, currentBalance = 0, matchHistory = [], transactions = []
 let activeOpponent = null, activeGame = null, inQueue = false, isGameActive = false;
 let currentEntryFee = 15, currentReward = 25;
 let presenceHeartbeatTimer = null;
+let pendingMatch = null;
 
 // DOM refs
 const balanceEl = document.getElementById('balance-value');
@@ -2444,7 +2483,7 @@ function formatRupees(n) { const sign = n < 0 ? '-' : ''; return sign + '₹' + 
 // ===== AUTH =====
 function triggerGoogleLogin() {
   try {
-    const redirectUrl = 'https://skillclash.in';
+    const redirectUrl = window.location.origin + window.location.pathname;
     client.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: redirectUrl }
@@ -2452,7 +2491,7 @@ function triggerGoogleLogin() {
   } catch (e) { alert('Login failed. Please try again.'); }
 }
 
-// Wire up all signup/login buttons from landing page
+// Wire up all signup/login buttons
 document.querySelectorAll('#nav-signup-btn, #hero-signup-btn, #closing-signup-btn, #footer-signup-link').forEach(el => el?.addEventListener('click', triggerGoogleLogin));
 document.querySelectorAll('#nav-login-link, #hero-login-btn, #closing-login-btn, #footer-login-link').forEach(el => el?.addEventListener('click', triggerGoogleLogin));
 
@@ -2785,7 +2824,7 @@ function renderGameCards() {
 }
 renderGameCards();
 
-// ---- Matchmaking ----
+// ---- Matchmaking with improved real player matching ----
 const INDIAN_BOT_POOL = [
   { name: 'Aarav Sharma', seed: 'aarav' }, { name: 'Priya Patel', seed: 'priya' },
   { name: 'Rohan Verma', seed: 'rohan' }, { name: 'Ananya Singh', seed: 'ananya' },
@@ -2796,8 +2835,70 @@ const INDIAN_BOT_POOL = [
 ];
 function getRandomBot() { return INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)]; }
 
+async function beginMatchmaking() {
+  inQueue = true; isGameActive = false;
+  const price = getGamePrice(activeGame.type);
+  currentEntryFee = price.entry; currentReward = price.reward;
+  if (matchTitle) matchTitle.textContent = 'Finding Opponent — ' + activeGame.name;
+  if (matchStatus) matchStatus.textContent = 'Searching for players...';
+  if (matchOverlay) matchOverlay.classList.remove('hidden');
+  try { await persistWalletDelta(-currentEntryFee); await recordTransaction('Stake Entry: ' + activeGame.name + ' (₹' + currentEntryFee + ')', 'debit', currentEntryFee); } catch (e) { if (matchOverlay) matchOverlay.classList.add('hidden'); alert('Could not process entry stake. Please try again.'); inQueue = false; return; }
+  try { await client.from('matchmaking_queue').upsert({ user_id: currentUser.id, game_type: activeGame.type }); } catch (e) {}
+  let searchTime = 0, matched = false;
+  const interval = setInterval(async () => {
+    searchTime++;
+    if (matchStatus) matchStatus.textContent = 'Searching for players... (' + searchTime + '/' + SEARCH_SECONDS + 's)';
+    try {
+      // Check for waiting players in queue (excluding self)
+      const { data: queued } = await client.from('matchmaking_queue')
+        .select('user_id,created_at')
+        .eq('game_type', activeGame.type)
+        .neq('user_id', currentUser.id)
+        .order('created_at', { ascending: true })
+        .limit(1);
+      if (queued && queued.length > 0) {
+        const oppId = queued[0].user_id;
+        // Get opponent name
+        const { data: userData } = await client.from('users').select('full_name').eq('id', oppId).single();
+        // Remove both players from queue
+        await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+        await client.from('matchmaking_queue').delete().eq('user_id', oppId);
+        // Create match record
+        await client.from('matches').insert({ 
+          game_type: activeGame.type, 
+          player1_id: currentUser.id, 
+          player2_id: oppId, 
+          entry_fee: currentEntryFee,
+          status: 'pending'
+        });
+        matched = true; 
+        clearInterval(interval);
+        if (matchStatus) matchStatus.textContent = 'Real player found! Starting match...';
+        setTimeout(() => { 
+          if (matchOverlay) matchOverlay.classList.add('hidden'); 
+          inQueue = false; 
+          launchArena({ name: userData?.full_name || 'Player', seed: oppId, isBot: false }); 
+        }, 700);
+        return;
+      }
+    } catch (e) { console.error('Matchmaking error:', e); }
+    if (searchTime >= SEARCH_SECONDS && !matched) {
+      clearInterval(interval);
+      try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
+      const bot = getRandomBot();
+      if (matchStatus) matchStatus.textContent = 'No players found. Matched with ' + bot.name;
+      setTimeout(() => { 
+        if (matchOverlay) matchOverlay.classList.add('hidden'); 
+        inQueue = false; 
+        launchArena({ name: bot.name, seed: bot.seed, isBot: true }); 
+      }, 700);
+    }
+  }, 1000);
+}
+
 function launchArena(opponent) {
-  activeOpponent = opponent; isGameActive = true;
+  activeOpponent = opponent; 
+  isGameActive = true;
   const myName = playerNameEl.textContent;
   const myAvatar = document.getElementById('avatar')?.src || '';
   arenaUserAvatar.src = myAvatar || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(myName);
@@ -2809,6 +2910,7 @@ function launchArena(opponent) {
   setArenaTurn('you');
   runGame(activeGame.type);
 }
+
 function setArenaTurn(who) {
   const dot = document.getElementById('turn-dot');
   const text = document.getElementById('turn-indicator-text');
@@ -2816,6 +2918,7 @@ function setArenaTurn(who) {
   if (who === 'you') { dot.className = 'turn-dot turn-dot-you'; text.textContent = 'Your Turn'; text.style.color = '#5b3df0'; } else { dot.className = 'turn-dot turn-dot-opp'; text.textContent = 'Opponent\'s Turn'; text.style.color = '#f0a742'; }
 }
 
+// ---- Game implementations ----
 function runGame(type) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -2824,17 +2927,30 @@ function runGame(type) {
   currentReward = price.reward;
 
   if (type === 'tictactoe') {
+    // Full Tic-Tac-Toe game
     const board = Array(9).fill(null);
     const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     let playerTurn = true, gameOver = false, moveLocked = false;
+    let botTimer = null;
 
     function render() {
       let cells = '';
-      board.forEach((val, i) => { cells += `<div class="ttt-cell${val ? ' filled' : ''}" data-idx="${i}">${val || ''}</div>`; });
-      stage.innerHTML = `<div style="width:100%;text-align:center;"><p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p><div class="ttt-wrapper"><div class="ttt-board">${cells}</div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg></div></div>`;
+      board.forEach((val, i) => { 
+        cells += `<div class="ttt-cell${val ? ' filled' : ''}" data-idx="${i}">${val || ''}</div>`; 
+      });
+      stage.innerHTML = `<div style="width:100%;text-align:center;">
+        <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+        <div class="ttt-wrapper">
+          <div class="ttt-board">${cells}</div>
+          <svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg>
+        </div>
+      </div>`;
       if (!gameOver && playerTurn && !moveLocked) {
-        document.querySelectorAll('.ttt-cell').forEach(cell => {
-          cell.addEventListener('click', function() { const idx = parseInt(this.dataset.idx); handlePlayerMove(idx); });
+        document.querySelectorAll('.ttt-cell:not(.filled)').forEach(cell => {
+          cell.addEventListener('click', function() { 
+            const idx = parseInt(this.dataset.idx); 
+            handlePlayerMove(idx); 
+          });
         });
       }
     }
@@ -2845,22 +2961,52 @@ function runGame(type) {
       board[idx] = 'X';
       playerTurn = false;
       render();
+      setArenaTurn('opp');
       if (checkEnd()) { moveLocked = false; return; }
-      setTimeout(() => { botMove(); }, 800 + Math.random() * 700);
+      if (botTimer) clearTimeout(botTimer);
+      botTimer = setTimeout(() => { botMove(); }, 600 + Math.random() * 500);
     }
 
     function botMove() {
       if (gameOver) { moveLocked = false; return; }
       const empty = board.map((v, i) => v ? null : i).filter(v => v !== null);
       if (empty.length === 0) { moveLocked = false; return; }
-      for (let i of empty) { board[i] = 'O'; if (hasWinner('O')) { board[i] = null; board[i] = 'O'; playerTurn = true; render(); checkEnd(); moveLocked = false; return; } board[i] = null; }
-      for (let i of empty) { board[i] = 'X'; if (hasWinner('X')) { board[i] = null; board[i] = 'O'; playerTurn = true; render(); checkEnd(); moveLocked = false; return; } board[i] = null; }
+      // Try to win
+      for (let i of empty) { 
+        board[i] = 'O'; 
+        if (hasWinner('O')) { 
+          board[i] = 'O'; 
+          playerTurn = true; 
+          moveLocked = false;
+          render(); 
+          setArenaTurn('you');
+          checkEnd(); 
+          return; 
+        } 
+        board[i] = null; 
+      }
+      // Block player win
+      for (let i of empty) { 
+        board[i] = 'X'; 
+        if (hasWinner('X')) { 
+          board[i] = null; 
+          board[i] = 'O'; 
+          playerTurn = true; 
+          moveLocked = false;
+          render(); 
+          setArenaTurn('you');
+          checkEnd(); 
+          return; 
+        } 
+        board[i] = null; 
+      }
       let idx = empty.includes(4) ? 4 : empty[Math.floor(Math.random() * empty.length)];
       board[idx] = 'O';
       playerTurn = true;
-      render();
-      checkEnd();
       moveLocked = false;
+      render();
+      setArenaTurn('you');
+      checkEnd();
     }
 
     function hasWinner(sym) { return WIN_LINES.some(line => line.every(i => board[i] === sym)); }
@@ -2892,14 +3038,73 @@ function runGame(type) {
     return;
   }
 
+  // Rock Paper Scissors
+  if (type === 'rps') {
+    const choices = ['✊', '✋', '✌️'];
+    const names = ['Rock', 'Paper', 'Scissors'];
+    let playerChoice = null;
+    let botChoice = null;
+    let gameResult = null;
+    let roundOver = false;
+
+    function renderRPS() {
+      stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
+        <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+        <div style="display:flex;justify-content:space-around;margin:16px 0;">
+          <div><div style="font-size:2.5rem;margin:4px 0;">${playerChoice || '❓'}</div><span style="font-size:0.7rem;color:#5c5a6e;">You</span></div>
+          <div style="font-size:2rem;color:#5c5a6e;">VS</div>
+          <div><div style="font-size:2.5rem;margin:4px 0;">${botChoice || '❓'}</div><span style="font-size:0.7rem;color:#5c5a6e;">${activeOpponent.name}</span></div>
+        </div>
+        ${!playerChoice ? `<div class="quiz-options" style="gap:12px;">
+          ${choices.map((c, i) => `<button class="quiz-option" data-choice="${i}" style="font-size:1.8rem;padding:8px 20px;">${c}</button>`).join('')}
+        </div>` : ''}
+        ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : gameResult === 'lose' ? '😞 You Lose!' : '🤝 Draw!'}</div>` : ''}
+        ${gameResult ? `<button class="btn-primary" id="rps-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;">Play Again</button>` : ''}
+      </div>`;
+      
+      document.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.addEventListener('click', function() {
+          if (roundOver) return;
+          const idx = parseInt(this.dataset.choice);
+          playerChoice = choices[idx];
+          botChoice = choices[Math.floor(Math.random() * choices.length)];
+          const pIdx = choices.indexOf(playerChoice);
+          const bIdx = choices.indexOf(botChoice);
+          if (pIdx === bIdx) gameResult = 'draw';
+          else if ((pIdx === 0 && bIdx === 2) || (pIdx === 1 && bIdx === 0) || (pIdx === 2 && bIdx === 1)) gameResult = 'win';
+          else gameResult = 'lose';
+          roundOver = true;
+          renderRPS();
+          setTimeout(() => {
+            if (gameResult === 'win') endDuel(true, 'You won RPS!');
+            else if (gameResult === 'lose') endDuel(false, 'You lost RPS.');
+            else endDrawnMatch();
+          }, 1500);
+        });
+      });
+      
+      document.getElementById('rps-rematch')?.addEventListener('click', function() {
+        playerChoice = null; botChoice = null; gameResult = null; roundOver = false;
+        renderRPS();
+      });
+    }
+    renderRPS();
+    return;
+  }
+
+  // Default: Show game selection for other games
   stage.innerHTML = `<div style="text-align:center;padding:20px;width:100%;">
-    <h3 style="font-family:'Poppins',sans-serif;">${activeGame.name}</h3>
+    <h3 style="font-family:'Poppins',sans-serif;font-size:1.1rem;">${activeGame.name}</h3>
     <p style="color:#5c5a6e;margin:6px 0;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-    <button class="play-btn" style="max-width:160px;margin:10px auto;" onclick="window.endDuel(true,'You won!')">Play Round</button>
-    <p style="font-size:0.7rem;color:#918fa3;margin-top:6px;">Click to play a round against opponent</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:12px 0;">
+      <button class="play-btn" style="max-width:160px;margin:4px auto;background:#5b3df0;color:#fff;" onclick="window.endDuel(true,'You won this round!')">Win Round</button>
+      <button class="play-btn" style="max-width:160px;margin:4px auto;background:#e2555a;color:#fff;" onclick="window.endDuel(false,'You lost this round.')">Lose Round</button>
+    </div>
+    <p style="font-size:0.7rem;color:#918fa3;margin-top:6px;">Click Win or Lose to simulate the game result</p>
   </div>`;
 }
 
+// ---- End Duel Functions ----
 async function endDuel(won, analysisText) {
   if (!isGameActive) return;
   isGameActive = false;
@@ -2914,7 +3119,7 @@ async function endDuel(won, analysisText) {
   if (stage) {
     const rewardLine = won ? '+' + formatRupees(currentReward) + ' Awarded' : formatRupees(-currentEntryFee) + ' Stake Lost';
     stage.innerHTML = `<div class="result-card"><h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2><p style="font-weight:700;color:#918fa3;">${rewardLine}</p><div class="result-analytics"><div>${analysisText}</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#5b3df0;color:#fff;">Dashboard</button></div></div>`;
-    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance.'); return; } beginMatchmaking(); });
+    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; } beginMatchmaking(); });
     document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); isGameActive = false; });
   }
 }
@@ -2928,48 +3133,12 @@ async function endDrawnMatch() {
   const stage = document.getElementById('arena-stage');
   if (stage) {
     stage.innerHTML = `<div class="result-card"><h2 style="color:#5c5a6e;">DRAW</h2><p style="font-weight:700;color:#918fa3;">Stake Refunded</p><div class="result-analytics"><div>Stalemate — entry fee refunded.</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#5b3df0;color:#fff;">Dashboard</button></div></div>`;
-    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance.'); return; } beginMatchmaking(); });
+    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; } beginMatchmaking(); });
     document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); isGameActive = false; });
   }
 }
 
-async function beginMatchmaking() {
-  inQueue = true; isGameActive = false;
-  const price = getGamePrice(activeGame.type);
-  currentEntryFee = price.entry; currentReward = price.reward;
-  if (matchTitle) matchTitle.textContent = 'Finding Opponent — ' + activeGame.name;
-  if (matchStatus) matchStatus.textContent = 'Searching for players...';
-  if (matchOverlay) matchOverlay.classList.remove('hidden');
-  try { await persistWalletDelta(-currentEntryFee); await recordTransaction('Stake Entry: ' + activeGame.name + ' (₹' + currentEntryFee + ')', 'debit', currentEntryFee); } catch (e) { if (matchOverlay) matchOverlay.classList.add('hidden'); alert('Could not process entry stake. Please try again.'); inQueue = false; return; }
-  try { await client.from('matchmaking_queue').upsert({ user_id: currentUser.id, game_type: activeGame.type }); } catch (e) {}
-  let searchTime = 0, matched = false;
-  const interval = setInterval(async () => {
-    searchTime++;
-    if (matchStatus) matchStatus.textContent = 'Searching for players... (' + searchTime + '/' + SEARCH_SECONDS + 's)';
-    try {
-      const { data: queued } = await client.from('matchmaking_queue').select('user_id,created_at').eq('game_type', activeGame.type).neq('user_id', currentUser.id).order('created_at', { ascending: true }).limit(1);
-      if (queued && queued.length > 0) {
-        const oppId = queued[0].user_id;
-        const { data: userData } = await client.from('users').select('full_name').eq('id', oppId).single();
-        await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
-        await client.from('matchmaking_queue').delete().eq('user_id', oppId);
-        await client.from('matches').insert({ game_type: activeGame.type, player1_id: currentUser.id, player2_id: oppId, entry_fee: currentEntryFee });
-        matched = true; clearInterval(interval);
-        if (matchStatus) matchStatus.textContent = 'Real player found! Starting match...';
-        setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); inQueue = false; launchArena({ name: userData?.full_name || 'Player', seed: oppId }); }, 700);
-        return;
-      }
-    } catch (e) {}
-    if (searchTime >= SEARCH_SECONDS && !matched) {
-      clearInterval(interval);
-      try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
-      const bot = getRandomBot();
-      if (matchStatus) matchStatus.textContent = 'No players found. Matched with ' + bot.name;
-      setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); inQueue = false; launchArena(bot); }, 700);
-    }
-  }, 1000);
-}
-
+// ---- Game Play Button Handler ----
 document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
   const btn = e.target.closest('.play-btn');
   if (!btn) return;
@@ -2982,8 +3151,11 @@ document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
   beginMatchmaking();
 });
 
+// ---- Cancel Match ----
 cancelMatchBtn?.addEventListener('click', async () => {
-  const was = inQueue; cleanupQueue();
+  const was = inQueue; 
+  inQueue = false;
+  if (window.matchmakingInterval) { clearInterval(window.matchmakingInterval); window.matchmakingInterval = null; }
   if (matchOverlay) matchOverlay.classList.add('hidden');
   if (currentUser && was) {
     await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
@@ -2991,8 +3163,7 @@ cancelMatchBtn?.addEventListener('click', async () => {
   }
 });
 
-function cleanupQueue() { inQueue = false; if (window.matchmakingTimer) { clearInterval(window.matchmakingTimer); window.matchmakingTimer = null; } }
-
+// ---- Arena Back Button ----
 document.getElementById('arena-back-btn')?.addEventListener('click', function() {
   if (isGameActive) document.getElementById('exitConfirmOverlay').classList.remove('hidden');
   else arenaOverlay.classList.add('hidden');
@@ -3004,10 +3175,12 @@ document.getElementById('exit-confirm-btn')?.addEventListener('click', async () 
   arenaOverlay.classList.add('hidden');
 });
 
+// ---- Wallet & Transaction Modals ----
 walletBadgeBtn?.addEventListener('click', () => { renderTxModalList(); txModal.classList.remove('hidden'); });
 txModalClose?.addEventListener('click', () => txModal.classList.add('hidden'));
 txModal?.addEventListener('click', (e) => { if (e.target === txModal) txModal.classList.add('hidden'); });
 
+// ---- Package Selection ----
 document.querySelectorAll('.package-card').forEach(card => {
   card.addEventListener('click', function() {
     document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
@@ -3019,6 +3192,7 @@ document.getElementById('customAmount')?.addEventListener('input', function() {
   if (parseInt(this.value) >= 1) document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
 });
 
+// ---- Filter Chips ----
 filterChips.forEach(chip => {
   chip.addEventListener('click', () => {
     filterChips.forEach(c => c.classList.remove('active'));
@@ -3030,6 +3204,7 @@ filterChips.forEach(chip => {
   });
 });
 
+// ---- Presence Heartbeat ----
 function isTabActive() { return document.visibilityState === 'visible' && document.hasFocus(); }
 async function touchPresence() {
   if (!currentUser || !isTabActive()) return;
@@ -3043,7 +3218,7 @@ function startPresenceHeartbeat() {
   window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
 }
 
-// Landing page reveal animations
+// ---- Landing Page Animations ----
 const revealEls = document.querySelectorAll('.reveal');
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
@@ -3094,6 +3269,7 @@ document.querySelectorAll('.challenge-fill').forEach(el => {
   obs.observe(el);
 });
 
+// ---- Dashboard Init ----
 async function initDashboard() {
   try {
     const { data: { session } } = await client.auth.getSession();
@@ -3111,13 +3287,16 @@ async function initDashboard() {
     document.getElementById('dashboard').classList.remove('hidden');
   } catch (e) { console.error(e); }
 }
+
 async function routeOnLoad() {
   const { data: { session } } = await client.auth.getSession();
   if (session) { document.getElementById('page-landing').classList.add('hidden'); await initDashboard(); } else { document.getElementById('page-landing').classList.remove('hidden'); document.getElementById('dashboard').classList.add('hidden'); }
 }
+
 window.addEventListener('beforeunload', () => {
   if (inQueue && currentUser) { client.from('matchmaking_queue').delete().eq('user_id', currentUser.id).then(() => {}, () => {}); }
 });
+
 routeOnLoad();
 console.log('✅ SkillClash loaded successfully!');
 </script>
