@@ -222,7 +222,7 @@
     .community-grid { grid-template-columns:repeat(5,1fr); }
   }
 
-  /* ===== DASHBOARD ===== */
+  /* ===== DASHBOARD (properly aligned) ===== */
   .app-wrap { min-height: 100vh; background: transparent; }
   .top-nav {
     background: rgba(255,255,255,0.45);
@@ -1413,7 +1413,7 @@ saveNameBtn?.addEventListener('click', async () => {
   }
 });
 
-// PAYMENT SYSTEM
+// PAYMENT SYSTEM - FULLY FIXED
 document.getElementById('initiatePaymentBtn')?.addEventListener('click', function() {
   const customAmount = parseInt(document.getElementById('customAmount').value) || 0;
   if (customAmount < 1) { showToast('Minimum amount is ₹1', 'error'); return; }
