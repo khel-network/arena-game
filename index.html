@@ -10,6 +10,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23fafafc'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%235b3df0'/%3E%3C/svg%3E" />
 <script src="https://zapupi.com/single-html-web-kit.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
   /* ===== LANDING PAGE STYLES ===== */
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -1235,7 +1237,6 @@
   }
   .app-wrap .terms-section .terms-content strong { color:#161522; }
 
-  /* ===== PAYMENT MODAL ===== */
   .app-wrap .payment-modal-overlay {
     position:fixed;
     inset:0;
@@ -1868,10 +1869,483 @@
 
 <!-- ===== DASHBOARD (hidden until login) ===== -->
 <div id="dashboard" class="app-wrap hidden">
-  <!-- Dashboard content would go here - full with games, wallet, etc. -->
+  <!-- NAV -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <div class="nav-top-row">
+        <div class="brand-small" id="nav-brand-logo" style="cursor:pointer;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+          SKILLCLASH
+        </div>
+        <div class="user-stats-bar">
+          <button id="wallet-badge-btn" class="token-badge" title="View transactions">
+            <span class="rupee-circle">₹</span>
+            <span id="balance-value">50</span>
+          </button>
+          <button id="profile-nav-btn" class="user-profile-chip">
+            <img id="avatar" class="user-avatar" src="" alt="Avatar" />
+            <span id="player-name" class="user-name">Player</span>
+          </button>
+        </div>
+      </div>
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-target="view-earn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+          <span>Earn</span>
+        </button>
+        <button class="tab-btn" data-target="view-matches">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Matches</span>
+        </button>
+        <button class="tab-btn" data-target="view-cashout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <span>Cashout</span>
+        </button>
+        <button class="tab-btn" data-target="view-addtoken">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span>Add Funds</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Earn View -->
+    <section id="view-earn" class="app-view active">
+      <div class="cashout-progress-banner">
+        <div class="progress-row">
+          <span>Next Cashout Threshold</span>
+          <span class="value" id="progress-text">₹50 / ₹150</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:33%;"></div>
+        </div>
+      </div>
+
+      <div class="hero-banner">
+        <div class="tag">INSTANT 1V1 DUELS</div>
+        <h2>Challenge Players &amp; Win Real Rewards</h2>
+        <p>Entry: <strong>₹15</strong> • Winner Reward: <strong class="reward">₹25</strong> (Net +₹10)</p>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-chip active" data-category="all">All Games</button>
+        <button class="filter-chip" data-category="reflex">Reflex Speed</button>
+        <button class="filter-chip" data-category="math">Math</button>
+        <button class="filter-chip" data-category="brain">Memory &amp; Brain</button>
+        <button class="filter-chip" data-category="strategy">Strategy</button>
+      </div>
+
+      <div class="games-grid" id="gamesGrid"></div>
+    </section>
+
+    <!-- Matches View -->
+    <section id="view-matches" class="app-view">
+      <div class="section-card">
+        <h3>Match History</h3>
+        <p class="section-sub">Your recent 1v1 duel records</p>
+        <div class="table-wrap">
+          <table class="ledger-table">
+            <thead><tr><th>Game</th><th>Opponent</th><th>Result</th><th>Reward</th><th>Time</th></tr></thead>
+            <tbody id="matches-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cashout View -->
+    <section id="view-cashout" class="app-view">
+      <div class="section-card">
+        <h3>Cashout Vault</h3>
+        <p class="section-sub">Withdraw your rewards to your bank account via UPI</p>
+        <div class="stat-box" style="margin-top:12px; margin-bottom:16px;">
+          <span class="stat-box-num" id="cashout-balance">₹0</span>
+          <span class="stat-box-lbl">Available Balance</span>
+          <p style="font-size:0.75rem; color:#5c5a6e; margin-top:4px;">Minimum withdrawal: ₹150</p>
+        </div>
+        <div class="cashout-form-box">
+          <div class="field-group">
+            <label for="cashout-upi">UPI ID (Google Pay / PhonePe / Paytm)</label>
+            <input type="text" id="cashout-upi" placeholder="e.g. user@upi" />
+          </div>
+          <div class="field-group">
+            <label for="cashout-amount">Amount to Withdraw (₹)</label>
+            <input type="number" id="cashout-amount" placeholder="Enter amount" min="150" step="10" />
+          </div>
+          <button id="cashout-submit-btn" class="btn-primary" style="width:100%;">Submit Withdrawal Request</button>
+          <div class="cashout-info-note">
+            ⏳ <strong>Processing Time:</strong> Withdrawals are processed within <strong>7–8 hours</strong> and will reflect in your UPI account after verification.
+          </div>
+          <p id="cashout-status-msg" class="refer-status-msg" style="margin-top:8px;"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add Funds View -->
+    <section id="view-addtoken" class="app-view">
+      <div class="section-card">
+        <h3>💰 Add Funds to Wallet</h3>
+        <p class="section-sub">Choose a package or enter custom amount. Min ₹1</p>
+
+        <div class="package-grid" id="packageGrid">
+          <div class="package-card" data-amount="1" data-bonus="0">
+            <span class="price">₹1</span>
+            <span class="tokens">₹1</span>
+          </div>
+          <div class="package-card" data-amount="5" data-bonus="0">
+            <span class="price">₹5</span>
+            <span class="tokens">₹5</span>
+          </div>
+          <div class="package-card" data-amount="10" data-bonus="10">
+            <span class="badge">+10%</span>
+            <span class="price">₹10</span>
+            <span class="tokens">₹11</span>
+          </div>
+          <div class="package-card selected" data-amount="50" data-bonus="20">
+            <span class="badge">🔥 Best</span>
+            <span class="price">₹50</span>
+            <span class="tokens">₹60</span>
+          </div>
+          <div class="package-card" data-amount="100" data-bonus="25">
+            <span class="badge">+25%</span>
+            <span class="price">₹100</span>
+            <span class="tokens">₹125</span>
+          </div>
+          <div class="package-card" data-amount="200" data-bonus="30">
+            <span class="badge">+30%</span>
+            <span class="price">₹200</span>
+            <span class="tokens">₹260</span>
+          </div>
+          <div class="package-card" data-amount="500" data-bonus="40">
+            <span class="badge">+40%</span>
+            <span class="price">₹500</span>
+            <span class="tokens">₹700</span>
+          </div>
+          <div class="package-card" data-amount="1000" data-bonus="50">
+            <span class="badge">+50%</span>
+            <span class="price">₹1000</span>
+            <span class="tokens">₹1500</span>
+          </div>
+        </div>
+
+        <div class="custom-amount-input">
+          <span class="currency">₹</span>
+          <input type="number" id="customAmount" value="50" min="1" step="1" placeholder="Enter amount" />
+          <span class="min-label">Min ₹1</span>
+        </div>
+
+        <button id="initiatePaymentBtn" class="pay-now-btn">
+          <i class="fas fa-qrcode"></i> Pay with ZapUPI
+        </button>
+
+        <div class="payment-instructions">
+          <h4><i class="fas fa-info-circle"></i> How to Add Money via UPI</h4>
+          <ol>
+            <li>Click <strong>"Pay with ZapUPI"</strong> above</li>
+            <li>You will be redirected to <strong>ZapUPI secure payment page</strong></li>
+            <li>Select your preferred <strong>UPI app</strong> (Paytm, PhonePe, Google Pay, etc.)</li>
+            <li>Complete the payment using your <strong>UPI PIN</strong></li>
+            <li>After successful payment, you'll be <strong>redirected back automatically</strong></li>
+            <li>Your <strong>wallet will update instantly</strong> — no refresh needed!</li>
+          </ol>
+          <p style="margin-top:8px; font-size:0.7rem; color:#5c5a6e;">
+            <i class="fas fa-shield-alt" style="color:#5b3df0;"></i>
+            Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highlight">paytm.s1ax1t9@pty</span>
+          </p>
+        </div>
+
+        <details class="terms-section">
+          <summary><i class="fas fa-file-contract"></i> Terms &amp; Conditions</summary>
+          <div class="terms-content">
+            <p><strong>1. Payment &amp; Reward Policy</strong><br>
+            All payments are processed through ZapUPI gateway. Rewards are credited instantly upon successful payment confirmation. Minimum deposit is ₹1.</p>
+            <p><strong>2. Refund Policy</strong><br>
+            All transactions are final. No refunds will be issued once rewards are credited to your wallet.</p>
+            <p><strong>3. Security</strong><br>
+            All payment data is encrypted and secured through ZapUPI's secure gateway.</p>
+            <p style="font-size:0.6rem; color:#918fa3; margin-top:8px;">Last Updated: September 2024</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Profile View -->
+    <section id="view-profile" class="app-view">
+      <div class="profile-header-card">
+        <div class="profile-left">
+          <img id="profile-view-avatar" class="profile-avatar-lg" src="" alt="Profile" />
+          <div class="profile-meta">
+            <div class="name-edit-group">
+              <h2 id="profile-display-name">Player</h2>
+              <button id="edit-name-btn" class="icon-btn" title="Edit Name">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+              </button>
+            </div>
+            <div id="name-edit-box" class="name-edit-box hidden">
+              <input type="text" id="name-input" class="name-input" maxlength="20" placeholder="New username" />
+              <button id="save-name-btn" class="btn-save">Save</button>
+              <button id="cancel-name-btn" class="btn-cancel-sm">Cancel</button>
+            </div>
+            <p class="join-date">SkillClash Member • Verified Account</p>
+            <div class="level-pill">
+              <span>Level <strong id="user-level">1</strong></span>
+              <div class="level-bar-bg"><div class="level-bar-fill" style="width:48%;"></div></div>
+              <span class="xp-text">480 / 1,000 XP</span>
+            </div>
+          </div>
+        </div>
+        <div class="profile-stats-grid">
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-total-earnings">₹50</span>
+            <span class="stat-box-lbl">Wallet Balance</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-matches-played">0</span>
+            <span class="stat-box-lbl">Matches Played</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-win-rate">0%</span>
+            <span class="stat-box-lbl">Win Rate</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-num" id="stat-tokens-won">+₹0</span>
+            <span class="stat-box-lbl">Duel Profit</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3>Account</h3>
+        <p class="section-sub">Manage your wallet, profile and referral program</p>
+        <div class="profile-menu-list">
+          <div class="menu-row menu-row-static">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><path d="M2 6h20v12H2z"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Signed in as</span>
+              <span class="menu-row-sub" id="profile-email">—</span>
+            </div>
+          </div>
+
+          <button class="menu-row" id="menu-transactions-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Transactions</span>
+              <span class="menu-row-sub">View your full credit &amp; debit history</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+
+          <button class="menu-row" id="menu-addtokens-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Add Funds</span>
+              <span class="menu-row-sub">Top up your wallet balance</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+
+          <button class="menu-row" id="menu-refer-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Refer &amp; Earn</span>
+              <span class="menu-row-sub">Invite friends, earn bonus rewards</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+
+          <button class="menu-row menu-row-danger" id="menu-logout-btn" type="button">
+            <div class="menu-row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <div class="menu-row-text">
+              <span class="menu-row-title">Log Out</span>
+              <span class="menu-row-sub">Sign out of your SkillClash account</span>
+            </div>
+            <span class="menu-row-arrow">›</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ledger View -->
+    <section id="view-ledger" class="app-view">
+      <div class="section-card">
+        <button class="back-link" id="ledger-back-btn">‹ Back to Profile</button>
+        <h3>Transaction History</h3>
+        <p class="section-sub">Live record of credit and debit events</p>
+        <div class="table-wrap">
+          <table class="ledger-table">
+            <thead><tr><th>Description</th><th>Type</th><th>Amount</th><th>Date &amp; Time</th></tr></thead>
+            <tbody id="ledger-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Refer View -->
+    <section id="view-refer" class="app-view">
+      <div class="section-card">
+        <button class="back-link" id="refer-back-btn">‹ Back to Profile</button>
+        <h3>Refer &amp; Earn</h3>
+        <p class="section-sub">Invite friends to SkillClash and earn free rewards together</p>
+        <div class="refer-info-grid">
+          <div class="refer-info-box">
+            <span class="refer-info-num">₹50</span>
+            <span class="refer-info-lbl">You get, per friend who joins</span>
+          </div>
+          <div class="refer-info-box">
+            <span class="refer-info-num">₹50</span>
+            <span class="refer-info-lbl">Your friend gets, on signup</span>
+          </div>
+        </div>
+        <p class="refer-explainer">Share your referral code below. When a friend enters it, they instantly receive ₹50 in rewards and you receive ₹50 — for every friend you refer, with no limit.</p>
+        <div class="refer-code-box">
+          <span class="refer-code-lbl">Your Referral Code</span>
+          <div class="refer-code-row">
+            <span id="my-referral-code" class="refer-code-value">—</span>
+            <button id="copy-referral-btn" class="btn-secondary">Copy</button>
+          </div>
+        </div>
+        <div class="refer-redeem-box">
+          <span class="refer-code-lbl">Have a Referral Code?</span>
+          <div class="refer-redeem-row">
+            <input type="text" id="referral-input" class="name-input" maxlength="12" placeholder="Enter code e.g. VISHA859" />
+            <button id="submit-referral-btn" class="btn-primary">Submit</button>
+          </div>
+          <p id="referral-status-msg" class="refer-status-msg"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- PAYMENT MODAL -->
+  <div id="paymentModal" class="payment-modal-overlay">
+    <div class="payment-modal">
+      <button class="close-btn" id="closePaymentModal"><i class="fas fa-times"></i></button>
+      <h2>💳 Complete Payment</h2>
+      <p class="subtitle">You will be redirected to secure payment page</p>
+      <div class="amount-display">
+        <span class="label">Amount to Pay</span>
+        <div class="rupee">₹<span id="paymentAmount">50</span></div>
+        <span class="label" id="bonusDisplay" style="color:#5b3df0; font-weight:600;">+₹10 Bonus</span>
+      </div>
+      <div id="paymentStatus" class="payment-status waiting">
+        <span class="spinner"></span>
+        <span>Creating payment...</span>
+      </div>
+      <button id="cancelPaymentBtn" class="cancel-payment-btn">Cancel Payment</button>
+    </div>
+  </div>
+
+  <!-- PAYMENT SUCCESS ANIMATION -->
+  <div id="paymentAnimation" class="payment-animation-overlay">
+    <div class="checkmark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17L4 12" stroke-dasharray="100" stroke-dashoffset="100" />
+      </svg>
+    </div>
+    <div class="success-text">Payment Successful!</div>
+    <div class="amount-text" id="animAmount">₹50</div>
+    <div class="sub-text">Rewards have been credited to your wallet</div>
+  </div>
+
+  <div id="confettiContainer" class="confetti-container"></div>
+
+  <!-- Match Overlay -->
+  <div id="match-overlay" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div style="margin-bottom:10px;">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#5b3df0" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+      </div>
+      <h3 id="match-title">Finding Opponent</h3>
+      <p class="modal-subtitle" id="match-status">Searching for players...</p>
+      <div class="modal-fee-notice" style="background:rgba(0,0,0,0.04); border-radius:10px; padding:6px; margin-bottom:12px; color:#5c5a6e; font-size:0.8rem;">Entry Stake: <strong style="color:#b8860b;">₹15</strong></div>
+      <button id="cancel-match-btn" class="btn-cancel">Cancel Queue</button>
+    </div>
+  </div>
+
+  <!-- Game Arena -->
+  <div id="game-arena-overlay" class="modal-overlay hidden">
+    <div class="arena-card">
+      <div class="arena-header">
+        <button class="arena-back-btn" id="arena-back-btn" title="Exit Game">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="player-stat user-side" id="arena-user-side">
+          <img id="arena-user-avatar" class="arena-avatar" src="" alt="You" />
+          <span id="arena-user-name" class="arena-name">You</span>
+        </div>
+        <span class="vs-badge">VS</span>
+        <div class="player-stat opp-side" id="arena-opp-side">
+          <img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
+          <span id="arena-opp-name" class="arena-name">Opponent</span>
+        </div>
+      </div>
+      <div class="arena-turn-indicator hidden" id="arena-turn-indicator">
+        <span class="turn-dot turn-dot-you" id="turn-dot"></span>
+        <span class="turn-text turn-text-you" id="turn-indicator-text">Your Turn</span>
+      </div>
+      <div id="arena-stage" class="arena-stage"></div>
+    </div>
+  </div>
+
+  <!-- Exit Game Confirmation -->
+  <div id="exitConfirmOverlay" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3 style="color:#e2555a;">⚠️ Exit Game?</h3>
+      <p class="modal-subtitle">If you exit now, you will be considered <strong>DEFEATED</strong>.</p>
+      <p style="font-size:0.85rem; color:#5c5a6e; margin:8px 0 16px;">
+        <i class="fas fa-exclamation-triangle" style="color:#f59e0b;"></i>
+        Your stake of <strong>₹15</strong> will <strong>NOT</strong> be refunded.
+      </p>
+      <p style="font-size:0.75rem; color:#5c5a6e; margin-bottom:12px;">Are you sure you want to exit this game?</p>
+      <div class="result-btn-row">
+        <button id="exit-cancel-btn" class="btn-secondary">Cancel</button>
+        <button id="exit-confirm-btn" class="btn-primary" style="background:#e2555a; color:#fff;">Yes, Exit (Lose)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Confirmation -->
+  <div id="logout-confirm-overlay" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3>Log Out?</h3>
+      <p class="modal-subtitle">You'll need to sign in again to access your wallet and matches.</p>
+      <div class="result-btn-row">
+        <button id="logout-cancel-btn" class="btn-secondary">Cancel</button>
+        <button id="logout-confirm-btn" class="btn-primary">Log Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Modal -->
+  <div id="transaction-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="tx-modal-header">
+        <h3>Transactions</h3>
+        <button id="tx-modal-close" class="tx-close-btn">✕</button>
+      </div>
+      <div class="tx-modal-content" id="tx-modal-body">
+        <div class="tx-list" id="tx-list-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>© 2026 SkillClash Technologies. All rights reserved.</p>
+  </footer>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
 //  SKILLCLASH - COMPLETE APPLICATION (FULL WORKING)
@@ -1880,7 +2354,94 @@ const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_894UwPwZc0SF2MyCP9sztQ_6-s0AALZ";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ===== AUTH - Google Login =====
+const ZAPUPI_API_KEY = 'zapce570e671e2f07f3bc9837566a44ec4c';
+const SEARCH_SECONDS = 8;
+const CASHOUT_MIN = 150;
+
+const GAME_PRICES = {
+  'tictactoe': { entry: 15, reward: 25 },
+  'rps': { entry: 15, reward: 25 },
+  'connect4': { entry: 20, reward: 35 },
+  'memory': { entry: 15, reward: 25 },
+  'scramble': { entry: 15, reward: 25 },
+  'typing': { entry: 20, reward: 35 },
+  'higherlower': { entry: 15, reward: 25 },
+  'snake': { entry: 20, reward: 35 },
+  'simon': { entry: 15, reward: 25 },
+  'dice': { entry: 15, reward: 25 },
+  'tap': { entry: 15, reward: 25 },
+  'whack': { entry: 20, reward: 35 },
+  'recall': { entry: 15, reward: 25 },
+  'superttt': { entry: 25, reward: 45 },
+  'slide': { entry: 20, reward: 35 },
+  'stroop': { entry: 15, reward: 25 },
+  'reflex': { entry: 15, reward: 25 },
+  'mathduel': { entry: 15, reward: 25 },
+  'battleship': { entry: 20, reward: 35 },
+  'emojisprint': { entry: 15, reward: 25 },
+  'mathchain': { entry: 15, reward: 25 }
+};
+function getGamePrice(t) { return GAME_PRICES[t] || { entry: 15, reward: 25 }; }
+
+let currentUser = null, currentBalance = 0, matchHistory = [], transactions = [];
+let activeOpponent = null, activeGame = null, inQueue = false, isGameActive = false;
+let currentEntryFee = 15, currentReward = 25;
+let presenceHeartbeatTimer = null;
+
+// DOM refs
+const balanceEl = document.getElementById('balance-value');
+const playerNameEl = document.getElementById('player-name');
+const avatarEl = document.getElementById('avatar');
+const profileDisplayName = document.getElementById('profile-display-name');
+const profileViewAvatar = document.getElementById('profile-view-avatar');
+const editNameBtn = document.getElementById('edit-name-btn');
+const nameEditBox = document.getElementById('name-edit-box');
+const nameInput = document.getElementById('name-input');
+const saveNameBtn = document.getElementById('save-name-btn');
+const cancelNameBtn = document.getElementById('cancel-name-btn');
+const profileEmailEl = document.getElementById('profile-email');
+const walletBadgeBtn = document.getElementById('wallet-badge-btn');
+const menuTransactionsBtn = document.getElementById('menu-transactions-btn');
+const menuLogoutBtn = document.getElementById('menu-logout-btn');
+const logoutConfirmOverlay = document.getElementById('logout-confirm-overlay');
+const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
+const logoutCancelBtn = document.getElementById('logout-cancel-btn');
+const ledgerBackBtn = document.getElementById('ledger-back-btn');
+const referBackBtn = document.getElementById('refer-back-btn');
+const myReferralCodeEl = document.getElementById('my-referral-code');
+const copyReferralBtn = document.getElementById('copy-referral-btn');
+const referralInput = document.getElementById('referral-input');
+const submitReferralBtn = document.getElementById('submit-referral-btn');
+const referralStatusMsg = document.getElementById('referral-status-msg');
+const tabButtons = document.querySelectorAll('.tab-btn');
+const appViews = document.querySelectorAll('.app-view');
+const filterChips = document.querySelectorAll('.filter-chip');
+const matchOverlay = document.getElementById('match-overlay');
+const cancelMatchBtn = document.getElementById('cancel-match-btn');
+const matchTitle = document.getElementById('match-title');
+const matchStatus = document.getElementById('match-status');
+const arenaOverlay = document.getElementById('game-arena-overlay');
+const arenaUserAvatar = document.getElementById('arena-user-avatar');
+const arenaUserName = document.getElementById('arena-user-name');
+const arenaOppAvatar = document.getElementById('arena-opp-avatar');
+const arenaOppName = document.getElementById('arena-opp-name');
+const arenaStage = document.getElementById('arena-stage');
+const txModal = document.getElementById('transaction-modal');
+const txModalClose = document.getElementById('tx-modal-close');
+const txListContainer = document.getElementById('tx-list-container');
+
+function showToast(msg, type = 'credit') {
+  const stack = document.getElementById('toast-stack');
+  if (!stack) return;
+  const t = document.createElement('div');
+  t.className = `toast ${type === 'credit' ? 'toast-success' : 'toast-error'}`;
+  t.innerHTML = `<span class="icon">${type === 'credit' ? '✅' : '❌'}</span> <span>${msg}</span>`;
+  stack.appendChild(t);
+  setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 300); }, 4000);
+}
+function formatRupees(n) { const sign = n < 0 ? '-' : ''; return sign + '₹' + Math.abs(n || 0).toLocaleString('en-IN'); }
+
+// ===== AUTH =====
 function triggerGoogleLogin() {
   try {
     const redirectUrl = 'https://skillclash.in';
@@ -1891,7 +2452,7 @@ function triggerGoogleLogin() {
   } catch (e) { alert('Login failed. Please try again.'); }
 }
 
-// Wire up all signup/login buttons
+// Wire up all signup/login buttons from landing page
 document.querySelectorAll('#nav-signup-btn, #hero-signup-btn, #closing-signup-btn, #footer-signup-link').forEach(el => el?.addEventListener('click', triggerGoogleLogin));
 document.querySelectorAll('#nav-login-link, #hero-login-btn, #closing-login-btn, #footer-login-link').forEach(el => el?.addEventListener('click', triggerGoogleLogin));
 
@@ -1900,7 +2461,589 @@ document.getElementById('menu-toggle-btn')?.addEventListener('click', function()
   document.getElementById('mobile-menu')?.classList.toggle('open');
 });
 
-// Reveal animations
+// ===== Supabase Helpers =====
+async function loadUserName() {
+  const meta = currentUser.user_metadata || {};
+  const local = localStorage.getItem('skillclash_name_' + currentUser.id);
+  const fallback = local || meta.full_name || meta.name || (currentUser.email ? currentUser.email.split('@')[0] : 'Player');
+  let dbName = null;
+  try { const { data } = await client.from('users').select('full_name').eq('id', currentUser.id).maybeSingle(); dbName = data?.full_name; } catch (e) {}
+  const name = dbName || fallback;
+  setUserDisplayName(name);
+  if (dbName !== name) syncProfileToDatabase(name);
+}
+async function syncProfileToDatabase(name) {
+  const avatarUrl = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(name);
+  try { await client.from('users').upsert({ id: currentUser.id, email: currentUser.email, full_name: name, avatar_url: avatarUrl }); } catch (e) {}
+}
+function setUserDisplayName(name) {
+  if (playerNameEl) playerNameEl.textContent = name;
+  if (profileDisplayName) profileDisplayName.textContent = name;
+  const avatarUrl = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(name);
+  if (avatarEl) avatarEl.src = avatarUrl;
+  if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
+}
+async function loadWallet() {
+  try { const { data, error } = await client.from('wallet').select('dummy_token').eq('user_id', currentUser.id).single(); if (error) throw error; currentBalance = data?.dummy_token || 0; } catch (e) { currentBalance = 0; }
+}
+async function persistWalletDelta(delta) {
+  const { data: wallet, error } = await client.from('wallet').select('dummy_token').eq('user_id', currentUser.id).single();
+  if (error || !wallet) throw error || new Error('Wallet not found');
+  const newBalance = Math.max(0, (wallet.dummy_token || 0) + delta);
+  await client.from('wallet').update({ dummy_token: newBalance, updated_at: new Date().toISOString() }).eq('user_id', currentUser.id);
+  currentBalance = newBalance;
+  return newBalance;
+}
+async function loadTransactions() {
+  try { const { data, error } = await client.from('transactions').select('description,type,amount,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50); if (error) throw error; transactions = (data || []).map(t => ({ desc: t.description, type: t.type, amount: t.amount, date: new Date(t.created_at).toLocaleString() })); } catch (e) { transactions = []; }
+}
+async function recordTransaction(desc, type, amount) {
+  transactions.unshift({ desc, type, amount, date: new Date().toLocaleString() });
+  updateUI();
+  try { await client.from('transactions').insert({ user_id: currentUser.id, description: desc, type, amount }); } catch (e) {}
+}
+async function loadMatchHistory() {
+  try { const { data, error } = await client.from('match_history').select('game,opponent,result,reward,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50); if (error) throw error; matchHistory = (data || []).map(m => ({ game: m.game, opponent: m.opponent, result: m.result, reward: m.reward, date: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })); } catch (e) { matchHistory = []; }
+}
+async function recordMatch(game, opponent, result, reward) {
+  matchHistory.unshift({ game, opponent, result, reward, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+  updateUI();
+  try { await client.from('match_history').insert({ user_id: currentUser.id, game, opponent, result, reward }); } catch (e) {}
+}
+async function creditTokens(tokens) { await persistWalletDelta(tokens); }
+
+function updateUI() {
+  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString('en-IN');
+  const pct = Math.min(100, Math.round((currentBalance / CASHOUT_MIN) * 100));
+  const pf = document.getElementById('progress-fill'); if (pf) pf.style.width = pct + '%';
+  const pt = document.getElementById('progress-text'); if (pt) pt.textContent = formatRupees(currentBalance) + ' / ' + formatRupees(CASHOUT_MIN);
+  const total = matchHistory.length, wins = matchHistory.filter(m => m.result === 'VICTORY').length;
+  const rate = total > 0 ? Math.round((wins / total) * 100) : 0;
+  const totalWon = matchHistory.filter(m => m.result === 'VICTORY').reduce((s, m) => s + m.reward, 0);
+  const se = document.getElementById('stat-total-earnings'); if (se) se.textContent = formatRupees(currentBalance);
+  const sm = document.getElementById('stat-matches-played'); if (sm) sm.textContent = total;
+  const sr = document.getElementById('stat-win-rate'); if (sr) sr.textContent = rate + '%';
+  const sw = document.getElementById('stat-tokens-won'); if (sw) sw.textContent = '+' + formatRupees(totalWon);
+  renderLedger(); renderMatchHistory(); renderTxModalList(); updateCashoutUI();
+}
+function renderLedger() {
+  const tbody = document.getElementById('ledger-body'); if (!tbody) return;
+  if (transactions.length === 0) { tbody.innerHTML = '<tr><td colspan="4">No transactions recorded</td></tr>'; return; }
+  tbody.innerHTML = transactions.map(tx => {
+    const isCredit = tx.type === 'credit'; const sign = isCredit ? '+' : '-'; const color = isCredit ? '#16c46b' : '#e2555a';
+    return `<tr><td>${tx.desc}</td><td><span class="${isCredit ? 'badge-credit' : 'badge-debit'}">${tx.type.toUpperCase()}</span></td><td style="color:${color}">${sign}${formatRupees(tx.amount)}</td><td>${tx.date}</td></tr>`;
+  }).join('');
+}
+function renderMatchHistory() {
+  const tbody = document.getElementById('matches-body'); if (!tbody) return;
+  if (matchHistory.length === 0) { tbody.innerHTML = '<tr><td colspan="5">No matches played yet.</td></tr>'; return; }
+  tbody.innerHTML = matchHistory.map(m => {
+    const isWin = m.result === 'VICTORY'; const color = isWin ? '#16c46b' : '#e2555a';
+    return `<tr><td>${m.game}</td><td>${m.opponent}</td><td><span class="${isWin ? 'badge-credit' : 'badge-debit'}">${m.result}</span></td><td style="color:${color}">${m.reward >= 0 ? '+' : ''}${formatRupees(m.reward)}</td><td>${m.date}</td></tr>`;
+  }).join('');
+}
+function renderTxModalList() {
+  if (!txListContainer) return;
+  if (transactions.length === 0) { txListContainer.innerHTML = '<p style="color:#5c5a6e; text-align:center; padding:12px 0;">No transactions yet.</p>'; return; }
+  txListContainer.innerHTML = transactions.map(tx => {
+    const isCredit = tx.type === 'credit'; const sign = isCredit ? '+' : '-';
+    return `<div class="tx-item"><span class="desc">${tx.desc}</span><span class="amount ${isCredit ? 'credit' : 'debit'}">${sign}${formatRupees(tx.amount)}</span><span class="date">${tx.date}</span></div>`;
+  }).join('');
+}
+function updateCashoutUI() {
+  const el = document.getElementById('cashout-balance'); if (el) el.textContent = formatRupees(currentBalance);
+}
+function switchView(id) {
+  tabButtons.forEach(b => b.classList.remove('active'));
+  appViews.forEach(v => v.classList.remove('active'));
+  const tab = Array.from(tabButtons).find(b => b.dataset.target === id); if (tab) tab.classList.add('active');
+  const view = document.getElementById(id); if (view) view.classList.add('active');
+}
+tabButtons.forEach(b => b.addEventListener('click', () => switchView(b.dataset.target)));
+document.getElementById('profile-nav-btn')?.addEventListener('click', () => switchView('view-profile'));
+document.getElementById('nav-brand-logo')?.addEventListener('click', () => switchView('view-earn'));
+menuTransactionsBtn?.addEventListener('click', () => switchView('view-ledger'));
+document.getElementById('menu-addtokens-btn')?.addEventListener('click', () => switchView('view-addtoken'));
+document.getElementById('menu-refer-btn')?.addEventListener('click', () => switchView('view-refer'));
+
+menuLogoutBtn?.addEventListener('click', () => logoutConfirmOverlay?.classList.remove('hidden'));
+logoutCancelBtn?.addEventListener('click', () => logoutConfirmOverlay?.classList.add('hidden'));
+logoutConfirmBtn?.addEventListener('click', async () => {
+  logoutConfirmBtn.disabled = true;
+  if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
+  await client.auth.signOut();
+  logoutConfirmBtn.disabled = false;
+  logoutConfirmOverlay?.classList.add('hidden');
+  currentUser = null;
+  document.getElementById('page-landing').classList.remove('hidden');
+  document.getElementById('dashboard').classList.add('hidden');
+});
+ledgerBackBtn?.addEventListener('click', () => switchView('view-profile'));
+referBackBtn?.addEventListener('click', () => switchView('view-profile'));
+
+function generateReferralCode(email) {
+  const local = (email || 'player').split('@')[0].replace(/[^a-zA-Z]/g, '').toUpperCase();
+  const prefix = (local + 'XXXXX').slice(0, 5);
+  const digits = Math.floor(100 + Math.random() * 900);
+  return prefix + digits;
+}
+async function loadReferralInfo() {
+  if (!myReferralCodeEl) return;
+  try {
+    const { data: row } = await client.from('users').select('referral_code').eq('id', currentUser.id).maybeSingle();
+    let code = row?.referral_code;
+    if (!code) {
+      for (let attempt = 0; attempt < 4 && !code; attempt++) {
+        const candidate = generateReferralCode(currentUser.email);
+        const { error } = await client.from('users').update({ referral_code: candidate }).eq('id', currentUser.id);
+        if (!error) code = candidate;
+      }
+    }
+    myReferralCodeEl.textContent = code || '—';
+  } catch (e) { myReferralCodeEl.textContent = 'Unavailable'; }
+}
+copyReferralBtn?.addEventListener('click', async () => {
+  const code = myReferralCodeEl?.textContent || '';
+  if (!code || code === '—') return;
+  try { await navigator.clipboard.writeText(code); copyReferralBtn.textContent = 'Copied!'; setTimeout(() => copyReferralBtn.textContent = 'Copy', 1500); } catch (e) {}
+});
+submitReferralBtn?.addEventListener('click', async () => {
+  const code = (referralInput?.value || '').trim().toUpperCase();
+  if (!referralStatusMsg) return;
+  referralStatusMsg.className = 'refer-status-msg';
+  referralStatusMsg.textContent = '';
+  if (!code) { referralStatusMsg.textContent = 'Please enter a code.'; referralStatusMsg.className = 'refer-status-msg error'; return; }
+  submitReferralBtn.disabled = true;
+  try {
+    const { data, error } = await client.rpc('redeem_referral_code', { p_code: code });
+    if (error) throw error;
+    if (data?.success) { referralStatusMsg.textContent = data.message || 'Referral applied!'; referralStatusMsg.className = 'refer-status-msg success'; referralInput.value = ''; await loadWallet(); await loadTransactions(); updateUI(); } else { referralStatusMsg.textContent = data?.message || 'Code invalid.'; referralStatusMsg.className = 'refer-status-msg error'; }
+  } catch (e) { referralStatusMsg.textContent = 'Referral program not set up.'; referralStatusMsg.className = 'refer-status-msg error'; }
+  submitReferralBtn.disabled = false;
+});
+
+editNameBtn?.addEventListener('click', () => { nameInput.value = playerNameEl.textContent; nameEditBox.classList.remove('hidden'); nameInput.focus(); });
+cancelNameBtn?.addEventListener('click', () => nameEditBox.classList.add('hidden'));
+saveNameBtn?.addEventListener('click', async () => {
+  const newName = nameInput.value.trim();
+  if (newName.length < 2) { alert('Name must be at least 2 characters.'); return; }
+  setUserDisplayName(newName);
+  nameEditBox.classList.add('hidden');
+  if (currentUser) {
+    localStorage.setItem('skillclash_name_' + currentUser.id, newName);
+    saveNameBtn.disabled = true;
+    try { await syncProfileToDatabase(newName); } catch (err) {}
+    saveNameBtn.disabled = false;
+  }
+});
+
+// ---- Payment System ----
+document.getElementById('initiatePaymentBtn')?.addEventListener('click', function() {
+  const customAmount = parseInt(document.getElementById('customAmount').value) || 0;
+  if (customAmount < 1) { showToast('Minimum amount is ₹1', 'error'); return; }
+  let bonus = 0;
+  const selectedPackage = document.querySelector('.package-card.selected');
+  if (selectedPackage) bonus = parseInt(selectedPackage.dataset.bonus) || 0;
+  const tokens = customAmount + Math.floor(customAmount * bonus / 100);
+  const orderId = 'ORD' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6).toUpperCase();
+  this.disabled = true;
+  this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating payment...';
+  const modal = document.getElementById('paymentModal');
+  document.getElementById('paymentAmount').textContent = customAmount;
+  document.getElementById('bonusDisplay').textContent = bonus > 0 ? `+${bonus}% Bonus → ₹${tokens}` : `₹${tokens}`;
+  const st = document.getElementById('paymentStatus');
+  st.className = 'payment-status waiting';
+  st.innerHTML = `<span class="spinner"></span><span>Creating payment...</span>`;
+  modal.classList.add('show');
+  const currentUrl = window.location.origin + window.location.pathname;
+  if (typeof ZapUPI === 'undefined' || !ZapUPI.createOrder) {
+    st.className = 'payment-status error';
+    st.innerHTML = `<i class="fas fa-exclamation-circle" style="font-size:1.2rem; color:#991b1b;"></i><span>Payment gateway not loaded. Please refresh.</span>`;
+    this.disabled = false;
+    this.innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
+    showToast('Payment gateway not loaded', 'error');
+    return;
+  }
+  ZapUPI.createOrder({
+    zap_key: ZAPUPI_API_KEY,
+    order_id: orderId,
+    amount: customAmount.toString(),
+    success_url: currentUrl + '?status=success&order_id=' + orderId,
+    failed_url: currentUrl + '?status=failed&order_id=' + orderId,
+    timeout_url: currentUrl + '?status=timeout&order_id=' + orderId,
+  }, {
+    onResponse: function(paymentUrl) {
+      st.innerHTML = `<span class="spinner"></span><span>Opening payment page...</span>`;
+      if (paymentUrl) window.open(paymentUrl, '_blank');
+      document.getElementById('initiatePaymentBtn').disabled = false;
+      document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
+    },
+    onError: function(err) {
+      st.className = 'payment-status error';
+      st.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>Error: ${err || 'Please try again'}</span>`;
+      showToast('Payment error: ' + (err || 'unknown'), 'error');
+      document.getElementById('initiatePaymentBtn').disabled = false;
+      document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
+    }
+  });
+});
+
+function closePaymentModal() {
+  document.getElementById('paymentModal').classList.remove('show');
+  document.getElementById('paymentStatus').className = 'payment-status waiting';
+  document.getElementById('paymentStatus').innerHTML = `<span class="spinner"></span><span>Creating payment...</span>`;
+  const btn = document.getElementById('initiatePaymentBtn');
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
+}
+document.getElementById('cancelPaymentBtn')?.addEventListener('click', closePaymentModal);
+document.getElementById('closePaymentModal')?.addEventListener('click', closePaymentModal);
+
+function showPaymentAnimation(amount) {
+  const ov = document.getElementById('paymentAnimation');
+  document.getElementById('animAmount').textContent = '₹' + amount;
+  ov.classList.add('show');
+  const container = document.getElementById('confettiContainer');
+  container.innerHTML = '';
+  const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#a29bfe', '#fd79a8'];
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.width = (Math.random() * 8 + 4) + 'px';
+    p.style.height = (Math.random() * 8 + 4) + 'px';
+    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    p.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    p.style.animationDelay = (Math.random() * 2) + 's';
+    container.appendChild(p);
+  }
+  setTimeout(() => { ov.classList.remove('show'); container.innerHTML = ''; }, 4000);
+}
+
+if (typeof ZapUPI !== 'undefined') {
+  ZapUPI.setPaymentCallbacks({
+    onSuccess: function(orderId) {
+      const amount = document.getElementById('paymentAmount')?.textContent || '0';
+      const tokens = parseInt(amount) || 0;
+      creditTokens(tokens);
+      recordTransaction('💳 Payment Received: ₹' + tokens + ' credited', 'credit', tokens);
+      loadWallet(); loadTransactions(); updateUI();
+      showPaymentAnimation(amount);
+      showToast('✅ Payment Successful! ₹' + amount + ' added.', 'credit');
+      setTimeout(closePaymentModal, 3000);
+    },
+    onFailed: function() { showToast('❌ Payment Failed. Please try again.', 'error'); },
+    onTimeout: function() { showToast('⏰ Payment Timeout. Please try again.', 'error'); }
+  });
+}
+
+document.getElementById('cashout-submit-btn')?.addEventListener('click', function() {
+  const upi = document.getElementById('cashout-upi')?.value.trim();
+  const amount = parseFloat(document.getElementById('cashout-amount')?.value);
+  const st = document.getElementById('cashout-status-msg');
+  if (!st) return;
+  st.className = 'refer-status-msg';
+  if (!upi || upi.length < 3) { st.textContent = 'Please enter a valid UPI ID.'; st.className = 'refer-status-msg error'; return; }
+  if (!amount || amount < CASHOUT_MIN) { st.textContent = 'Minimum withdrawal is ₹' + CASHOUT_MIN + '.'; st.className = 'refer-status-msg error'; return; }
+  if (amount > currentBalance) { st.textContent = 'Insufficient balance.'; st.className = 'refer-status-msg error'; return; }
+  st.textContent = `Withdrawal request for ₹${amount} to ${upi} submitted. It will be processed in 7–8 hours.`;
+  st.className = 'refer-status-msg success';
+});
+
+// ---- GAMES CATALOG ----
+const GAME_CATALOG = [
+  { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win!', icon: '✖️', badge: 'STRATEGY', category: 'brain', entry: 15, reward: 25 },
+  { type: 'rps', name: 'RPS Duel', desc: 'Best-of-5 rock, paper, scissors. Outsmart your opponent!', icon: '✊', badge: 'CLASSIC', category: 'strategy', entry: 15, reward: 25 },
+  { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four in a row. Strategic battles!', icon: '🔴', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 },
+  { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board. Test your memory!', icon: '🧠', badge: 'BRAIN', category: 'brain', entry: 15, reward: 25 },
+  { type: 'scramble', name: 'Word Scramble', desc: 'Unscramble the word quickly. Fast thinking wins!', icon: '🔤', badge: 'WORD', category: 'brain', entry: 15, reward: 25 },
+  { type: 'typing', name: 'Typing Race', desc: 'Type the sentence, first to finish wins. Speed matters!', icon: '⌨️', badge: 'SPEED', category: 'reflex', entry: 20, reward: 35 },
+  { type: 'higherlower', name: 'Higher-Lower', desc: 'Guess the secret number in fewest tries.', icon: '🎯', badge: 'LOGIC', category: 'brain', entry: 15, reward: 25 },
+  { type: 'snake', name: 'Snake Duel', desc: 'Eat, grow, survive — highest score wins!', icon: '🐍', badge: 'ARCADE', category: 'reflex', entry: 20, reward: 35 },
+  { type: 'simon', name: 'Simon Says', desc: 'Repeat the growing color pattern. Memory challenge!', icon: '🎵', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25 },
+  { type: 'dice', name: 'Dice Battle', desc: 'Push your luck rolling dice. Risk vs reward!', icon: '🎲', badge: 'LUCK', category: 'strategy', entry: 15, reward: 25 },
+  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed!', icon: '👆', badge: 'SPEED', category: 'reflex', entry: 15, reward: 25 },
+  { type: 'whack', name: 'Whack-a-Mole', desc: 'First to 15 hits wins. Reflexes matter!', icon: '🔨', badge: 'REFLEX', category: 'reflex', entry: 20, reward: 35 },
+  { type: 'recall', name: 'Sequence Recall', desc: 'Numbers flash, tap them back in order. Memory!', icon: '🔢', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25 },
+  { type: 'superttt', name: 'Tic-Tac-Toe Ultimate', desc: '3x3 grid of boards — win the meta-board!', icon: '🕹️', badge: 'STRATEGY', category: 'strategy', entry: 25, reward: 45 },
+  { type: 'slide', name: 'Slide Puzzle Race', desc: 'Solve the 15-puzzle faster than your opponent.', icon: '🧩', badge: 'PUZZLE', category: 'brain', entry: 20, reward: 35 },
+  { type: 'stroop', name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', icon: '🎨', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
+  { type: 'reflex', name: 'Reflex Grid', desc: 'Tap the lit tile before it fades. Speed!', icon: '⚡', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
+  { type: 'mathduel', name: 'Math Duel', desc: 'Solve 5 equations fastest to win. Quick math!', icon: '➕', badge: 'MATH', category: 'math', entry: 15, reward: 25 },
+  { type: 'battleship', name: 'Battleship Mini', desc: 'Sink the hidden fleet in fewest shots. Strategy!', icon: '🚢', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 },
+  { type: 'emojisprint', name: 'Emoji Memory Sprint', desc: 'Memory match with growing grid. Challenge!', icon: '🌟', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25 },
+  { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve 5 quick sums back-to-back. Speed math!', icon: '🧮', badge: 'MATH', category: 'math', entry: 15, reward: 25 }
+];
+function renderGameCards() {
+  const grid = document.getElementById('gamesGrid');
+  if (!grid) return;
+  grid.innerHTML = GAME_CATALOG.map((g, i) => {
+    const bg = `hsl(${i * 18 % 360}, 50%, 90%)`;
+    return `<div class="game-card" data-category="${g.category}"><div class="card-media" style="background:${bg};"><span style="font-size:2rem;">${g.icon}</span><span class="card-badge">${g.badge}</span></div><div class="card-content"><h3 class="card-title">${g.name}</h3><p class="card-desc">${g.desc}</p><div class="card-meta"><span>₹${g.entry}</span><span class="win">+₹${g.reward}</span></div><button class="play-btn" data-game="${g.name}" data-type="${g.type}" data-entry="${g.entry}" data-reward="${g.reward}">Play</button></div></div>`;
+  }).join('');
+}
+renderGameCards();
+
+// ---- Matchmaking ----
+const INDIAN_BOT_POOL = [
+  { name: 'Aarav Sharma', seed: 'aarav' }, { name: 'Priya Patel', seed: 'priya' },
+  { name: 'Rohan Verma', seed: 'rohan' }, { name: 'Ananya Singh', seed: 'ananya' },
+  { name: 'Vikram Malhotra', seed: 'vikram' }, { name: 'Sneha Reddy', seed: 'sneha' },
+  { name: 'Aditya Kumar', seed: 'aditya' }, { name: 'Neha Gupta', seed: 'neha' },
+  { name: 'Karan Mehta', seed: 'karan' }, { name: 'Divya Roy', seed: 'divya' },
+  { name: 'Arjun Chopra', seed: 'arjun' }, { name: 'Riya Sen', seed: 'riya' }
+];
+function getRandomBot() { return INDIAN_BOT_POOL[Math.floor(Math.random() * INDIAN_BOT_POOL.length)]; }
+
+function launchArena(opponent) {
+  activeOpponent = opponent; isGameActive = true;
+  const myName = playerNameEl.textContent;
+  const myAvatar = document.getElementById('avatar')?.src || '';
+  arenaUserAvatar.src = myAvatar || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(myName);
+  arenaUserName.textContent = myName;
+  arenaOppName.textContent = opponent.name;
+  arenaOppAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + opponent.seed;
+  arenaOverlay.classList.remove('hidden');
+  document.getElementById('arena-turn-indicator')?.classList.remove('hidden');
+  setArenaTurn('you');
+  runGame(activeGame.type);
+}
+function setArenaTurn(who) {
+  const dot = document.getElementById('turn-dot');
+  const text = document.getElementById('turn-indicator-text');
+  if (!dot || !text) return;
+  if (who === 'you') { dot.className = 'turn-dot turn-dot-you'; text.textContent = 'Your Turn'; text.style.color = '#5b3df0'; } else { dot.className = 'turn-dot turn-dot-opp'; text.textContent = 'Opponent\'s Turn'; text.style.color = '#f0a742'; }
+}
+
+function runGame(type) {
+  const stage = document.getElementById('arena-stage');
+  if (!stage) return;
+  const price = getGamePrice(type);
+  currentEntryFee = price.entry;
+  currentReward = price.reward;
+
+  if (type === 'tictactoe') {
+    const board = Array(9).fill(null);
+    const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    let playerTurn = true, gameOver = false, moveLocked = false;
+
+    function render() {
+      let cells = '';
+      board.forEach((val, i) => { cells += `<div class="ttt-cell${val ? ' filled' : ''}" data-idx="${i}">${val || ''}</div>`; });
+      stage.innerHTML = `<div style="width:100%;text-align:center;"><p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p><div class="ttt-wrapper"><div class="ttt-board">${cells}</div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg></div></div>`;
+      if (!gameOver && playerTurn && !moveLocked) {
+        document.querySelectorAll('.ttt-cell').forEach(cell => {
+          cell.addEventListener('click', function() { const idx = parseInt(this.dataset.idx); handlePlayerMove(idx); });
+        });
+      }
+    }
+
+    function handlePlayerMove(idx) {
+      if (gameOver || !playerTurn || moveLocked || board[idx]) return;
+      moveLocked = true;
+      board[idx] = 'X';
+      playerTurn = false;
+      render();
+      if (checkEnd()) { moveLocked = false; return; }
+      setTimeout(() => { botMove(); }, 800 + Math.random() * 700);
+    }
+
+    function botMove() {
+      if (gameOver) { moveLocked = false; return; }
+      const empty = board.map((v, i) => v ? null : i).filter(v => v !== null);
+      if (empty.length === 0) { moveLocked = false; return; }
+      for (let i of empty) { board[i] = 'O'; if (hasWinner('O')) { board[i] = null; board[i] = 'O'; playerTurn = true; render(); checkEnd(); moveLocked = false; return; } board[i] = null; }
+      for (let i of empty) { board[i] = 'X'; if (hasWinner('X')) { board[i] = null; board[i] = 'O'; playerTurn = true; render(); checkEnd(); moveLocked = false; return; } board[i] = null; }
+      let idx = empty.includes(4) ? 4 : empty[Math.floor(Math.random() * empty.length)];
+      board[idx] = 'O';
+      playerTurn = true;
+      render();
+      checkEnd();
+      moveLocked = false;
+    }
+
+    function hasWinner(sym) { return WIN_LINES.some(line => line.every(i => board[i] === sym)); }
+    function findLine(sym) { return WIN_LINES.find(line => line.every(i => board[i] === sym)); }
+
+    function checkEnd() {
+      let line = findLine('X');
+      if (line) { gameOver = true; render(); drawWinLine(line); setTimeout(() => endDuel(true, 'You win!'), 600); return true; }
+      line = findLine('O');
+      if (line) { gameOver = true; render(); drawWinLine(line); setTimeout(() => endDuel(false, 'Opponent won.'), 600); return true; }
+      if (board.every(c => c)) { gameOver = true; setTimeout(endDrawnMatch, 400); return true; }
+      return false;
+    }
+
+    function drawWinLine(line) {
+      const svg = document.getElementById('ttt-line');
+      if (!svg) return;
+      const cellSize = 58, gap = 4, step = cellSize + gap;
+      const centers = [0,1,2,3,4,5,6,7,8].map(i => { const r = Math.floor(i/3), c = i%3; return [c*step + cellSize/2, r*step + cellSize/2]; });
+      const [x1,y1] = centers[line[0]], [x2,y2] = centers[line[2]];
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      path.setAttribute('x1', x1); path.setAttribute('y1', y1); path.setAttribute('x2', x1); path.setAttribute('y2', y1);
+      path.setAttribute('class', 'ttt-winline');
+      svg.appendChild(path);
+      requestAnimationFrame(() => { path.style.transition = 'x2 0.35s ease, y2 0.35s ease';
+        path.setAttribute('x2', x2); path.setAttribute('y2', y2); });
+    }
+    render();
+    return;
+  }
+
+  stage.innerHTML = `<div style="text-align:center;padding:20px;width:100%;">
+    <h3 style="font-family:'Poppins',sans-serif;">${activeGame.name}</h3>
+    <p style="color:#5c5a6e;margin:6px 0;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+    <button class="play-btn" style="max-width:160px;margin:10px auto;" onclick="window.endDuel(true,'You won!')">Play Round</button>
+    <p style="font-size:0.7rem;color:#918fa3;margin-top:6px;">Click to play a round against opponent</p>
+  </div>`;
+}
+
+async function endDuel(won, analysisText) {
+  if (!isGameActive) return;
+  isGameActive = false;
+  let reward = -currentEntryFee;
+  if (won) {
+    try { await persistWalletDelta(currentReward); await recordTransaction('Duel Victory', 'credit', currentReward); reward = currentReward; } catch (e) {}
+  }
+  await recordMatch(activeGame.name, activeOpponent.name, won ? 'VICTORY' : 'DEFEAT', reward);
+  updateUI();
+  document.getElementById('arena-turn-indicator')?.classList.add('hidden');
+  const stage = document.getElementById('arena-stage');
+  if (stage) {
+    const rewardLine = won ? '+' + formatRupees(currentReward) + ' Awarded' : formatRupees(-currentEntryFee) + ' Stake Lost';
+    stage.innerHTML = `<div class="result-card"><h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2><p style="font-weight:700;color:#918fa3;">${rewardLine}</p><div class="result-analytics"><div>${analysisText}</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#5b3df0;color:#fff;">Dashboard</button></div></div>`;
+    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance.'); return; } beginMatchmaking(); });
+    document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); isGameActive = false; });
+  }
+}
+
+async function endDrawnMatch() {
+  if (!isGameActive) return;
+  isGameActive = false;
+  try { await persistWalletDelta(currentEntryFee); await recordTransaction('Stake Refunded', 'credit', currentEntryFee); await recordMatch(activeGame.name, activeOpponent.name, 'DRAW', 0); } catch (e) {}
+  updateUI();
+  document.getElementById('arena-turn-indicator')?.classList.add('hidden');
+  const stage = document.getElementById('arena-stage');
+  if (stage) {
+    stage.innerHTML = `<div class="result-card"><h2 style="color:#5c5a6e;">DRAW</h2><p style="font-weight:700;color:#918fa3;">Stake Refunded</p><div class="result-analytics"><div>Stalemate — entry fee refunded.</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#5b3df0;color:#fff;">Dashboard</button></div></div>`;
+    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance.'); return; } beginMatchmaking(); });
+    document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); isGameActive = false; });
+  }
+}
+
+async function beginMatchmaking() {
+  inQueue = true; isGameActive = false;
+  const price = getGamePrice(activeGame.type);
+  currentEntryFee = price.entry; currentReward = price.reward;
+  if (matchTitle) matchTitle.textContent = 'Finding Opponent — ' + activeGame.name;
+  if (matchStatus) matchStatus.textContent = 'Searching for players...';
+  if (matchOverlay) matchOverlay.classList.remove('hidden');
+  try { await persistWalletDelta(-currentEntryFee); await recordTransaction('Stake Entry: ' + activeGame.name + ' (₹' + currentEntryFee + ')', 'debit', currentEntryFee); } catch (e) { if (matchOverlay) matchOverlay.classList.add('hidden'); alert('Could not process entry stake. Please try again.'); inQueue = false; return; }
+  try { await client.from('matchmaking_queue').upsert({ user_id: currentUser.id, game_type: activeGame.type }); } catch (e) {}
+  let searchTime = 0, matched = false;
+  const interval = setInterval(async () => {
+    searchTime++;
+    if (matchStatus) matchStatus.textContent = 'Searching for players... (' + searchTime + '/' + SEARCH_SECONDS + 's)';
+    try {
+      const { data: queued } = await client.from('matchmaking_queue').select('user_id,created_at').eq('game_type', activeGame.type).neq('user_id', currentUser.id).order('created_at', { ascending: true }).limit(1);
+      if (queued && queued.length > 0) {
+        const oppId = queued[0].user_id;
+        const { data: userData } = await client.from('users').select('full_name').eq('id', oppId).single();
+        await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+        await client.from('matchmaking_queue').delete().eq('user_id', oppId);
+        await client.from('matches').insert({ game_type: activeGame.type, player1_id: currentUser.id, player2_id: oppId, entry_fee: currentEntryFee });
+        matched = true; clearInterval(interval);
+        if (matchStatus) matchStatus.textContent = 'Real player found! Starting match...';
+        setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); inQueue = false; launchArena({ name: userData?.full_name || 'Player', seed: oppId }); }, 700);
+        return;
+      }
+    } catch (e) {}
+    if (searchTime >= SEARCH_SECONDS && !matched) {
+      clearInterval(interval);
+      try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
+      const bot = getRandomBot();
+      if (matchStatus) matchStatus.textContent = 'No players found. Matched with ' + bot.name;
+      setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); inQueue = false; launchArena(bot); }, 700);
+    }
+  }, 1000);
+}
+
+document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
+  const btn = e.target.closest('.play-btn');
+  if (!btn) return;
+  const gameName = btn.dataset.game, gameType = btn.dataset.type;
+  const entry = parseInt(btn.dataset.entry) || 15, reward = parseInt(btn.dataset.reward) || 25;
+  if (!gameName || !gameType) return;
+  activeGame = { name: gameName, type: gameType };
+  currentEntryFee = entry; currentReward = reward;
+  if (currentBalance < entry) { alert('Insufficient balance. Need ' + formatRupees(entry)); return; }
+  beginMatchmaking();
+});
+
+cancelMatchBtn?.addEventListener('click', async () => {
+  const was = inQueue; cleanupQueue();
+  if (matchOverlay) matchOverlay.classList.add('hidden');
+  if (currentUser && was) {
+    await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+    try { await persistWalletDelta(currentEntryFee); await recordTransaction('Stake Refunded', 'credit', currentEntryFee); } catch (e) {}
+  }
+});
+
+function cleanupQueue() { inQueue = false; if (window.matchmakingTimer) { clearInterval(window.matchmakingTimer); window.matchmakingTimer = null; } }
+
+document.getElementById('arena-back-btn')?.addEventListener('click', function() {
+  if (isGameActive) document.getElementById('exitConfirmOverlay').classList.remove('hidden');
+  else arenaOverlay.classList.add('hidden');
+});
+document.getElementById('exit-cancel-btn')?.addEventListener('click', () => document.getElementById('exitConfirmOverlay').classList.add('hidden'));
+document.getElementById('exit-confirm-btn')?.addEventListener('click', async () => {
+  document.getElementById('exitConfirmOverlay').classList.add('hidden');
+  if (isGameActive) { await endDuel(false, 'Game exited - Defeat'); isGameActive = false; }
+  arenaOverlay.classList.add('hidden');
+});
+
+walletBadgeBtn?.addEventListener('click', () => { renderTxModalList(); txModal.classList.remove('hidden'); });
+txModalClose?.addEventListener('click', () => txModal.classList.add('hidden'));
+txModal?.addEventListener('click', (e) => { if (e.target === txModal) txModal.classList.add('hidden'); });
+
+document.querySelectorAll('.package-card').forEach(card => {
+  card.addEventListener('click', function() {
+    document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+    document.getElementById('customAmount').value = parseInt(this.dataset.amount);
+  });
+});
+document.getElementById('customAmount')?.addEventListener('input', function() {
+  if (parseInt(this.value) >= 1) document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+});
+
+filterChips.forEach(chip => {
+  chip.addEventListener('click', () => {
+    filterChips.forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const cat = chip.dataset.category;
+    document.querySelectorAll('.game-card').forEach(card => {
+      card.style.display = (cat === 'all' || card.dataset.category === cat) ? 'flex' : 'none';
+    });
+  });
+});
+
+function isTabActive() { return document.visibilityState === 'visible' && document.hasFocus(); }
+async function touchPresence() {
+  if (!currentUser || !isTabActive()) return;
+  try { await client.from('users').update({ last_seen: new Date().toISOString() }).eq('id', currentUser.id); } catch (e) {}
+}
+function startPresenceHeartbeat() {
+  touchPresence();
+  if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
+  presenceHeartbeatTimer = setInterval(touchPresence, 8000);
+  document.addEventListener('visibilitychange', () => { if (isTabActive()) touchPresence(); });
+  window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
+}
+
+// Landing page reveal animations
 const revealEls = document.querySelectorAll('.reveal');
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
@@ -1912,7 +3055,6 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.12 });
 revealEls.forEach(el => revealObserver.observe(el));
 
-// Animate counters
 function animateCount(el, target) {
   const duration = 1400;
   const start = performance.now();
@@ -1943,7 +3085,6 @@ document.querySelectorAll('[data-count-el]').forEach(el => {
   obs.observe(el);
 });
 
-// Challenge progress bars
 document.querySelectorAll('.challenge-fill').forEach(el => {
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -1953,7 +3094,32 @@ document.querySelectorAll('.challenge-fill').forEach(el => {
   obs.observe(el);
 });
 
-console.log('✅ SkillClash Landing Page loaded successfully!');
+async function initDashboard() {
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { document.getElementById('page-landing').classList.remove('hidden'); document.getElementById('dashboard').classList.add('hidden'); return; }
+    currentUser = session.user;
+    if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '—';
+    await loadUserName();
+    await loadWallet();
+    await loadTransactions();
+    await loadMatchHistory();
+    await loadReferralInfo();
+    updateUI();
+    startPresenceHeartbeat();
+    document.getElementById('page-landing').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+  } catch (e) { console.error(e); }
+}
+async function routeOnLoad() {
+  const { data: { session } } = await client.auth.getSession();
+  if (session) { document.getElementById('page-landing').classList.add('hidden'); await initDashboard(); } else { document.getElementById('page-landing').classList.remove('hidden'); document.getElementById('dashboard').classList.add('hidden'); }
+}
+window.addEventListener('beforeunload', () => {
+  if (inQueue && currentUser) { client.from('matchmaking_queue').delete().eq('user_id', currentUser.id).then(() => {}, () => {}); }
+});
+routeOnLoad();
+console.log('✅ SkillClash loaded successfully!');
 </script>
 </body>
 </html>
