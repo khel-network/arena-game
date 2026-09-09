@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>SkillClash | India's #1 Free-to-Play Skill Gaming Platform</title>
-<meta name="description" content="Play free skill-based games on SkillClash. Compete in 1v1 duels, earn XP, climb leaderboards. Join 3L+ players in Reflex, Strategy, Memory & Math games. No downloads required." />
+<meta name="description" content="Play free skill-based games on SkillClash. Compete in 1v1 duels, earn ₹, climb leaderboards. Join 3L+ players in Reflex, Strategy, Memory & Math games. No downloads required." />
 <meta name="keywords" content="skill gaming, free games, 1v1 games, skill clash, online games, competitive gaming, reflex games, strategy games" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -84,7 +84,7 @@
   .hero-visual-core svg { width:78px; height:78px; color:#161522; opacity:.9; }
   .floating-chip { position:absolute; background:#fff; border:1px solid #eee9f7; border-radius:14px; padding:8px 12px; box-shadow:0 8px 20px rgba(0,0,0,.07); font-size:.65rem; font-weight:700; display:flex; align-items:center; gap:6px; animation:chipFloat 4s ease-in-out infinite; }
   @keyframes chipFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
-  .chip-xp { top:-10px; left:-8px; color:#c08a1c; }
+  .chip-₹ { top:-10px; left:-8px; color:#c08a1c; }
   .chip-sync { top:22%; right:-18px; color:#16c46b; animation-delay:.6s; }
   .chip-fair { bottom:16%; left:-20px; color:#5b3df0; animation-delay:1.2s; }
   .chip-matches { bottom:-12px; right:0; color:#5c5a6e; animation-delay:1.8s; }
@@ -331,7 +331,7 @@
   .app-wrap .level-pill { display:flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:600; flex-wrap:wrap; color:#161522; }
   .app-wrap .level-bar-bg { width:60px; height:4px; background:rgba(0,0,0,0.06); border-radius:100px; overflow:hidden; }
   .app-wrap .level-bar-fill { height:100%; background:#5b3df0; border-radius:100px; }
-  .app-wrap .xp-text { color:#5c5a6e; }
+  .app-wrap .₹-text { color:#5c5a6e; }
   .app-wrap .profile-stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .app-wrap .stat-box { background:rgba(255,255,255,0.6); border:1px solid #eee9f7; border-radius:10px; padding:10px; box-shadow:0 2px 8px rgba(20,15,50,0.03); }
   .app-wrap .stat-box-num { font-family:'Poppins',sans-serif; font-weight:700; font-size:1rem; display:block; color:#161522; }
@@ -360,7 +360,7 @@
   .app-wrap .refer-info-box { background:rgba(255,255,255,0.6); border:1px solid #eee9f7; border-radius:10px; padding:10px; text-align:center; }
   .app-wrap .refer-info-num { font-family:'Poppins',sans-serif; font-size:1.1rem; font-weight:800; color:#5b3df0; }
   .app-wrap .refer-info-lbl { font-size:0.65rem; color:#5c5a6e; }
-  .app-wrap .refer-explainer { font-size:0.75rem; color:#5c5a6e; line-height:1.4; margin:10px 0 12px; }
+  .app-wrap .refer-e₹lainer { font-size:0.75rem; color:#5c5a6e; line-height:1.4; margin:10px 0 12px; }
   .app-wrap .refer-code-box, .app-wrap .refer-redeem-box { background:rgba(255,255,255,0.4); border:1px solid #eee9f7; border-radius:10px; padding:12px; margin-bottom:10px; }
   .app-wrap .refer-code-lbl { font-size:0.6rem; font-weight:700; color:#5c5a6e; text-transform:uppercase; letter-spacing:0.04em; display:block; margin-bottom:6px; }
   .app-wrap .refer-code-row, .app-wrap .refer-redeem-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
@@ -591,19 +591,19 @@
       </div>
       <div class="hero-trust"><span class="stars">★★★★★</span> Trusted by <strong>3L+ Players</strong> across India</div>
       <div class="hero-stats-grid">
-        <div class="hero-stat-box"><div class="num" data-count="300000">0</div><div class="lbl">Players</div></div>
-        <div class="hero-stat-box"><div class="num" data-count="1240000">0</div><div class="lbl">Matches</div></div>
+        <div class="hero-stat-box"><div class="num" data-count="10000">0</div><div class="lbl">Players</div></div>
+        <div class="hero-stat-box"><div class="num" data-count="24000">0</div><div class="lbl">Matches</div></div>
         <div class="hero-stat-box"><div class="num-static">24×7</div><div class="lbl">Support</div></div>
         <div class="hero-stat-box"><div class="num-static">100%</div><div class="lbl">FairPlay</div></div>
       </div>
     </div>
     <div class="hero-right reveal">
       <div class="hero-visual">
-        <div class="floating-chip chip-xp"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9 12 2"/></svg> 5,00,000+ XP Earned</div>
+        <div class="floating-chip chip-₹"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9 12 2"/></svg> 20,000+ ₹ Earned</div>
         <div class="floating-chip chip-sync"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Live Sync · 2s ago</div>
         <div class="hero-visual-core"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
         <div class="floating-chip chip-fair"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> FairPlay Enabled</div>
-        <div class="floating-chip chip-matches"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> 12,40,000+ Played</div>
+        <div class="floating-chip chip-matches"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> 24,000+ Played</div>
       </div>
     </div>
   </section>
@@ -654,7 +654,7 @@
         <div class="challenge-top"><span class="live-pill"><span class="dot"></span> LIVE</span><span class="fair-pill">FairPlay</span></div>
         <div class="challenge-meta">Strategy · 1v1</div>
         <div class="challenge-title">🔥 Strategy Duel Championship</div>
-        <div class="challenge-stats"><div><div class="val">Free</div><div class="lbl">Entry</div></div><div><div class="val">5,000 XP</div><div class="lbl">Top Reward</div></div><div><div class="val">32 left</div><div class="lbl">Slots</div></div></div>
+        <div class="challenge-stats"><div><div class="val">Free</div><div class="lbl">Entry</div></div><div><div class="val">100 ₹</div><div class="lbl">Top Reward</div></div><div><div class="val">32 left</div><div class="lbl">Slots</div></div></div>
         <div class="challenge-progress-row"><span>168 players joined</span><span>84%</span></div>
         <div class="challenge-track"><div class="challenge-fill" data-fill="84"></div></div>
         <button class="btn-join-challenge">Join Challenge</button>
@@ -663,7 +663,7 @@
         <div class="challenge-top"><span class="live-pill"><span class="dot"></span> LIVE</span><span class="fair-pill">FairPlay</span></div>
         <div class="challenge-meta">Reflex · 1v1</div>
         <div class="challenge-title">👑 Reflex Speed Pro Cup</div>
-        <div class="challenge-stats"><div><div class="val">Free</div><div class="lbl">Entry</div></div><div><div class="val">2,500 XP</div><div class="lbl">Top Reward</div></div><div><div class="val">8 left</div><div class="lbl">Slots</div></div></div>
+        <div class="challenge-stats"><div><div class="val">Free</div><div class="lbl">Entry</div></div><div><div class="val">200 ₹</div><div class="lbl">Top Reward</div></div><div><div class="val">8 left</div><div class="lbl">Slots</div></div></div>
         <div class="challenge-progress-row"><span>92 players joined</span><span>92%</span></div>
         <div class="challenge-track"><div class="challenge-fill" data-fill="92"></div></div>
         <button class="btn-join-challenge">Join Challenge</button>
@@ -672,7 +672,7 @@
         <div class="challenge-top"><span class="live-pill"><span class="dot"></span> LIVE</span><span class="fair-pill">FairPlay</span></div>
         <div class="challenge-meta">Memory · Solo</div>
         <div class="challenge-title">🌟 Memory Sprint Knockout</div>
-        <div class="challenge-stats"><div><div class="val">Free</div><div class="lbl">Entry</div></div><div><div class="val">4,000 XP</div><div class="lbl">Top Reward</div></div><div><div class="val">88 left</div><div class="lbl">Slots</div></div></div>
+        <div class="challenge-stats"><div><div class="val">Free</div><div class="lbl">Entry</div></div><div><div class="val">250 ₹</div><div class="lbl">Top Reward</div></div><div><div class="val">88 left</div><div class="lbl">Slots</div></div></div>
         <div class="challenge-progress-row"><span>412 players joined</span><span>82%</span></div>
         <div class="challenge-track"><div class="challenge-fill" data-fill="82"></div></div>
         <button class="btn-join-challenge">Join Challenge</button>
@@ -722,9 +722,9 @@
     <div class="section-eyebrow-pill">The scoreboard, live</div>
     <h2 class="section-title">A platform players win on, <span class="grad-text">every day.</span></h2>
     <div class="scoreboard-grid" style="margin-top:8px;">
-      <div class="scoreboard-box"><div class="val" data-count-el="500000">0</div><div class="lbl">Total XP Distributed</div></div>
-      <div class="scoreboard-box"><div class="val" data-count-el="312000">0</div><div class="lbl">Total Players</div></div>
-      <div class="scoreboard-box"><div class="val" data-count-el="1240000">0</div><div class="lbl">Matches Played</div></div>
+      <div class="scoreboard-box"><div class="val" data-count-el="₹ 20000">0</div><div class="lbl">Total ₹ Distributed</div></div>
+      <div class="scoreboard-box"><div class="val" data-count-el="3120">0</div><div class="lbl">Total Players</div></div>
+      <div class="scoreboard-box"><div class="val" data-count-el="24000">0</div><div class="lbl">Matches Played</div></div>
       <div class="scoreboard-box"><div class="val" data-count-el="1080">0</div><div class="lbl">Daily Top Scorers</div></div>
     </div>
   </section>
@@ -743,8 +743,8 @@
     <div class="section-eyebrow-pill">FAQ</div>
     <h2 class="section-title">Got Questions? We got <span class="grad-text">answers.</span></h2>
     <div class="faq-list" style="margin-top:10px;">
-      <details class="faq-item"><summary>Is SkillClash really free to play? <span class="plus">+</span></summary><p>Yes. There are no entry fees anywhere on the platform — every duel and challenge is free to join. Rewards come as XP, badges, and leaderboard rank.</p></details>
-      <details class="faq-item"><summary>How fast does the leaderboard update? <span class="plus">+</span></summary><p>Instantly. The moment a match ends, your XP, rank, and match history sync in real time.</p></details>
+      <details class="faq-item"><summary>Is SkillClash really free to play? <span class="plus">+</span></summary><p>Yes. There are no entry fees anywhere on the platform — every duel and challenge is free to join. Rewards come as ₹, badges, and leaderboard rank.</p></details>
+      <details class="faq-item"><summary>How fast does the leaderboard update? <span class="plus">+</span></summary><p>Instantly. The moment a match ends, your ₹, rank, and match history sync in real time.</p></details>
       <details class="faq-item"><summary>How does the anti-cheat system work? <span class="plus">+</span></summary><p>In-house anti-cheat and behaviour checks flag suspicious activity; confirmed rule-breaking results in a suspension.</p></details>
       <details class="faq-item"><summary>Is my profile data secure? <span class="plus">+</span></summary><p>Yes. Accounts are protected with encrypted sign-in and your match history is only visible to you.</p></details>
     </div>
@@ -777,7 +777,7 @@
       <div class="footer-top">
         <div class="footer-brand-col">
           <div class="footer-brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>SkillClash</div>
-          <p>SkillClash is a free-to-play skill-gaming arena for Reflex, Strategy, Memory, and Math duels. Climb the leaderboard, earn XP and badges — no entry fees, no cash prizes, no downloads required.</p>
+          <p>SkillClash is a free-to-play skill-gaming arena for Reflex, Strategy, Memory, and Math duels. Climb the leaderboard, earn ₹ and badges — no entry fees, no cash prizes, no downloads required.</p>
           <div class="footer-social">
             <a href="#" aria-label="Community"><svg class="ic" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>
             <a href="#" aria-label="Announcements"><svg class="ic" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></a>
@@ -822,7 +822,7 @@
       <div class="footer-top">
         <div class="footer-brand-col">
           <div class="footer-brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>SkillClash</div>
-          <p>SkillClash is a free-to-play skill-gaming arena for Reflex, Strategy, Memory, and Math duels. Climb the leaderboard, earn XP and badges — no entry fees, no cash prizes, no downloads required.</p>
+          <p>SkillClash is a free-to-play skill-gaming arena for Reflex, Strategy, Memory, and Math duels. Climb the leaderboard, earn ₹ and badges — no entry fees, no cash prizes, no downloads required.</p>
           <div class="footer-social">
             <a href="#" aria-label="Community"><svg class="ic" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>
             <a href="#" aria-label="Announcements"><svg class="ic" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></a>
@@ -1034,7 +1034,7 @@
             <div class="level-pill">
               <span>Level <strong id="user-level">1</strong></span>
               <div class="level-bar-bg"><div class="level-bar-fill" style="width:48%;"></div></div>
-              <span class="xp-text">480 / 1,000 XP</span>
+              <span class="₹-text">480 / 1,000 ₹</span>
             </div>
           </div>
         </div>
@@ -1100,7 +1100,7 @@
           <div class="refer-info-box"><span class="refer-info-num">₹50</span><span class="refer-info-lbl">You get, per friend who joins</span></div>
           <div class="refer-info-box"><span class="refer-info-num">₹50</span><span class="refer-info-lbl">Your friend gets, on signup</span></div>
         </div>
-        <p class="refer-explainer">Share your referral code below. When a friend enters it, they instantly receive ₹50 in rewards and you receive ₹50 — for every friend you refer, with no limit.</p>
+        <p class="refer-e₹lainer">Share your referral code below. When a friend enters it, they instantly receive ₹50 in rewards and you receive ₹50 — for every friend you refer, with no limit.</p>
         <div class="refer-code-box">
           <span class="refer-code-lbl">Your Referral Code</span>
           <div class="refer-code-row">
@@ -1337,9 +1337,9 @@ function showPage(type) {
   const container = document.getElementById('page-container');
   const content = document.getElementById('page-content');
   const pages = {
-    help: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Help Center</h1><p>Welcome to the SkillClash Help Center. Here you'll find answers to common questions.</p><h2>Getting Started</h2><p><strong>How do I create an account?</strong><br>Simply click the "Sign Up" button and log in with your Google account.</p><p><strong>Is SkillClash really free?</strong><br>Yes! SkillClash is completely free to play.</p><h2>Gameplay</h2><p><strong>How does matchmaking work?</strong><br>Our system matches you with players of similar skill level.</p><h2>Technical Support</h2><p>If you're experiencing technical issues, please try refreshing the page or clearing your browser cache.</p><p style="font-size:0.7rem; color:#918fa3; margin-top:12px;">Last Updated: January 2026</p>`,
+    help: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Help Center</h1><p>Welcome to the SkillClash Help Center. Here you'll find answers to common questions.</p><h2>Getting Started</h2><p><strong>How do I create an account?</strong><br>Simply click the "Sign Up" button and log in with your Google account.</p><p><strong>Is SkillClash really free?</strong><br>Yes! SkillClash is completely free to play.</p><h2>Gameplay</h2><p><strong>How does matchmaking work?</strong><br>Our system matches you with players of similar skill level.</p><h2>Technical Support</h2><p>If you're e₹eriencing technical issues, please try refreshing the page or clearing your browser cache.</p><p style="font-size:0.7rem; color:#918fa3; margin-top:12px;">Last Updated: January 2026</p>`,
     contact: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Contact Us</h1><p>We'd love to hear from you!</p><h2>📧 Email</h2><p><strong>General Inquiries:</strong> support@skillclash.in</p><p><strong>Partnerships:</strong> partnerships@skillclash.in</p><h2>💬 Community</h2><ul><li><strong>Discord:</strong> discord.gg/skillclash</li><li><strong>Twitter:</strong> @skillclash</li></ul><h2>⏰ Support Hours</h2><p>24×7, 365 days a year.</p><p style="font-size:0.7rem; color:#918fa3; margin-top:12px;">Last Updated: January 2026</p>`,
-    terms: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Terms &amp; Conditions</h1><p><strong>Last Updated: January 2026</strong></p><h2>1. Acceptance of Terms</h2><p>By using SkillClash, you agree to these Terms &amp; Conditions.</p><h2>2. Eligibility</h2><p>You must be at least 18 years old to use SkillClash.</p><h2>3. Account</h2><p>You are responsible for maintaining the security of your account.</p><h2>4. FairPlay Policy</h2><p>Any form of cheating, hacking, or exploiting will result in permanent account suspension.</p><h2>5. User Conduct</h2><p>You agree to respect other players and not use offensive language.</p><h2>6. Intellectual Property</h2><p>All content on SkillClash is the property of SkillClash Technologies.</p>`,
+    terms: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Terms &amp; Conditions</h1><p><strong>Last Updated: January 2026</strong></p><h2>1. Acceptance of Terms</h2><p>By using SkillClash, you agree to these Terms &amp; Conditions.</p><h2>2. Eligibility</h2><p>You must be at least 18 years old to use SkillClash.</p><h2>3. Account</h2><p>You are responsible for maintaining the security of your account.</p><h2>4. FairPlay Policy</h2><p>Any form of cheating, hacking, or e₹loiting will result in permanent account suspension.</p><h2>5. User Conduct</h2><p>You agree to respect other players and not use offensive language.</p><h2>6. Intellectual Property</h2><p>All content on SkillClash is the property of SkillClash Technologies.</p>`,
     privacy: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Privacy Policy</h1><p><strong>Last Updated: January 2026</strong></p><h2>1. Information We Collect</h2><ul><li><strong>Google Account:</strong> Email and name</li><li><strong>Game Data:</strong> Match history, scores</li><li><strong>Usage Data:</strong> How you interact with our platform</li></ul><h2>2. How We Use Your Information</h2><ul><li>To provide and improve our games</li><li>To maintain leaderboards</li></ul><h2>3. Data Security</h2><p>Your information is encrypted and stored securely.</p><h2>4. Contact</h2><p>privacy@skillclash.in</p>`,
     disclaimer: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Disclaimer</h1><p><strong>Last Updated: January 2026</strong></p><h2>1. Skill-Based Gaming</h2><p>SkillClash is a <strong>skill-based gaming platform</strong> where outcomes depend on player skill.</p><h2>2. No Real Money Gambling</h2><p>SkillClash does not involve real money gambling.</p><h2>3. 18+ Only</h2><p>Our platform is strictly for users aged 18 and above.</p><h2>4. Play Responsibly</h2><p>We encourage responsible gaming.</p><h2>5. Legal Compliance</h2><p>SkillClash complies with all applicable Indian laws.</p>`
   };
