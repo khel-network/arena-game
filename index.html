@@ -207,6 +207,7 @@
   .btn-closing-login:hover { background:rgba(255,255,255,.16); }
   @media (min-width:420px){ .btn-closing-signup,.btn-closing-login{ font-size:.86rem; padding:14px 22px; } }
 
+  /* ===== FOOTER ===== */
   .site-footer { border-top:1px solid #f0eef8; background:#fff; padding:32px 18px 26px; }
   .footer-inner { max-width:1160px; margin:0 auto; }
   .footer-top { display:flex; flex-direction:column; gap:24px; margin-bottom:24px; }
@@ -219,7 +220,7 @@
   .footer-social svg { width:14px; height:14px; }
   .footer-cols { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
   .footer-col h5 { font-size:.66rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#161522; margin-bottom:10px; font-family:'Poppins',sans-serif; }
-  .footer-col a { display:block; font-size:.79rem; color:#5c5a6e; padding:5px 0; }
+  .footer-col a { display:block; font-size:.79rem; color:#5c5a6e; padding:5px 0; cursor:pointer; }
   .footer-col a:hover { color:#5b3df0; }
   .footer-bottom { border-top:1px solid #f0eef8; padding-top:18px; display:flex; flex-direction:column; gap:8px; }
   .footer-bottom .copyright { font-size:.68rem; color:#918fa3; line-height:1.6; }
@@ -1994,7 +1995,7 @@
     </div>
   </div>
 
-  <!-- Footer -->
+  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-top">
@@ -2014,19 +2015,17 @@
             <a href="#challenges">Tournaments</a>
             <a href="#how-it-works">How It Works</a>
             <a href="#faq">FAQ</a>
-            <a href="#" onclick="showPage('about')">About Us</a>
           </div>
           <div class="footer-col">
             <h5>Support</h5>
-            <a href="#" onclick="showPage('help')">Help Center</a>
-            <a href="#" onclick="showPage('contact')">Contact Us</a>
-            <a href="#" onclick="showPage('community')">Community</a>
+            <a onclick="showPage('help')">Help Center</a>
+            <a onclick="showPage('contact')">Contact Us</a>
           </div>
           <div class="footer-col">
             <h5>Legal</h5>
-            <a href="#" onclick="showPage('terms')">Terms &amp; Conditions</a>
-            <a href="#" onclick="showPage('privacy')">Privacy Policy</a>
-            <a href="#" onclick="showPage('disclaimer')">Disclaimer</a>
+            <a onclick="showPage('terms')">Terms &amp; Conditions</a>
+            <a onclick="showPage('privacy')">Privacy Policy</a>
+            <a onclick="showPage('disclaimer')">Disclaimer</a>
           </div>
         </div>
       </div>
@@ -2522,7 +2521,15 @@
     </div>
   </div>
 
+  <!-- Dashboard Footer -->
   <footer class="app-footer">
+    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:6px;">
+      <a onclick="showPage('help')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Help Center</a>
+      <a onclick="showPage('contact')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Contact Us</a>
+      <a onclick="showPage('terms')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Terms</a>
+      <a onclick="showPage('privacy')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Privacy</a>
+      <a onclick="showPage('disclaimer')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Disclaimer</a>
+    </div>
     <p>© 2026 SkillClash Technologies. All rights reserved.</p>
     <p style="font-size:0.55rem; color:#918fa3; margin-top:4px;">18+ only. Skill-based gaming. Play responsibly.</p>
   </footer>
@@ -2629,23 +2636,6 @@ function showPage(type) {
   const content = document.getElementById('page-content');
   
   const pages = {
-    about: `
-      <button class="back-link" onclick="hidePage()"><i class="fas fa-arrow-left"></i> Back</button>
-      <h1>About SkillClash</h1>
-      <p>SkillClash is India's leading free-to-play skill-gaming platform. We believe in the power of skill, not luck. Our platform offers a safe, fair, and competitive environment where players can test their abilities against others.</p>
-      <h2>Our Mission</h2>
-      <p>To provide a world-class skill-based gaming experience that is accessible to everyone, completely free, and built on the principles of fairness and transparency.</p>
-      <h2>Our Values</h2>
-      <ul>
-        <li><strong>FairPlay:</strong> Every match is fair and balanced</li>
-        <li><strong>Transparency:</strong> Clear rules and instant results</li>
-        <li><strong>Community:</strong> Building a positive gaming community</li>
-        <li><strong>Innovation:</strong> Constantly improving our games</li>
-      </ul>
-      <h2>Why SkillClash?</h2>
-      <p>With over 3,00,000+ players and 12,40,000+ matches played, SkillClash has become India's most trusted skill-gaming platform. We offer 20+ games across multiple categories, instant matchmaking, and a secure environment.</p>
-      <p style="font-size:0.7rem; color:#918fa3; margin-top:12px;">Last Updated: January 2026</p>
-    `,
     help: `
       <button class="back-link" onclick="hidePage()"><i class="fas fa-arrow-left"></i> Back</button>
       <h1>Help Center</h1>
@@ -2692,8 +2682,7 @@ function showPage(type) {
       <p><strong>Average Response Time:</strong> Under 2 hours</p>
       
       <h2>📍 Office</h2>
-      <p>SkillClash Technologies<br>
-      Bengaluru, Karnataka, India</p>
+      <p>SkillClash Technologies<br>Bengaluru, Karnataka, India</p>
       <p style="font-size:0.7rem; color:#918fa3; margin-top:12px;">Last Updated: January 2026</p>
     `,
     terms: `
