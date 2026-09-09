@@ -31,7 +31,7 @@
   h1,h2,h3,h4,h5 { font-family:'Poppins',sans-serif; }
 
   /* Prevent scroll when game is active */
-  body.game-active { overflow:hidden; position:fixed; width:100%; height:100%; }
+  body.game-active { overflow:hidden; position:fixed; width:100%; height:100%; top:0; left:0; }
 
   .background-wash { position:fixed; inset:0; z-index:-1; pointer-events:none;
     background:
@@ -2062,10 +2062,10 @@
         <div class="footer-cols">
           <div class="footer-col">
             <h5>Platform</h5>
-            <a onclick="hidePage(); document.getElementById('page-landing').scrollIntoView({behavior:'smooth'});">Home</a>
-            <a onclick="hidePage(); document.getElementById('modes').scrollIntoView({behavior:'smooth'});">Games</a>
-            <a onclick="hidePage(); document.getElementById('challenges').scrollIntoView({behavior:'smooth'});">Tournaments</a>
-            <a onclick="hidePage(); document.getElementById('faq').scrollIntoView({behavior:'smooth'});">FAQ</a>
+            <a onclick="hidePageToLanding()">Home</a>
+            <a onclick="hidePageToLandingAndScroll('modes')">Games</a>
+            <a onclick="hidePageToLandingAndScroll('challenges')">Tournaments</a>
+            <a onclick="hidePageToLandingAndScroll('faq')">FAQ</a>
           </div>
           <div class="footer-col">
             <h5>Support</h5>
@@ -2568,11 +2568,11 @@
   <!-- Dashboard Footer -->
   <footer class="app-footer">
     <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:6px;">
-      <a onclick="showPage('help')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Help Center</a>
-      <a onclick="showPage('contact')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Contact Us</a>
-      <a onclick="showPage('terms')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Terms</a>
-      <a onclick="showPage('privacy')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Privacy</a>
-      <a onclick="showPage('disclaimer')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Disclaimer</a>
+      <a onclick="showPageFromDashboard('help')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Help Center</a>
+      <a onclick="showPageFromDashboard('contact')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Contact Us</a>
+      <a onclick="showPageFromDashboard('terms')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Terms</a>
+      <a onclick="showPageFromDashboard('privacy')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Privacy</a>
+      <a onclick="showPageFromDashboard('disclaimer')" style="color:#5b3df0; font-weight:600; font-size:0.7rem; cursor:pointer;">Disclaimer</a>
     </div>
     <p>© 2026 SkillClash Technologies. All rights reserved.</p>
     <p style="font-size:0.55rem; color:#918fa3; margin-top:4px;">18+ only. Skill-based gaming. Play responsibly.</p>
@@ -2621,6 +2621,8 @@ let activeOpponent = null, activeGame = null, inQueue = false, isGameActive = fa
 let currentEntryFee = 15, currentReward = 25;
 let presenceHeartbeatTimer = null;
 let gameTimers = [];
+let currentGameType = null;
+let gameState = null;
 
 // DOM refs
 const balanceEl = document.getElementById('balance-value');
@@ -2675,14 +2677,17 @@ function showToast(msg, type = 'credit') {
 }
 function formatRupees(n) { const sign = n < 0 ? '-' : ''; return sign + '₹' + Math.abs(n || 0).toLocaleString('en-IN'); }
 
-// ===== PAGE VIEWS (SEO Pages) =====
+// ===== PAGE NAVIGATION =====
+let isOnDashboard = false;
+let currentPageType = 'landing'; // 'landing', 'dashboard', 'page'
+
 function showPage(type) {
   const container = document.getElementById('page-container');
   const content = document.getElementById('page-content');
   
   const pages = {
     help: `
-      <button class="back-link" onclick="hidePage()"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
       <h1>Help Center</h1>
       <p>Welcome to the SkillClash Help Center. Here you'll find answers to common questions and guides to help you get the most out of your experience.</p>
       
@@ -2706,7 +2711,7 @@ function showPage(type) {
       <p style="font-size:0.7rem; color:#918fa3; margin-top:12px;">Last Updated: January 2026</p>
     `,
     contact: `
-      <button class="back-link" onclick="hidePage()"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
       <h1>Contact Us</h1>
       <p>We'd love to hear from you! Whether you have questions, feedback, or just want to say hello, our team is here to help.</p>
       
@@ -2731,7 +2736,7 @@ function showPage(type) {
       <p style="font-size:0.7rem; color:#918fa3; margin-top:12px;">Last Updated: January 2026</p>
     `,
     terms: `
-      <button class="back-link" onclick="hidePage()"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
       <h1>Terms &amp; Conditions</h1>
       <p><strong>Last Updated: January 2026</strong></p>
       
@@ -2766,7 +2771,7 @@ function showPage(type) {
       <p>We reserve the right to update these terms at any time. Continued use constitutes acceptance of the updated terms.</p>
     `,
     privacy: `
-      <button class="back-link" onclick="hidePage()"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
       <h1>Privacy Policy</h1>
       <p><strong>Last Updated: January 2026</strong></p>
       
@@ -2808,7 +2813,7 @@ function showPage(type) {
       <p>For privacy concerns, contact us at: privacy@skillclash.in</p>
     `,
     disclaimer: `
-      <button class="back-link" onclick="hidePage()"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
       <h1>Disclaimer</h1>
       <p><strong>Last Updated: January 2026</strong></p>
       
@@ -2842,13 +2847,57 @@ function showPage(type) {
   container.style.display = 'block';
   document.getElementById('page-landing').style.display = 'none';
   document.getElementById('dashboard').classList.add('hidden');
+  currentPageType = 'page';
   window.scrollTo(0, 0);
 }
 
-function hidePage() {
+function showPageFromDashboard(type) {
+  showPage(type);
+  // Store that we came from dashboard
+  sessionStorage.setItem('returnToDashboard', 'true');
+}
+
+function hidePageToPrevious() {
+  const returnToDashboard = sessionStorage.getItem('returnToDashboard') === 'true';
+  sessionStorage.removeItem('returnToDashboard');
+  
+  document.getElementById('page-container').style.display = 'none';
+  
+  if (returnToDashboard && currentUser) {
+    // Return to dashboard
+    document.getElementById('page-landing').style.display = 'none';
+    document.getElementById('dashboard').classList.remove('hidden');
+    currentPageType = 'dashboard';
+    isOnDashboard = true;
+    // Refresh data
+    loadWallet();
+    loadTransactions();
+    loadMatchHistory();
+    updateUI();
+  } else {
+    // Return to landing
+    document.getElementById('page-landing').style.display = 'block';
+    document.getElementById('dashboard').classList.add('hidden');
+    currentPageType = 'landing';
+    isOnDashboard = false;
+  }
+}
+
+function hidePageToLanding() {
   document.getElementById('page-container').style.display = 'none';
   document.getElementById('page-landing').style.display = 'block';
   document.getElementById('dashboard').classList.add('hidden');
+  currentPageType = 'landing';
+  isOnDashboard = false;
+  sessionStorage.removeItem('returnToDashboard');
+}
+
+function hidePageToLandingAndScroll(sectionId) {
+  hidePageToLanding();
+  setTimeout(() => {
+    const el = document.getElementById(sectionId);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }, 300);
 }
 
 // ===== AUTH =====
@@ -2899,7 +2948,6 @@ async function loadWallet() {
     if (error) throw error; 
     currentBalance = data?.dummy_token || 0; 
   } catch (e) { 
-    // If wallet doesn't exist, create it
     if (e.message && e.message.includes('No rows found')) {
       try {
         await client.from('wallet').insert({ user_id: currentUser.id, dummy_token: 0 });
@@ -2911,10 +2959,8 @@ async function loadWallet() {
   }
 }
 async function persistWalletDelta(delta) {
-  // First check if wallet exists
   let { data: wallet, error } = await client.from('wallet').select('dummy_token').eq('user_id', currentUser.id).single();
   if (error || !wallet) {
-    // Create wallet if it doesn't exist
     await client.from('wallet').insert({ user_id: currentUser.id, dummy_token: 0 });
     wallet = { dummy_token: 0 };
   }
@@ -2983,7 +3029,6 @@ function updateCashoutUI() {
   const el = document.getElementById('cashout-balance'); if (el) el.textContent = formatRupees(currentBalance);
 }
 function switchView(id) {
-  // If game is active, don't switch
   if (isGameActive) { showToast('Please finish your game first', 'error'); return; }
   tabButtons.forEach(b => b.classList.remove('active'));
   appViews.forEach(v => v.classList.remove('active'));
@@ -3002,7 +3047,6 @@ logoutCancelBtn?.addEventListener('click', () => logoutConfirmOverlay?.classList
 logoutConfirmBtn?.addEventListener('click', async () => {
   logoutConfirmBtn.disabled = true;
   if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
-  // Clear all game timers
   gameTimers.forEach(t => clearInterval(t));
   gameTimers = [];
   await client.auth.signOut();
@@ -3013,6 +3057,8 @@ logoutConfirmBtn?.addEventListener('click', async () => {
   document.getElementById('page-landing').style.display = 'block';
   document.getElementById('page-container').style.display = 'none';
   document.getElementById('dashboard').classList.add('hidden');
+  currentPageType = 'landing';
+  isOnDashboard = false;
 });
 ledgerBackBtn?.addEventListener('click', () => switchView('view-profile'));
 referBackBtn?.addEventListener('click', () => switchView('view-profile'));
@@ -3164,17 +3210,14 @@ if (typeof ZapUPI !== 'undefined') {
       const amount = document.getElementById('paymentAmount')?.textContent || '0';
       const tokens = parseInt(amount) || 0;
       
-      // Credit tokens
       await creditTokens(tokens);
       await recordTransaction('💳 Payment Received: ₹' + tokens + ' credited', 'credit', tokens);
       
-      // Reload all data
       await loadWallet();
       await loadTransactions();
       await loadMatchHistory();
       updateUI();
       
-      // Show success animation
       showPaymentAnimation(amount);
       showToast('✅ Payment Successful! ₹' + amount + ' added to your wallet.', 'credit');
       setTimeout(closePaymentModal, 3000);
@@ -3190,20 +3233,17 @@ if (typeof ZapUPI !== 'undefined') {
   });
 }
 
-// Check for payment return URL parameters
 function checkPaymentReturn() {
   const params = new URLSearchParams(window.location.search);
   const status = params.get('status');
   const orderId = params.get('order_id');
   if (status === 'success' && orderId) {
-    // Payment was successful, refresh data
     setTimeout(async () => {
       await loadWallet();
       await loadTransactions();
       await loadMatchHistory();
       updateUI();
       showToast('✅ Payment successful! Wallet updated.', 'credit');
-      // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }, 500);
   }
@@ -3223,7 +3263,7 @@ document.getElementById('cashout-submit-btn')?.addEventListener('click', functio
   st.className = 'refer-status-msg success';
 });
 
-// ---- GAMES CATALOG ----
+// ---- FULL GAME IMPLEMENTATIONS ----
 const GAME_CATALOG = [
   { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win!', icon: '✖️', badge: 'STRATEGY', category: 'brain', entry: 15, reward: 25 },
   { type: 'rps', name: 'RPS Duel', desc: 'Best-of-5 rock, paper, scissors. Outsmart your opponent!', icon: '✊', badge: 'CLASSIC', category: 'strategy', entry: 15, reward: 25 },
@@ -3247,6 +3287,7 @@ const GAME_CATALOG = [
   { type: 'emojisprint', name: 'Emoji Memory Sprint', desc: 'Memory match with growing grid. Challenge!', icon: '🌟', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25 },
   { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve 5 quick sums back-to-back. Speed math!', icon: '🧮', badge: 'MATH', category: 'math', entry: 15, reward: 25 }
 ];
+
 function renderGameCards() {
   const grid = document.getElementById('gamesGrid');
   if (!grid) return;
@@ -3323,14 +3364,12 @@ async function beginMatchmaking() {
       }, 700);
     }
   }, 1000);
-  // Store interval for cleanup
   gameTimers.push(interval);
 }
 
 function launchArena(opponent) {
   activeOpponent = opponent; 
   isGameActive = true;
-  // Prevent background scroll
   document.body.classList.add('game-active');
   
   const myName = playerNameEl.textContent;
@@ -3341,14 +3380,14 @@ function launchArena(opponent) {
   arenaOppAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + opponent.seed;
   arenaOverlay.classList.remove('hidden');
   document.getElementById('arena-turn-indicator')?.classList.remove('hidden');
-  // For 2-player games, set turn to 'you' if it's your turn
+  
   if (opponent.isBot) {
     setArenaTurn('you');
   } else {
-    // For real player vs real player, determine who goes first
     const firstPlayer = Math.random() < 0.5 ? 'you' : 'opp';
     setArenaTurn(firstPlayer);
   }
+  currentGameType = activeGame.type;
   runGame(activeGame.type);
 }
 
@@ -3367,372 +3406,367 @@ function setArenaTurn(who) {
   }
 }
 
-// ---- FULL GAME IMPLEMENTATIONS (simplified but working) ----
-function runGame(type) {
+// ---- TIC TAC TOE ----
+function runTicTacToe() {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
-  const price = getGamePrice(type);
-  currentEntryFee = price.entry;
-  currentReward = price.reward;
+  
+  let board = Array(9).fill(null);
+  let playerTurn = true;
+  let gameOver = false;
+  let moveLocked = false;
+  let botTimer = null;
+  const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
-  // ---- TIC TAC TOE ----
-  if (type === 'tictactoe') {
-    const board = Array(9).fill(null);
-    const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    let playerTurn = true, gameOver = false, moveLocked = false;
-    let botTimer = null;
-
-    function render() {
-      let cells = '';
-      board.forEach((val, i) => { 
-        cells += `<div class="ttt-cell${val ? ' filled' : ''}" data-idx="${i}">${val || ''}</div>`; 
-      });
-      stage.innerHTML = `<div style="width:100%;text-align:center;">
-        <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-        <div class="ttt-wrapper">
-          <div class="ttt-board">${cells}</div>
-          <svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg>
-        </div>
-      </div>`;
-      if (!gameOver && playerTurn && !moveLocked) {
-        document.querySelectorAll('.ttt-cell:not(.filled)').forEach(cell => {
-          cell.addEventListener('click', function() { 
-            const idx = parseInt(this.dataset.idx); 
-            handlePlayerMove(idx); 
-          });
+  function render() {
+    let cells = '';
+    board.forEach((val, i) => { 
+      cells += `<div class="ttt-cell${val ? ' filled' : ''}" data-idx="${i}">${val || ''}</div>`; 
+    });
+    stage.innerHTML = `<div style="width:100%;text-align:center;">
+      <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+      <div class="ttt-wrapper">
+        <div class="ttt-board">${cells}</div>
+        <svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 200 200"></svg>
+      </div>
+    </div>`;
+    if (!gameOver && playerTurn && !moveLocked) {
+      document.querySelectorAll('.ttt-cell:not(.filled)').forEach(cell => {
+        cell.addEventListener('click', function() { 
+          const idx = parseInt(this.dataset.idx); 
+          handlePlayerMove(idx); 
         });
-      }
+      });
     }
+  }
 
-    function handlePlayerMove(idx) {
-      if (gameOver || !playerTurn || moveLocked || board[idx]) return;
-      moveLocked = true;
-      board[idx] = 'X';
-      playerTurn = false;
-      render();
-      setArenaTurn('opp');
-      if (checkEnd()) { moveLocked = false; return; }
-      if (botTimer) clearTimeout(botTimer);
-      botTimer = setTimeout(() => { botMove(); }, 600 + Math.random() * 500);
-      gameTimers.push(botTimer);
-    }
-
-    function botMove() {
-      if (gameOver) { moveLocked = false; return; }
-      const empty = board.map((v, i) => v ? null : i).filter(v => v !== null);
-      if (empty.length === 0) { moveLocked = false; return; }
-      // Simple bot: try to win or block
-      for (let i of empty) { 
-        board[i] = 'O'; 
-        if (hasWinner('O')) { 
-          board[i] = 'O'; 
-          playerTurn = true; 
-          moveLocked = false;
-          render(); 
-          setArenaTurn('you');
-          checkEnd(); 
-          return; 
-        } 
-        board[i] = null; 
-      }
-      for (let i of empty) { 
-        board[i] = 'X'; 
-        if (hasWinner('X')) { 
-          board[i] = null; 
-          board[i] = 'O'; 
-          playerTurn = true; 
-          moveLocked = false;
-          render(); 
-          setArenaTurn('you');
-          checkEnd(); 
-          return; 
-        } 
-        board[i] = null; 
-      }
-      let idx = empty.includes(4) ? 4 : empty[Math.floor(Math.random() * empty.length)];
-      board[idx] = 'O';
-      playerTurn = true;
-      moveLocked = false;
-      render();
-      setArenaTurn('you');
-      checkEnd();
-    }
-
-    function hasWinner(sym) { return WIN_LINES.some(line => line.every(i => board[i] === sym)); }
-    function findLine(sym) { return WIN_LINES.find(line => line.every(i => board[i] === sym)); }
-
-    function checkEnd() {
-      let line = findLine('X');
-      if (line) { gameOver = true; render(); drawWinLine(line); setTimeout(() => endDuel(true, 'You win!'), 600); return true; }
-      line = findLine('O');
-      if (line) { gameOver = true; render(); drawWinLine(line); setTimeout(() => endDuel(false, 'Opponent won.'), 600); return true; }
-      if (board.every(c => c)) { gameOver = true; setTimeout(endDrawnMatch, 400); return true; }
-      return false;
-    }
-
-    function drawWinLine(line) {
-      const svg = document.getElementById('ttt-line');
-      if (!svg) return;
-      svg.innerHTML = '';
-      const cellSize = 58, gap = 4, step = cellSize + gap;
-      const centers = [0,1,2,3,4,5,6,7,8].map(i => { const r = Math.floor(i/3), c = i%3; return [c*step + cellSize/2, r*step + cellSize/2]; });
-      const [x1,y1] = centers[line[0]], [x2,y2] = centers[line[2]];
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      path.setAttribute('x1', x1); path.setAttribute('y1', y1); path.setAttribute('x2', x1); path.setAttribute('y2', y1);
-      path.setAttribute('class', 'ttt-winline');
-      svg.appendChild(path);
-      requestAnimationFrame(() => { path.style.transition = 'x2 0.35s ease, y2 0.35s ease';
-        path.setAttribute('x2', x2); path.setAttribute('y2', y2); });
-    }
+  function handlePlayerMove(idx) {
+    if (gameOver || !playerTurn || moveLocked || board[idx]) return;
+    moveLocked = true;
+    board[idx] = 'X';
+    playerTurn = false;
     render();
-    return;
+    setArenaTurn('opp');
+    if (checkEnd()) { moveLocked = false; return; }
+    if (botTimer) clearTimeout(botTimer);
+    botTimer = setTimeout(() => { botMove(); }, 600 + Math.random() * 500);
+    gameTimers.push(botTimer);
   }
 
-  // ---- ROCK PAPER SCISSORS ----
-  if (type === 'rps') {
-    const choices = ['✊', '✋', '✌️'];
-    let playerChoice = null;
-    let botChoice = null;
-    let gameResult = null;
-    let roundOver = false;
+  function botMove() {
+    if (gameOver) { moveLocked = false; return; }
+    const empty = board.map((v, i) => v ? null : i).filter(v => v !== null);
+    if (empty.length === 0) { moveLocked = false; return; }
+    
+    // Try to win
+    for (let i of empty) { 
+      board[i] = 'O'; 
+      if (hasWinner('O')) { 
+        board[i] = 'O'; 
+        playerTurn = true; 
+        moveLocked = false;
+        render(); 
+        setArenaTurn('you');
+        checkEnd(); 
+        return; 
+      } 
+      board[i] = null; 
+    }
+    // Block player
+    for (let i of empty) { 
+      board[i] = 'X'; 
+      if (hasWinner('X')) { 
+        board[i] = null; 
+        board[i] = 'O'; 
+        playerTurn = true; 
+        moveLocked = false;
+        render(); 
+        setArenaTurn('you');
+        checkEnd(); 
+        return; 
+      } 
+      board[i] = null; 
+    }
+    // Random move
+    let idx = empty.includes(4) ? 4 : empty[Math.floor(Math.random() * empty.length)];
+    board[idx] = 'O';
+    playerTurn = true;
+    moveLocked = false;
+    render();
+    setArenaTurn('you');
+    checkEnd();
+  }
 
-    function renderRPS() {
-      stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
-        <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-        <div style="display:flex;justify-content:space-around;margin:16px 0;">
-          <div><div style="font-size:2.5rem;margin:4px 0;">${playerChoice || '❓'}</div><span style="font-size:0.7rem;color:#5c5a6e;">You</span></div>
-          <div style="font-size:2rem;color:#5c5a6e;">VS</div>
-          <div><div style="font-size:2.5rem;margin:4px 0;">${botChoice || '❓'}</div><span style="font-size:0.7rem;color:#5c5a6e;">${activeOpponent.name}</span></div>
-        </div>
-        ${!playerChoice ? `<div style="display:flex;gap:12px;justify-content:center;">
-          ${choices.map((c, i) => `<button class="rps-option" data-choice="${i}" style="font-size:1.8rem;padding:8px 20px;background:#fff;border:1px solid #eee9f7;border-radius:10px;cursor:pointer;">${c}</button>`).join('')}
-        </div>` : ''}
-        ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : gameResult === 'lose' ? '😞 You Lose!' : '🤝 Draw!'}</div>` : ''}
-        ${gameResult ? `<button class="btn-primary" id="rps-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
-      </div>`;
-      
-      document.querySelectorAll('.rps-option').forEach(btn => {
-        btn.addEventListener('click', function() {
-          if (roundOver) return;
-          const idx = parseInt(this.dataset.choice);
-          playerChoice = choices[idx];
-          botChoice = choices[Math.floor(Math.random() * choices.length)];
-          const pIdx = choices.indexOf(playerChoice);
-          const bIdx = choices.indexOf(botChoice);
-          if (pIdx === bIdx) gameResult = 'draw';
-          else if ((pIdx === 0 && bIdx === 2) || (pIdx === 1 && bIdx === 0) || (pIdx === 2 && bIdx === 1)) gameResult = 'win';
-          else gameResult = 'lose';
-          roundOver = true;
-          renderRPS();
-          setTimeout(() => {
-            if (gameResult === 'win') endDuel(true, 'You won RPS!');
-            else if (gameResult === 'lose') endDuel(false, 'You lost RPS.');
-            else endDrawnMatch();
-          }, 1500);
-        });
-      });
-      
-      document.getElementById('rps-rematch')?.addEventListener('click', function() {
-        playerChoice = null; botChoice = null; gameResult = null; roundOver = false;
+  function hasWinner(sym) { return WIN_LINES.some(line => line.every(i => board[i] === sym)); }
+  function findLine(sym) { return WIN_LINES.find(line => line.every(i => board[i] === sym)); }
+
+  function checkEnd() {
+    let line = findLine('X');
+    if (line) { gameOver = true; render(); drawWinLine(line); setTimeout(() => endDuel(true, 'You win!'), 600); return true; }
+    line = findLine('O');
+    if (line) { gameOver = true; render(); drawWinLine(line); setTimeout(() => endDuel(false, 'Opponent won.'), 600); return true; }
+    if (board.every(c => c)) { gameOver = true; setTimeout(endDrawnMatch, 400); return true; }
+    return false;
+  }
+
+  function drawWinLine(line) {
+    const svg = document.getElementById('ttt-line');
+    if (!svg) return;
+    svg.innerHTML = '';
+    const cellSize = 58, gap = 4, step = cellSize + gap;
+    const centers = [0,1,2,3,4,5,6,7,8].map(i => { const r = Math.floor(i/3), c = i%3; return [c*step + cellSize/2, r*step + cellSize/2]; });
+    const [x1,y1] = centers[line[0]], [x2,y2] = centers[line[2]];
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    path.setAttribute('x1', x1); path.setAttribute('y1', y1); path.setAttribute('x2', x1); path.setAttribute('y2', y1);
+    path.setAttribute('class', 'ttt-winline');
+    svg.appendChild(path);
+    requestAnimationFrame(() => { path.style.transition = 'x2 0.35s ease, y2 0.35s ease';
+      path.setAttribute('x2', x2); path.setAttribute('y2', y2); });
+  }
+  render();
+}
+
+// ---- RPS ----
+function runRPS() {
+  const stage = document.getElementById('arena-stage');
+  if (!stage) return;
+  
+  const choices = ['✊', '✋', '✌️'];
+  let playerChoice = null, botChoice = null, gameResult = null, roundOver = false;
+
+  function renderRPS() {
+    stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
+      <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+      <div style="display:flex;justify-content:space-around;margin:16px 0;">
+        <div><div style="font-size:2.5rem;margin:4px 0;">${playerChoice || '❓'}</div><span style="font-size:0.7rem;color:#5c5a6e;">You</span></div>
+        <div style="font-size:2rem;color:#5c5a6e;">VS</div>
+        <div><div style="font-size:2.5rem;margin:4px 0;">${botChoice || '❓'}</div><span style="font-size:0.7rem;color:#5c5a6e;">${activeOpponent.name}</span></div>
+      </div>
+      ${!playerChoice ? `<div style="display:flex;gap:12px;justify-content:center;">
+        ${choices.map((c, i) => `<button class="rps-option" data-choice="${i}" style="font-size:1.8rem;padding:8px 20px;background:#fff;border:1px solid #eee9f7;border-radius:10px;cursor:pointer;">${c}</button>`).join('')}
+      </div>` : ''}
+      ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : gameResult === 'lose' ? '😞 You Lose!' : '🤝 Draw!'}</div>` : ''}
+      ${gameResult ? `<button class="btn-primary" id="rps-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
+    </div>`;
+    
+    document.querySelectorAll('.rps-option').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (roundOver) return;
+        const idx = parseInt(this.dataset.choice);
+        playerChoice = choices[idx];
+        botChoice = choices[Math.floor(Math.random() * choices.length)];
+        const pIdx = choices.indexOf(playerChoice);
+        const bIdx = choices.indexOf(botChoice);
+        if (pIdx === bIdx) gameResult = 'draw';
+        else if ((pIdx === 0 && bIdx === 2) || (pIdx === 1 && bIdx === 0) || (pIdx === 2 && bIdx === 1)) gameResult = 'win';
+        else gameResult = 'lose';
+        roundOver = true;
         renderRPS();
-      });
-    }
-    renderRPS();
-    return;
-  }
-
-  // ---- HIGHER LOWER ----
-  if (type === 'higherlower') {
-    let secretNumber = Math.floor(Math.random() * 100) + 1;
-    let guess = null;
-    let attempts = 0;
-    let gameOver = false;
-    let gameResult = null;
-
-    function renderHL() {
-      stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
-        <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-        <div style="font-size:3rem;margin:10px 0;">🔢</div>
-        <p style="font-size:0.9rem;margin:8px 0;">${guess !== null ? `Your guess: ${guess} - ${guess === secretNumber ? '🎉 Correct!' : guess < secretNumber ? '⬆️ Higher!' : '⬇️ Lower!'}` : 'Guess a number between 1 and 100'}</p>
-        <p style="font-size:0.7rem;color:#5c5a6e;">Attempts: ${attempts}/7</p>
-        ${!gameOver ? `<div style="display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap;">
-          <input type="number" id="guess-input" min="1" max="100" style="padding:8px 12px;border:1px solid #eee9f7;border-radius:8px;width:100px;font-size:1rem;">
-          <button id="guess-btn" style="padding:8px 20px;background:#5b3df0;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Guess</button>
-        </div>` : ''}
-        ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : '😞 You Lose! The number was ' + secretNumber}</div>` : ''}
-        ${gameResult ? `<button class="btn-primary" id="hl-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
-      </div>`;
-      
-      document.getElementById('guess-btn')?.addEventListener('click', function() {
-        if (gameOver) return;
-        const input = document.getElementById('guess-input');
-        const val = parseInt(input.value);
-        if (isNaN(val) || val < 1 || val > 100) { alert('Please enter a number between 1 and 100'); return; }
-        guess = val;
-        attempts++;
-        if (guess === secretNumber) {
-          gameOver = true;
-          gameResult = 'win';
-          renderHL();
-          setTimeout(() => endDuel(true, 'You guessed correctly!'), 1000);
-        } else if (attempts >= 7) {
-          gameOver = true;
-          gameResult = 'lose';
-          renderHL();
-          setTimeout(() => endDuel(false, 'Out of attempts!'), 1000);
-        } else {
-          renderHL();
-        }
-      });
-      
-      document.getElementById('hl-rematch')?.addEventListener('click', function() {
-        secretNumber = Math.floor(Math.random() * 100) + 1;
-        guess = null;
-        attempts = 0;
-        gameOver = false;
-        gameResult = null;
-        renderHL();
-      });
-    }
-    renderHL();
-    return;
-  }
-
-  // ---- DICE BATTLE ----
-  if (type === 'dice') {
-    let playerRoll = null;
-    let botRoll = null;
-    let gameResult = null;
-    let rolled = false;
-
-    function renderDice() {
-      stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
-        <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-        <div style="display:flex;justify-content:space-around;margin:16px 0;">
-          <div><div style="font-size:3rem;margin:4px 0;">${playerRoll !== null ? ['⚀','⚁','⚂','⚃','⚄','⚅'][playerRoll-1] : '🎲'}</div><span style="font-size:0.7rem;color:#5c5a6e;">You</span></div>
-          <div style="font-size:2rem;color:#5c5a6e;">VS</div>
-          <div><div style="font-size:3rem;margin:4px 0;">${botRoll !== null ? ['⚀','⚁','⚂','⚃','⚄','⚅'][botRoll-1] : '🎲'}</div><span style="font-size:0.7rem;color:#5c5a6e;">${activeOpponent.name}</span></div>
-        </div>
-        ${!rolled ? `<button id="roll-btn" style="padding:10px 30px;background:#5b3df0;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">🎲 Roll Dice</button>` : ''}
-        ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : gameResult === 'lose' ? '😞 You Lose!' : '🤝 Draw!'}</div>` : ''}
-        ${gameResult ? `<button class="btn-primary" id="dice-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
-      </div>`;
-      
-      document.getElementById('roll-btn')?.addEventListener('click', function() {
-        if (rolled) return;
-        rolled = true;
-        playerRoll = Math.floor(Math.random() * 6) + 1;
-        botRoll = Math.floor(Math.random() * 6) + 1;
-        if (playerRoll > botRoll) gameResult = 'win';
-        else if (playerRoll < botRoll) gameResult = 'lose';
-        else gameResult = 'draw';
-        renderDice();
         setTimeout(() => {
-          if (gameResult === 'win') endDuel(true, 'You rolled higher!');
-          else if (gameResult === 'lose') endDuel(false, 'Opponent rolled higher.');
+          if (gameResult === 'win') endDuel(true, 'You won RPS!');
+          else if (gameResult === 'lose') endDuel(false, 'You lost RPS.');
           else endDrawnMatch();
         }, 1500);
       });
-      
-      document.getElementById('dice-rematch')?.addEventListener('click', function() {
-        playerRoll = null; botRoll = null; gameResult = null; rolled = false;
-        renderDice();
-      });
-    }
-    renderDice();
-    return;
+    });
+    
+    document.getElementById('rps-rematch')?.addEventListener('click', function() {
+      playerChoice = null; botChoice = null; gameResult = null; roundOver = false;
+      renderRPS();
+    });
   }
+  renderRPS();
+}
 
-  // ---- TAP RACE ----
-  if (type === 'tap') {
-    let playerTaps = 0;
-    let botTaps = 0;
-    let timeLeft = 5;
-    let gameRunning = false;
-    let gameResult = null;
-    let timerInterval = null;
-    let botInterval = null;
+// ---- HIGHER LOWER ----
+function runHigherLower() {
+  const stage = document.getElementById('arena-stage');
+  if (!stage) return;
+  
+  let secretNumber = Math.floor(Math.random() * 100) + 1;
+  let guess = null, attempts = 0, gameOver = false, gameResult = null;
 
-    function renderTap() {
-      stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
-        <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-        <div style="display:flex;justify-content:space-around;margin:12px 0;">
-          <div><div style="font-size:2rem;font-weight:800;color:#5b3df0;">${playerTaps}</div><span style="font-size:0.7rem;color:#5c5a6e;">You</span></div>
-          <div style="font-size:2rem;color:#5c5a6e;">VS</div>
-          <div><div style="font-size:2rem;font-weight:800;color:#f0a742;">${botTaps}</div><span style="font-size:0.7rem;color:#5c5a6e;">${activeOpponent.name}</span></div>
-        </div>
-        <div style="font-size:1.2rem;font-weight:700;margin:6px 0;">⏱️ ${timeLeft}s</div>
-        ${!gameRunning && !gameResult ? `<button id="tap-start-btn" style="padding:10px 30px;background:#16c46b;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">🚀 Start</button>` : ''}
-        ${gameRunning ? `<button id="tap-btn" style="padding:20px 40px;background:#5b3df0;color:#fff;border:none;border-radius:12px;font-weight:700;font-size:1.5rem;cursor:pointer;">👆 TAP!</button>` : ''}
-        ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : '😞 You Lose!'}</div>` : ''}
-        ${gameResult ? `<button class="btn-primary" id="tap-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
-      </div>`;
-      
-      document.getElementById('tap-start-btn')?.addEventListener('click', function() {
-        if (gameRunning) return;
-        playerTaps = 0;
-        botTaps = 0;
-        timeLeft = 5;
-        gameRunning = true;
-        gameResult = null;
-        renderTap();
-        if (botInterval) clearInterval(botInterval);
-        botInterval = setInterval(() => {
-          if (gameRunning) {
-            botTaps += Math.floor(Math.random() * 3) + 1;
-            renderTap();
-          }
-        }, 200);
-        gameTimers.push(botInterval);
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-          timeLeft--;
+  function renderHL() {
+    stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
+      <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+      <div style="font-size:3rem;margin:10px 0;">🔢</div>
+      <p style="font-size:0.9rem;margin:8px 0;">${guess !== null ? `Your guess: ${guess} - ${guess === secretNumber ? '🎉 Correct!' : guess < secretNumber ? '⬆️ Higher!' : '⬇️ Lower!'}` : 'Guess a number between 1 and 100'}</p>
+      <p style="font-size:0.7rem;color:#5c5a6e;">Attempts: ${attempts}/7</p>
+      ${!gameOver ? `<div style="display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap;">
+        <input type="number" id="guess-input" min="1" max="100" style="padding:8px 12px;border:1px solid #eee9f7;border-radius:8px;width:100px;font-size:1rem;">
+        <button id="guess-btn" style="padding:8px 20px;background:#5b3df0;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Guess</button>
+      </div>` : ''}
+      ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : '😞 You Lose! The number was ' + secretNumber}</div>` : ''}
+      ${gameResult ? `<button class="btn-primary" id="hl-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
+    </div>`;
+    
+    document.getElementById('guess-btn')?.addEventListener('click', function() {
+      if (gameOver) return;
+      const input = document.getElementById('guess-input');
+      const val = parseInt(input.value);
+      if (isNaN(val) || val < 1 || val > 100) { alert('Please enter a number between 1 and 100'); return; }
+      guess = val;
+      attempts++;
+      if (guess === secretNumber) {
+        gameOver = true;
+        gameResult = 'win';
+        renderHL();
+        setTimeout(() => endDuel(true, 'You guessed correctly!'), 1000);
+      } else if (attempts >= 7) {
+        gameOver = true;
+        gameResult = 'lose';
+        renderHL();
+        setTimeout(() => endDuel(false, 'Out of attempts!'), 1000);
+      } else {
+        renderHL();
+      }
+    });
+    
+    document.getElementById('hl-rematch')?.addEventListener('click', function() {
+      secretNumber = Math.floor(Math.random() * 100) + 1;
+      guess = null; attempts = 0; gameOver = false; gameResult = null;
+      renderHL();
+    });
+  }
+  renderHL();
+}
+
+// ---- DICE BATTLE ----
+function runDice() {
+  const stage = document.getElementById('arena-stage');
+  if (!stage) return;
+  
+  let playerRoll = null, botRoll = null, gameResult = null, rolled = false;
+
+  function renderDice() {
+    stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
+      <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+      <div style="display:flex;justify-content:space-around;margin:16px 0;">
+        <div><div style="font-size:3rem;margin:4px 0;">${playerRoll !== null ? ['⚀','⚁','⚂','⚃','⚄','⚅'][playerRoll-1] : '🎲'}</div><span style="font-size:0.7rem;color:#5c5a6e;">You</span></div>
+        <div style="font-size:2rem;color:#5c5a6e;">VS</div>
+        <div><div style="font-size:3rem;margin:4px 0;">${botRoll !== null ? ['⚀','⚁','⚂','⚃','⚄','⚅'][botRoll-1] : '🎲'}</div><span style="font-size:0.7rem;color:#5c5a6e;">${activeOpponent.name}</span></div>
+      </div>
+      ${!rolled ? `<button id="roll-btn" style="padding:10px 30px;background:#5b3df0;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">🎲 Roll Dice</button>` : ''}
+      ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : gameResult === 'lose' ? '😞 You Lose!' : '🤝 Draw!'}</div>` : ''}
+      ${gameResult ? `<button class="btn-primary" id="dice-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
+    </div>`;
+    
+    document.getElementById('roll-btn')?.addEventListener('click', function() {
+      if (rolled) return;
+      rolled = true;
+      playerRoll = Math.floor(Math.random() * 6) + 1;
+      botRoll = Math.floor(Math.random() * 6) + 1;
+      if (playerRoll > botRoll) gameResult = 'win';
+      else if (playerRoll < botRoll) gameResult = 'lose';
+      else gameResult = 'draw';
+      renderDice();
+      setTimeout(() => {
+        if (gameResult === 'win') endDuel(true, 'You rolled higher!');
+        else if (gameResult === 'lose') endDuel(false, 'Opponent rolled higher.');
+        else endDrawnMatch();
+      }, 1500);
+    });
+    
+    document.getElementById('dice-rematch')?.addEventListener('click', function() {
+      playerRoll = null; botRoll = null; gameResult = null; rolled = false;
+      renderDice();
+    });
+  }
+  renderDice();
+}
+
+// ---- TAP RACE ----
+function runTap() {
+  const stage = document.getElementById('arena-stage');
+  if (!stage) return;
+  
+  let playerTaps = 0, botTaps = 0, timeLeft = 5, gameRunning = false, gameResult = null;
+  let timerInterval = null, botInterval = null;
+
+  function renderTap() {
+    stage.innerHTML = `<div style="width:100%;text-align:center;padding:10px;">
+      <p class="subtitle" style="font-size:0.75rem;color:#5c5a6e;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+      <div style="display:flex;justify-content:space-around;margin:12px 0;">
+        <div><div style="font-size:2rem;font-weight:800;color:#5b3df0;">${playerTaps}</div><span style="font-size:0.7rem;color:#5c5a6e;">You</span></div>
+        <div style="font-size:2rem;color:#5c5a6e;">VS</div>
+        <div><div style="font-size:2rem;font-weight:800;color:#f0a742;">${botTaps}</div><span style="font-size:0.7rem;color:#5c5a6e;">${activeOpponent.name}</span></div>
+      </div>
+      <div style="font-size:1.2rem;font-weight:700;margin:6px 0;">⏱️ ${timeLeft}s</div>
+      ${!gameRunning && !gameResult ? `<button id="tap-start-btn" style="padding:10px 30px;background:#16c46b;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">🚀 Start</button>` : ''}
+      ${gameRunning ? `<button id="tap-btn" style="padding:20px 40px;background:#5b3df0;color:#fff;border:none;border-radius:12px;font-weight:700;font-size:1.5rem;cursor:pointer;">👆 TAP!</button>` : ''}
+      ${gameResult ? `<div style="margin:12px 0;font-weight:700;font-size:1.2rem;color:${gameResult === 'win' ? '#16c46b' : '#e2555a'};">${gameResult === 'win' ? '🎉 You Win!' : '😞 You Lose!'}</div>` : ''}
+      ${gameResult ? `<button class="btn-primary" id="tap-rematch" style="margin:8px auto;padding:10px 24px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Play Again</button>` : ''}
+    </div>`;
+    
+    document.getElementById('tap-start-btn')?.addEventListener('click', function() {
+      if (gameRunning) return;
+      playerTaps = 0; botTaps = 0; timeLeft = 5; gameRunning = true; gameResult = null;
+      renderTap();
+      if (botInterval) clearInterval(botInterval);
+      botInterval = setInterval(() => {
+        if (gameRunning) {
+          botTaps += Math.floor(Math.random() * 3) + 1;
           renderTap();
-          if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            clearInterval(botInterval);
-            gameRunning = false;
-            if (playerTaps > botTaps) gameResult = 'win';
-            else if (playerTaps < botTaps) gameResult = 'lose';
-            else gameResult = 'draw';
-            renderTap();
-            setTimeout(() => {
-              if (gameResult === 'win') endDuel(true, 'You tapped more!');
-              else if (gameResult === 'lose') endDuel(false, 'Opponent tapped more.');
-              else endDrawnMatch();
-            }, 1000);
-          }
-        }, 1000);
-        gameTimers.push(timerInterval);
-      });
-      
-      document.getElementById('tap-btn')?.addEventListener('click', function() {
-        if (!gameRunning) return;
-        playerTaps++;
+        }
+      }, 200);
+      gameTimers.push(botInterval);
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
         renderTap();
-      });
-      
-      document.getElementById('tap-rematch')?.addEventListener('click', function() {
-        if (timerInterval) clearInterval(timerInterval);
-        if (botInterval) clearInterval(botInterval);
-        playerTaps = 0; botTaps = 0; timeLeft = 5; gameRunning = false; gameResult = null;
-        renderTap();
-      });
-    }
-    renderTap();
-    return;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          clearInterval(botInterval);
+          gameRunning = false;
+          if (playerTaps > botTaps) gameResult = 'win';
+          else if (playerTaps < botTaps) gameResult = 'lose';
+          else gameResult = 'draw';
+          renderTap();
+          setTimeout(() => {
+            if (gameResult === 'win') endDuel(true, 'You tapped more!');
+            else if (gameResult === 'lose') endDuel(false, 'Opponent tapped more.');
+            else endDrawnMatch();
+          }, 1000);
+        }
+      }, 1000);
+      gameTimers.push(timerInterval);
+    });
+    
+    document.getElementById('tap-btn')?.addEventListener('click', function() {
+      if (!gameRunning) return;
+      playerTaps++;
+      renderTap();
+    });
+    
+    document.getElementById('tap-rematch')?.addEventListener('click', function() {
+      if (timerInterval) clearInterval(timerInterval);
+      if (botInterval) clearInterval(botInterval);
+      playerTaps = 0; botTaps = 0; timeLeft = 5; gameRunning = false; gameResult = null;
+      renderTap();
+    });
   }
+  renderTap();
+}
 
-  // ---- DEFAULT for other games ----
-  stage.innerHTML = `<div style="text-align:center;padding:20px;width:100%;">
-    <h3 style="font-family:'Poppins',sans-serif;font-size:1.1rem;">${activeGame.name}</h3>
-    <p style="color:#5c5a6e;margin:6px 0;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:12px 0;">
-      <button class="play-btn" style="max-width:160px;margin:4px auto;background:#5b3df0;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;" onclick="window.endDuel(true,'You won this round!')">Win Round</button>
-      <button class="play-btn" style="max-width:160px;margin:4px auto;background:#e2555a;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;" onclick="window.endDuel(false,'You lost this round.')">Lose Round</button>
-    </div>
-    <p style="font-size:0.7rem;color:#918fa3;margin-top:6px;">More games coming soon!</p>
-  </div>`;
+// ---- Main Game Router ----
+function runGame(type) {
+  switch(type) {
+    case 'tictactoe': runTicTacToe(); break;
+    case 'rps': runRPS(); break;
+    case 'higherlower': runHigherLower(); break;
+    case 'dice': runDice(); break;
+    case 'tap': runTap(); break;
+    default:
+      const stage = document.getElementById('arena-stage');
+      if (stage) {
+        stage.innerHTML = `<div style="text-align:center;padding:20px;width:100%;">
+          <h3 style="font-family:'Poppins',sans-serif;font-size:1.1rem;">${activeGame ? activeGame.name : 'Game'}</h3>
+          <p style="color:#5c5a6e;margin:6px 0;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
+          <p style="font-size:0.9rem;color:#161522;margin:12px 0;">Game coming soon! 🎮</p>
+          <button class="btn-primary" onclick="window.endDuel(false, 'Game not available yet.')" style="padding:10px 20px;background:#5b3df0;color:#fff;border-radius:10px;font-weight:700;border:none;cursor:pointer;">Return</button>
+        </div>`;
+      }
+  }
 }
 
 // ---- End Duel Functions ----
@@ -3752,9 +3786,12 @@ async function endDuel(won, analysisText) {
   if (stage) {
     const rewardLine = won ? '+' + formatRupees(currentReward) + ' Awarded' : formatRupees(-currentEntryFee) + ' Stake Lost';
     stage.innerHTML = `<div class="result-card"><h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2><p style="font-weight:700;color:#918fa3;">${rewardLine}</p><div class="result-analytics"><div>${analysisText}</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#5b3df0;color:#fff;">Dashboard</button></div></div>`;
-    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; } beginMatchmaking(); });
+    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); document.body.classList.remove('game-active'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; } beginMatchmaking(); });
     document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); isGameActive = false; document.body.classList.remove('game-active'); });
   }
+  // Clear game timers
+  gameTimers.forEach(t => clearInterval(t));
+  gameTimers = [];
 }
 
 async function endDrawnMatch() {
@@ -3767,9 +3804,11 @@ async function endDrawnMatch() {
   const stage = document.getElementById('arena-stage');
   if (stage) {
     stage.innerHTML = `<div class="result-card"><h2 style="color:#5c5a6e;">DRAW</h2><p style="font-weight:700;color:#918fa3;">Stake Refunded</p><div class="result-analytics"><div>Stalemate — entry fee refunded.</div></div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn" style="background:#5b3df0;color:#fff;">Dashboard</button></div></div>`;
-    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; } beginMatchmaking(); });
+    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); document.body.classList.remove('game-active'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; } beginMatchmaking(); });
     document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); isGameActive = false; document.body.classList.remove('game-active'); });
   }
+  gameTimers.forEach(t => clearInterval(t));
+  gameTimers = [];
 }
 
 // ---- Game Play Button Handler ----
@@ -3789,7 +3828,6 @@ document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
 cancelMatchBtn?.addEventListener('click', async () => {
   const was = inQueue; 
   inQueue = false;
-  if (window.matchmakingInterval) { clearInterval(window.matchmakingInterval); window.matchmakingInterval = null; }
   if (matchOverlay) matchOverlay.classList.add('hidden');
   if (currentUser && was) {
     await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
@@ -3916,6 +3954,7 @@ async function initDashboard() {
       document.getElementById('page-landing').style.display = 'block';
       document.getElementById('page-container').style.display = 'none';
       document.getElementById('dashboard').classList.add('hidden'); 
+      currentPageType = 'landing';
       return; 
     }
     currentUser = session.user;
@@ -3930,8 +3969,8 @@ async function initDashboard() {
     document.getElementById('page-landing').style.display = 'none';
     document.getElementById('page-container').style.display = 'none';
     document.getElementById('dashboard').classList.remove('hidden');
-    
-    // Check for payment return
+    currentPageType = 'dashboard';
+    isOnDashboard = true;
     checkPaymentReturn();
   } catch (e) { console.error(e); }
 }
@@ -3945,7 +3984,8 @@ async function routeOnLoad() {
   } else { 
     document.getElementById('page-landing').style.display = 'block';
     document.getElementById('page-container').style.display = 'none';
-    document.getElementById('dashboard').classList.add('hidden'); 
+    document.getElementById('dashboard').classList.add('hidden');
+    currentPageType = 'landing';
   }
 }
 
@@ -3958,13 +3998,6 @@ window.addEventListener('beforeunload', (e) => {
   }
   if (inQueue && currentUser) { 
     client.from('matchmaking_queue').delete().eq('user_id', currentUser.id).then(() => {}, () => {}); 
-  }
-});
-
-// ---- Handle page visibility change to prevent accidental refresh ----
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden && isGameActive) {
-    // User switched tabs while in game - we keep the game state
   }
 });
 
