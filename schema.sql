@@ -1,7 +1,8 @@
 -- ============================================================
--- SkillClash - MASTER SCHEMA v3
--- Updated with new pricing: entry ₹15-25, rewards ₹25-45
--- Cashout minimum ₹150, Welcome bonus ₹50
+-- SkillClash - MASTER SCHEMA v4
+-- Adds: game_sessions table for REAL live 2-player games
+-- Updates: claim_opponent now creates a shared game session
+-- Keeps: entry ₹15-25, rewards ₹25-45, cashout ₹150, welcome ₹50
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -39,7 +40,7 @@ create policy "Users can insert their own profile"
   on public.users for insert with check (auth.uid() = id);
 
 -- ------------------------------------------------------------
--- WALLET - Default balance is now 50 (welcome bonus)
+-- WALLET - Default balance is 50 (welcome bonus)
 -- ------------------------------------------------------------
 create table if not exists public.wallet (
   id uuid primary key default gen_random_uuid(),
@@ -58,6 +59,10 @@ create policy "Users can update their own wallet"
   on public.wallet for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+drop policy if exists "Users can insert their own wallet" on public.wallet;
+create policy "Users can insert their own wallet"
+  on public.wallet for insert with check (auth.uid() = user_id);
 
 -- ------------------------------------------------------------
 -- MATCHMAKING QUEUE
@@ -156,6 +161,60 @@ create policy "Users can insert their own match history"
   on public.match_history for insert with check (auth.uid() = user_id);
 
 -- ------------------------------------------------------------
+-- GAME SESSIONS - shared live state for REAL 2-player games
+-- ------------------------------------------------------------
+create table if not exists public.game_sessions (
+  id uuid primary key default gen_random_uuid(),
+  game_type text not null,
+  player1_id uuid not null references public.users (id) on delete cascade,
+  player2_id uuid references public.users (id) on delete cascade,
+  state jsonb not null default '{}'::jsonb,
+  current_turn text not null default 'player1',
+  status text not null default 'active'
+    check (status in ('active', 'completed', 'abandoned')),
+  winner_id uuid references public.users (id),
+  entry_fee integer not null default 15,
+  reward integer not null default 25,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists game_sessions_players_idx
+  on public.game_sessions (player1_id, player2_id);
+
+create index if not exists game_sessions_status_idx
+  on public.game_sessions (status);
+
+alter table public.game_sessions enable row level security;
+
+drop policy if exists "Players can view their game sessions" on public.game_sessions;
+create policy "Players can view their game sessions"
+  on public.game_sessions for select
+  using (auth.uid() = player1_id or auth.uid() = player2_id);
+
+drop policy if exists "Players can insert their game sessions" on public.game_sessions;
+create policy "Players can insert their game sessions"
+  on public.game_sessions for insert
+  with check (auth.uid() = player1_id or auth.uid() = player2_id);
+
+drop policy if exists "Players can update their game sessions" on public.game_sessions;
+create policy "Players can update their game sessions"
+  on public.game_sessions for update
+  using (auth.uid() = player1_id or auth.uid() = player2_id);
+
+-- Enable realtime on game_sessions so both players get live updates.
+-- Wrapped in a DO block so re-running this file won't error if already added.
+do $$
+begin
+  begin
+    alter publication supabase_realtime add table public.game_sessions;
+  exception
+    when duplicate_object then null;
+    when undefined_object then null;
+  end;
+end $$;
+
+-- ------------------------------------------------------------
 -- AUTO-PROVISION NEW USERS - Welcome bonus ₹50
 -- ------------------------------------------------------------
 create or replace function public.handle_new_user()
@@ -187,51 +246,72 @@ create trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 -- ------------------------------------------------------------
--- CLAIM_OPPONENT: atomically pairs you with a genuinely-online
--- waiting player, or returns null if none exist.
+-- CLAIM_OPPONENT
+-- Pairs you with a genuinely-online waiting player and creates
+-- a shared game_session both players can read/write in realtime.
+-- Returns: { matched: bool, session_id, opponent_id, you_are }
 -- ------------------------------------------------------------
-create or replace function public.claim_opponent(p_game_type text, p_entry_fee integer default 15)
-returns public.matches
+create or replace function public.claim_opponent(
+  p_game_type text,
+  p_entry_fee integer default 15,
+  p_reward integer default 25
+)
+returns json
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
   v_opponent_id uuid;
-  v_match public.matches;
+  v_me uuid := auth.uid();
+  v_session_id uuid;
 begin
+  -- purge stale queue entries (offline > 15s)
   delete from public.matchmaking_queue mq
   using public.users u
   where mq.user_id = u.id
     and mq.game_type = p_game_type
     and u.last_seen < now() - interval '15 seconds';
 
+  -- pick a genuinely-online waiting opponent
   select mq.user_id into v_opponent_id
   from public.matchmaking_queue mq
   join public.users u on u.id = mq.user_id
   where mq.game_type = p_game_type
-    and mq.user_id <> auth.uid()
+    and mq.user_id <> v_me
     and u.last_seen >= now() - interval '15 seconds'
   order by mq.created_at asc
   for update of mq skip locked
   limit 1;
 
   if v_opponent_id is null then
-    return null;
+    return json_build_object('matched', false);
   end if;
 
-  delete from public.matchmaking_queue where user_id = v_opponent_id;
-  delete from public.matchmaking_queue where user_id = auth.uid();
+  -- remove both from the queue
+  delete from public.matchmaking_queue where user_id in (v_opponent_id, v_me);
 
-  insert into public.matches (game_type, player1_id, player2_id, entry_fee)
-  values (p_game_type, v_opponent_id, auth.uid(), p_entry_fee)
-  returning * into v_match;
+  -- create the shared live session
+  insert into public.game_sessions (
+    game_type, player1_id, player2_id, state, current_turn,
+    status, entry_fee, reward
+  )
+  values (
+    p_game_type, v_opponent_id, v_me,
+    '{}'::jsonb, 'player1', 'active', p_entry_fee, p_reward
+  )
+  returning id into v_session_id;
 
-  return v_match;
+  return json_build_object(
+    'matched', true,
+    'session_id', v_session_id,
+    'opponent_id', v_opponent_id,
+    'you_are', 'player2'
+  );
 end;
 $$;
 
-grant execute on function public.claim_opponent(text, integer) to authenticated;
+grant execute on function public.claim_opponent(text, integer, integer) to authenticated;
 
 -- ------------------------------------------------------------
 -- REDEEM_REFERRAL_CODE - ₹50 for referrer and ₹50 for new user
@@ -337,3 +417,7 @@ drop trigger if exists on_payment_approved on public.payment_requests;
 create trigger on_payment_approved
   before update on public.payment_requests
   for each row execute procedure public.process_payment_approval();
+
+-- ============================================================
+-- END OF SCHEMA v4
+-- ============================================================
