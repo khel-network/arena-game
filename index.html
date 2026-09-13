@@ -334,9 +334,10 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 @media (min-width:500px) { .app-wrap .games-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
 .app-wrap .game-card { background: rgba(255,255,255,0.85); border: 1px solid #e9e5f5; border-radius: 16px; overflow: hidden; transition: 0.25s ease; display: flex; flex-direction: column; box-shadow: 0 4px 16px rgba(20,15,50,0.04); min-height: 190px; }
 .app-wrap .game-card:hover { transform: translateY(-4px); border-color: #b8a8f0; box-shadow: 0 10px 28px rgba(91,61,240,0.12); }
-.app-wrap .card-media { height: 110px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-.app-wrap .card-media svg { width: 100%; height: 100%; display: block; }
-.app-wrap .card-badge { position: absolute; top: 8px; left: 8px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); padding: 3px 8px; border-radius: 100px; font-size: 9px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2; }
+.app-wrap .card-media { height: 110px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #100e19; }
+.app-wrap .card-media img.thumbnail { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s ease; }
+.app-wrap .game-card:hover .card-media img.thumbnail { transform: scale(1.045); }
+.app-wrap .card-badge { position: absolute; top: 6px; left: 8px; background: rgba(10, 9, 16, 0.55); backdrop-filter: blur(2px); padding: 2px 6px !important; border-radius: 100px; font-size: 9px !important; font-weight: 700; letter-spacing: 0.02em !important; color: #fff; text-transform: uppercase; max-width: calc(100% - 16px) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4 !important; z-index: 2; }
 .app-wrap .card-content { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; }
 .app-wrap .card-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 1px; color: #161522; line-height: 1.2; }
 .app-wrap .card-desc { font-size: 10px; color: #5c5a6e; line-height: 1.3; flex: 1; margin-bottom: 4px; }
@@ -701,66 +702,6 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .chat-input-row button { padding: 10px 18px; background: linear-gradient(135deg, #5b3df0, #7c5cf5); color: #fff; border-radius: 100px; font-weight: 700; font-size: 0.8rem; transition: 0.2s; white-space: nowrap; flex-shrink: 0; }
 .chat-input-row button:hover { transform: translateY(-1px); }
 .chat-input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* ===== GAME CARD THUMBNAIL ANIMATIONS ===== */
-/* All animations used inside game card SVGs. */
-@keyframes drawStroke {
-  0% { stroke-dashoffset: 40; opacity: 0; }
-  50% { stroke-dashoffset: 0; opacity: 1; }
-  100% { stroke-dashoffset: -40; opacity: 0; }
-}
-.anim-draw { stroke-dasharray: 40; animation: drawStroke 2s infinite ease-in-out; }
-
-@keyframes dropDown {
-  0% { transform: translateY(-35px); opacity: 0; }
-  40% { transform: translateY(0px); opacity: 1; }
-  80%, 100% { transform: translateY(0px); opacity: 1; }
-}
-.anim-drop { animation: dropDown 2s infinite cubic-bezier(0.25, 1, 0.5, 1); transform-origin: center; }
-
-@keyframes slideTake {
-  0%, 30% { transform: translateX(0); opacity: 1; }
-  60% { transform: translateX(18px) scale(0.5); opacity: 0; }
-  100% { transform: translateX(0); opacity: 0; }
-}
-.anim-slide { animation: slideTake 2s infinite ease-in-out; }
-
-@keyframes tapBounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(0.82) translateY(5px); }
-}
-.anim-tap { animation: tapBounce 0.8s infinite ease-in-out; transform-origin: center; }
-
-@keyframes flashColor {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; filter: drop-shadow(0 0 6px currentColor); }
-}
-.anim-flash { animation: flashColor 1.2s infinite ease-in-out; }
-
-@keyframes popUp {
-  0%, 60%, 100% { transform: translateY(12px); }
-  20%, 40% { transform: translateY(-3px); }
-}
-.anim-mole { animation: popUp 2s infinite ease-in-out; transform-origin: bottom; }
-
-@keyframes rollDiceAnim {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  35% { transform: rotate(-20deg) scale(1.08); }
-  70% { transform: rotate(15deg) scale(0.95); }
-}
-.anim-dice { animation: rollDiceAnim 2.5s infinite ease-in-out; transform-origin: center; }
-
-@keyframes floatIndicator {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-.anim-float { animation: floatIndicator 1.8s infinite ease-in-out; }
-
-@keyframes rotateGear {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-.anim-spin { animation: rotateGear 4s infinite linear; transform-origin: center; }
 </style>
 </head>
 <body>
@@ -1307,7 +1248,7 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 </div>
 <span class="vs-badge">VS</span>
 <div class="player-stat opp-side" id="arena-opp-side">
-<img id="arena-opp-avatar" class="arena-opp-avatar" src="" alt="Opponent" />
+<img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
 <span id="arena-opp-name" class="arena-name">Opponent</span>
 </div>
 </div>
@@ -1400,8 +1341,9 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 
 <script>
 // ============================================================
-// SKILLCLASH - v7
-// Adds: animated SVG thumbnails on game cards (matching each game's style)
+// SKILLCLASH - v8
+// Updates: dark minimal line-art thumbnails for all 21 games
+// Everything else identical to v6 (games, wallet, 2P, toasts, etc.)
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -2059,81 +2001,277 @@ document.getElementById('cashout-submit-btn')?.addEventListener('click', functio
 });
 
 /* ============================================================
-   GAME CATALOG — with thumbnail SVGs (animation + colors)
+   GAME CATALOG
    ============================================================
-   HOW TO EDIT THUMBNAILS LATER
-   -----------------------------
-   Each game below has a "thumb" object with:
-     - bg     : background color of the card media area
-     - icon   : inline SVG markup drawn inside a 60x50 viewBox
-                (coordinates are relative to center = 0,0)
-   Just edit "bg" or "icon" for any game. Animations are applied via
-   CSS classes (see .anim-* in the <style> block above).
-   Available animation classes:
-     anim-draw  → stroke draw (for lines)
-     anim-drop  → drops down (for falling pieces)
-     anim-slide → slides away (for taking stones)
-     anim-tap   → bounce down/up (for tap/click objects)
-     anim-flash → opacity flash (for lit tiles / highlights)
-     anim-mole  → pop-up motion (for moles / pop-ups)
-     anim-dice  → rotating wobble (for dice)
-     anim-float → gentle up/down float (for text / indicators)
-     anim-spin  → full rotation (for gears)
+   Each game object controls the card. Fields you can edit:
+     name    → title shown on card
+     desc    → subtitle
+     badge   → tiny pill top-left of thumbnail
+     entry   → stake ₹
+     reward  → win payout ₹
+     thumbnail → OPTIONAL image URL. If set, it renders as <img>.
+                 If not set, a dark SVG line-art thumbnail is
+                 generated automatically from the game's type.
+   To swap a thumbnail later: set `thumbnail: 'https://...'`.
    ============================================================ */
 const GAME_CATALOG = [
-  { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25,
-    thumb: { bg: '#fef3c7', icon: '<line x1="-15" y1="-15" x2="15" y2="15" stroke="#d97706" stroke-width="4" class="anim-draw"/><circle cx="0" cy="0" r="14" stroke="#4f46e5" stroke-width="3" fill="none"/>' } },
-  { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four in a row. Strategic battles.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35,
-    thumb: { bg: '#e0f2fe', icon: '<rect x="-24" y="-18" width="48" height="36" rx="4" fill="#0284c7"/><circle cx="-12" cy="0" r="5" fill="#ffffff"/><circle cx="0" cy="0" r="5" fill="#ef4444"/><circle cx="12" cy="0" r="5" class="anim-drop" fill="#eab308"/>' } },
-  { type: 'nim', name: 'Nim Duel', desc: 'Take stones from piles. Player who takes the last stone wins.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25,
-    thumb: { bg: '#f1f5f9', icon: '<circle cx="-15" cy="5" r="4" fill="#334155"/><circle cx="-5" cy="0" r="4" fill="#334155"/><circle cx="5" cy="-5" r="4" fill="#334155"/><circle cx="15" cy="-10" r="5" fill="#6366f1" class="anim-slide"/>' } },
-  { type: 'dots', name: 'Dots & Boxes', desc: 'Complete more boxes than your opponent on a 4x4 grid.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35,
-    thumb: { bg: '#ecfdf5', icon: '<rect x="-15" y="-15" width="30" height="30" fill="#10b981" fill-opacity="0.3" class="anim-flash"/><circle cx="-15" cy="-15" r="3" fill="#047857"/><circle cx="15" cy="-15" r="3" fill="#047857"/><circle cx="-15" cy="15" r="3" fill="#047857"/><circle cx="15" cy="15" r="3" fill="#047857"/>' } },
-  { type: 'rps', name: 'RPS Duel', desc: 'Best-of-3 rock, paper, scissors. Outsmart your opponent.', badge: 'CLASSIC', category: 'strategy', entry: 15, reward: 25,
-    thumb: { bg: '#fef9c3', icon: '<text x="0" y="8" font-size="28" text-anchor="middle" class="anim-tap">✊</text>' } },
-  { type: 'dice', name: 'Dice Battle', desc: 'Roll the dice. Higher number wins the round.', badge: 'LUCK', category: 'strategy', entry: 15, reward: 25,
-    thumb: { bg: '#dcfce7', icon: '<g class="anim-dice"><rect x="-18" y="-12" width="24" height="24" rx="4" fill="#ffffff" stroke="#166534" stroke-width="2"/><circle cx="-10" cy="-4" r="2" fill="#166534"/><circle cx="-2" cy="-4" r="2" fill="#166534"/><circle cx="-10" cy="4" r="2" fill="#166534"/><circle cx="-2" cy="4" r="2" fill="#166534"/></g>' } },
-  { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board. Test your memory.', badge: 'BRAIN', category: 'brain', entry: 15, reward: 25,
-    thumb: { bg: '#f3e8ff', icon: '<rect x="-18" y="-14" width="16" height="28" rx="3" fill="#9333ea" class="anim-float"/><rect x="2" y="-14" width="16" height="28" rx="3" fill="#c084fc"/>' } },
-  { type: 'memorylg', name: 'Memory Grid Pro', desc: '20-card memory grid. Find pairs before your opponent.', badge: 'BRAIN', category: 'brain', entry: 20, reward: 35,
-    thumb: { bg: '#e0e7ff', icon: '<rect x="-18" y="-18" width="8" height="8" fill="#4f46e5" class="anim-flash"/><rect x="-6" y="-18" width="8" height="8" fill="#818cf8"/><rect x="6" y="-18" width="8" height="8" fill="#4f46e5"/><rect x="-18" y="-6" width="8" height="8" fill="#818cf8"/><rect x="-6" y="-6" width="8" height="8" fill="#4f46e5" class="anim-flash"/><rect x="6" y="-6" width="8" height="8" fill="#818cf8"/>' } },
-  { type: 'higherlower', name: 'Higher-Lower', desc: 'Guess the secret number in fewest tries.', badge: 'LOGIC', category: 'brain', entry: 15, reward: 25,
-    thumb: { bg: '#ccfbf1', icon: '<path d="M0 -15 L10 0 L-10 0 Z" fill="#0d9488" class="anim-float"/><path d="M0 15 L10 0 L-10 0 Z" fill="#e11d48"/>' } },
-  { type: 'scramble', name: 'Word Scramble', desc: 'Unscramble the word. Fastest fingers win.', badge: 'WORD', category: 'brain', entry: 15, reward: 25,
-    thumb: { bg: '#fae8ff', icon: '<text x="0" y="6" font-size="22" font-weight="bold" fill="#a21caf" text-anchor="middle" class="anim-float">ABC</text>' } },
-  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed.', badge: 'SPEED', category: 'reflex', entry: 15, reward: 25,
-    thumb: { bg: '#ffedd5', icon: '<circle cx="0" cy="0" r="16" fill="#ea580c"/><circle cx="0" cy="0" r="8" fill="#ffffff" class="anim-tap"/>' } },
-  { type: 'simon', name: 'Simon Says', desc: 'Repeat the growing color pattern. Memory challenge.', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25,
-    thumb: { bg: '#fce7f3', icon: '<circle cx="0" cy="0" r="18" fill="#db2777"/><path d="M0 0 L0 -18 A18 18 0 0 1 18 0 Z" fill="#9333ea" class="anim-flash"/>' } },
-  { type: 'whack', name: 'Whack-a-Mole', desc: 'First to 15 hits wins. Reflexes matter.', badge: 'REFLEX', category: 'reflex', entry: 20, reward: 35,
-    thumb: { bg: '#fee2e2', icon: '<ellipse cx="0" cy="5" rx="14" ry="8" fill="#b91c1c"/><circle cx="0" cy="-4" r="7" fill="#f87171" class="anim-mole"/>' } },
-  { type: 'reaction', name: 'Reaction Duel', desc: 'Wait for green, then tap fastest. Classic reflex test.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25,
-    thumb: { bg: '#f3f4f6', icon: '<path d="M-4 -18 L6 -2 L0 -2 L4 18 L-6 2 L0 2 Z" fill="#eab308" class="anim-flash"/>' } },
-  { type: 'oddone', name: 'Odd One Out', desc: 'Spot the different tile. First to 8 correct wins.', badge: 'VISION', category: 'reflex', entry: 15, reward: 25,
-    thumb: { bg: '#ccfbf1', icon: '<rect x="-14" y="-14" width="10" height="10" fill="#0d9488"/><rect x="4" y="-14" width="10" height="10" fill="#0d9488"/><rect x="-14" y="4" width="10" height="10" fill="#f43f5e" class="anim-float"/><rect x="4" y="4" width="10" height="10" fill="#0d9488"/>' } },
-  { type: 'mathduel', name: 'Math Duel', desc: 'Solve equations fastest to win. Quick math.', badge: 'MATH', category: 'math', entry: 15, reward: 25,
-    thumb: { bg: '#e0f2fe', icon: '<text x="0" y="8" font-size="24" font-weight="bold" fill="#0284c7" text-anchor="middle" class="anim-float">∑ =</text>' } },
-  { type: 'reflex', name: 'Reflex Grid', desc: 'Tap the lit tile before it fades. Speed.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25,
-    thumb: { bg: '#fee2e2', icon: '<rect x="-12" y="-12" width="10" height="10" fill="#ef4444" class="anim-flash"/><rect x="2" y="-12" width="10" height="10" fill="#fca5a5"/><rect x="-12" y="2" width="10" height="10" fill="#fca5a5"/><rect x="2" y="2" width="10" height="10" fill="#fca5a5"/>' } },
-  { type: 'stroop', name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25,
-    thumb: { bg: '#fef3c7', icon: '<circle cx="-6" cy="0" r="10" fill="#3b82f6" fill-opacity="0.8" class="anim-float"/><circle cx="6" cy="0" r="10" fill="#eab308" fill-opacity="0.8"/>' } },
-  { type: 'recall', name: 'Sequence Recall', desc: 'Numbers flash, tap them back in order. Memory.', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25,
-    thumb: { bg: '#f3e8ff', icon: '<text x="0" y="6" font-size="18" font-weight="bold" fill="#7c3aed" text-anchor="middle" class="anim-float">1 2 3</text>' } },
-  { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve quick sums back-to-back. Speed math.', badge: 'MATH', category: 'math', entry: 15, reward: 25,
-    thumb: { bg: '#e0f2fe', icon: '<text x="0" y="6" font-size="16" font-weight="bold" fill="#0369a1" text-anchor="middle" class="anim-float">10 + 5</text>' } },
-  { type: 'battleship', name: 'Battleship Mini', desc: '5x5 grid. Find all 4 hidden ships first.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35,
-    thumb: { bg: '#dcfce7', icon: '<path d="M-12 6 L12 6 L8 0 L-8 0 Z" fill="#15803d" class="anim-float"/><circle cx="4" cy="-8" r="3" fill="#dc2626"/>' } }
+  { type: 'tictactoe',  name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25 },
+  { type: 'connect4',   name: 'Connect 4', desc: 'Drop discs and connect four in a row. Strategic battles.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 },
+  { type: 'nim',        name: 'Nim Duel', desc: 'Take stones from piles. Player who takes the last stone wins.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25 },
+  { type: 'dots',       name: 'Dots & Boxes', desc: 'Complete more boxes than your opponent on a 4x4 grid.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 },
+  { type: 'rps',        name: 'RPS Duel', desc: 'Best-of-3 rock, paper, scissors. Outsmart your opponent.', badge: 'CLASSIC', category: 'strategy', entry: 15, reward: 25 },
+  { type: 'dice',       name: 'Dice Battle', desc: 'Roll the dice. Higher number wins the round.', badge: 'LUCK', category: 'strategy', entry: 15, reward: 25 },
+  { type: 'memory',     name: 'Memory Match', desc: 'Flip pairs and clear the board. Test your memory.', badge: 'BRAIN', category: 'brain', entry: 15, reward: 25 },
+  { type: 'memorylg',   name: 'Memory Grid Pro', desc: '20-card memory grid. Find pairs before your opponent.', badge: 'BRAIN', category: 'brain', entry: 20, reward: 35 },
+  { type: 'higherlower',name: 'Higher-Lower', desc: 'Guess the secret number in fewest tries.', badge: 'LOGIC', category: 'brain', entry: 15, reward: 25 },
+  { type: 'scramble',   name: 'Word Scramble', desc: 'Unscramble the word. Fastest fingers win.', badge: 'WORD', category: 'brain', entry: 15, reward: 25 },
+  { type: 'tap',        name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed.', badge: 'SPEED', category: 'reflex', entry: 15, reward: 25 },
+  { type: 'simon',      name: 'Simon Says', desc: 'Repeat the growing color pattern. Memory challenge.', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25 },
+  { type: 'whack',      name: 'Whack-a-Mole', desc: 'First to 15 hits wins. Reflexes matter.', badge: 'REFLEX', category: 'reflex', entry: 20, reward: 35 },
+  { type: 'reaction',   name: 'Reaction Duel', desc: 'Wait for green, then tap fastest. Classic reflex test.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
+  { type: 'oddone',     name: 'Odd One Out', desc: 'Spot the different tile. First to 8 correct wins.', badge: 'VISION', category: 'reflex', entry: 15, reward: 25 },
+  { type: 'mathduel',   name: 'Math Duel', desc: 'Solve equations fastest to win. Quick math.', badge: 'MATH', category: 'math', entry: 15, reward: 25 },
+  { type: 'reflex',     name: 'Reflex Grid', desc: 'Tap the lit tile before it fades. Speed.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
+  { type: 'stroop',     name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
+  { type: 'recall',     name: 'Sequence Recall', desc: 'Numbers flash, tap them back in order. Memory.', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25 },
+  { type: 'mathchain',  name: 'Fast Math Chain', desc: 'Solve quick sums back-to-back. Speed math.', badge: 'MATH', category: 'math', entry: 15, reward: 25 },
+  { type: 'battleship', name: 'Battleship Mini', desc: '5x5 grid. Find all 4 hidden ships first.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 }
 ];
+
+// ---------------------------------------------------------------------------
+// Thumbnail engine — dark, adult "competitive esports" look.
+// Each game gets an inline SVG line-art icon keyed to its badge/category,
+// wrapped in a moody charcoal gradient card with a soft accent glow.
+// No image files, no emoji, no children's-app pastel look.
+// ---------------------------------------------------------------------------
+
+// Accent colour per category — this is what gives each thumbnail its identity.
+const CATEGORY_ACCENT = {
+  STRATEGY: '#8b6ef5',
+  CLASSIC:  '#f0a83e',
+  LUCK:     '#f2c94c',
+  BRAIN:    '#4fd1e0',
+  LOGIC:    '#f5567c',
+  WORD:     '#4be3a0',
+  SPEED:    '#ff7a45',
+  MEMORY:   '#b98cf7',
+  REFLEX:   '#ff5d73',
+  VISION:   '#4fe0c4',
+  MATH:     '#6f8dff'
+};
+const INK = '#f2f0ff';
+
+const el = {
+  line: (x1,y1,x2,y2,attr='') => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ${attr}/>`,
+  circle: (cx,cy,r,attr='') => `<circle cx="${cx}" cy="${cy}" r="${r}" ${attr}/>`,
+  rect: (x,y,w,h,rx,attr='') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" ${attr}/>`,
+  poly: (pts,attr='') => `<polygon points="${pts}" ${attr}/>`,
+  path: (d,attr='') => `<path d="${d}" ${attr}/>`,
+  text: (x,y,str,attr='') => `<text x="${x}" y="${y}" text-anchor="middle" font-family="Poppins, sans-serif" ${attr}>${str}</text>`,
+  g: (attr,inner) => `<g ${attr}>${inner}</g>`
+};
+
+function squareGrid(cols, rows, cell, gap, highlightIndex, accent) {
+  const w = cols * cell + (cols - 1) * gap;
+  const h = rows * cell + (rows - 1) * gap;
+  let out = '';
+  let i = 0;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = -w / 2 + c * (cell + gap);
+      const y = -h / 2 + r * (cell + gap);
+      const isHi = i === highlightIndex;
+      out += el.rect(x, y, cell, cell, 2, isHi
+        ? `fill="${accent}" fill-opacity="0.85" stroke="none"`
+        : `fill="none" stroke="${INK}" stroke-opacity="0.55" stroke-width="1.6"`);
+      i++;
+    }
+  }
+  return out;
+}
+
+// One icon builder per game "type". Every icon lives in a -30..30 box.
+const ICONS = {
+  tictactoe: (a) => `
+    ${el.line(-9,-26,-9,26)}${el.line(9,-26,9,26)}
+    ${el.line(-26,-9,26,-9)}${el.line(-26,9,26,9)}
+    <g stroke="${a}">${el.line(-22,-22,-13,-13)}${el.line(-13,-22,-22,-13)}</g>
+    ${el.circle(19.5,19.5,6,`stroke="${a}" fill="none"`)}
+  `,
+  connect4: (a) => `
+    ${el.rect(-24,-24,48,52,6,'fill="none"')}
+    ${el.line(-8,-24,-8,28)}${el.line(8,-24,8,28)}
+    ${el.circle(-16,16,6,`fill="${a}" stroke="none"`)}
+    ${el.circle(0,4,6,`fill="${INK}" stroke="none"`)}
+    ${el.circle(16,16,6,`fill="${a}" stroke="none"`)}
+    ${el.circle(0,-15,6,`stroke="${a}" stroke-dasharray="2 3" fill="none"`)}
+  `,
+  nim: (a) => `
+    ${el.line(-24,6,-24,24)}${el.line(-19,6,-19,24)}${el.line(-14,6,-14,24)}${el.line(-9,6,-9,24)}
+    ${el.line(3,10,3,24)}${el.line(9,10,9,24)}
+    <g stroke="${a}">${el.line(21,-4,21,24)}</g>
+    <g stroke="${a}">${el.line(4,-22,17,-9)}</g>
+    ${el.circle(18,-8,2,`fill="${a}" stroke="none"`)}
+  `,
+  dots: (a) => `
+    ${[-20,0,20].map(x=>[-20,0,20].map(y=>el.circle(x,y,2.3,`fill="${INK}" stroke="none"`)).join('')).join('')}
+    ${el.rect(-20,-20,20,20,0,`fill="${a}" fill-opacity="0.25" stroke="none"`)}
+    <g stroke="${a}">${el.line(-20,-20,0,-20)}${el.line(-20,-20,-20,0)}${el.line(0,-20,0,0)}${el.line(-20,0,0,0)}</g>
+  `,
+  rps: (a) => `
+    <g transform="translate(-13,9)">${el.poly('-8,-14 6,-14 13,0 6,14 -8,14 -15,0', `fill="none" stroke="${INK}"`)}</g>
+    <g transform="translate(14,9)">${el.line(-9,-9,9,9)}${el.line(9,-9,-9,9)}</g>
+    <g transform="translate(0,-15)">${el.rect(-11,-11,22,22,3,`fill="none" stroke="${a}"`)}</g>
+  `,
+  dice: (a) => `
+    ${el.rect(-23,-7,20,20,4,`fill="none" stroke="${INK}"`)}
+    ${el.circle(-18,-2,1.6,`fill="${INK}" stroke="none"`)}${el.circle(-8,-2,1.6,`fill="${INK}" stroke="none"`)}
+    ${el.circle(-18,8,1.6,`fill="${INK}" stroke="none"`)}${el.circle(-8,8,1.6,`fill="${INK}" stroke="none"`)}
+    ${el.rect(-3,-19,20,20,4,`fill="none" stroke="${a}"`)}
+    ${el.circle(7,-9,1.6,`fill="${a}" stroke="none"`)}
+    ${el.circle(2,-14,1.6,`fill="${a}" stroke="none"`)}${el.circle(12,-14,1.6,`fill="${a}" stroke="none"`)}
+    ${el.circle(2,-4,1.6,`fill="${a}" stroke="none"`)}${el.circle(12,-4,1.6,`fill="${a}" stroke="none"`)}
+    <g stroke="${INK}" stroke-opacity="0.5">${el.line(-27,-18,-23,-22)}${el.line(-20,-24,-16,-27)}</g>
+  `,
+  memory: (a) => `
+    ${el.rect(-20,-17,26,34,4,`fill="none" stroke="${INK}"`)}
+    ${el.line(-14,-9,-1,-3)}${el.line(-14,3,-1,9)}
+    ${el.rect(-6,-20,26,34,4,`fill="none" stroke="${a}"`)}
+    ${el.poly('7,-10 13,-4 7,2 1,-4', `fill="${a}" stroke="none"`)}
+  `,
+  memorylg: (a) => {
+    const cols = 4, rows = 4, cell = 9, gap = 3.2;
+    const w = cols * cell + (cols - 1) * gap;
+    const h = rows * cell + (rows - 1) * gap;
+    const hi = [5, 10];
+    let squares = '';
+    const centers = [];
+    let i = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = -w / 2 + c * (cell + gap);
+        const y = -h / 2 + r * (cell + gap);
+        const isHi = hi.includes(i);
+        squares += el.rect(x, y, cell, cell, 2, isHi
+          ? `fill="${a}" fill-opacity="0.85" stroke="none"`
+          : `fill="none" stroke="${INK}" stroke-opacity="0.5" stroke-width="1.4"`);
+        if (isHi) centers.push([x + cell / 2, y + cell / 2]);
+        i++;
+      }
+    }
+    const link = centers.length === 2
+      ? el.line(centers[0][0], centers[0][1], centers[1][0], centers[1][1], `stroke="${a}" stroke-dasharray="1.5 2.5"`)
+      : '';
+    return squares + link;
+  },
+  higherlower: (a) => `
+    ${el.path('M -11,-6 L 0,-19 L 11,-6', `fill="none" stroke="${INK}"`)}
+    ${el.path('M -11,7 L 0,20 L 11,7', `fill="none" stroke="${a}"`)}
+    ${el.circle(0,0,3,`fill="${a}" stroke="none"`)}
+  `,
+  scramble: (a) => `
+    <g transform="translate(-14,-4) rotate(-12)">${el.rect(-10,-10,20,20,4,`fill="none" stroke="${INK}"`)}${el.text(0,6,'A',`font-size="14" font-weight="700" fill="${INK}"`)}</g>
+    <g transform="translate(11,-8) rotate(9)">${el.rect(-10,-10,20,20,4,`fill="none" stroke="${a}"`)}${el.text(0,6,'B',`font-size="14" font-weight="700" fill="${a}"`)}</g>
+    <g transform="translate(2,17) rotate(-5)">${el.rect(-10,-10,20,20,4,`fill="none" stroke="${INK}"`)}${el.text(0,6,'C',`font-size="14" font-weight="700" fill="${INK}"`)}</g>
+  `,
+  tap: (a) => `
+    ${el.circle(0,0,22,`fill="none" stroke="${INK}" stroke-opacity="0.45"`)}
+    ${el.circle(0,0,13,`fill="none" stroke="${a}"`)}
+    ${el.circle(0,0,4,`fill="${a}" stroke="none"`)}
+    <g stroke="${INK}" stroke-opacity="0.6">
+      ${el.line(0,-27,0,-32)}${el.line(0,27,0,32)}${el.line(-27,0,-32,0)}${el.line(27,0,32,0)}
+    </g>
+  `,
+  simon: (a) => `
+    ${el.circle(0,0,24,`fill="none" stroke="${INK}"`)}
+    ${el.path('M 0,0 L 0,-24 A 24,24 0 0 1 24,0 Z', `fill="${a}" fill-opacity="0.85" stroke="none"`)}
+    ${el.line(-24,0,24,0)}${el.line(0,-24,0,24)}
+  `,
+  whack: (a) => `
+    ${[-16,0,16].map(x=>el.g(``, el.path(`M ${x-8},10 Q ${x},2 ${x+8},10`, `fill="none" stroke="${INK}" stroke-opacity="0.55"`))).join('')}
+    ${[-16,0,16].map(x=>el.g(``, el.path(`M ${x-8},-8 Q ${x},-16 ${x+8},-8`, `fill="none" stroke="${INK}" stroke-opacity="0.55"`))).join('')}
+    ${el.path('M -7,10 Q 0,-6 7,10 Z', `fill="${a}" stroke="none"`)}
+    ${el.circle(0,-2,13,`fill="none" stroke="${a}"`)}
+    ${el.line(-16,-2,-9,-2,`stroke="${a}"`)}${el.line(9,-2,16,-2,`stroke="${a}"`)}
+    ${el.line(0,-15,0,-9,`stroke="${a}"`)}
+  `,
+  reaction: (a) => `
+    ${el.circle(0,1,20,`fill="none" stroke="${INK}" stroke-opacity="0.45" stroke-dasharray="3 4"`)}
+    ${el.line(0,-19,0,-24)}
+    ${el.poly('-3,-15 7,-1 1,-1 6,15 -9,-1 -2,-1', `fill="${a}" stroke="none"`)}
+  `,
+  oddone: (a) => squareGrid(3,3,13,4,4,a),
+  mathduel: (a) => `
+    <g stroke="${INK}" stroke-width="3.4">${el.line(-22,-6,-8,-6)}${el.line(-22,6,-8,6)}</g>
+    <g stroke="${a}" stroke-width="3.4">${el.line(8,-14,8,14)}${el.line(-2,0,18,0)}</g>
+  `,
+  reflex: (a) => el.circle(0,0,11,`fill="${a}" fill-opacity="0.28" stroke="none"`) + squareGrid(3,3,13,4,4,a),
+  stroop: (a) => `
+    ${el.circle(-9,0,16,`fill="none" stroke="${INK}"`)}
+    ${el.circle(9,0,16,`fill="none" stroke="${a}"`)}
+    ${el.path('M 0,-13.8 A 16,16 0 0 1 0,13.8 A 16,16 0 0 1 0,-13.8 Z', `fill="${a}" fill-opacity="0.22" stroke="none"`)}
+  `,
+  recall: (a) => `
+    ${el.path('M -20,2 Q -10,-14 0,-6 T 20,6', `fill="none" stroke="${INK}" stroke-opacity="0.5" stroke-dasharray="2 3.5"`)}
+    ${el.circle(-20,2,9,`fill="none" stroke="${INK}"`)}${el.text(-20,5.5,'1',`font-size="10" font-weight="700" fill="${INK}"`)}
+    ${el.circle(0,-6,9,`fill="none" stroke="${a}"`)}${el.text(0,-2.5,'2',`font-size="10" font-weight="700" fill="${a}"`)}
+    ${el.circle(20,6,9,`fill="none" stroke="${INK}"`)}${el.text(20,9.5,'3',`font-size="10" font-weight="700" fill="${INK}"`)}
+  `,
+  mathchain: (a) => `
+    ${el.rect(-16,-8,17,16,8,`fill="none" stroke="${INK}"`)}
+    ${el.rect(-2,-8,17,16,8,`fill="none" stroke="${a}"`)}
+    ${el.line(17,-19,17,-11,`stroke="${a}"`)}${el.line(13,-15,21,-15,`stroke="${a}"`)}
+  `,
+  battleship: (a) => `
+    <g stroke="${INK}" stroke-opacity="0.4">
+      ${[-25,-15,-5,5,15,25].map(v=>el.line(v,-25,v,25)).join('')}
+      ${[-25,-15,-5,5,15,25].map(v=>el.line(-25,v,25,v)).join('')}
+    </g>
+    ${el.rect(-25,-15,20,9,2,`fill="${a}" fill-opacity="0.85" stroke="none"`)}
+    ${el.rect(-5,5,10,9,2,`fill="${INK}" fill-opacity="0.55" stroke="none"`)}
+    ${el.circle(15,-10,7,`fill="none" stroke="${a}"`)}
+    ${el.line(15,-20,15,-3,`stroke="${a}" stroke-width="1"`)}${el.line(5,-10,25,-10,`stroke="${a}" stroke-width="1"`)}
+  `
+};
+
+function buildThumbnail(game) {
+  const accent = CATEGORY_ACCENT[game.badge] || CATEGORY_ACCENT.STRATEGY;
+  const iconFn = ICONS[game.type];
+  const icon = iconFn ? iconFn(accent) : '';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#1a1726"/>
+        <stop offset="1" stop-color="#0c0b12"/>
+      </linearGradient>
+      <radialGradient id="glow" cx="82%" cy="6%" r="80%">
+        <stop offset="0" stop-color="${accent}" stop-opacity="0.38"/>
+        <stop offset="55%" stop-color="${accent}" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="400" height="220" fill="url(#bg)"/>
+    <rect width="400" height="220" fill="url(#glow)"/>
+    <g stroke="#ffffff" stroke-opacity="0.05">
+      ${[40,80,120,160,200,240,280,320,360].map(x=>el.line(x,0,x,220)).join('')}
+      ${[40,80,120,160,200].map(y=>el.line(0,y,400,y)).join('')}
+    </g>
+    <g transform="translate(200,114) scale(2.75)" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      ${icon}
+    </g>
+  </svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
 
 function renderGameCards() {
   const grid = document.getElementById('gamesGrid');
   if (!grid) return;
   grid.innerHTML = GAME_CATALOG.map((g) => {
+    // If a game has a manual `thumbnail` URL, use it. Otherwise auto-generate
+    // the dark SVG line-art thumbnail from its type + badge.
+    const src = g.thumbnail || buildThumbnail(g);
     return `<div class="game-card" data-category="${g.category}">
-      <div class="card-media" style="background: ${g.thumb.bg};">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 -25 60 50">
-          ${g.thumb.icon}
-        </svg>
+      <div class="card-media">
+        <img class="thumbnail" src="${src}" alt="${g.name}" loading="lazy" />
         <span class="card-badge">${g.badge}</span>
       </div>
       <div class="card-content">
@@ -2893,7 +3031,6 @@ function runScramble(opponent, live) {
   const WORDS = ['APPLE','TIGER','RIVER','MOUNTAIN','CANDLE','ORANGE','SILVER','GUITAR','FOREST','PLANET','ROCKET','WINTER','GARDEN','BRIDGE','SUMMER','CAMERA','PENCIL','BOTTLE','YELLOW','ANIMAL'];
   const TOTAL = 5;
   let current = 0, myScore = 0, oppScore = 0, gameOver = false, word = '', scrambled = '';
-  let roundStart = 0;
 
   function scramble(w) {
     let arr = w.split('');
@@ -2905,7 +3042,6 @@ function runScramble(opponent, live) {
   function makeRound() {
     word = WORDS[Math.floor(Math.random() * WORDS.length)];
     scrambled = scramble(word);
-    roundStart = Date.now();
   }
 
   function render() {
@@ -3217,7 +3353,7 @@ function runReaction(opponent, live) {
   renderIntro();
 }
 
-// ===== Existing bot games: RPS, Dice, Memory, HigherLower, Tap, Simon, Whack, MathDuel, Reflex, Stroop, Recall, MathChain =====
+// ===== Existing bot games =====
 
 function runRPS(opponent) {
   const stage = document.getElementById('arena-stage');
@@ -4312,7 +4448,7 @@ window.addEventListener('beforeunload', (e) => {
 window.endDuel = endDuel;
 
 routeOnLoad();
-console.log('SkillClash v7 loaded — animated SVG thumbnails on game cards, all v6 features preserved');
+console.log('SkillClash v8 loaded — dark minimal line-art thumbnails, all v6 features preserved');
 </script>
 </body>
 </html>
