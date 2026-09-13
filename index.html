@@ -6,6 +6,12 @@
 <title>SkillClash | India's Free-to-Play Skill Gaming Platform</title>
 <meta name="description" content="Play free skill-based games on SkillClash. Compete in 1v1 duels, earn rewards, climb leaderboards." />
 <meta name="keywords" content="skill gaming, free games, 1v1 games, skill clash, online games" />
+<meta name="theme-color" content="#5b3df0" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="SkillClash" />
+<link rel="manifest" href='data:application/manifest+json,{"name":"SkillClash","short_name":"SkillClash","start_url":".","display":"standalone","background_color":"%23fafafc","theme_color":"%235b3df0","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect width=%27192%27 height=%27192%27 rx=%2742%27 fill=%27%235b3df0%27/%3E%3Cpath d=%27M105 24 L57 102 L96 102 L87 168 L135 90 L96 90 Z%27 fill=%27white%27/%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"}]}' />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -47,7 +53,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
 .grad-text { background: linear-gradient(90deg, #5b3df0 15%, #f0a742 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-/* ===== UNIFIED BRAND LOGO ===== */
+/* ===== BRAND LOGO ===== */
 .brand, .brand-small {
   display: flex; align-items: center; gap: 7px;
   font-family: 'Poppins', sans-serif; font-weight: 800;
@@ -58,23 +64,9 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
 }
-.brand svg, .brand-small svg {
-  color: #5b3df0;
-  flex-shrink: 0;
-  width: 22px; height: 22px;
-  background: none;
-}
-.brand .clash, .brand-small .clash {
-  background: linear-gradient(90deg, #5b3df0 0%, #f0a742 100%);
-  -webkit-background-clip: text; background-clip: text;
-  color: transparent;
-}
-.app-wrap .brand-small {
-  cursor: pointer;
-  background: linear-gradient(90deg, #161522 0%, #5b3df0 100%);
-  -webkit-background-clip: text; background-clip: text;
-  color: transparent;
-}
+.brand svg, .brand-small svg { color: #5b3df0; flex-shrink: 0; width: 22px; height: 22px; background: none; }
+.brand .clash, .brand-small .clash { background: linear-gradient(90deg, #5b3df0 0%, #f0a742 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.app-wrap .brand-small { cursor: pointer; background: linear-gradient(90deg, #161522 0%, #5b3df0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 /* ===== LANDING NAV ===== */
 .site-nav {
@@ -83,16 +75,36 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   background: rgba(250, 250, 252, .9); backdrop-filter: blur(10px);
   border-bottom: 1px solid #eee9f7;
 }
-.nav-right { display: flex; align-items: center; gap: 12px; }
-.link-login { font-weight: 600; font-size: .8rem; color: #4b4a5c; }
+.nav-right { display: flex; align-items: center; gap: 8px; }
+.link-login { font-weight: 600; font-size: .8rem; color: #4b4a5c; cursor: pointer; }
 .link-login:hover { color: #161522; }
 .btn-signup { padding: 8px 18px; border-radius: 100px; background: #161522; color: #fff; font-weight: 700; font-size: .78rem; transition: .2s; white-space: nowrap; }
 .btn-signup:hover { background: #5b3df0; transform: translateY(-1px); }
+.btn-download-app {
+  display: none;
+  padding: 8px 16px;
+  border-radius: 100px;
+  background: linear-gradient(135deg, #5b3df0, #7c5cf5);
+  color: #fff;
+  font-weight: 700;
+  font-size: .78rem;
+  transition: .2s;
+  white-space: nowrap;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(91,61,240,0.25);
+}
+.btn-download-app.show { display: inline-flex; }
+.btn-download-app:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(91,61,240,0.35); }
+.btn-download-app i { font-size: .85rem; }
+@media (min-width:640px) {
+  .btn-download-app { padding: 8px 18px; font-size: .8rem; }
+}
 .menu-toggle { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #fff; border: 1px solid #eee9f7; }
 .mobile-menu { max-height: 0; overflow: hidden; transition: max-height .35s ease; background: #fff; border-bottom: 1px solid #eee9f7; }
-.mobile-menu.open { max-height: 260px; }
+.mobile-menu.open { max-height: 300px; }
 .mobile-menu-inner { display: flex; flex-direction: column; gap: 2px; padding: 10px 18px 16px; }
-.mobile-menu-inner a { padding: 10px 6px; font-weight: 600; font-size: .88rem; border-radius: 8px; color: #4b4a5c; }
+.mobile-menu-inner a { padding: 10px 6px; font-weight: 600; font-size: .88rem; border-radius: 8px; color: #4b4a5c; cursor: pointer; }
 .mobile-menu-inner a:hover { background: #f5f3fc; color: #161522; }
 
 /* ===== HERO ===== */
@@ -102,8 +114,8 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 @keyframes pulseDot { 0%,100%{opacity:1;} 50%{opacity:.35;} }
 .hero-title { font-weight: 800; font-size: 2rem; line-height: 1.14; letter-spacing: -0.01em; margin-bottom: 16px; }
 .hero-sub { color: #5c5a6e; font-size: .92rem; line-height: 1.65; max-width: 460px; margin-bottom: 20px; }
-.hero-cta-row { display: flex; gap: 8px; margin-bottom: 18px; }
-.btn-signup-lg, .btn-login-lg { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 10px; border-radius: 100px; font-weight: 700; font-size: .78rem; transition: .2s; white-space: nowrap; }
+.hero-cta-row { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.btn-signup-lg, .btn-login-lg { flex: 1; min-width: 130px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 10px; border-radius: 100px; font-weight: 700; font-size: .78rem; transition: .2s; white-space: nowrap; }
 .btn-signup-lg { background: #161522; color: #fff; }
 .btn-signup-lg:hover { background: #5b3df0; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(91,61,240,.25); }
 .btn-login-lg { border: 1.5px solid #e4e1f0; background: #fff; }
@@ -232,8 +244,8 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .closing-cta .badge-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.14); padding: 5px 14px; border-radius: 100px; font-size: .66rem; font-weight: 700; margin-bottom: 14px; }
 .closing-cta h2 { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.4rem; margin-bottom: 10px; }
 .closing-cta p { font-size: .83rem; opacity: .85; max-width: 420px; margin: 0 auto 20px; line-height: 1.55; }
-.closing-cta-row { display: flex; gap: 10px; max-width: 420px; margin: 0 auto; }
-.btn-closing-signup, .btn-closing-login { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 14px; border-radius: 100px; font-weight: 800; font-size: .8rem; transition: .2s; white-space: nowrap; }
+.closing-cta-row { display: flex; gap: 10px; max-width: 420px; margin: 0 auto; flex-wrap: wrap; }
+.btn-closing-signup, .btn-closing-login { flex: 1; min-width: 130px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 14px; border-radius: 100px; font-weight: 800; font-size: .8rem; transition: .2s; white-space: nowrap; }
 .btn-closing-signup { background: #fff; color: #1a1730; }
 .btn-closing-signup:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,.2); }
 .btn-closing-login { border: 1.5px solid rgba(255,255,255,.4); color: #fff; background: rgba(255,255,255,.08); }
@@ -264,7 +276,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   .hero-wrap { display: flex; align-items: center; gap: 44px; padding: 56px 24px; }
   .hero-left, .hero-right { flex: 1; }
   .hero-title { font-size: 2.5rem; }
-  .hero-cta-row { max-width: 400px; }
+  .hero-cta-row { max-width: 480px; }
   .hero-stats-grid { grid-template-columns: repeat(4, minmax(100px, 1fr)); max-width: 440px; }
   .badge-grid { grid-template-columns: repeat(3, 1fr); }
   .why-grid { grid-template-columns: repeat(3, 1fr); }
@@ -332,12 +344,37 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .filter-chip.active, .app-wrap .filter-chip:hover { background: linear-gradient(135deg, #5b3df0, #7c5cf5); color: #fff; border-color: #5b3df0; box-shadow: 0 4px 12px rgba(91,61,240,0.25); }
 .app-wrap .games-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 @media (min-width:500px) { .app-wrap .games-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
-.app-wrap .game-card { background: rgba(255,255,255,0.85); border: 1px solid #e9e5f5; border-radius: 16px; overflow: hidden; transition: 0.25s ease; display: flex; flex-direction: column; box-shadow: 0 4px 16px rgba(20,15,50,0.04); min-height: 190px; }
+.app-wrap .game-card { background: rgba(255,255,255,0.85); border: 1px solid #e9e5f5; border-radius: 16px; overflow: hidden; transition: 0.25s ease; display: flex; flex-direction: column; box-shadow: 0 4px 16px rgba(20,15,50,0.04); min-height: 190px; position: relative; }
 .app-wrap .game-card:hover { transform: translateY(-4px); border-color: #b8a8f0; box-shadow: 0 10px 28px rgba(91,61,240,0.12); }
 .app-wrap .card-media { height: 110px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #100e19; }
 .app-wrap .card-media img.thumbnail { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s ease; }
 .app-wrap .game-card:hover .card-media img.thumbnail { transform: scale(1.045); }
 .app-wrap .card-badge { position: absolute; top: 6px; left: 8px; background: rgba(10, 9, 16, 0.55); backdrop-filter: blur(2px); padding: 2px 6px !important; border-radius: 100px; font-size: 9px !important; font-weight: 700; letter-spacing: 0.02em !important; color: #fff; text-transform: uppercase; max-width: calc(100% - 16px) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4 !important; z-index: 2; }
+.app-wrap .help-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(10, 9, 16, 0.65);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s;
+  z-index: 3;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.app-wrap .help-btn:hover {
+  background: #5b3df0;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(91,61,240,0.4);
+}
 .app-wrap .card-content { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; }
 .app-wrap .card-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 1px; color: #161522; line-height: 1.2; }
 .app-wrap .card-desc { font-size: 10px; color: #5c5a6e; line-height: 1.3; flex: 1; margin-bottom: 4px; }
@@ -373,9 +410,9 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .menu-row:hover { border-color: #b8a8f0; background: linear-gradient(135deg, #f3f0ff, #ede9fe); }
 .app-wrap .menu-row-icon { width: 30px; height: 30px; min-width: 30px; border-radius: 50%; background: linear-gradient(135deg, #ede9fe, #ddd6fe); display: flex; align-items: center; justify-content: center; color: #5b3df0; border: 1px solid #ddd6fe; }
 .app-wrap .menu-row-icon svg { width: 16px; height: 16px; }
-.app-wrap .menu-row-text { flex: 1; }
-.app-wrap .menu-row-title { font-weight: 700; font-size: 0.8rem; }
-.app-wrap .menu-row-sub { font-size: 0.65rem; color: #5c5a6e; }
+.app-wrap .menu-row-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.app-wrap .menu-row-title { font-weight: 700; font-size: 0.8rem; display: block; }
+.app-wrap .menu-row-sub { font-size: 0.65rem; color: #5c5a6e; display: block; }
 .app-wrap .menu-row-arrow { color: #918fa3; font-size: 1rem; font-weight: 300; }
 .app-wrap .menu-row-danger .menu-row-icon { color: #e2555a; background: linear-gradient(135deg, #fee2e2, #fecaca); border-color: #fecaca; }
 .app-wrap .menu-row-danger:hover { border-color: #e2555a; background: linear-gradient(135deg, #fef2f2, #fee2e2); }
@@ -560,7 +597,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .confetti-piece { position: absolute; width: 10px; height: 10px; top: -10px; animation: confettiFall linear forwards; }
 @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg) scale(0.3); opacity: 0; } }
 
-/* ===== WALLET SIDE TOAST ===== */
+/* ===== WALLET TOAST ===== */
 .wallet-toast-stack {
   position: fixed;
   top: 78px;
@@ -591,11 +628,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 }
 .wallet-toast.credit { border-left: 4px solid #16c46b; }
 .wallet-toast.debit { border-left: 4px solid #e2555a; }
-.wallet-toast .icon-circle {
-  width: 28px; height: 28px; min-width: 28px;
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 0.95rem; color: #fff;
-}
+.wallet-toast .icon-circle { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; color: #fff; }
 .wallet-toast.credit .icon-circle { background: linear-gradient(135deg, #16c46b, #22d47a); }
 .wallet-toast.debit .icon-circle { background: linear-gradient(135deg, #e2555a, #f07075); }
 .wallet-toast .msg { flex: 1; }
@@ -653,6 +686,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   .app-wrap .card-desc { font-size: 9px; }
   .app-wrap .card-meta { font-size: 9px; }
   .app-wrap .card-badge { font-size: 8px !important; padding: 1px 5px !important; }
+  .app-wrap .help-btn { width: 22px; height: 22px; font-size: 0.68rem; top: 5px; right: 5px; }
   .app-wrap .payment-modal { padding: 16px; }
   .app-wrap .payment-modal h2 { font-size: 1.1rem; }
   .app-wrap .package-grid { grid-template-columns: repeat(3, 1fr); }
@@ -750,9 +784,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   display: flex; align-items: center; justify-content: center; gap: 10px;
   transition: 0.2s; cursor: not-allowed; opacity: 0.5;
 }
-.btn-google-continue.enabled {
-  cursor: pointer; opacity: 1;
-}
+.btn-google-continue.enabled { cursor: pointer; opacity: 1; }
 .btn-google-continue.enabled:hover {
   border-color: #5b3df0; background: #faf8ff;
   transform: translateY(-1px);
@@ -800,37 +832,16 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
   background: linear-gradient(180deg, #5b3df0, #f0a742);
 }
-.invite-row {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
-}
-.invite-avatar {
-  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
-  border: 2px solid #5b3df0; object-fit: cover;
-}
-.invite-text {
-  flex: 1; font-size: 0.78rem; color: #161522; line-height: 1.35;
-}
+.invite-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.invite-avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; border: 2px solid #5b3df0; object-fit: cover; }
+.invite-text { flex: 1; font-size: 0.78rem; color: #161522; line-height: 1.35; }
 .invite-text strong { font-weight: 800; color: #161522; }
-.invite-text small {
-  display: block; color: #5c5a6e; font-size: 0.68rem; margin-top: 2px;
-}
-.invite-actions {
-  display: flex; gap: 8px;
-}
-.invite-btn {
-  flex: 1; padding: 8px 12px;
-  border-radius: 10px; font-weight: 700; font-size: 0.75rem;
-  transition: 0.2s; cursor: pointer;
-}
-.invite-btn.join {
-  background: linear-gradient(135deg, #5b3df0, #7c5cf5);
-  color: #fff; border: none;
-  box-shadow: 0 4px 12px rgba(91,61,240,0.25);
-}
+.invite-text small { display: block; color: #5c5a6e; font-size: 0.68rem; margin-top: 2px; }
+.invite-actions { display: flex; gap: 8px; }
+.invite-btn { flex: 1; padding: 8px 12px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; transition: 0.2s; cursor: pointer; }
+.invite-btn.join { background: linear-gradient(135deg, #5b3df0, #7c5cf5); color: #fff; border: none; box-shadow: 0 4px 12px rgba(91,61,240,0.25); }
 .invite-btn.join:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(91,61,240,0.35); }
-.invite-btn.skip {
-  background: transparent; border: 1px solid #e4e1f0; color: #5c5a6e;
-}
+.invite-btn.skip { background: transparent; border: 1px solid #e4e1f0; color: #5c5a6e; }
 .invite-btn.skip:hover { background: #f5f3fc; }
 .invite-timer {
   position: absolute; bottom: 0; left: 0; height: 3px;
@@ -838,10 +849,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   border-radius: 0 0 0 4px;
   animation: inviteTimer 8s linear forwards;
 }
-@keyframes inviteTimer {
-  from { width: 100%; }
-  to { width: 0%; }
-}
+@keyframes inviteTimer { from { width: 100%; } to { width: 0%; } }
 
 @media (max-width:640px) {
   .invite-popup-stack { top: 72px; right: 8px; max-width: 280px; }
@@ -849,6 +857,115 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   .invite-avatar { width: 32px; height: 32px; }
   .invite-text { font-size: 0.72rem; }
   .invite-btn { font-size: 0.7rem; padding: 7px 10px; }
+}
+
+/* ===== HOW TO PLAY MODAL ===== */
+.how-to-play-overlay {
+  position: fixed; inset: 0;
+  background: rgba(22,21,34,0.55);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 6000;
+  padding: 20px;
+}
+.how-to-play-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
+.how-to-play-card {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 460px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 24px 22px 20px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+  animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+.how-to-play-card .close-x {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none; font-size: 1.5rem;
+  color: #918fa3; cursor: pointer; padding: 4px 8px;
+  transition: 0.2s;
+}
+.how-to-play-card .close-x:hover { color: #161522; transform: rotate(90deg); }
+.how-to-play-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f3f0ff, #ede9fe);
+  border: 1px solid #ddd6fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+}
+.how-to-play-card h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #161522;
+  margin-bottom: 4px;
+}
+.how-to-play-card .htp-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #5b3df0;
+  background: #f2effc;
+  padding: 2px 9px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 14px;
+}
+.how-to-play-card h4 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #161522;
+  margin: 14px 0 8px;
+}
+.how-to-play-card ol,
+.how-to-play-card ul {
+  padding-left: 20px;
+  color: #5c5a6e;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+.how-to-play-card ol li::marker { color: #5b3df0; font-weight: 700; }
+.how-to-play-card ul li::marker { color: #5b3df0; }
+.how-to-play-card p {
+  color: #5c5a6e;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.how-to-play-card .htp-meta {
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #f3f0ff, #fdf5ee);
+  border: 1px solid #ddd6fe;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 16px;
+}
+.how-to-play-card .htp-meta div {
+  text-align: center;
+  flex: 1;
+}
+.how-to-play-card .htp-meta .v {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  color: #5b3df0;
+}
+.how-to-play-card .htp-meta .l {
+  font-size: 0.6rem;
+  color: #5c5a6e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 </style>
 </head>
@@ -861,12 +978,13 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 <nav class="site-nav">
 <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>Skill<span class="clash">Clash</span></div>
 <div class="nav-right">
-<a href="#" class="link-login" id="nav-login-link">Log In</a>
+<a class="link-login" id="nav-login-link">Log In</a>
+<button id="nav-download-btn" class="btn-download-app"><i class="fas fa-download"></i> Download App</button>
 <button id="nav-signup-btn" class="btn-signup">Sign Up</button>
 <button id="menu-toggle-btn" class="menu-toggle" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
 </div>
 </nav>
-<div class="mobile-menu" id="mobile-menu"><div class="mobile-menu-inner"><a href="#modes">Games</a><a href="#challenges">Tournaments</a><a href="#how-it-works">How It Works</a><a href="#faq">FAQ</a><a href="#" onclick="showPage('help'); return false;">Help</a></div></div>
+<div class="mobile-menu" id="mobile-menu"><div class="mobile-menu-inner"><a href="#modes">Games</a><a href="#challenges">Tournaments</a><a href="#how-it-works">How It Works</a><a href="#faq">FAQ</a><a onclick="showPage('help')">Help</a></div></div>
 
 <section class="hero-wrap">
 <div class="hero-left reveal">
@@ -1042,10 +1160,10 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 <div class="section-eyebrow-pill">Community</div>
 <h2 class="section-title">Join 15k+ players in the <span class="grad-text">arena</span></h2>
 <div class="community-grid" style="margin-top:6px;">
-<a href="#" class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg><span>Community Chat</span><small>Join Updates</small></a>
-<a href="#" class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg><span>Announcements</span><small>@skillclash</small></a>
+<a class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg><span>Community Chat</span><small>Join Updates</small></a>
+<a class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg><span>Announcements</span><small>@skillclash</small></a>
 <a href="https://www.instagram.com/_skillclash/" target="_blank" rel="noopener noreferrer" class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" /></svg><span>Highlights</span><small>@_skillclash</small></a>
-<a href="#" class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg><span>SkillClash TV</span><small>Video Guides</small></a>
+<a class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg><span>SkillClash TV</span><small>Video Guides</small></a>
 </div>
 </section>
 
@@ -1066,9 +1184,9 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 <div class="footer-brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>SkillClash</div>
 <p>SkillClash is a free-to-play skill-gaming arena for Reflex, Strategy, Memory, and Math duels. Climb the leaderboard, earn ₹ and badges — no entry fees, no cash prizes, no downloads required.</p>
 <div class="footer-social">
-<a href="#" aria-label="Community"><svg class="ic" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg></a>
-<a href="#" aria-label="Announcements"><svg class="ic" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg></a>
-<a href="#" aria-label="Video"><svg class="ic" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg></a>
+<a aria-label="Community"><svg class="ic" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg></a>
+<a aria-label="Announcements"><svg class="ic" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg></a>
+<a aria-label="Video"><svg class="ic" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg></a>
 </div>
 </div>
 <div class="footer-cols">
@@ -1106,7 +1224,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 <div class="page-content" id="page-content"></div>
 </div>
 
-<!-- ===== WALLET MINI TOAST ===== -->
+<!-- ===== WALLET TOAST ===== -->
 <div id="wallet-toast-stack" class="wallet-toast-stack" aria-live="polite"></div>
 
 <!-- ===== GENERAL TOAST ===== -->
@@ -1137,6 +1255,22 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
       Continue with Google
     </button>
     <p class="hint">We use Google to verify your identity. No passwords stored.</p>
+  </div>
+</div>
+
+<!-- ===== HOW TO PLAY MODAL ===== -->
+<div id="how-to-play-overlay" class="how-to-play-overlay">
+  <div class="how-to-play-card">
+    <button class="close-x" id="htp-close" aria-label="Close">&times;</button>
+    <div class="how-to-play-icon" id="htp-icon">×</div>
+    <h3 id="htp-title">Game</h3>
+    <span class="htp-badge" id="htp-badge">CATEGORY</span>
+    <div id="htp-body"></div>
+    <div class="htp-meta">
+      <div><div class="v" id="htp-entry">₹15</div><div class="l">Entry</div></div>
+      <div><div class="v" id="htp-reward">₹25</div><div class="l">Win Reward</div></div>
+      <div><div class="v" id="htp-mode">1v1</div><div class="l">Mode</div></div>
+    </div>
   </div>
 </div>
 
@@ -1413,7 +1547,7 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 </div>
 </div>
 
-<!-- Game Arena (v9.1: outer static turn indicator removed) -->
+<!-- Game Arena -->
 <div id="game-arena-overlay" class="modal-overlay hidden">
 <div class="arena-card">
 <div class="arena-header">
@@ -1513,17 +1647,17 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 
 <script>
 // ============================================================
-// SKILLCLASH - v9.1
+// SKILLCLASH - v10
+// ============================================================
 // Fixes:
-//   1. Removed static outer "Your Turn" indicator — only the
-//      dynamic in-stage one now shows.
-//   2. Real-user A now polls game_sessions every second during
-//      matchmaking and checks again before bot fallback, so if
-//      real-user B accepts A's invite, A joins B in the real
-//      match instead of falling back to a bot.
-//   3. Invite TTL extended to 8s (SQL side).
-// All v9 features preserved: terms checkbox, corrected legal,
-// invite popup system.
+//   1. A-wins-B-stuck bug in every live game — final state is
+//      pushed via end_session_with_state() RPC so BOTH players
+//      receive the final board before the session is closed.
+//   2. Double-launch guard during matchmaking.
+//   3. Account row spacing (title/sub now block-level).
+//   4. Landing page Log In now also shows terms modal.
+//   5. Download App button (PWA install).
+//   6. How to Play modal for every game.
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -1571,12 +1705,16 @@ let activeGameSessionId = null;
 let gameRealtimeSubscription = null;
 let isRealPlayerMatch = false;
 let myRole = null;
+let activeGameSession = null; // v10: full session row for player IDs
 
 let currentInviteId = null;
 let inviteSubscription = null;
 let inviteExpireTimer = null;
 let inviteExpireInterval = null;
 const shownInviteIds = new Set();
+
+// v10: prevent double arena launch
+let arenaLaunchInProgress = false;
 
 const balanceEl = document.getElementById('balance-value');
 const playerNameEl = document.getElementById('player-name');
@@ -1620,7 +1758,7 @@ const txModalClose = document.getElementById('tx-modal-close');
 const txListContainer = document.getElementById('tx-list-container');
 const invitePopupStack = document.getElementById('invite-popup-stack');
 
-// ===== WALLET SIDE TOAST =====
+// ===== TOASTS =====
 function showWalletToast(amount, type, reason) {
   const stack = document.getElementById('wallet-toast-stack');
   if (!stack) return;
@@ -1628,19 +1766,10 @@ function showWalletToast(amount, type, reason) {
   const icon = type === 'credit' ? '+' : '−';
   const t = document.createElement('div');
   t.className = `wallet-toast ${type}`;
-  t.innerHTML = `
-    <div class="icon-circle">${icon}</div>
-    <div class="msg">
-      <span class="amt">${sign}₹${Math.abs(amount)}</span>
-      ${reason ? `<span class="reason">${reason}</span>` : ''}
-    </div>`;
+  t.innerHTML = `<div class="icon-circle">${icon}</div><div class="msg"><span class="amt">${sign}₹${Math.abs(amount)}</span>${reason ? `<span class="reason">${reason}</span>` : ''}</div>`;
   stack.appendChild(t);
-  setTimeout(() => {
-    t.classList.add('out');
-    setTimeout(() => t.remove(), 300);
-  }, 3200);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3200);
 }
-
 function showToast(msg, type = 'credit') {
   const stack = document.getElementById('toast-stack');
   if (!stack) return;
@@ -1650,7 +1779,6 @@ function showToast(msg, type = 'credit') {
   stack.appendChild(t);
   setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 300); }, 3500);
 }
-
 function formatRupees(n) { const sign = n < 0 ? '-' : ''; return sign + '₹' + Math.abs(n || 0).toLocaleString('en-IN'); }
 
 // ===== PAGE NAVIGATION =====
@@ -1658,106 +1786,19 @@ function showPage(type) {
   const container = document.getElementById('page-container');
   const content = document.getElementById('page-content');
   const pages = {
-    help: `
-      <button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
+    help: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
       <h1>Help Center</h1>
       <p>Welcome to SkillClash Help Center. Ask our AI assistant anything about the platform.</p>
       <div class="chat-container" id="chatContainer">
-        <div class="chat-header">
-          <div class="chat-avatar" id="chatAgentAvatar">V</div>
-          <div class="chat-agent-info">
-            <div class="chat-agent-name" id="chatAgentName">Vishal</div>
-            <div class="chat-agent-status"><span class="dot"></span> Online • Usually replies instantly</div>
-          </div>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-          <div class="chat-msg bot">
-            Hello, I'm <strong id="agentNameInline">Vishal</strong>, your SkillClash assistant. Ask me anything about games, wallet, tournaments, or how to get started.
-            <span class="time">Just now</span>
-          </div>
-        </div>
-        <div class="chat-typing" id="chatTyping">
-          <span id="chatTypingName">Vishal</span> is typing
-          <span class="dots"><span></span><span></span><span></span></span>
-        </div>
-        <div class="chat-input-row">
-          <input type="text" id="chatInput" placeholder="Ask me anything..." />
-          <button id="chatSendBtn"><i class="fas fa-paper-plane"></i> Send</button>
-        </div>
-      </div>
-      <p style="font-size:0.7rem; color:#918fa3; margin-top:12px;">AI assistant • Your feedback helps us improve</p>
-    `,
+        <div class="chat-header"><div class="chat-avatar" id="chatAgentAvatar">V</div><div class="chat-agent-info"><div class="chat-agent-name" id="chatAgentName">Vishal</div><div class="chat-agent-status"><span class="dot"></span> Online • Usually replies instantly</div></div></div>
+        <div class="chat-messages" id="chatMessages"><div class="chat-msg bot">Hello, I'm <strong id="agentNameInline">Vishal</strong>, your SkillClash assistant. Ask me anything about games, wallet, tournaments, or how to get started.<span class="time">Just now</span></div></div>
+        <div class="chat-typing" id="chatTyping"><span id="chatTypingName">Vishal</span> is typing <span class="dots"><span></span><span></span><span></span></span></div>
+        <div class="chat-input-row"><input type="text" id="chatInput" placeholder="Ask me anything..." /><button id="chatSendBtn"><i class="fas fa-paper-plane"></i> Send</button></div>
+      </div>`,
     contact: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Contact Us</h1><p>We'd love to hear from you.</p><h2>Email</h2><p><strong>General Inquiries:</strong> support@skillclash.in</p><p><strong>Partnerships:</strong> partnerships@skillclash.in</p><h2>Community</h2><ul><li><strong>Discord:</strong> discord.gg/skillclash</li><li><strong>Twitter:</strong> @skillclash</li></ul><h2>Support Hours</h2><p>24×7, 365 days a year.</p>`,
-    terms: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
-<h1>Terms &amp; Conditions</h1>
-<p><strong>Last Updated: January 2026</strong></p>
-<h2>1. Acceptance of Terms</h2>
-<p>By creating an account and using SkillClash ("the Platform"), you agree to be bound by these Terms &amp; Conditions. If you do not agree, please do not use the Platform.</p>
-<h2>2. Eligibility</h2>
-<p>You must be at least 18 years of age to create an account, participate in matches, or make any payment on SkillClash. By using the Platform you confirm that you meet this requirement. Accounts found to belong to minors will be suspended and any balance forfeited.</p>
-<h2>3. Skill-Based Gaming</h2>
-<p>SkillClash hosts skill-based games where outcomes are determined predominantly by the skill, reaction time, and mental ability of players — not by chance alone. Players pay a small entry stake into a match pool. Winners receive the reward shown on each game card. All amounts shown on the Platform are in Indian Rupees (₹).</p>
-<h2>4. Account &amp; Security</h2>
-<p>You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs on your account. Notify us immediately at support@skillclash.in if you suspect unauthorised access.</p>
-<h2>5. Payments &amp; Withdrawals</h2>
-<p>Payments are processed through our payment gateway partner. Deposits are credited to your in-app wallet after confirmation. Withdrawals require a minimum balance of ₹150 and are processed within 7–8 business hours after verification. All transactions are final once credited to the wallet. You are responsible for any applicable taxes on your winnings.</p>
-<h2>6. FairPlay Policy</h2>
-<p>Any form of cheating, hacking, using scripts, exploiting bugs, colluding with other players, or attempting to manipulate match outcomes will result in permanent suspension of your account and forfeiture of any balance. We run automated anti-cheat and behaviour checks.</p>
-<h2>7. User Conduct</h2>
-<p>You agree to interact respectfully with other players and not to use offensive language, harass other users, or attempt to abuse the referral program or bonus system.</p>
-<h2>8. State Restrictions</h2>
-<p>Participation in paid skill-based games is not permitted in certain Indian states as per local regulations. It is your responsibility to confirm that your jurisdiction permits skill-based paid gaming before you play. SkillClash is not liable for violations caused by users in restricted jurisdictions.</p>
-<h2>9. Limitation of Liability</h2>
-<p>SkillClash provides the Platform on an "as is" basis. We are not liable for losses arising from network issues, device failures, third-party payment delays, or actions taken by other players.</p>
-<h2>10. Changes to Terms</h2>
-<p>We may update these Terms from time to time. Continued use of the Platform after changes constitutes acceptance of the revised Terms.</p>
-<h2>11. Contact</h2>
-<p>For questions about these Terms, email support@skillclash.in.</p>`,
-    privacy: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
-<h1>Privacy Policy</h1>
-<p><strong>Last Updated: January 2026</strong></p>
-<h2>1. Information We Collect</h2>
-<ul>
-<li><strong>Google Account:</strong> Your name, email address, and profile picture provided when you sign in with Google.</li>
-<li><strong>Game Data:</strong> Match history, scores, in-game stats, and wallet transactions.</li>
-<li><strong>Usage Data:</strong> How you interact with the Platform, including device type, browser, IP address, and general location (city-level).</li>
-<li><strong>Payment Data:</strong> Transaction IDs and UPI IDs used for payments. We do not store card details or UPI PINs.</li>
-</ul>
-<h2>2. How We Use Your Information</h2>
-<ul>
-<li>To provide, operate, and improve our games and services.</li>
-<li>To maintain leaderboards, matchmaking, and match history.</li>
-<li>To process payments, withdrawals, and referral bonuses.</li>
-<li>To detect fraud, cheating, and abuse.</li>
-<li>To send important service updates and, with your consent, marketing messages.</li>
-</ul>
-<h2>3. Data Sharing</h2>
-<p>We do not sell your personal data. We share data only with trusted service providers (payment gateways, authentication) strictly to operate the Platform, and when required by law.</p>
-<h2>4. Data Security</h2>
-<p>Your information is encrypted in transit and stored securely. Access is restricted to authorised personnel only.</p>
-<h2>5. Your Rights</h2>
-<p>You may request access to, correction of, or deletion of your personal data by emailing privacy@skillclash.in. Some data (like transaction records) may be retained as required by law.</p>
-<h2>6. Children</h2>
-<p>SkillClash is strictly for users aged 18 and above. We do not knowingly collect data from anyone under 18.</p>
-<h2>7. Contact</h2>
-<p>For privacy-related questions, email privacy@skillclash.in.</p>`,
-    disclaimer: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
-<h1>Disclaimer</h1>
-<p><strong>Last Updated: January 2026</strong></p>
-<h2>1. Skill-Based Gaming</h2>
-<p>SkillClash is a <strong>skill-based gaming platform</strong>. Outcomes of every match depend predominantly on the player's skill, reaction time, and mental ability — not chance. The Platform is not a gambling or betting service.</p>
-<h2>2. 18+ Only</h2>
-<p>Our Platform is strictly for users aged 18 and above. By using SkillClash you confirm you meet this requirement.</p>
-<h2>3. State Restrictions</h2>
-<p>Skill-based paid gaming is not permitted in certain Indian states. It is the user's sole responsibility to check whether paid skill-based gaming is legal in their jurisdiction before participating. SkillClash does not encourage or facilitate play from restricted jurisdictions.</p>
-<h2>4. Play Responsibly</h2>
-<p>We encourage responsible gaming. Set personal limits, take regular breaks, and never play with money you cannot afford to lose. If gaming is affecting your wellbeing, please seek help from a qualified professional.</p>
-<h2>5. No Guarantees</h2>
-<p>Rewards and outcomes depend entirely on your skill and the performance of your opponents. SkillClash makes no guarantee of earnings or winnings.</p>
-<h2>6. Third-Party Services</h2>
-<p>Payments are handled by third-party gateways. SkillClash is not responsible for delays or issues caused by these providers.</p>
-<h2>7. Legal Compliance</h2>
-<p>SkillClash complies with applicable Indian laws. Users are responsible for ensuring their own compliance with local regulations.</p>`
+    terms: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Terms &amp; Conditions</h1><p><strong>Last Updated: January 2026</strong></p><h2>1. Acceptance of Terms</h2><p>By creating an account and using SkillClash ("the Platform"), you agree to be bound by these Terms &amp; Conditions. If you do not agree, please do not use the Platform.</p><h2>2. Eligibility</h2><p>You must be at least 18 years of age to create an account, participate in matches, or make any payment on SkillClash.</p><h2>3. Skill-Based Gaming</h2><p>SkillClash hosts skill-based games where outcomes are determined predominantly by the skill, reaction time, and mental ability of players — not by chance alone. Players pay a small entry stake into a match pool. Winners receive the reward shown on each game card.</p><h2>4. Account &amp; Security</h2><p>You are responsible for maintaining the confidentiality of your account credentials.</p><h2>5. Payments &amp; Withdrawals</h2><p>Payments are processed through our payment gateway partner. Withdrawals require a minimum balance of ₹150 and are processed within 7–8 business hours after verification.</p><h2>6. FairPlay Policy</h2><p>Any form of cheating, hacking, using scripts, exploiting bugs, colluding with other players, or attempting to manipulate match outcomes will result in permanent suspension.</p><h2>7. State Restrictions</h2><p>Participation in paid skill-based games is not permitted in certain Indian states as per local regulations.</p><h2>8. Contact</h2><p>For questions about these Terms, email support@skillclash.in.</p>`,
+    privacy: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Privacy Policy</h1><p><strong>Last Updated: January 2026</strong></p><h2>1. Information We Collect</h2><ul><li><strong>Google Account:</strong> Name, email, profile picture.</li><li><strong>Game Data:</strong> Match history, scores, wallet transactions.</li><li><strong>Usage Data:</strong> Device type, browser, IP address.</li><li><strong>Payment Data:</strong> Transaction IDs and UPI IDs.</li></ul><h2>2. How We Use Your Information</h2><ul><li>To provide, operate, and improve our games.</li><li>To maintain leaderboards and match history.</li><li>To process payments and detect fraud.</li></ul><h2>3. Data Sharing</h2><p>We do not sell your personal data.</p><h2>4. Data Security</h2><p>Your information is encrypted in transit and stored securely.</p><h2>5. Contact</h2><p>privacy@skillclash.in</p>`,
+    disclaimer: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Disclaimer</h1><p><strong>Last Updated: January 2026</strong></p><h2>1. Skill-Based Gaming</h2><p>SkillClash is a <strong>skill-based gaming platform</strong>. Outcomes depend predominantly on player skill.</p><h2>2. 18+ Only</h2><p>Our Platform is strictly for users aged 18 and above.</p><h2>3. State Restrictions</h2><p>Skill-based paid gaming is not permitted in certain Indian states.</p><h2>4. Play Responsibly</h2><p>Set personal limits, take regular breaks.</p><h2>5. Legal Compliance</h2><p>SkillClash complies with applicable Indian laws.</p>`
   };
   content.innerHTML = pages[type] || '<h1>Page Not Found</h1>';
   container.style.display = 'block';
@@ -1780,7 +1821,6 @@ function hidePageToPrevious() {
     document.getElementById('dashboard').classList.add('hidden');
   }
 }
-
 function hidePageToLanding() {
   document.getElementById('page-container').style.display = 'none';
   document.getElementById('page-landing').style.display = 'block';
@@ -1788,23 +1828,20 @@ function hidePageToLanding() {
   sessionStorage.removeItem('returnToDashboard');
 }
 
-function hidePageToLandingAndScroll(sectionId) {
-  hidePageToLanding();
-  setTimeout(() => { const el = document.getElementById(sectionId); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 300);
-}
-
-// ===== AUTH (v9: terms checkbox gate) =====
+// ===== AUTH (v10: both Sign Up and Log In show terms modal) =====
 const signupTermsOverlay = document.getElementById('signup-terms-overlay');
 const termsCheckbox = document.getElementById('terms-checkbox');
 const termsCheckboxLabel = document.getElementById('terms-checkbox-label');
 const signupGoogleBtn = document.getElementById('signup-google-btn');
 
 function openSignupTerms() {
+  termsCheckbox.checked = false;
+  termsCheckboxLabel.classList.remove('checked');
+  signupGoogleBtn.disabled = true;
+  signupGoogleBtn.classList.remove('enabled');
   signupTermsOverlay.classList.add('show');
 }
-function closeSignupTerms() {
-  signupTermsOverlay.classList.remove('show');
-}
+function closeSignupTerms() { signupTermsOverlay.classList.remove('show'); }
 
 termsCheckboxLabel?.addEventListener('click', (e) => {
   if (e.target.tagName === 'A') return;
@@ -1823,9 +1860,7 @@ termsCheckbox?.addEventListener('change', () => {
 });
 
 document.getElementById('signup-terms-close')?.addEventListener('click', closeSignupTerms);
-signupTermsOverlay?.addEventListener('click', (e) => {
-  if (e.target === signupTermsOverlay) closeSignupTerms();
-});
+signupTermsOverlay?.addEventListener('click', (e) => { if (e.target === signupTermsOverlay) closeSignupTerms(); });
 
 function triggerGoogleLogin() {
   try {
@@ -1835,11 +1870,9 @@ function triggerGoogleLogin() {
   } catch (e) { alert('Login failed. Please try again.'); }
 }
 
-document.querySelectorAll('#nav-signup-btn, #hero-signup-btn, #closing-signup-btn').forEach(el =>
+// v10: both Sign Up AND Log In open the terms modal first
+document.querySelectorAll('#nav-signup-btn, #hero-signup-btn, #closing-signup-btn, #nav-login-link, #hero-login-btn, #closing-login-btn').forEach(el =>
   el?.addEventListener('click', openSignupTerms)
-);
-document.querySelectorAll('#nav-login-link, #hero-login-btn, #closing-login-btn').forEach(el =>
-  el?.addEventListener('click', triggerGoogleLogin)
 );
 signupGoogleBtn?.addEventListener('click', () => {
   if (termsCheckbox?.checked) triggerGoogleLogin();
@@ -1849,7 +1882,54 @@ document.getElementById('menu-toggle-btn')?.addEventListener('click', function()
   document.getElementById('mobile-menu')?.classList.toggle('open');
 });
 
-// ===== Supabase Helpers =====
+// ===== PWA INSTALL =====
+let deferredInstallPrompt = null;
+const navDownloadBtn = document.getElementById('nav-download-btn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (navDownloadBtn) navDownloadBtn.classList.add('show');
+});
+
+window.addEventListener('appinstalled', () => {
+  if (navDownloadBtn) navDownloadBtn.classList.remove('show');
+  deferredInstallPrompt = null;
+  showToast('SkillClash installed on your device!', 'credit');
+});
+
+// Show the button if the browser supports install (fallback for Safari etc.)
+if (navigator.standalone === false || (window.matchMedia && window.matchMedia('(display-mode: browser)').matches)) {
+  // iOS Safari doesn't fire beforeinstallprompt, so show button always so user can be guided
+}
+setTimeout(() => {
+  if (navDownloadBtn && !deferredInstallPrompt) {
+    // Show button anyway so users on iOS can tap and get instructions
+    navDownloadBtn.classList.add('show');
+  }
+}, 1500);
+
+navDownloadBtn?.addEventListener('click', async () => {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+      showToast('Installing SkillClash...', 'credit');
+    }
+    deferredInstallPrompt = null;
+    navDownloadBtn.classList.remove('show');
+  } else {
+    // Fallback: iOS Safari or browser without install API
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      alert('To install SkillClash on iPhone/iPad:\n\n1. Tap the Share button (square with arrow) in Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
+    } else {
+      alert('To install SkillClash as an app:\n\n1. Open your browser menu (⋮ or ⋯)\n2. Tap "Install app" or "Add to Home screen"\n3. Confirm install');
+    }
+  }
+});
+
+// ===== SUPABASE HELPERS =====
 async function loadUserName() {
   const meta = currentUser.user_metadata || {};
   const local = localStorage.getItem('skillclash_name_' + currentUser.id);
@@ -1860,24 +1940,15 @@ async function loadUserName() {
   setUserDisplayName(name);
   if (dbName !== name) syncProfileToDatabase(name);
 }
-
 async function syncProfileToDatabase(name) {
   const avatarUrl = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(name);
   try { await client.from('users').upsert({ id: currentUser.id, email: currentUser.email, full_name: name, avatar_url: avatarUrl }); } catch (e) {}
 }
-
 async function recordTermsAcceptance() {
   const acceptedAt = localStorage.getItem('skillclash_terms_accepted_at');
   if (!acceptedAt || !currentUser) return;
-  try {
-    await client.from('users').update({
-      terms_accepted_at: acceptedAt,
-      age_confirmed: true
-    }).eq('id', currentUser.id);
-    localStorage.removeItem('skillclash_terms_accepted_at');
-  } catch (e) {}
+  try { await client.from('users').update({ terms_accepted_at: acceptedAt, age_confirmed: true }).eq('id', currentUser.id); localStorage.removeItem('skillclash_terms_accepted_at'); } catch (e) {}
 }
-
 function setUserDisplayName(name) {
   if (playerNameEl) playerNameEl.textContent = name;
   if (profileDisplayName) profileDisplayName.textContent = name;
@@ -1885,7 +1956,6 @@ function setUserDisplayName(name) {
   if (avatarEl) avatarEl.src = avatarUrl;
   if (profileViewAvatar) profileViewAvatar.src = avatarUrl;
 }
-
 async function loadWallet() {
   try {
     const { data, error } = await client.from('wallet').select('dummy_token').eq('user_id', currentUser.id).single();
@@ -1893,24 +1963,18 @@ async function loadWallet() {
     currentBalance = data?.dummy_token || 0;
   } catch (e) {
     if (e.message && e.message.includes('No rows found')) {
-      try { await client.from('wallet').insert({ user_id: currentUser.id, dummy_token: 0 }); currentBalance = 0; }
-      catch (err) { currentBalance = 0; }
+      try { await client.from('wallet').insert({ user_id: currentUser.id, dummy_token: 0 }); currentBalance = 0; } catch (err) { currentBalance = 0; }
     } else { currentBalance = 0; }
   }
 }
-
 async function persistWalletDelta(delta) {
   let { data: wallet, error } = await client.from('wallet').select('dummy_token').eq('user_id', currentUser.id).single();
-  if (error || !wallet) {
-    await client.from('wallet').insert({ user_id: currentUser.id, dummy_token: 0 });
-    wallet = { dummy_token: 0 };
-  }
+  if (error || !wallet) { await client.from('wallet').insert({ user_id: currentUser.id, dummy_token: 0 }); wallet = { dummy_token: 0 }; }
   const newBalance = Math.max(0, (wallet.dummy_token || 0) + delta);
   await client.from('wallet').update({ dummy_token: newBalance, updated_at: new Date().toISOString() }).eq('user_id', currentUser.id);
   currentBalance = newBalance;
   return newBalance;
 }
-
 async function loadTransactions() {
   try {
     const { data, error } = await client.from('transactions').select('description,type,amount,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
@@ -1918,13 +1982,11 @@ async function loadTransactions() {
     transactions = (data || []).map(t => ({ desc: t.description, type: t.type, amount: t.amount, date: new Date(t.created_at).toLocaleString() }));
   } catch (e) { transactions = []; }
 }
-
 async function recordTransaction(desc, type, amount) {
   transactions.unshift({ desc, type, amount, date: new Date().toLocaleString() });
   updateUI();
   try { await client.from('transactions').insert({ user_id: currentUser.id, description: desc, type, amount }); } catch (e) {}
 }
-
 async function loadMatchHistory() {
   try {
     const { data, error } = await client.from('match_history').select('game,opponent,result,reward,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
@@ -1932,13 +1994,11 @@ async function loadMatchHistory() {
     matchHistory = (data || []).map(m => ({ game: m.game, opponent: m.opponent, result: m.result, reward: m.reward, date: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }));
   } catch (e) { matchHistory = []; }
 }
-
 async function recordMatch(game, opponent, result, reward) {
   matchHistory.unshift({ game, opponent, result, reward, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
   updateUI();
   try { await client.from('match_history').insert({ user_id: currentUser.id, game, opponent, result, reward }); } catch (e) {}
 }
-
 function updateUI() {
   if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString('en-IN');
   const pct = Math.min(100, Math.round((currentBalance / CASHOUT_MIN) * 100));
@@ -1953,7 +2013,6 @@ function updateUI() {
   const sw = document.getElementById('stat-tokens-won'); if (sw) sw.textContent = '+' + formatRupees(totalWon);
   renderLedger(); renderMatchHistory(); renderTxModalList(); updateCashoutUI();
 }
-
 function renderLedger() {
   const tbody = document.getElementById('ledger-body'); if (!tbody) return;
   if (transactions.length === 0) { tbody.innerHTML = '<tr><td colspan="4">No transactions recorded</td></tr>'; return; }
@@ -1964,7 +2023,6 @@ function renderLedger() {
     return `<tr><td>${tx.desc}</td><td><span class="${isCredit ? 'badge-credit' : 'badge-debit'}">${tx.type.toUpperCase()}</span></td><td style="color:${color}">${sign}${formatRupees(tx.amount)}</td><td>${tx.date}</td></tr>`;
   }).join('');
 }
-
 function renderMatchHistory() {
   const tbody = document.getElementById('matches-body'); if (!tbody) return;
   if (matchHistory.length === 0) { tbody.innerHTML = '<tr><td colspan="5">No matches played yet.</td></tr>'; return; }
@@ -1974,7 +2032,6 @@ function renderMatchHistory() {
     return `<tr><td>${m.game}</td><td>${m.opponent}</td><td><span class="${isWin ? 'badge-credit' : 'badge-debit'}">${m.result}</span></td><td style="color:${color}">${m.reward >= 0 ? '+' : ''}${formatRupees(m.reward)}</td><td>${m.date}</td></tr>`;
   }).join('');
 }
-
 function renderTxModalList() {
   if (!txListContainer) return;
   if (transactions.length === 0) { txListContainer.innerHTML = '<p style="color:#5c5a6e; text-align:center; padding:12px 0;">No transactions yet.</p>'; return; }
@@ -1984,11 +2041,7 @@ function renderTxModalList() {
     return `<div class="tx-item"><span class="desc">${tx.desc}</span><span class="amount ${isCredit ? 'credit' : 'debit'}">${sign}${formatRupees(tx.amount)}</span><span class="date">${tx.date}</span></div>`;
   }).join('');
 }
-
-function updateCashoutUI() {
-  const el = document.getElementById('cashout-balance');
-  if (el) el.textContent = formatRupees(currentBalance);
-}
+function updateCashoutUI() { const el = document.getElementById('cashout-balance'); if (el) el.textContent = formatRupees(currentBalance); }
 
 function switchView(id) {
   if (isGameActive) { showToast('Please finish your game first', 'error'); return; }
@@ -2018,9 +2071,7 @@ logoutConfirmBtn?.addEventListener('click', async () => {
   if (inviteSubscription) { try { await inviteSubscription.unsubscribe(); } catch (e) {} }
   if (inviteExpireTimer) clearTimeout(inviteExpireTimer);
   if (inviteExpireInterval) clearInterval(inviteExpireInterval);
-  if (currentInviteId && currentUser) {
-    try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('from_user_id', currentUser.id); } catch (e) {}
-  }
+  if (currentInviteId && currentUser) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('from_user_id', currentUser.id); } catch (e) {} }
   currentInviteId = null;
   await client.auth.signOut();
   logoutConfirmBtn.disabled = false;
@@ -2041,7 +2092,6 @@ function generateReferralCode(email) {
   const digits = Math.floor(100 + Math.random() * 900);
   return prefix + digits;
 }
-
 async function loadReferralInfo() {
   if (!myReferralCodeEl) return;
   try {
@@ -2057,17 +2107,11 @@ async function loadReferralInfo() {
     myReferralCodeEl.textContent = code || '—';
   } catch (e) { myReferralCodeEl.textContent = 'Unavailable'; }
 }
-
 copyReferralBtn?.addEventListener('click', async () => {
   const code = myReferralCodeEl?.textContent || '';
   if (!code || code === '—') return;
-  try {
-    await navigator.clipboard.writeText(code);
-    copyReferralBtn.textContent = 'Copied!';
-    setTimeout(() => copyReferralBtn.textContent = 'Copy', 1500);
-  } catch (e) {}
+  try { await navigator.clipboard.writeText(code); copyReferralBtn.textContent = 'Copied!'; setTimeout(() => copyReferralBtn.textContent = 'Copy', 1500); } catch (e) {}
 });
-
 submitReferralBtn?.addEventListener('click', async () => {
   const code = (referralInput?.value || '').trim().toUpperCase();
   if (!referralStatusMsg) return;
@@ -2095,11 +2139,7 @@ submitReferralBtn?.addEventListener('click', async () => {
   submitReferralBtn.disabled = false;
 });
 
-editNameBtn?.addEventListener('click', () => {
-  nameInput.value = playerNameEl.textContent;
-  nameEditBox.classList.remove('hidden');
-  nameInput.focus();
-});
+editNameBtn?.addEventListener('click', () => { nameInput.value = playerNameEl.textContent; nameEditBox.classList.remove('hidden'); nameInput.focus(); });
 cancelNameBtn?.addEventListener('click', () => nameEditBox.classList.add('hidden'));
 saveNameBtn?.addEventListener('click', async () => {
   const newName = nameInput.value.trim();
@@ -2143,13 +2183,7 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
     return;
   }
 
-  client.from('payment_requests').insert({
-    user_id: currentUser.id,
-    txn_id: orderId,
-    amount_inr: customAmount,
-    tokens_to_credit: tokens,
-    status: 'pending'
-  }).then(() => {
+  client.from('payment_requests').insert({ user_id: currentUser.id, txn_id: orderId, amount_inr: customAmount, tokens_to_credit: tokens, status: 'pending' }).then(() => {
     sessionStorage.setItem('pending_order_' + orderId, JSON.stringify({ amount: customAmount, tokens }));
     ZapUPI.createOrder({
       zap_key: ZAPUPI_API_KEY,
@@ -2180,7 +2214,6 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
     document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
   });
 });
-
 function closePaymentModal() {
   document.getElementById('paymentModal').classList.remove('show');
   document.getElementById('paymentStatus').className = 'payment-status waiting';
@@ -2189,7 +2222,6 @@ function closePaymentModal() {
   btn.disabled = false;
   btn.innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
 }
-
 document.getElementById('cancelPaymentBtn')?.addEventListener('click', closePaymentModal);
 document.getElementById('closePaymentModal')?.addEventListener('click', closePaymentModal);
 
@@ -2218,26 +2250,16 @@ function showPaymentAnimation(amount) {
 async function approvePaymentOrder(orderId) {
   if (!orderId || !currentUser) return false;
   try {
-    const { data: row, error } = await client.from('payment_requests')
-      .select('id, user_id, tokens_to_credit, status')
-      .eq('txn_id', orderId).maybeSingle();
+    const { data: row, error } = await client.from('payment_requests').select('id, user_id, tokens_to_credit, status').eq('txn_id', orderId).maybeSingle();
     if (error || !row) return false;
     if (row.status === 'approved') return true;
     if (row.user_id !== currentUser.id) return false;
-
-    const { error: upErr } = await client.from('payment_requests')
-      .update({ status: 'approved', reviewed_at: new Date().toISOString() })
-      .eq('txn_id', orderId).eq('status', 'pending');
+    const { error: upErr } = await client.from('payment_requests').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('txn_id', orderId).eq('status', 'pending');
     if (upErr) return false;
-
     await new Promise(r => setTimeout(r, 500));
-    await loadWallet();
-    await loadTransactions();
-    updateUI();
+    await loadWallet(); await loadTransactions(); updateUI();
     return true;
-  } catch (e) {
-    return false;
-  }
+  } catch (e) { return false; }
 }
 
 if (typeof ZapUPI !== 'undefined' && ZapUPI.setPaymentCallbacks) {
@@ -2292,13 +2314,8 @@ async function checkPaymentReturn() {
       }, 2500);
     }
     window.history.replaceState({}, document.title, window.location.pathname);
-  } else if (status === 'failed') {
-    showToast('Payment failed. Please try again.', 'error');
-    window.history.replaceState({}, document.title, window.location.pathname);
-  } else if (status === 'timeout') {
-    showToast('Payment timed out. Please try again.', 'error');
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
+  } else if (status === 'failed') { showToast('Payment failed. Please try again.', 'error'); window.history.replaceState({}, document.title, window.location.pathname); }
+  else if (status === 'timeout') { showToast('Payment timed out. Please try again.', 'error'); window.history.replaceState({}, document.title, window.location.pathname); }
 }
 
 document.getElementById('cashout-submit-btn')?.addEventListener('click', function() {
@@ -2316,7 +2333,7 @@ document.getElementById('cashout-submit-btn')?.addEventListener('click', functio
 });
 
 /* ============================================================
-   GAME CATALOG
+   GAME CATALOG + HOW TO PLAY CONTENT
    ============================================================ */
 const GAME_CATALOG = [
   { type: 'tictactoe',  name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25 },
@@ -2341,6 +2358,52 @@ const GAME_CATALOG = [
   { type: 'mathchain',  name: 'Fast Math Chain', desc: 'Solve quick sums back-to-back. Speed math.', badge: 'MATH', category: 'math', entry: 15, reward: 25 },
   { type: 'battleship', name: 'Battleship Mini', desc: '5x5 grid. Find all 4 hidden ships first.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 }
 ];
+
+// v10: How to Play content per game type
+const HOW_TO_PLAY = {
+  tictactoe: { icon: '×', mode: '1v1 Live', steps: ['You and your opponent take turns placing X or O on a 3×3 grid.', 'The first player to get three of their marks in a row — horizontally, vertically, or diagonally — wins.', 'If the board fills with no winner, the match is a draw and both stakes are refunded.'], tip: 'Control the center square early — it belongs to the most winning lines.' },
+  connect4: { icon: '◉', mode: '1v1 Live', steps: ['You and your opponent take turns dropping colored discs into a 7-column, 6-row grid.', 'Discs fall to the lowest empty slot in the column you choose.', 'The first player to line up four of their discs in a row — horizontally, vertically, or diagonally — wins.'], tip: 'Build two-way threats — make a line that can win on either side.' },
+  nim: { icon: '●', mode: '1v1 Live', steps: ['There are three piles of stones: 3, 5, and 7.', 'On your turn, take 1 or 2 stones from any single pile.', 'The player who takes the last stone wins the match.'], tip: 'Aim to leave your opponent an even number across piles.' },
+  dots: { icon: '□', mode: '1v1 Live', steps: ['You and your opponent take turns drawing a line between two adjacent dots on a 4×4 grid.', 'If your line completes the fourth side of a box, you claim that box and go again.', 'When all boxes are claimed, the player with more boxes wins.'], tip: 'Avoid completing the third side of a box — it hands your opponent the fourth side.' },
+  rps: { icon: '✊', mode: 'Best of 3', steps: ['Each round, pick Rock, Paper, or Scissors.', 'Rock beats Scissors, Scissors beats Paper, Paper beats Rock.', 'First player to win 2 rounds wins the match.'], tip: 'There is no perfect strategy — mix it up so your opponent cannot read you.' },
+  dice: { icon: '⚄', mode: 'Single roll', steps: ['You and your opponent each roll one six-sided die.', 'The higher number wins the match.', 'If both dice show the same number, the match is a draw and stakes are refunded.'], tip: 'Pure luck — no strategy. Good for a quick match.' },
+  memory: { icon: '⬛', mode: 'Turn-based', steps: ['A 4×4 grid of face-down cards hides 8 matching pairs.', 'On your turn, flip two cards. If they match, they stay revealed and you go again.', 'If they do not match, they flip back and it becomes your opponent\'s turn.', 'The player who finds more pairs wins.'], tip: 'Remember card positions on your opponent\'s failed flips.' },
+  memorylg: { icon: '▦', mode: 'Turn-based', steps: ['A 5×4 grid of face-down cards hides 10 matching pairs.', 'On your turn, flip two cards. If they match, they stay revealed and you go again.', 'The player who finds more pairs wins.'], tip: 'Larger grid = longer memory. Focus on remembering one row at a time.' },
+  higherlower: { icon: '⇅', mode: 'Solo vs bot', steps: ['A secret number between 1 and 100 is chosen.', 'Enter your guess. The system tells you if it is too high or too low.', 'You have 7 attempts to guess the number exactly.'], tip: 'Always start with 50 — it splits the range in half.' },
+  scramble: { icon: 'A', mode: '5 rounds', steps: ['A scrambled word is shown for each round.', 'Type the correct word and submit as fast as you can.', 'Both players solve the same words. The player with more correct answers wins.'], tip: 'Look for vowel patterns — they usually reveal the word shape.' },
+  tap: { icon: '☝', mode: '5-second race', steps: ['You have 5 seconds to tap the button as many times as possible.', 'Your opponent taps their own button at the same time.', 'The player with more taps wins.'], tip: 'Use two thumbs — alternating gives a faster rate.' },
+  simon: { icon: '◐', mode: 'Pattern rounds', steps: ['A sequence of colored squares lights up one at a time.', 'Repeat the sequence by tapping the squares in the same order.', 'Each round adds one more step. Miss one and the match ends.'], tip: 'Say the colors out loud in your head — it helps memory.' },
+  whack: { icon: '◆', mode: 'Race to 15', steps: ['A mole pops up randomly in a 3×3 grid.', 'Tap it before it disappears to score a hit.', 'The first player to reach 15 hits wins.'], tip: 'Watch the whole grid, not just the mole.' },
+  reaction: { icon: '!', mode: '3 rounds', steps: ['A box appears. Wait for it to turn green.', 'The moment it turns green, tap it as fast as you can.', 'Tap too early and you lose the round. Fastest average time wins.'], tip: 'Relax your hand — tense muscles slow your reaction.' },
+  oddone: { icon: '◈', mode: '8 rounds', steps: ['A 4×4 grid of tiles appears. One tile has a slightly different shade.', 'Tap the odd tile as fast as you can.', 'The player with more correct picks out of 8 wins.'], tip: 'Scan row by row instead of trying to take in the whole grid.' },
+  mathduel: { icon: '∑', mode: '5 questions', steps: ['You and your opponent get the same 5 math questions.', 'Solve each and enter your answer as fast as you can.', 'Fastest correct answer wins each round. Most correct answers wins the match.'], tip: 'Do the easy ones first — speed matters as much as accuracy.' },
+  reflex: { icon: '⚡', mode: 'Race to 10', steps: ['A random tile lights up in a 4×4 grid.', 'Tap the lit tile before it fades.', 'The first player to hit 10 tiles wins.'], tip: 'Keep your finger hovering — moving it wastes time.' },
+  stroop: { icon: '◉', mode: '8 rounds', steps: ['A color word appears (like "BLUE") but is written in a different ink color.', 'Tap the button that matches the INK color, not the word.', 'Most correct out of 8 wins.'], tip: 'Cover the word with your eyes and focus only on the color.' },
+  recall: { icon: '①②', mode: '5 levels', steps: ['A sequence of numbers flashes on the grid one at a time.', 'Tap the same numbers back in the same order.', 'Each level adds one more number. Miss one and the match ends.'], tip: 'Group numbers into chunks of 2-3 in your mind.' },
+  mathchain: { icon: '∷', mode: '5 sums', steps: ['You get 5 quick math questions back-to-back.', 'Solve each and submit as fast as you can.', 'Most correct answers wins.'], tip: 'Do not double-check — trust your first answer.' },
+  battleship: { icon: '⌖', mode: 'Turn-based', steps: ['You and your opponent each hide 4 ships on a 5×5 grid.', 'Take turns firing at one cell. "Hit" means a ship was there, "miss" means empty water.', 'The first player to sink all 4 of the opponent\'s ships wins.'], tip: 'Once you get a hit, target the adjacent cells.' }
+};
+
+function buildGameCardHTML(g, index) {
+  const hsl = (index * 22) % 360;
+  const bg = `hsl(${hsl}, 55%, 92%)`;
+  return `<div class="game-card" data-category="${g.category}">
+    <div class="card-media" style="background:${bg};">
+      <img class="thumbnail" src="${g.thumbnail || buildThumbnail(g)}" alt="${g.name}" loading="lazy" />
+      <span class="card-badge">${g.badge}</span>
+      <button class="help-btn" data-help="${g.type}" title="How to play">?</button>
+    </div>
+    <div class="card-content">
+      <h3 class="card-title">${g.name}</h3>
+      <p class="card-desc">${g.desc}</p>
+      <div class="card-meta">
+        <span>₹${g.entry}</span>
+        <span class="win">+₹${g.reward}</span>
+      </div>
+      <button class="play-btn" data-game="${g.name}" data-type="${g.type}" data-entry="${g.entry}" data-reward="${g.reward}">Play</button>
+    </div>
+  </div>`;
+}
 
 const CATEGORY_ACCENT = {
   STRATEGY: '#8b6ef5', CLASSIC: '#f0a83e', LUCK: '#f2c94c', BRAIN: '#4fd1e0',
@@ -2408,24 +2471,13 @@ function buildThumbnail(game) {
   const icon = iconFn ? iconFn(accent) : '';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220">
     <defs>
-      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#1a1726"/>
-        <stop offset="1" stop-color="#0c0b12"/>
-      </linearGradient>
-      <radialGradient id="glow" cx="82%" cy="6%" r="80%">
-        <stop offset="0" stop-color="${accent}" stop-opacity="0.38"/>
-        <stop offset="55%" stop-color="${accent}" stop-opacity="0"/>
-      </radialGradient>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a1726"/><stop offset="1" stop-color="#0c0b12"/></linearGradient>
+      <radialGradient id="glow" cx="82%" cy="6%" r="80%"><stop offset="0" stop-color="${accent}" stop-opacity="0.38"/><stop offset="55%" stop-color="${accent}" stop-opacity="0"/></radialGradient>
     </defs>
     <rect width="400" height="220" fill="url(#bg)"/>
     <rect width="400" height="220" fill="url(#glow)"/>
-    <g stroke="#ffffff" stroke-opacity="0.05">
-      ${[40,80,120,160,200,240,280,320,360].map(x=>el.line(x,0,x,220)).join('')}
-      ${[40,80,120,160,200].map(y=>el.line(0,y,400,y)).join('')}
-    </g>
-    <g transform="translate(200,114) scale(2.75)" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      ${icon}
-    </g>
+    <g stroke="#ffffff" stroke-opacity="0.05">${[40,80,120,160,200,240,280,320,360].map(x=>el.line(x,0,x,220)).join('')}${[40,80,120,160,200].map(y=>el.line(0,y,400,y)).join('')}</g>
+    <g transform="translate(200,114) scale(2.75)" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</g>
   </svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
@@ -2433,26 +2485,46 @@ function buildThumbnail(game) {
 function renderGameCards() {
   const grid = document.getElementById('gamesGrid');
   if (!grid) return;
-  grid.innerHTML = GAME_CATALOG.map((g) => {
-    const src = g.thumbnail || buildThumbnail(g);
-    return `<div class="game-card" data-category="${g.category}">
-      <div class="card-media">
-        <img class="thumbnail" src="${src}" alt="${g.name}" loading="lazy" />
-        <span class="card-badge">${g.badge}</span>
-      </div>
-      <div class="card-content">
-        <h3 class="card-title">${g.name}</h3>
-        <p class="card-desc">${g.desc}</p>
-        <div class="card-meta">
-          <span>₹${g.entry}</span>
-          <span class="win">+₹${g.reward}</span>
-        </div>
-        <button class="play-btn" data-game="${g.name}" data-type="${g.type}" data-entry="${g.entry}" data-reward="${g.reward}">Play</button>
-      </div>
-    </div>`;
-  }).join('');
+  grid.innerHTML = GAME_CATALOG.map((g, i) => buildGameCardHTML(g, i)).join('');
 }
 renderGameCards();
+
+// v10: How to Play modal logic
+const htpOverlay = document.getElementById('how-to-play-overlay');
+const htpIcon = document.getElementById('htp-icon');
+const htpTitle = document.getElementById('htp-title');
+const htpBadge = document.getElementById('htp-badge');
+const htpBody = document.getElementById('htp-body');
+const htpEntry = document.getElementById('htp-entry');
+const htpReward = document.getElementById('htp-reward');
+const htpMode = document.getElementById('htp-mode');
+
+function openHowToPlay(type) {
+  const game = GAME_CATALOG.find(g => g.type === type);
+  const htp = HOW_TO_PLAY[type];
+  if (!game || !htp) return;
+  htpIcon.textContent = htp.icon;
+  htpTitle.textContent = game.name;
+  htpBadge.textContent = game.badge;
+  htpEntry.textContent = '₹' + game.entry;
+  htpReward.textContent = '₹' + game.reward;
+  htpMode.textContent = htp.mode;
+  let html = '<h4>How to play</h4><ol>';
+  htp.steps.forEach(s => { html += `<li>${s}</li>`; });
+  html += '</ol>';
+  if (htp.tip) html += `<h4>Pro tip</h4><p>${htp.tip}</p>`;
+  htpBody.innerHTML = html;
+  htpOverlay.classList.add('show');
+}
+function closeHowToPlay() { htpOverlay.classList.remove('show'); }
+document.getElementById('htp-close')?.addEventListener('click', closeHowToPlay);
+htpOverlay?.addEventListener('click', (e) => { if (e.target === htpOverlay) closeHowToPlay(); });
+
+// Delegate help button clicks
+document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
+  const helpBtn = e.target.closest('.help-btn');
+  if (helpBtn) { e.stopPropagation(); openHowToPlay(helpBtn.dataset.help); return; }
+});
 
 const INDIAN_BOT_POOL = [
   { name: 'Aarav Sharma', seed: 'aarav' }, { name: 'Priya Patel', seed: 'priya' },
@@ -2490,17 +2562,35 @@ async function pushSessionState(sessionId, newState, nextTurn) {
   } catch (e) {}
 }
 
-async function markSessionComplete(sessionId, winnerId) {
+// v10: atomic end — pushes final state + marks complete in one RPC
+async function endSessionWithState(sessionId, finalState, winnerId) {
   try {
-    await client.from('game_sessions').update({
-      status: 'completed',
-      winner_id: winnerId || null,
-      updated_at: new Date().toISOString()
-    }).eq('id', sessionId);
-  } catch (e) {}
+    const { data, error } = await client.rpc('end_session_with_state', {
+      p_session_id: sessionId,
+      p_final_state: finalState || {},
+      p_winner_id: winnerId || null
+    });
+    if (error) throw error;
+    return data;
+  } catch (e) {
+    // Fallback to plain update if RPC fails (should not happen with v10 SQL)
+    try {
+      await client.from('game_sessions').update({
+        state: finalState || {},
+        status: 'completed',
+        winner_id: winnerId || null,
+        updated_at: new Date().toISOString()
+      }).eq('id', sessionId);
+    } catch (e2) {}
+    return { ok: true };
+  }
 }
 
 async function launchArena(opponent, sessionInfo) {
+  // v10: double-launch guard
+  if (arenaLaunchInProgress) return;
+  arenaLaunchInProgress = true;
+
   activeOpponent = opponent;
   isGameActive = true;
   document.body.classList.add('game-active');
@@ -2517,14 +2607,21 @@ async function launchArena(opponent, sessionInfo) {
     activeGameSessionId = sessionInfo.session_id;
     isRealPlayerMatch = true;
     myRole = sessionInfo.you_are;
-    const turn = 'player1';
+    // v10: fetch full session so we know both player IDs
+    try {
+      const { data: sess } = await client.from('game_sessions').select('*').eq('id', sessionInfo.session_id).maybeSingle();
+      activeGameSession = sess || null;
+    } catch (e) { activeGameSession = null; }
+    const turn = activeGameSession?.current_turn || 'player1';
     launchLiveGame(activeGame.type, opponent, activeGameSessionId, turn);
   } else {
     activeGameSessionId = null;
+    activeGameSession = null;
     isRealPlayerMatch = false;
     myRole = 'player1';
     launchBotGame(activeGame.type, opponent);
   }
+  arenaLaunchInProgress = false;
 }
 
 function launchBotGame(type, opponent) {
@@ -2567,7 +2664,7 @@ function launchLiveGame(type, opponent, sessionId, initialTurn) {
   }
 }
 
-// ===== GAME: TIC-TAC-TOE (live + bot) — dynamic turn indicator only =====
+// ===== GAME: TIC-TAC-TOE (v10: pushes final state on win) =====
 function runTicTacToe(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -2578,6 +2675,7 @@ function runTicTacToe(opponent, live) {
   const mySymbol = isLive ? (myRole === 'player1' ? 'X' : 'O') : 'X';
   const oppSymbol = mySymbol === 'X' ? 'O' : 'X';
   let myTurn = isLive ? (myRole === 'player1') : true;
+  let endHandled = false;
 
   function render() {
     let cells = '';
@@ -2614,13 +2712,44 @@ function runTicTacToe(opponent, live) {
     myTurn = false;
     render();
     const winner = findWinner();
-    if (winner === sym) { gameOver = true; drawLine(getWinLine(sym)); if (isLive) await markSessionComplete(live.sessionId, currentUser.id); setTimeout(() => endDuel(true, 'Tic-Tac-Toe victory.'), 700); return; }
-    if (winner === oppSymbol) { gameOver = true; drawLine(getWinLine(oppSymbol)); if (isLive) await markSessionComplete(live.sessionId, opponent.id); setTimeout(() => endDuel(false, 'Opponent completed a line.'), 700); return; }
-    if (board.every(c => c)) { gameOver = true; if (isLive) await markSessionComplete(live.sessionId, null); setTimeout(endDrawnMatch, 500); return; }
+    const finalState = { board: [...board] };
+
+    if (winner === sym) {
+      gameOver = true;
+      drawLine(getWinLine(sym));
+      if (isLive && !endHandled) {
+        endHandled = true;
+        await endSessionWithState(live.sessionId, finalState, currentUser.id);
+      }
+      setTimeout(() => endDuel(true, 'Tic-Tac-Toe victory.'), 700);
+      return;
+    }
+    if (winner === oppSymbol) {
+      gameOver = true;
+      drawLine(getWinLine(oppSymbol));
+      if (isLive && !endHandled) {
+        endHandled = true;
+        // push final state first so opponent sees the winning line, then complete
+        await pushSessionState(live.sessionId, finalState, myRole);
+        await endSessionWithState(live.sessionId, finalState, opponent.id);
+      }
+      setTimeout(() => endDuel(false, 'Opponent completed a line.'), 700);
+      return;
+    }
+    if (board.every(c => c)) {
+      gameOver = true;
+      if (isLive && !endHandled) {
+        endHandled = true;
+        await pushSessionState(live.sessionId, finalState, myRole);
+        await endSessionWithState(live.sessionId, finalState, null);
+      }
+      setTimeout(endDrawnMatch, 500);
+      return;
+    }
 
     if (isLive) {
       const nextTurn = myRole === 'player1' ? 'player2' : 'player1';
-      await pushSessionState(live.sessionId, { board: [...board] }, nextTurn);
+      await pushSessionState(live.sessionId, finalState, nextTurn);
     } else {
       setTimeout(botMove, 500 + Math.random() * 400);
     }
@@ -2666,22 +2795,37 @@ function runTicTacToe(opponent, live) {
 
   if (isLive) {
     subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') { gameOver = true; return; }
-      if (newState && Array.isArray(newState.board)) {
+      if (status === 'completed') {
+        // v10: even if opponent just completed, read their final board so we can render it
+        if (newState && Array.isArray(newState.board) && !gameOver) {
+          board = newState.board;
+          render();
+          const w = findWinner();
+          if (w) drawLine(getWinLine(w));
+        }
+        if (gameOver) return;
+        gameOver = true;
+        endHandled = true;
+        const iWon = winnerId === currentUser.id;
+        const isDraw = !winnerId;
+        setTimeout(() => {
+          if (isDraw) endDrawnMatch();
+          else if (iWon) endDuel(true, 'Tic-Tac-Toe victory.');
+          else endDuel(false, 'Opponent completed a line.');
+        }, 500);
+        return;
+      }
+      if (newState && Array.isArray(newState.board) && !gameOver) {
         board = newState.board;
         myTurn = (turn === myRole);
         render();
-        const w = findWinner();
-        if (w === mySymbol) { gameOver = true; drawLine(getWinLine(mySymbol)); setTimeout(() => endDuel(true, 'Tic-Tac-Toe victory.'), 700); }
-        else if (w === oppSymbol) { gameOver = true; drawLine(getWinLine(oppSymbol)); setTimeout(() => endDuel(false, 'Opponent completed a line.'), 700); }
-        else if (board.every(c => c)) { gameOver = true; setTimeout(endDrawnMatch, 500); }
       }
     });
   }
   render();
 }
 
-// ===== GAME: CONNECT 4 (live + bot) =====
+// ===== GAME: CONNECT 4 (v10) =====
 function runConnect4(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -2692,6 +2836,7 @@ function runConnect4(opponent, live) {
   const myChip = isLive ? (myRole === 'player1' ? '1' : '2') : '1';
   const oppChip = myChip === '1' ? '2' : '1';
   let myTurn = isLive ? (myRole === 'player1') : true;
+  let endHandled = false;
 
   function render() {
     let cols = '';
@@ -2711,10 +2856,7 @@ function runConnect4(opponent, live) {
     </div>`;
     if (!gameOver && myTurn) {
       document.querySelectorAll('.c4-col').forEach(col => {
-        col.addEventListener('click', () => {
-          const c = parseInt(col.dataset.col);
-          dropChip(c, myChip);
-        });
+        col.addEventListener('click', () => { dropChip(parseInt(col.dataset.col), myChip); });
       });
     }
   }
@@ -2727,12 +2869,23 @@ function runConnect4(opponent, live) {
     board[row][col] = chip;
     myTurn = false;
     render();
+    const finalState = { board: board.map(r => [...r]) };
     const win = checkWin(chip);
-    if (win) { gameOver = true; if (isLive) await markSessionComplete(live.sessionId, currentUser.id); setTimeout(() => endDuel(true, 'Connect 4 victory.'), 700); return; }
-    if (board[0].every(c => c)) { gameOver = true; if (isLive) await markSessionComplete(live.sessionId, null); setTimeout(endDrawnMatch, 500); return; }
+    if (win) {
+      gameOver = true;
+      if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, currentUser.id); }
+      setTimeout(() => endDuel(true, 'Connect 4 victory.'), 700);
+      return;
+    }
+    if (board[0].every(c => c)) {
+      gameOver = true;
+      if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, null); }
+      setTimeout(endDrawnMatch, 500);
+      return;
+    }
     if (isLive) {
       const nextTurn = myRole === 'player1' ? 'player2' : 'player1';
-      await pushSessionState(live.sessionId, { board: board.map(r => [...r]) }, nextTurn);
+      await pushSessionState(live.sessionId, finalState, nextTurn);
     } else {
       setTimeout(botMove, 500 + Math.random() * 400);
     }
@@ -2771,21 +2924,31 @@ function runConnect4(opponent, live) {
 
   if (isLive) {
     subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') { gameOver = true; return; }
-      if (newState && Array.isArray(newState.board)) {
+      if (status === 'completed') {
+        if (newState && Array.isArray(newState.board) && !gameOver) { board = newState.board.map(r => [...r]); render(); }
+        if (gameOver) return;
+        gameOver = true;
+        endHandled = true;
+        const iWon = winnerId === currentUser.id;
+        const isDraw = !winnerId;
+        setTimeout(() => {
+          if (isDraw) endDrawnMatch();
+          else if (iWon) endDuel(true, 'Connect 4 victory.');
+          else endDuel(false, 'Opponent connected four.');
+        }, 500);
+        return;
+      }
+      if (newState && Array.isArray(newState.board) && !gameOver) {
         board = newState.board.map(r => [...r]);
         myTurn = (turn === myRole);
         render();
-        if (checkWin(myChip)) { gameOver = true; setTimeout(() => endDuel(true, 'Connect 4 victory.'), 700); }
-        else if (checkWin(oppChip)) { gameOver = true; setTimeout(() => endDuel(false, 'Opponent connected four.'), 700); }
-        else if (board[0].every(c => c)) { gameOver = true; setTimeout(endDrawnMatch, 500); }
       }
     });
   }
   render();
 }
 
-// ===== GAME: NIM (live + bot) =====
+// ===== GAME: NIM (v10) =====
 function runNim(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -2793,6 +2956,7 @@ function runNim(opponent, live) {
   let piles = [3, 5, 7];
   let gameOver = false;
   let myTurn = isLive ? (myRole === 'player1') : true;
+  let endHandled = false;
 
   function render() {
     const totalStones = piles.reduce((a,b) => a+b, 0);
@@ -2803,11 +2967,7 @@ function runNim(opponent, live) {
       </div>
       <div class="nim-row">`;
     piles.forEach((count, i) => {
-      html += `<div class="nim-pile ${(!myTurn || gameOver || count === 0) ? 'disabled' : ''}" data-pile="${i}">
-        <div class="nim-count">${count}</div>
-        <div class="nim-dots">${'●'.repeat(count) || '—'}</div>
-        <div style="font-size:0.65rem;color:#918fa3;margin-top:4px;">Pile ${i+1}</div>
-      </div>`;
+      html += `<div class="nim-pile ${(!myTurn || gameOver || count === 0) ? 'disabled' : ''}" data-pile="${i}"><div class="nim-count">${count}</div><div class="nim-dots">${'●'.repeat(count) || '—'}</div><div style="font-size:0.65rem;color:#918fa3;margin-top:4px;">Pile ${i+1}</div></div>`;
     });
     html += `</div><p style="font-size:0.75rem;color:#5c5a6e;margin-top:12px;">${totalStones} stones remaining · Take the last stone to win</p></div>`;
     stage.innerHTML = html;
@@ -2823,17 +2983,12 @@ function runNim(opponent, live) {
   }
 
   function showTakeButtons(pileIdx) {
-    const stage = document.getElementById('arena-stage');
     const maxTake = Math.min(2, piles[pileIdx]);
     let buttons = '';
     for (let t = 1; t <= maxTake; t++) buttons += `<button class="nim-take-btn" data-take="${t}">Take ${t}</button>`;
     stage.innerHTML += `<div style="position:fixed;inset:0;background:rgba(22,21,34,0.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:2000;" id="nim-take-overlay"><div class="modal-card" style="max-width:280px;text-align:center;"><h3 style="margin-bottom:12px;">Pile ${pileIdx+1} has ${piles[pileIdx]} stones</h3><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">${buttons}</div><button class="btn-cancel" id="nim-cancel" style="margin-top:12px;">Cancel</button></div></div>`;
     document.querySelectorAll('#nim-take-overlay .nim-take-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const t = parseInt(btn.dataset.take);
-        document.getElementById('nim-take-overlay').remove();
-        makeMove(pileIdx, t);
-      });
+      btn.addEventListener('click', () => { const t = parseInt(btn.dataset.take); document.getElementById('nim-take-overlay').remove(); makeMove(pileIdx, t); });
     });
     document.getElementById('nim-cancel')?.addEventListener('click', () => { document.getElementById('nim-take-overlay').remove(); });
   }
@@ -2844,10 +2999,16 @@ function runNim(opponent, live) {
     const total = piles.reduce((a,b) => a+b, 0);
     myTurn = false;
     render();
-    if (total === 0) { gameOver = true; if (isLive) await markSessionComplete(live.sessionId, currentUser.id); setTimeout(() => endDuel(true, 'You took the last stone.'), 700); return; }
+    const finalState = { piles: [...piles] };
+    if (total === 0) {
+      gameOver = true;
+      if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, currentUser.id); }
+      setTimeout(() => endDuel(true, 'You took the last stone.'), 700);
+      return;
+    }
     if (isLive) {
       const nextTurn = myRole === 'player1' ? 'player2' : 'player1';
-      await pushSessionState(live.sessionId, { piles: [...piles] }, nextTurn);
+      await pushSessionState(live.sessionId, finalState, nextTurn);
     } else {
       setTimeout(botMove, 600 + Math.random() * 400);
     }
@@ -2860,10 +3021,7 @@ function runNim(opponent, live) {
     if (nimSum !== 0) {
       for (let i = 0; i < piles.length; i++) {
         const target = piles[i] ^ nimSum;
-        if (target < piles[i]) {
-          const take = piles[i] - target;
-          if (take >= 1 && take <= 2) { bestPile = i; bestTake = take; break; }
-        }
+        if (target < piles[i]) { const take = piles[i] - target; if (take >= 1 && take <= 2) { bestPile = i; bestTake = take; break; } }
       }
     }
     if (bestPile === -1) {
@@ -2881,20 +3039,31 @@ function runNim(opponent, live) {
 
   if (isLive) {
     subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') { gameOver = true; return; }
-      if (newState && Array.isArray(newState.piles)) {
+      if (status === 'completed') {
+        if (newState && Array.isArray(newState.piles) && !gameOver) { piles = newState.piles; render(); }
+        if (gameOver) return;
+        gameOver = true;
+        endHandled = true;
+        const iWon = winnerId === currentUser.id;
+        const isDraw = !winnerId;
+        setTimeout(() => {
+          if (isDraw) endDrawnMatch();
+          else if (iWon) endDuel(true, 'You took the last stone.');
+          else endDuel(false, 'Opponent took the last stone.');
+        }, 500);
+        return;
+      }
+      if (newState && Array.isArray(newState.piles) && !gameOver) {
         piles = newState.piles;
         myTurn = (turn === myRole);
         render();
-        const total = piles.reduce((a,b) => a+b, 0);
-        if (total === 0) { gameOver = true; setTimeout(endDrawnMatch, 500); }
       }
     });
   }
   render();
 }
 
-// ===== GAME: DOTS & BOXES (live + bot) =====
+// ===== GAME: DOTS & BOXES (v10) =====
 function runDots(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -2908,6 +3077,7 @@ function runDots(opponent, live) {
   const oppChip = myChip === '1' ? '2' : '1';
   let myTurn = isLive ? (myRole === 'player1') : true;
   let gameOver = false;
+  let endHandled = false;
 
   function checkBoxes() {
     let completed = 0;
@@ -2959,14 +3129,18 @@ function runDots(opponent, live) {
     if (completed === 0) myTurn = false;
     render();
     const totalBoxes = B.flat().filter(v => v).length;
+    const finalState = { H, V, B };
     if (totalBoxes === N * N) {
       gameOver = true;
-      if (isLive) {
+      if (isLive && !endHandled) {
+        endHandled = true;
         const mine = B.flat().filter(v => v === myChip).length;
         const theirs = B.flat().filter(v => v === oppChip).length;
-        if (mine > theirs) { await markSessionComplete(live.sessionId, currentUser.id); setTimeout(() => endDuel(true, `You completed ${mine} boxes vs ${theirs}.`), 600); }
-        else if (mine < theirs) { await markSessionComplete(live.sessionId, opponent.id); setTimeout(() => endDuel(false, `Opponent completed ${theirs} boxes vs ${mine}.`), 600); }
-        else { await markSessionComplete(live.sessionId, null); setTimeout(endDrawnMatch, 500); }
+        const winnerId = mine > theirs ? currentUser.id : (mine < theirs ? opponent.id : null);
+        await endSessionWithState(live.sessionId, finalState, winnerId);
+        if (mine > theirs) setTimeout(() => endDuel(true, `You completed ${mine} boxes vs ${theirs}.`), 600);
+        else if (mine < theirs) setTimeout(() => endDuel(false, `Opponent completed ${theirs} boxes vs ${mine}.`), 600);
+        else setTimeout(endDrawnMatch, 500);
       } else {
         const mine = B.flat().filter(v => v === '1').length;
         const theirs = B.flat().filter(v => v === '2').length;
@@ -2977,8 +3151,10 @@ function runDots(opponent, live) {
       return;
     }
     if (!myTurn) {
-      if (isLive) { const nextTurn = myRole === 'player1' ? 'player2' : 'player1'; await pushSessionState(live.sessionId, { H, V, B }, nextTurn); }
+      if (isLive) { const nextTurn = myRole === 'player1' ? 'player2' : 'player1'; await pushSessionState(live.sessionId, finalState, nextTurn); }
       else { setTimeout(botMove, 500 + Math.random() * 400); }
+    } else if (isLive) {
+      await pushSessionState(live.sessionId, finalState, myRole);
     }
   }
 
@@ -3015,20 +3191,31 @@ function runDots(opponent, live) {
 
   if (isLive) {
     subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') { gameOver = true; return; }
-      if (newState && newState.H && newState.V && newState.B) {
+      if (status === 'completed') {
+        if (newState && newState.H && newState.V && newState.B && !gameOver) { H = newState.H; V = newState.V; B = newState.B; render(); }
+        if (gameOver) return;
+        gameOver = true;
+        endHandled = true;
+        const iWon = winnerId === currentUser.id;
+        const isDraw = !winnerId;
+        setTimeout(() => {
+          if (isDraw) endDrawnMatch();
+          else if (iWon) endDuel(true, 'You won!');
+          else endDuel(false, 'Opponent won.');
+        }, 500);
+        return;
+      }
+      if (newState && newState.H && newState.V && newState.B && !gameOver) {
         H = newState.H; V = newState.V; B = newState.B;
         myTurn = (turn === myRole);
         render();
-        const totalBoxes = B.flat().filter(v => v).length;
-        if (totalBoxes === N * N) gameOver = true;
       }
     });
   }
   render();
 }
 
-// ===== GAME: MEMORY GRID PRO (live + bot) =====
+// ===== GAME: MEMORY GRID PRO (v10) =====
 function runMemoryLarge(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3038,6 +3225,7 @@ function runMemoryLarge(opponent, live) {
   let cards = DECK.sort(() => Math.random() - 0.5).map((s, i) => ({ sym: s, flipped: false, matched: false, id: i }));
   let flipped = [], lock = false, playerPairs = 0, botPairs = 0, turn = 'you';
   let gameOver = false;
+  let endHandled = false;
 
   function render() {
     stage.innerHTML = `<div style="width:100%;text-align:center;">
@@ -3100,6 +3288,7 @@ function runMemoryLarge(opponent, live) {
   }
 
   function finish() {
+    if (gameOver) return;
     gameOver = true;
     if (playerPairs > botPairs) endDuel(true, `You found ${playerPairs} pairs, opponent found ${botPairs}.`);
     else if (playerPairs < botPairs) endDuel(false, `Opponent found ${botPairs} pairs, you found ${playerPairs}.`);
@@ -3107,9 +3296,22 @@ function runMemoryLarge(opponent, live) {
   }
 
   if (isLive) {
-    subscribeToSession(live.sessionId, (newState, turnState, status) => {
-      if (status === 'completed') { gameOver = true; return; }
-      if (newState && Array.isArray(newState.cards)) {
+    subscribeToSession(live.sessionId, (newState, turnState, status, winnerId) => {
+      if (status === 'completed') {
+        if (newState && Array.isArray(newState.cards) && !gameOver) { cards = newState.cards; render(); }
+        if (gameOver) return;
+        gameOver = true;
+        endHandled = true;
+        const iWon = winnerId === currentUser.id;
+        const isDraw = !winnerId;
+        setTimeout(() => {
+          if (isDraw) endDrawnMatch();
+          else if (iWon) endDuel(true, 'You won!');
+          else endDuel(false, 'Opponent won.');
+        }, 500);
+        return;
+      }
+      if (newState && Array.isArray(newState.cards) && !gameOver) {
         cards = newState.cards;
         turn = (turnState === myRole) ? 'you' : 'bot';
         render();
@@ -3119,7 +3321,7 @@ function runMemoryLarge(opponent, live) {
   render();
 }
 
-// ===== GAME: WORD SCRAMBLE (live + bot) =====
+// ===== GAME: WORD SCRAMBLE (v10) =====
 function runScramble(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3157,7 +3359,7 @@ function runScramble(opponent, live) {
     setTimeout(() => { if (!gameOver && current < TOTAL) { if (Math.random() < 0.55) { oppScore++; } } }, 5000);
   }
 
-  function submit() {
+  async function submit() {
     if (gameOver) return;
     const val = (document.getElementById('scramble-input').value || '').toUpperCase().trim();
     if (val === word) myScore++;
@@ -3167,17 +3369,39 @@ function runScramble(opponent, live) {
     render();
   }
 
-  function finish() {
+  async function finish() {
+    if (gameOver) return;
     gameOver = true;
+    const winnerId = myScore > oppScore ? currentUser.id : (myScore < oppScore ? opponent.id : null);
+    if (isLive && !endHandled) { endHandled = true; try { await endSessionWithState(live.sessionId, { myScore, oppScore }, winnerId); } catch (e) {} }
     if (myScore > oppScore) endDuel(true, `You solved ${myScore}/${TOTAL}.`);
     else if (myScore < oppScore) endDuel(false, `You solved ${myScore}, opponent ${oppScore}.`);
     else endDrawnMatch();
   }
+  let endHandled = false;
+
+  if (isLive) {
+    subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
+      if (status === 'completed') {
+        if (gameOver) return;
+        gameOver = true;
+        endHandled = true;
+        const iWon = winnerId === currentUser.id;
+        const isDraw = !winnerId;
+        setTimeout(() => {
+          if (isDraw) endDrawnMatch();
+          else if (iWon) endDuel(true, 'You won!');
+          else endDuel(false, 'Opponent won.');
+        }, 500);
+      }
+    });
+  }
+
   makeRound();
   render();
 }
 
-// ===== GAME: BATTLESHIP MINI (live + bot) =====
+// ===== GAME: BATTLESHIP MINI (v10) =====
 function runBattleship(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3190,6 +3414,7 @@ function runBattleship(opponent, live) {
   const SHIPS = [3, 2, 2, 1];
   const TOTAL_HITS = SHIPS.reduce((a,b) => a+b, 0);
   let myHits = 0, oppHits = 0;
+  let endHandled = false;
 
   function placeShips() {
     const grid = Array.from({ length: N }, () => Array(N).fill(0));
@@ -3247,10 +3472,17 @@ function runBattleship(opponent, live) {
     const isHit = oppShips.some(s => s.cells.some(cell => cell.r === r && cell.c === c));
     myShots[r][c] = isHit ? 'hit' : 'miss';
     if (isHit) myHits++;
-    if (myHits >= TOTAL_HITS) { gameOver = true; render(); if (isLive) await markSessionComplete(live.sessionId, currentUser.id); setTimeout(() => endDuel(true, `You sank all ships in ${countShots()} shots.`), 700); return; }
+    const finalState = { shots: myShots.map(row => [...row]) };
+    if (myHits >= TOTAL_HITS) {
+      gameOver = true;
+      render();
+      if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, currentUser.id); }
+      setTimeout(() => endDuel(true, `You sank all ships in ${countShots()} shots.`), 700);
+      return;
+    }
     myTurn = false;
     render();
-    if (isLive) { const nextTurn = myRole === 'player1' ? 'player2' : 'player1'; await pushSessionState(live.sessionId, { shots: myShots }, nextTurn); }
+    if (isLive) { const nextTurn = myRole === 'player1' ? 'player2' : 'player1'; await pushSessionState(live.sessionId, finalState, nextTurn); }
     else { setTimeout(botFire, 500 + Math.random() * 400); }
   }
 
@@ -3273,9 +3505,22 @@ function runBattleship(opponent, live) {
   }
 
   if (isLive) {
-    subscribeToSession(live.sessionId, (newState, turn, status) => {
-      if (status === 'completed') { gameOver = true; return; }
-      if (newState && newState.shots) {
+    subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
+      if (status === 'completed') {
+        if (newState && newState.shots && !gameOver) { myShots = newState.shots; myHits = myShots.flat().filter(v => v === 'hit').length; render(); }
+        if (gameOver) return;
+        gameOver = true;
+        endHandled = true;
+        const iWon = winnerId === currentUser.id;
+        const isDraw = !winnerId;
+        setTimeout(() => {
+          if (isDraw) endDrawnMatch();
+          else if (iWon) endDuel(true, 'You sank all ships!');
+          else endDuel(false, 'Opponent sank all your ships.');
+        }, 500);
+        return;
+      }
+      if (newState && newState.shots && !gameOver) {
         myShots = newState.shots;
         myHits = myShots.flat().filter(v => v === 'hit').length;
         myTurn = (turn === myRole);
@@ -3286,14 +3531,12 @@ function runBattleship(opponent, live) {
   render();
 }
 
-// ===== GAME: ODD ONE OUT (bot only) =====
+// ===== GAME: ODD ONE OUT (bot) =====
 function runOddOne(opponent, live) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const TOTAL = 8;
   let current = 0, myScore = 0, oppScore = 0, gameOver = false;
   let baseColor = '', oddColor = '', oddIdx = 0;
-
   function makeRound() {
     const hue = Math.floor(Math.random() * 360);
     const sat = 65 + Math.floor(Math.random() * 20);
@@ -3303,20 +3546,11 @@ function runOddOne(opponent, live) {
     oddColor = `hsl(${hue}, ${sat}%, ${Math.max(20, Math.min(80, light + lightDelta))}%)`;
     oddIdx = Math.floor(Math.random() * 16);
   }
-
   function render() {
     if (current >= TOTAL) return finish();
     const tiles = [];
     for (let i = 0; i < 16; i++) tiles.push(i === oddIdx ? oddColor : baseColor);
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;">
-        <div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div>
-        <div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${oppScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div>
-      </div>
-      <p style="font-size:0.8rem;color:#5b3df0;margin-bottom:6px;font-weight:700;">Round ${current + 1}/${TOTAL} — Tap the odd tile</p>
-      <div class="odd-grid">${tiles.map((t, i) => `<div class="odd-tile" data-i="${i}" style="background:${t};"></div>`).join('')}</div>
-    </div>`;
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p><div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${oppScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div><p style="font-size:0.8rem;color:#5b3df0;margin-bottom:6px;font-weight:700;">Round ${current + 1}/${TOTAL} — Tap the odd tile</p><div class="odd-grid">${tiles.map((t, i) => `<div class="odd-tile" data-i="${i}" style="background:${t};"></div>`).join('')}</div></div>`;
     document.querySelectorAll('.odd-tile').forEach(el => {
       el.addEventListener('click', () => {
         if (gameOver) return;
@@ -3331,101 +3565,44 @@ function runOddOne(opponent, live) {
     });
     setTimeout(() => { if (!gameOver && current < TOTAL) { if (Math.random() < 0.5) oppScore++; } }, 3500);
   }
-
-  function finish() {
-    gameOver = true;
-    if (myScore > oppScore) endDuel(true, `You spotted ${myScore}/${TOTAL}.`);
-    else if (myScore < oppScore) endDuel(false, `You spotted ${myScore}, opponent ${oppScore}.`);
-    else endDrawnMatch();
-  }
-  makeRound();
-  render();
+  function finish() { gameOver = true; if (myScore > oppScore) endDuel(true, `You spotted ${myScore}/${TOTAL}.`); else if (myScore < oppScore) endDuel(false, `You spotted ${myScore}, opponent ${oppScore}.`); else endDrawnMatch(); }
+  makeRound(); render();
 }
 
-// ===== GAME: REACTION DUEL (bot only) =====
+// ===== GAME: REACTION DUEL (bot) =====
 function runReaction(opponent, live) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const TOTAL = 3;
   let current = 0, myTimes = [], botTimes = [], gameOver = false;
   let boxState = 'wait', startTime = 0, timer = null;
-
   function renderIntro() {
-    stage.innerHTML = `<div class="react-arena">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Round ${current + 1}/${TOTAL}</p>
-      <p style="font-size:0.8rem;color:#5c5a6e;margin-bottom:12px;">Tap when the box turns green. Fastest reaction wins the round.</p>
-      <div class="react-box wait" id="react-box">Wait for green...</div>
-      <p style="font-size:0.75rem;color:#5c5a6e;margin-top:12px;">Your times: ${myTimes.map(t => t + 'ms').join(', ') || '—'} · Opponent: ${botTimes.map(t => t + 'ms').join(', ') || '—'}</p>
-    </div>`;
+    stage.innerHTML = `<div class="react-arena"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Round ${current + 1}/${TOTAL}</p><p style="font-size:0.8rem;color:#5c5a6e;margin-bottom:12px;">Tap when the box turns green.</p><div class="react-box wait" id="react-box">Wait for green...</div><p style="font-size:0.75rem;color:#5c5a6e;margin-top:12px;">Your times: ${myTimes.map(t => t + 'ms').join(', ') || '—'} · Opponent: ${botTimes.map(t => t + 'ms').join(', ') || '—'}</p></div>`;
     attachHandlers();
   }
-
   function attachHandlers() {
     const box = document.getElementById('react-box');
     box.addEventListener('click', handleClick);
-    timer = setTimeout(() => {
-      boxState = 'go';
-      box.classList.remove('wait'); box.classList.add('go');
-      box.textContent = 'TAP NOW!';
-      startTime = performance.now();
-    }, 1500 + Math.random() * 2500);
+    timer = setTimeout(() => { boxState = 'go'; box.classList.remove('wait'); box.classList.add('go'); box.textContent = 'TAP NOW!'; startTime = performance.now(); }, 1500 + Math.random() * 2500);
   }
-
   function handleClick() {
-    const box = document.getElementById('react-box');
-    if (!box) return;
-    if (boxState === 'wait') {
-      box.classList.remove('wait'); box.classList.add('done');
-      box.textContent = 'Too early!';
-      clearTimeout(timer);
-      botTimes.push(300 + Math.floor(Math.random() * 200));
-      current++;
-      setTimeout(() => { if (current >= TOTAL) finish(); else renderIntro(); }, 900);
-      return;
-    }
-    if (boxState === 'go') {
-      const t = Math.round(performance.now() - startTime);
-      myTimes.push(t);
-      botTimes.push(250 + Math.floor(Math.random() * 250));
-      boxState = 'done';
-      box.classList.remove('go'); box.classList.add('done');
-      box.textContent = `${t}ms`;
-      current++;
-      setTimeout(() => { if (current >= TOTAL) finish(); else renderIntro(); }, 900);
-    }
+    const box = document.getElementById('react-box'); if (!box) return;
+    if (boxState === 'wait') { box.classList.remove('wait'); box.classList.add('done'); box.textContent = 'Too early!'; clearTimeout(timer); botTimes.push(300 + Math.floor(Math.random() * 200)); current++; setTimeout(() => { if (current >= TOTAL) finish(); else renderIntro(); }, 900); return; }
+    if (boxState === 'go') { const t = Math.round(performance.now() - startTime); myTimes.push(t); botTimes.push(250 + Math.floor(Math.random() * 250)); boxState = 'done'; box.classList.remove('go'); box.classList.add('done'); box.textContent = `${t}ms`; current++; setTimeout(() => { if (current >= TOTAL) finish(); else renderIntro(); }, 900); }
   }
-
-  function finish() {
-    gameOver = true;
-    const myAvg = myTimes.reduce((a,b) => a+b, 0) / myTimes.length || 9999;
-    const botAvg = botTimes.reduce((a,b) => a+b, 0) / botTimes.length || 9999;
-    if (myAvg < botAvg) endDuel(true, `Your avg ${Math.round(myAvg)}ms vs ${Math.round(botAvg)}ms.`);
-    else if (myAvg > botAvg) endDuel(false, `Your avg ${Math.round(myAvg)}ms, opponent ${Math.round(botAvg)}ms.`);
-    else endDrawnMatch();
-  }
+  function finish() { gameOver = true; const myAvg = myTimes.reduce((a,b) => a+b, 0) / myTimes.length || 9999; const botAvg = botTimes.reduce((a,b) => a+b, 0) / botTimes.length || 9999; if (myAvg < botAvg) endDuel(true, `Your avg ${Math.round(myAvg)}ms vs ${Math.round(botAvg)}ms.`); else if (myAvg > botAvg) endDuel(false, `Your avg ${Math.round(myAvg)}ms, opponent ${Math.round(botAvg)}ms.`); else endDrawnMatch(); }
   renderIntro();
 }
 
-// ===== Existing bot games =====
+// ===== BOT GAMES (RPS, Dice, Memory, HigherLower, Tap, Simon, Whack, MathDuel, Reflex, Stroop, Recall, MathChain) =====
+
 function runRPS(opponent) {
   const stage = document.getElementById('arena-stage'); if (!stage) return;
   const choices = ['✊', '✋', '✌'];
   let playerScore = 0, botScore = 0, roundOver = false, matchOver = false;
   const targetWins = 2;
   function render() {
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Best of 3</p>
-      <div style="display:flex;justify-content:space-around;align-items:center;margin:14px 0;">
-        <div><div style="font-size:1.6rem;font-weight:800;color:#5b3df0;">${playerScore}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div>
-        <div style="font-size:0.9rem;color:#918fa3;">VS</div>
-        <div><div style="font-size:1.6rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div>
-      </div>
-      <div class="rps-choices">${choices.map((c, i) => `<button class="rps-btn" data-i="${i}" ${roundOver || matchOver ? 'disabled' : ''}>${c}</button>`).join('')}</div>
-      <p style="font-size:0.75rem;color:#5c5a6e;">First to ${targetWins} wins</p>
-    </div>`;
-    if (!roundOver && !matchOver) {
-      document.querySelectorAll('.rps-btn').forEach(btn => { btn.addEventListener('click', () => playRound(parseInt(btn.dataset.i))); });
-    }
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Best of 3</p><div style="display:flex;justify-content:space-around;align-items:center;margin:14px 0;"><div><div style="font-size:1.6rem;font-weight:800;color:#5b3df0;">${playerScore}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;">VS</div><div><div style="font-size:1.6rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div></div><div class="rps-choices">${choices.map((c, i) => `<button class="rps-btn" data-i="${i}" ${roundOver || matchOver ? 'disabled' : ''}>${c}</button>`).join('')}</div><p style="font-size:0.75rem;color:#5c5a6e;">First to ${targetWins} wins</p></div>`;
+    if (!roundOver && !matchOver) document.querySelectorAll('.rps-btn').forEach(btn => btn.addEventListener('click', () => playRound(parseInt(btn.dataset.i))));
   }
   function playRound(pick) {
     const botPick = Math.floor(Math.random() * 3);
@@ -3438,11 +3615,7 @@ function runRPS(opponent) {
     const resultText = result === 1 ? 'You win this round' : result === -1 ? 'You lose this round' : 'Draw';
     const resultColor = result === 1 ? '#16c46b' : result === -1 ? '#e2555a' : '#5c5a6e';
     stage.innerHTML = `<div style="width:100%;text-align:center;"><div style="display:flex;justify-content:space-around;align-items:center;margin:14px 0;"><div><div style="font-size:2.6rem;">${choices[pick]}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;">VS</div><div><div style="font-size:2.6rem;">${choices[botPick]}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div></div><p style="font-weight:700;color:${resultColor};margin:10px 0;">${resultText}</p><p style="font-size:0.8rem;color:#5c5a6e;">Score: You ${playerScore} – ${botScore} ${opponent.name}</p></div>`;
-    setTimeout(() => {
-      if (playerScore >= targetWins) { matchOver = true; endDuel(true, 'You won the RPS duel.'); return; }
-      if (botScore >= targetWins) { matchOver = true; endDuel(false, 'Opponent won the RPS duel.'); return; }
-      roundOver = false; render();
-    }, 1200);
+    setTimeout(() => { if (playerScore >= targetWins) { matchOver = true; endDuel(true, 'You won the RPS duel.'); return; } if (botScore >= targetWins) { matchOver = true; endDuel(false, 'Opponent won the RPS duel.'); return; } roundOver = false; render(); }, 1200);
   }
   render();
 }
@@ -3454,23 +3627,8 @@ function runDice(opponent) {
   function render() {
     const pFace = playerRoll !== null ? faces[playerRoll - 1] : '⚄';
     const bFace = botRoll !== null ? faces[botRoll - 1] : '⚄';
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-      <div class="dice-arena"><div><div class="dice-face">${pFace}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;">VS</div><div><div class="dice-face">${bFace}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div></div>
-      ${!rolled ? `<button class="dice-roll-btn" id="dice-roll">Roll Dice</button>` : ''}
-    </div>`;
-    document.getElementById('dice-roll')?.addEventListener('click', () => {
-      if (rolled) return;
-      rolled = true;
-      playerRoll = Math.floor(Math.random() * 6) + 1;
-      botRoll = Math.floor(Math.random() * 6) + 1;
-      render();
-      setTimeout(() => {
-        if (playerRoll > botRoll) endDuel(true, 'Your dice rolled higher.');
-        else if (playerRoll < botRoll) endDuel(false, 'Opponent rolled higher.');
-        else endDrawnMatch();
-      }, 1200);
-    });
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p><div class="dice-arena"><div><div class="dice-face">${pFace}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;">VS</div><div><div class="dice-face">${bFace}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div></div>${!rolled ? `<button class="dice-roll-btn" id="dice-roll">Roll Dice</button>` : ''}</div>`;
+    document.getElementById('dice-roll')?.addEventListener('click', () => { if (rolled) return; rolled = true; playerRoll = Math.floor(Math.random() * 6) + 1; botRoll = Math.floor(Math.random() * 6) + 1; render(); setTimeout(() => { if (playerRoll > botRoll) endDuel(true, 'Your dice rolled higher.'); else if (playerRoll < botRoll) endDuel(false, 'Opponent rolled higher.'); else endDrawnMatch(); }, 1200); });
   }
   render();
 }
@@ -3481,15 +3639,7 @@ function runMemory(opponent) {
   let cards = [...SYMBOLS, ...SYMBOLS].sort(() => Math.random() - 0.5).map((s, i) => ({ sym: s, flipped: false, matched: false, id: i }));
   let flipped = [], lock = false, playerPairs = 0, botPairs = 0, turn = 'you';
   function render() {
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;">
-        <div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${playerPairs}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div>
-        <div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botPairs}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div>
-      </div>
-      <p style="font-size:0.75rem;color:${turn==='you'?'#5b3df0':'#f0a742'};margin-bottom:8px;">${turn==='you'?'Your Turn':'Opponent\'s Turn'}</p>
-      <div class="mem-board">${cards.map((c, i) => `<div class="mem-card ${c.flipped || c.matched ? 'revealed' : ''} ${c.matched ? 'matched' : ''}" data-i="${i}">${c.flipped || c.matched ? c.sym : ''}</div>`).join('')}</div>
-    </div>`;
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p><div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${playerPairs}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botPairs}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div><p style="font-size:0.75rem;color:${turn==='you'?'#5b3df0':'#f0a742'};margin-bottom:8px;">${turn==='you'?'Your Turn':'Opponent\'s Turn'}</p><div class="mem-board">${cards.map((c, i) => `<div class="mem-card ${c.flipped || c.matched ? 'revealed' : ''} ${c.matched ? 'matched' : ''}" data-i="${i}">${c.flipped || c.matched ? c.sym : ''}</div>`).join('')}</div></div>`;
     if (turn === 'you' && !lock) {
       document.querySelectorAll('.mem-card').forEach(el => {
         el.addEventListener('click', () => {
@@ -3500,13 +3650,8 @@ function runMemory(opponent) {
           if (flipped.length === 2) {
             lock = true;
             const [a, b] = flipped;
-            if (cards[a].sym === cards[b].sym) {
-              cards[a].matched = cards[b].matched = true; playerPairs++;
-              flipped = []; lock = false; render();
-              if (playerPairs + botPairs === SYMBOLS.length) return finish();
-            } else {
-              setTimeout(() => { cards[a].flipped = cards[b].flipped = false; flipped = []; lock = false; turn = 'bot'; render(); setTimeout(botPlay, 700); }, 700);
-            }
+            if (cards[a].sym === cards[b].sym) { cards[a].matched = cards[b].matched = true; playerPairs++; flipped = []; lock = false; render(); if (playerPairs + botPairs === SYMBOLS.length) return finish(); }
+            else { setTimeout(() => { cards[a].flipped = cards[b].flipped = false; flipped = []; lock = false; turn = 'bot'; render(); setTimeout(botPlay, 700); }, 700); }
           }
         });
       });
@@ -3524,18 +3669,11 @@ function runMemory(opponent) {
     cards[pickA].flipped = true; cards[pickB].flipped = true;
     render();
     setTimeout(() => {
-      if (cards[pickA].sym === cards[pickB].sym) {
-        cards[pickA].matched = cards[pickB].matched = true; botPairs++; render();
-        if (playerPairs + botPairs === SYMBOLS.length) return finish();
-        setTimeout(botPlay, 500);
-      } else { setTimeout(() => { cards[pickA].flipped = cards[pickB].flipped = false; turn = 'you'; render(); }, 700); }
+      if (cards[pickA].sym === cards[pickB].sym) { cards[pickA].matched = cards[pickB].matched = true; botPairs++; render(); if (playerPairs + botPairs === SYMBOLS.length) return finish(); setTimeout(botPlay, 500); }
+      else { setTimeout(() => { cards[pickA].flipped = cards[pickB].flipped = false; turn = 'you'; render(); }, 700); }
     }, 700);
   }
-  function finish() {
-    if (playerPairs > botPairs) endDuel(true, `You found ${playerPairs} pairs, opponent found ${botPairs}.`);
-    else if (playerPairs < botPairs) endDuel(false, `Opponent found ${botPairs} pairs, you found ${playerPairs}.`);
-    else endDrawnMatch();
-  }
+  function finish() { if (playerPairs > botPairs) endDuel(true, `You found ${playerPairs} pairs, opponent found ${botPairs}.`); else if (playerPairs < botPairs) endDuel(false, `Opponent found ${botPairs} pairs, you found ${playerPairs}.`); else endDrawnMatch(); }
   render();
 }
 
@@ -3544,15 +3682,7 @@ function runHigherLower(opponent) {
   const secret = Math.floor(Math.random() * 100) + 1;
   let attempts = 0, gameOver = false; const log = [];
   function render() {
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Guess 1–100</p>
-      <p style="font-size:0.85rem;color:#5c5a6e;margin-bottom:10px;">Attempts: ${attempts}/7</p>
-      <div class="hl-input-row">
-        <input type="number" class="hl-input" id="hl-guess" min="1" max="100" placeholder="#" ${gameOver ? 'disabled' : ''}>
-        <button class="hl-submit" id="hl-submit" ${gameOver ? 'disabled' : ''}>Guess</button>
-      </div>
-      <div class="hl-log">${log.map(l => `<div class="hl-log-item ${l.cls}">${l.text}</div>`).join('')}</div>
-    </div>`;
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Guess 1–100</p><p style="font-size:0.85rem;color:#5c5a6e;margin-bottom:10px;">Attempts: ${attempts}/7</p><div class="hl-input-row"><input type="number" class="hl-input" id="hl-guess" min="1" max="100" placeholder="#" ${gameOver ? 'disabled' : ''}><button class="hl-submit" id="hl-submit" ${gameOver ? 'disabled' : ''}>Guess</button></div><div class="hl-log">${log.map(l => `<div class="hl-log-item ${l.cls}">${l.text}</div>`).join('')}</div></div>`;
     document.getElementById('hl-submit')?.addEventListener('click', guess);
     document.getElementById('hl-guess')?.addEventListener('keydown', e => { if (e.key === 'Enter') guess(); });
   }
@@ -3575,13 +3705,7 @@ function runTap(opponent) {
   let myTaps = 0, botTaps = 0, running = false, timeLeft = 5, finished = false;
   let timer = null, botTimer = null;
   function render() {
-    stage.innerHTML = `<div class="tap-arena">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · 5 seconds</p>
-      <div class="tap-scoreboard"><div><div class="tap-score-value" style="color:#5b3df0;">${myTaps}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;align-self:center;">VS</div><div><div class="tap-score-value" style="color:#f0a742;">${botTaps}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div></div>
-      <div class="tap-timer">${timeLeft}s</div>
-      ${!running && !finished ? '<button class="tap-btn-big" id="tap-start">Start</button>' : ''}
-      ${running ? '<button class="tap-btn-big" id="tap-btn">TAP</button>' : ''}
-    </div>`;
+    stage.innerHTML = `<div class="tap-arena"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · 5 seconds</p><div class="tap-scoreboard"><div><div class="tap-score-value" style="color:#5b3df0;">${myTaps}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;align-self:center;">VS</div><div><div class="tap-score-value" style="color:#f0a742;">${botTaps}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div></div><div class="tap-timer">${timeLeft}s</div>${!running && !finished ? '<button class="tap-btn-big" id="tap-start">Start</button>' : ''}${running ? '<button class="tap-btn-big" id="tap-btn">TAP</button>' : ''}</div>`;
     document.getElementById('tap-start')?.addEventListener('click', start);
     document.getElementById('tap-btn')?.addEventListener('click', () => { if (running) { myTaps++; render(); } });
   }
@@ -3590,18 +3714,7 @@ function runTap(opponent) {
     myTaps = 0; botTaps = 0; timeLeft = 5; running = true; finished = false;
     render();
     botTimer = setInterval(() => { if (running) { botTaps += Math.floor(Math.random() * 3) + 1; render(); } }, 200);
-    timer = setInterval(() => {
-      timeLeft--;
-      if (timeLeft <= 0) {
-        clearInterval(timer); clearInterval(botTimer);
-        running = false; finished = true; render();
-        setTimeout(() => {
-          if (myTaps > botTaps) endDuel(true, `You tapped ${myTaps} vs ${botTaps}.`);
-          else if (myTaps < botTaps) endDuel(false, `You tapped ${myTaps}, opponent ${botTaps}.`);
-          else endDrawnMatch();
-        }, 800);
-      } else render();
-    }, 1000);
+    timer = setInterval(() => { timeLeft--; if (timeLeft <= 0) { clearInterval(timer); clearInterval(botTimer); running = false; finished = true; render(); setTimeout(() => { if (myTaps > botTaps) endDuel(true, `You tapped ${myTaps} vs ${botTaps}.`); else if (myTaps < botTaps) endDuel(false, `You tapped ${myTaps}, opponent ${botTaps}.`); else endDrawnMatch(); }, 800); } else render(); }, 1000);
   }
   render();
 }
@@ -3611,11 +3724,7 @@ function runSimon(opponent) {
   const COLORS = ['#5b3df0','#f0a742','#16c46b','#e2555a'];
   let sequence = [], userInput = [], showing = false, level = 1, gameOver = false;
   function render() {
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Round ${level}</p>
-      <p style="font-size:0.8rem;color:${showing ? '#f0a742' : '#5b3df0'};margin-bottom:8px;">${showing ? 'Watch the pattern…' : 'Your turn — repeat the pattern'}</p>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:240px;margin:0 auto;">${COLORS.map((c, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:14px;background:${c};opacity:0.5;border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}</div>
-    </div>`;
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Round ${level}</p><p style="font-size:0.8rem;color:${showing ? '#f0a742' : '#5b3df0'};margin-bottom:8px;">${showing ? 'Watch the pattern…' : 'Your turn — repeat the pattern'}</p><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:240px;margin:0 auto;">${COLORS.map((c, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:14px;background:${c};opacity:0.5;border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}</div></div>`;
     document.querySelectorAll('#arena-stage button[data-i]').forEach(btn => {
       btn.addEventListener('click', () => {
         if (showing || gameOver) return;
@@ -3632,18 +3741,10 @@ function runSimon(opponent) {
     sequence.push(Math.floor(Math.random() * 4));
     showing = true; render();
     let i = 0;
-    const playNext = () => {
-      if (i >= sequence.length) { showing = false; userInput = []; render(); return; }
-      const idx = sequence[i];
-      const btns = document.querySelectorAll('#arena-stage button[data-i]');
-      const b = btns[idx];
-      if (b) { b.style.opacity = '1'; setTimeout(() => { b.style.opacity = '0.5'; i++; setTimeout(playNext, 250); }, 400); }
-      else { i++; playNext(); }
-    };
+    const playNext = () => { if (i >= sequence.length) { showing = false; userInput = []; render(); return; } const idx = sequence[i]; const btns = document.querySelectorAll('#arena-stage button[data-i]'); const b = btns[idx]; if (b) { b.style.opacity = '1'; setTimeout(() => { b.style.opacity = '0.5'; i++; setTimeout(playNext, 250); }, 400); } else { i++; playNext(); } };
     setTimeout(playNext, 600);
   }
-  render();
-  nextRound();
+  render(); nextRound();
 }
 
 function runWhack(opponent) {
@@ -3652,19 +3753,8 @@ function runWhack(opponent) {
   let myScore = 0, botScore = 0, running = false, current = -1, gameOver = false;
   let moleTimer = null, botTimer = null;
   function render() {
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · First to ${TARGET}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.4rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;align-self:center;">VS</div><div><div style="font-size:1.4rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:8px auto;">${Array.from({length:9}).map((_, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:12px;background:${i===current ? '#5b3df0' : '#f0eef8'};border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}</div>
-      ${!running && !gameOver ? '<button class="dice-roll-btn" id="whack-start">Start</button>' : ''}
-    </div>`;
-    document.querySelectorAll('#arena-stage button[data-i]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!running) return;
-        const i = parseInt(btn.dataset.i);
-        if (i === current) { myScore++; current = -1; render(); if (myScore >= TARGET) finish(true); }
-      });
-    });
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · First to ${TARGET}</p><div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.4rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;align-self:center;">VS</div><div><div style="font-size:1.4rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:8px auto;">${Array.from({length:9}).map((_, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:12px;background:${i===current ? '#5b3df0' : '#f0eef8'};border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}</div>${!running && !gameOver ? '<button class="dice-roll-btn" id="whack-start">Start</button>' : ''}</div>`;
+    document.querySelectorAll('#arena-stage button[data-i]').forEach(btn => { btn.addEventListener('click', () => { if (!running) return; const i = parseInt(btn.dataset.i); if (i === current) { myScore++; current = -1; render(); if (myScore >= TARGET) finish(true); } }); });
     document.getElementById('whack-start')?.addEventListener('click', start);
   }
   function start() {
@@ -3673,12 +3763,7 @@ function runWhack(opponent) {
     moleTimer = setInterval(() => { if (!running) return; current = Math.floor(Math.random() * 9); render(); setTimeout(() => { if (current !== -1) { current = -1; render(); } }, 700); }, 800);
     botTimer = setInterval(() => { if (!running) return; if (Math.random() < 0.4) { botScore++; render(); if (botScore >= TARGET) finish(false); } }, 900);
   }
-  function finish(won) {
-    running = false; gameOver = true;
-    clearInterval(moleTimer); clearInterval(botTimer);
-    if (won) endDuel(true, `You reached ${TARGET} hits first.`);
-    else endDuel(false, `Opponent reached ${TARGET} hits first.`);
-  }
+  function finish(won) { running = false; gameOver = true; clearInterval(moleTimer); clearInterval(botTimer); if (won) endDuel(true, `You reached ${TARGET} hits first.`); else endDuel(false, `Opponent reached ${TARGET} hits first.`); }
   render();
 }
 
@@ -3687,40 +3772,15 @@ function runMathDuel(opponent) {
   const QUESTIONS = 5;
   let current = 0, myScore = 0, botScore = 0, gameOver = false;
   let a = 0, b = 0, op = '+', answer = 0;
-  function makeQ() {
-    const ops = ['+', '-', '×'];
-    op = ops[Math.floor(Math.random() * ops.length)];
-    if (op === '+') { a = Math.floor(Math.random() * 20) + 1; b = Math.floor(Math.random() * 20) + 1; answer = a + b; }
-    else if (op === '-') { a = Math.floor(Math.random() * 20) + 10; b = Math.floor(Math.random() * 10) + 1; answer = a - b; }
-    else { a = Math.floor(Math.random() * 9) + 2; b = Math.floor(Math.random() * 9) + 2; answer = a * b; }
-  }
+  function makeQ() { const ops = ['+', '-', '×']; op = ops[Math.floor(Math.random() * ops.length)]; if (op === '+') { a = Math.floor(Math.random() * 20) + 1; b = Math.floor(Math.random() * 20) + 1; answer = a + b; } else if (op === '-') { a = Math.floor(Math.random() * 20) + 10; b = Math.floor(Math.random() * 10) + 1; answer = a - b; } else { a = Math.floor(Math.random() * 9) + 2; b = Math.floor(Math.random() * 9) + 2; answer = a * b; } }
   function render() {
     if (current >= QUESTIONS) return finish();
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Question ${current + 1}/${QUESTIONS}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div>
-      <div style="font-size:1.8rem;font-weight:800;margin:14px 0;">${a} ${op} ${b} = ?</div>
-      <div class="hl-input-row"><input type="number" class="hl-input" id="md-input" placeholder="#"><button class="hl-submit" id="md-submit">Submit</button></div>
-    </div>`;
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Question ${current + 1}/${QUESTIONS}</p><div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div><div style="font-size:1.8rem;font-weight:800;margin:14px 0;">${a} ${op} ${b} = ?</div><div class="hl-input-row"><input type="number" class="hl-input" id="md-input" placeholder="#"><button class="hl-submit" id="md-submit">Submit</button></div></div>`;
     document.getElementById('md-submit')?.addEventListener('click', submit);
     document.getElementById('md-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
   }
-  function submit() {
-    if (gameOver) return;
-    const val = parseInt(document.getElementById('md-input').value);
-    if (isNaN(val)) return;
-    if (val === answer) myScore++;
-    if (Math.random() < 0.6) botScore++;
-    current++;
-    if (current >= QUESTIONS) return finish();
-    makeQ(); render();
-  }
-  function finish() {
-    gameOver = true;
-    if (myScore > botScore) endDuel(true, `You scored ${myScore}/${QUESTIONS}.`);
-    else if (myScore < botScore) endDuel(false, `You scored ${myScore}, opponent ${botScore}.`);
-    else endDrawnMatch();
-  }
+  function submit() { if (gameOver) return; const val = parseInt(document.getElementById('md-input').value); if (isNaN(val)) return; if (val === answer) myScore++; if (Math.random() < 0.6) botScore++; current++; if (current >= QUESTIONS) return finish(); makeQ(); render(); }
+  function finish() { gameOver = true; if (myScore > botScore) endDuel(true, `You scored ${myScore}/${QUESTIONS}.`); else if (myScore < botScore) endDuel(false, `You scored ${myScore}, opponent ${botScore}.`); else endDrawnMatch(); }
   makeQ(); render();
 }
 
@@ -3730,19 +3790,8 @@ function runReflex(opponent) {
   let myScore = 0, botScore = 0, current = -1, running = false, gameOver = false;
   let moleTimer = null, botTimer = null;
   function render() {
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · First to ${TARGET}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:260px;margin:8px auto;">${Array.from({length:16}).map((_, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:8px;background:${i===current ? '#5b3df0' : '#f0eef8'};border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}</div>
-      ${!running && !gameOver ? '<button class="dice-roll-btn" id="reflex-start">Start</button>' : ''}
-    </div>`;
-    document.querySelectorAll('#arena-stage button[data-i]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!running) return;
-        const i = parseInt(btn.dataset.i);
-        if (i === current) { myScore++; current = -1; render(); if (myScore >= TARGET) finish(true); }
-      });
-    });
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · First to ${TARGET}</p><div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:260px;margin:8px auto;">${Array.from({length:16}).map((_, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:8px;background:${i===current ? '#5b3df0' : '#f0eef8'};border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}</div>${!running && !gameOver ? '<button class="dice-roll-btn" id="reflex-start">Start</button>' : ''}</div>`;
+    document.querySelectorAll('#arena-stage button[data-i]').forEach(btn => { btn.addEventListener('click', () => { if (!running) return; const i = parseInt(btn.dataset.i); if (i === current) { myScore++; current = -1; render(); if (myScore >= TARGET) finish(true); } }); });
     document.getElementById('reflex-start')?.addEventListener('click', start);
   }
   function start() {
@@ -3751,12 +3800,7 @@ function runReflex(opponent) {
     moleTimer = setInterval(() => { if (!running) return; current = Math.floor(Math.random() * 16); render(); setTimeout(() => { if (current !== -1) { current = -1; render(); } }, 600); }, 700);
     botTimer = setInterval(() => { if (!running) return; if (Math.random() < 0.35) { botScore++; render(); if (botScore >= TARGET) finish(false); } }, 800);
   }
-  function finish(won) {
-    running = false; gameOver = true;
-    clearInterval(moleTimer); clearInterval(botTimer);
-    if (won) endDuel(true, `You reached ${TARGET} first.`);
-    else endDuel(false, `Opponent reached ${TARGET} first.`);
-  }
+  function finish(won) { running = false; gameOver = true; clearInterval(moleTimer); clearInterval(botTimer); if (won) endDuel(true, `You reached ${TARGET} first.`); else endDuel(false, `Opponent reached ${TARGET} first.`); }
   render();
 }
 
@@ -3768,30 +3812,10 @@ function runStroop(opponent) {
   function makeRound() { word = COLORS[Math.floor(Math.random() * COLORS.length)]; ink = COLORS[Math.floor(Math.random() * COLORS.length)]; }
   function render() {
     if (current >= TOTAL) return finish();
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Round ${current + 1}/${TOTAL}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div>
-      <p style="font-size:0.8rem;color:#5c5a6e;margin-bottom:10px;">Tap the INK color of the word</p>
-      <div style="font-family:Poppins;font-weight:800;font-size:2.4rem;color:${ink.css};margin:12px 0;">${word.name}</div>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;">${COLORS.map(c => `<button data-name="${c.name}" style="padding:10px 16px;border-radius:10px;background:${c.css};color:#fff;font-weight:700;border:none;cursor:pointer;">${c.name}</button>`).join('')}</div>
-    </div>`;
-    document.querySelectorAll('#arena-stage button[data-name]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (gameOver) return;
-        if (btn.dataset.name === ink.name) myScore++;
-        if (Math.random() < 0.7) botScore++;
-        current++;
-        if (current >= TOTAL) return finish();
-        makeRound(); render();
-      });
-    });
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Round ${current + 1}/${TOTAL}</p><div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div><p style="font-size:0.8rem;color:#5c5a6e;margin-bottom:10px;">Tap the INK color of the word</p><div style="font-family:Poppins;font-weight:800;font-size:2.4rem;color:${ink.css};margin:12px 0;">${word.name}</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;">${COLORS.map(c => `<button data-name="${c.name}" style="padding:10px 16px;border-radius:10px;background:${c.css};color:#fff;font-weight:700;border:none;cursor:pointer;">${c.name}</button>`).join('')}</div></div>`;
+    document.querySelectorAll('#arena-stage button[data-name]').forEach(btn => { btn.addEventListener('click', () => { if (gameOver) return; if (btn.dataset.name === ink.name) myScore++; if (Math.random() < 0.7) botScore++; current++; if (current >= TOTAL) return finish(); makeRound(); render(); }); });
   }
-  function finish() {
-    gameOver = true;
-    if (myScore > botScore) endDuel(true, `You scored ${myScore}/${TOTAL}.`);
-    else if (myScore < botScore) endDuel(false, `You scored ${myScore}, opponent ${botScore}.`);
-    else endDrawnMatch();
-  }
+  function finish() { gameOver = true; if (myScore > botScore) endDuel(true, `You scored ${myScore}/${TOTAL}.`); else if (myScore < botScore) endDuel(false, `You scored ${myScore}, opponent ${botScore}.`); else endDrawnMatch(); }
   makeRound(); render();
 }
 
@@ -3800,39 +3824,10 @@ function runRecall(opponent) {
   let sequence = [], userInput = [], showing = false, level = 1, gameOver = false;
   const MAX_LEVEL = 5;
   function render() {
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Level ${level}</p>
-      <p style="font-size:0.85rem;color:${showing ? '#f0a742' : '#5b3df0'};margin-bottom:10px;">${showing ? 'Watch the sequence' : 'Tap the numbers in order'}</p>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto;">${[1,2,3,4,5,6,7,8,9].map(n => `<button data-n="${n}" style="aspect-ratio:1;border-radius:12px;background:#f0eef8;font-weight:800;font-size:1.2rem;color:#161522;border:none;cursor:pointer;transition:0.15s;">${n}</button>`).join('')}</div>
-    </div>`;
-    document.querySelectorAll('#arena-stage button[data-n]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (showing || gameOver) return;
-        const n = parseInt(btn.dataset.n);
-        userInput.push(n);
-        btn.style.background = '#5b3df0'; btn.style.color = '#fff';
-        setTimeout(() => { btn.style.background = '#f0eef8'; btn.style.color = '#161522'; }, 180);
-        if (userInput[userInput.length - 1] !== sequence[userInput.length - 1]) { gameOver = true; setTimeout(() => endDuel(false, `You reached level ${level}.`), 500); return; }
-        if (userInput.length === sequence.length) {
-          if (level >= MAX_LEVEL) { endDuel(true, 'You cleared all levels.'); return; }
-          level++; userInput = []; setTimeout(nextRound, 700);
-        }
-      });
-    });
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Level ${level}</p><p style="font-size:0.85rem;color:${showing ? '#f0a742' : '#5b3df0'};margin-bottom:10px;">${showing ? 'Watch the sequence' : 'Tap the numbers in order'}</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto;">${[1,2,3,4,5,6,7,8,9].map(n => `<button data-n="${n}" style="aspect-ratio:1;border-radius:12px;background:#f0eef8;font-weight:800;font-size:1.2rem;color:#161522;border:none;cursor:pointer;transition:0.15s;">${n}</button>`).join('')}</div></div>`;
+    document.querySelectorAll('#arena-stage button[data-n]').forEach(btn => { btn.addEventListener('click', () => { if (showing || gameOver) return; const n = parseInt(btn.dataset.n); userInput.push(n); btn.style.background = '#5b3df0'; btn.style.color = '#fff'; setTimeout(() => { btn.style.background = '#f0eef8'; btn.style.color = '#161522'; }, 180); if (userInput[userInput.length - 1] !== sequence[userInput.length - 1]) { gameOver = true; setTimeout(() => endDuel(false, `You reached level ${level}.`), 500); return; } if (userInput.length === sequence.length) { if (level >= MAX_LEVEL) { endDuel(true, 'You cleared all levels.'); return; } level++; userInput = []; setTimeout(nextRound, 700); } }); });
   }
-  function nextRound() {
-    sequence.push(Math.floor(Math.random() * 9) + 1);
-    showing = true; render();
-    let i = 0;
-    const playNext = () => {
-      if (i >= sequence.length) { showing = false; userInput = []; render(); return; }
-      const n = sequence[i];
-      const btn = document.querySelector(`#arena-stage button[data-n="${n}"]`);
-      if (btn) { btn.style.background = '#5b3df0'; btn.style.color = '#fff'; setTimeout(() => { btn.style.background = '#f0eef8'; btn.style.color = '#161522'; i++; setTimeout(playNext, 300); }, 500); }
-      else { i++; playNext(); }
-    };
-    setTimeout(playNext, 600);
-  }
+  function nextRound() { sequence.push(Math.floor(Math.random() * 9) + 1); showing = true; render(); let i = 0; const playNext = () => { if (i >= sequence.length) { showing = false; userInput = []; render(); return; } const n = sequence[i]; const btn = document.querySelector(`#arena-stage button[data-n="${n}"]`); if (btn) { btn.style.background = '#5b3df0'; btn.style.color = '#fff'; setTimeout(() => { btn.style.background = '#f0eef8'; btn.style.color = '#161522'; i++; setTimeout(playNext, 300); }, 500); } else { i++; playNext(); } }; setTimeout(playNext, 600); }
   render(); nextRound();
 }
 
@@ -3841,40 +3836,16 @@ function runMathChain(opponent) {
   const TOTAL = 5;
   let current = 0, myScore = 0, botScore = 0, gameOver = false;
   let a = 0, b = 0, op = '+', answer = 0;
-  function makeQ() {
-    const ops = ['+', '-', '×'];
-    op = ops[Math.floor(Math.random() * ops.length)];
-    if (op === '+') { a = Math.floor(Math.random() * 50) + 1; b = Math.floor(Math.random() * 50) + 1; answer = a + b; }
-    else if (op === '-') { a = Math.floor(Math.random() * 50) + 20; b = Math.floor(Math.random() * 20) + 1; answer = a - b; }
-    else { a = Math.floor(Math.random() * 9) + 2; b = Math.floor(Math.random() * 9) + 2; answer = a * b; }
-  }
+  function makeQ() { const ops = ['+', '-', '×']; op = ops[Math.floor(Math.random() * ops.length)]; if (op === '+') { a = Math.floor(Math.random() * 50) + 1; b = Math.floor(Math.random() * 50) + 1; answer = a + b; } else if (op === '-') { a = Math.floor(Math.random() * 50) + 20; b = Math.floor(Math.random() * 20) + 1; answer = a - b; } else { a = Math.floor(Math.random() * 9) + 2; b = Math.floor(Math.random() * 9) + 2; answer = a * b; } }
   function render() {
     if (current >= TOTAL) return finish();
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Sum ${current + 1}/${TOTAL}</p>
-      <div style="font-size:1.8rem;font-weight:800;margin:14px 0;">${a} ${op} ${b} = ?</div>
-      <div class="hl-input-row"><input type="number" class="hl-input" id="mc-input" placeholder="#"><button class="hl-submit" id="mc-submit">Submit</button></div>
-      <p style="font-size:0.75rem;color:#5c5a6e;margin-top:12px;">Correct: ${myScore} · Opponent: ${botScore}</p>
-    </div>`;
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Sum ${current + 1}/${TOTAL}</p><div style="font-size:1.8rem;font-weight:800;margin:14px 0;">${a} ${op} ${b} = ?</div><div class="hl-input-row"><input type="number" class="hl-input" id="mc-input" placeholder="#"><button class="hl-submit" id="mc-submit">Submit</button></div><p style="font-size:0.75rem;color:#5c5a6e;margin-top:12px;">Correct: ${myScore} · Opponent: ${botScore}</p></div>`;
     document.getElementById('mc-submit')?.addEventListener('click', submit);
     document.getElementById('mc-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
     setTimeout(() => { if (!gameOver && current < TOTAL) { if (Math.random() < 0.75) botScore++; } }, 4000);
   }
-  function submit() {
-    if (gameOver) return;
-    const val = parseInt(document.getElementById('mc-input').value);
-    if (isNaN(val)) return;
-    if (val === answer) myScore++;
-    current++;
-    if (current >= TOTAL) return finish();
-    makeQ(); render();
-  }
-  function finish() {
-    gameOver = true;
-    if (myScore > botScore) endDuel(true, `You solved ${myScore}/${TOTAL}.`);
-    else if (myScore < botScore) endDuel(false, `You solved ${myScore}, opponent ${botScore}.`);
-    else endDrawnMatch();
-  }
+  function submit() { if (gameOver) return; const val = parseInt(document.getElementById('mc-input').value); if (isNaN(val)) return; if (val === answer) myScore++; current++; if (current >= TOTAL) return finish(); makeQ(); render(); }
+  function finish() { gameOver = true; if (myScore > botScore) endDuel(true, `You solved ${myScore}/${TOTAL}.`); else if (myScore < botScore) endDuel(false, `You solved ${myScore}, opponent ${botScore}.`); else endDrawnMatch(); }
   makeQ(); render();
 }
 
@@ -3884,7 +3855,10 @@ async function endDuel(won, analysisText) {
   isGameActive = false;
   document.body.classList.remove('game-active');
   if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {} gameRealtimeSubscription = null; }
-  if (activeGameSessionId) { try { await markSessionComplete(activeGameSessionId, won ? currentUser.id : (activeOpponent?.id || null)); } catch (e) {} activeGameSessionId = null; }
+
+  // v10: session already marked complete by the game logic. Just clean up.
+  activeGameSessionId = null;
+  activeGameSession = null;
 
   let reward = -currentEntryFee;
   if (won) {
@@ -3897,31 +3871,16 @@ async function endDuel(won, analysisText) {
   } else {
     showWalletToast(currentEntryFee, 'debit', 'Lost ' + activeGame.name);
   }
-
   await recordMatch(activeGame.name, activeOpponent.name, won ? 'VICTORY' : 'DEFEAT', reward);
   updateUI();
   const stage = document.getElementById('arena-stage');
   if (stage) {
     const rewardLine = won ? '+' + formatRupees(currentReward) + ' Awarded' : formatRupees(-currentEntryFee) + ' Stake Lost';
-    stage.innerHTML = `<div class="result-card">
-      <h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2>
-      <p style="font-weight:700;color:#918fa3;">${rewardLine}</p>
-      <div class="result-analytics">${analysisText}</div>
-      <div class="result-btn-row">
-        <button class="btn-secondary" id="rematch-btn">Rematch</button>
-        <button class="btn-primary" id="return-dash-btn">Dashboard</button>
-      </div>
-    </div>`;
-    document.getElementById('rematch-btn')?.addEventListener('click', () => {
-      arenaOverlay.classList.add('hidden'); document.body.classList.remove('game-active');
-      const p = getGamePrice(activeGame.type);
-      if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; }
-      beginMatchmaking();
-    });
+    stage.innerHTML = `<div class="result-card"><h2 class="${won ? 'win-text' : 'lose-text'}">${won ? 'VICTORY' : 'DEFEAT'}</h2><p style="font-weight:700;color:#918fa3;">${rewardLine}</p><div class="result-analytics">${analysisText}</div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn">Dashboard</button></div></div>`;
+    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); document.body.classList.remove('game-active'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; } beginMatchmaking(); });
     document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); isGameActive = false; document.body.classList.remove('game-active'); });
   }
-  gameTimers.forEach(t => clearInterval(t));
-  gameTimers = [];
+  gameTimers.forEach(t => clearInterval(t)); gameTimers = [];
 }
 
 async function endDrawnMatch() {
@@ -3929,7 +3888,8 @@ async function endDrawnMatch() {
   isGameActive = false;
   document.body.classList.remove('game-active');
   if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {} gameRealtimeSubscription = null; }
-  if (activeGameSessionId) { try { await markSessionComplete(activeGameSessionId, null); } catch (e) {} activeGameSessionId = null; }
+  activeGameSessionId = null;
+  activeGameSession = null;
   try {
     await persistWalletDelta(currentEntryFee);
     await recordTransaction('Stake Refunded — ' + activeGame.name, 'credit', currentEntryFee);
@@ -3939,59 +3899,31 @@ async function endDrawnMatch() {
   updateUI();
   const stage = document.getElementById('arena-stage');
   if (stage) {
-    stage.innerHTML = `<div class="result-card">
-      <h2 style="color:#5c5a6e;">DRAW</h2>
-      <p style="font-weight:700;color:#918fa3;">Stake Refunded</p>
-      <div class="result-analytics">Stalemate — entry fee refunded.</div>
-      <div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn">Dashboard</button></div>
-    </div>`;
-    document.getElementById('rematch-btn')?.addEventListener('click', () => {
-      arenaOverlay.classList.add('hidden'); document.body.classList.remove('game-active');
-      const p = getGamePrice(activeGame.type);
-      if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; }
-      beginMatchmaking();
-    });
+    stage.innerHTML = `<div class="result-card"><h2 style="color:#5c5a6e;">DRAW</h2><p style="font-weight:700;color:#918fa3;">Stake Refunded</p><div class="result-analytics">Stalemate — entry fee refunded.</div><div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn">Dashboard</button></div></div>`;
+    document.getElementById('rematch-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); document.body.classList.remove('game-active'); const p = getGamePrice(activeGame.type); if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; } beginMatchmaking(); });
     document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); isGameActive = false; document.body.classList.remove('game-active'); });
   }
-  gameTimers.forEach(t => clearInterval(t));
-  gameTimers = [];
+  gameTimers.forEach(t => clearInterval(t)); gameTimers = [];
 }
 
 /* ============================================================
-   MATCHMAKING (v9.1)
-   - Broadcasts invite
-   - Polls game_sessions every second for accepted invite
-   - Final session check before bot fallback
+   MATCHMAKING (v10 — polling + final check before bot)
    ============================================================ */
 async function checkForLiveSession() {
-  // Returns the session row if there's an active game_session where we're a player
   try {
-    const { data } = await client
-      .from('game_sessions')
-      .select('id, player1_id, player2_id, created_at')
-      .eq('game_type', activeGame.type)
-      .eq('status', 'active')
-      .or(`player1_id.eq.${currentUser.id},player2_id.eq.${currentUser.id}`)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data } = await client.from('game_sessions').select('id, player1_id, player2_id, current_turn, created_at').eq('game_type', activeGame.type).eq('status', 'active').or(`player1_id.eq.${currentUser.id},player2_id.eq.${currentUser.id}`).order('created_at', { ascending: false }).limit(1).maybeSingle();
     if (data && data.player1_id && data.player2_id) return data;
   } catch (e) {}
   return null;
 }
 
 async function joinLiveSession(liveSession) {
-  // Cancel queue + invites, then launch arena against the real opponent
   try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
-  if (currentInviteId) {
-    try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
-    currentInviteId = null;
-  }
+  if (currentInviteId) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {} currentInviteId = null; }
   if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
 
   const oppId = liveSession.player1_id === currentUser.id ? liveSession.player2_id : liveSession.player1_id;
   const { data: oppUser } = await client.from('users').select('full_name').eq('id', oppId).maybeSingle();
-
   if (matchStatus) matchStatus.textContent = 'Real player joined. Starting match...';
 
   setTimeout(() => {
@@ -4007,6 +3939,7 @@ async function joinLiveSession(liveSession) {
 async function beginMatchmaking() {
   inQueue = true;
   isGameActive = false;
+  arenaLaunchInProgress = false;
   const price = getGamePrice(activeGame.type);
   currentEntryFee = price.entry;
   currentReward = price.reward;
@@ -4020,10 +3953,7 @@ async function beginMatchmaking() {
   const circumference = 276.46;
   const progEl = document.getElementById('mm-prog');
   const numEl = document.getElementById('mm-num');
-  function updateRing() {
-    if (numEl) numEl.textContent = remaining;
-    if (progEl) { const offset = circumference * (1 - remaining / TOTAL); progEl.style.strokeDashoffset = offset; }
-  }
+  function updateRing() { if (numEl) numEl.textContent = remaining; if (progEl) { const offset = circumference * (1 - remaining / TOTAL); progEl.style.strokeDashoffset = offset; } }
   updateRing();
 
   try {
@@ -4037,19 +3967,12 @@ async function beginMatchmaking() {
     return;
   }
 
-  try {
-    await client.from('matchmaking_queue').upsert({ user_id: currentUser.id, game_type: activeGame.type });
-  } catch (e) {}
+  try { await client.from('matchmaking_queue').upsert({ user_id: currentUser.id, game_type: activeGame.type }); } catch (e) {}
 
-  // Broadcast invite for others to join
   try {
     const { data: invite } = await client.from('match_invites').insert({
-      from_user_id: currentUser.id,
-      game_type: activeGame.type,
-      game_name: activeGame.name,
-      entry_fee: currentEntryFee,
-      reward: currentReward,
-      status: 'open'
+      from_user_id: currentUser.id, game_type: activeGame.type, game_name: activeGame.name,
+      entry_fee: currentEntryFee, reward: currentReward, status: 'open'
     }).select().single();
     if (invite && invite.id) {
       currentInviteId = invite.id;
@@ -4065,79 +3988,48 @@ async function beginMatchmaking() {
 
   if (matchmakingInterval) clearInterval(matchmakingInterval);
   matchmakingInterval = setInterval(async () => {
+    if (matched) return;
     searchTime++;
     remaining = Math.max(0, TOTAL - searchTime);
     updateRing();
 
-    // v9.1: every second, first check if someone accepted our invite
     if (!matched) {
       const liveSession = await checkForLiveSession();
       if (liveSession) {
         matched = true;
-        clearInterval(matchmakingInterval);
-        matchmakingInterval = null;
+        clearInterval(matchmakingInterval); matchmakingInterval = null;
         joinLiveSession(liveSession);
         return;
       }
     }
 
-    // Also try claim_opponent (matches us with others in queue)
     try {
-      const { data: result, error } = await client.rpc('claim_opponent', {
-        p_game_type: activeGame.type,
-        p_entry_fee: currentEntryFee,
-        p_reward: currentReward
-      });
+      const { data: result, error } = await client.rpc('claim_opponent', { p_game_type: activeGame.type, p_entry_fee: currentEntryFee, p_reward: currentReward });
       if (error) throw error;
-
       if (result && result.matched) {
         matched = true;
-        clearInterval(matchmakingInterval);
-        matchmakingInterval = null;
-
-        if (currentInviteId) {
-          try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
-          currentInviteId = null;
-        }
+        clearInterval(matchmakingInterval); matchmakingInterval = null;
+        if (currentInviteId) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {} currentInviteId = null; }
         if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
-
         const oppId = result.opponent_id;
         const { data: userData } = await client.from('users').select('full_name').eq('id', oppId).maybeSingle();
         if (matchStatus) matchStatus.textContent = 'Real player found. Starting match...';
-
         setTimeout(() => {
           if (matchOverlay) matchOverlay.classList.add('hidden');
           inQueue = false;
-          launchArena(
-            { name: userData?.full_name || 'Player', seed: oppId, isBot: false, id: oppId },
-            { session_id: result.session_id, you_are: result.you_are }
-          );
+          launchArena({ name: userData?.full_name || 'Player', seed: oppId, isBot: false, id: oppId }, { session_id: result.session_id, you_are: result.you_are });
         }, 700);
         return;
       }
     } catch (e) { console.error('Matchmaking error:', e); }
 
-    // Time's up
     if (searchTime >= TOTAL && !matched) {
-      clearInterval(matchmakingInterval);
-      matchmakingInterval = null;
-
-      // v9.1: FINAL check — did someone accept our invite?
+      clearInterval(matchmakingInterval); matchmakingInterval = null;
       const finalSession = await checkForLiveSession();
-      if (finalSession) {
-        matched = true;
-        joinLiveSession(finalSession);
-        return;
-      }
-
-      // Truly no real opponent → fall back to bot
+      if (finalSession) { matched = true; joinLiveSession(finalSession); return; }
       try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
-      if (currentInviteId) {
-        try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
-        currentInviteId = null;
-      }
+      if (currentInviteId) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {} currentInviteId = null; }
       if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
-
       const bot = getRandomBot();
       if (matchStatus) matchStatus.textContent = 'No players online. Connecting with ' + bot.name;
       setTimeout(() => {
@@ -4169,10 +4061,7 @@ cancelMatchBtn?.addEventListener('click', async () => {
   if (matchOverlay) matchOverlay.classList.add('hidden');
   if (currentUser && was) {
     await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
-    if (currentInviteId) {
-      try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
-      currentInviteId = null;
-    }
+    if (currentInviteId) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {} currentInviteId = null; }
     if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
     try {
       await persistWalletDelta(currentEntryFee);
@@ -4190,7 +4079,14 @@ document.getElementById('arena-back-btn')?.addEventListener('click', function() 
 document.getElementById('exit-cancel-btn')?.addEventListener('click', () => document.getElementById('exitConfirmOverlay').classList.add('hidden'));
 document.getElementById('exit-confirm-btn')?.addEventListener('click', async () => {
   document.getElementById('exitConfirmOverlay').classList.add('hidden');
-  if (isGameActive) { await endDuel(false, 'Game exited — defeat.'); isGameActive = false; }
+  if (isGameActive) {
+    // v10: abandon session cleanly
+    if (activeGameSessionId) {
+      try { await client.from('game_sessions').update({ status: 'abandoned', winner_id: activeOpponent?.id || null, updated_at: new Date().toISOString() }).eq('id', activeGameSessionId); } catch (e) {}
+      activeGameSessionId = null;
+    }
+    isGameActive = false;
+  }
   arenaOverlay.classList.add('hidden');
   document.body.classList.remove('game-active');
 });
@@ -4234,100 +4130,53 @@ function startPresenceHeartbeat() {
   window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
 }
 
-/* ============================================================
-   MATCH INVITE POPUP SYSTEM
-   ============================================================ */
+// ===== INVITE POPUP SYSTEM =====
 async function subscribeToInvites() {
-  if (inviteSubscription) {
-    try { await inviteSubscription.unsubscribe(); } catch (e) {}
-    inviteSubscription = null;
-  }
+  if (inviteSubscription) { try { await inviteSubscription.unsubscribe(); } catch (e) {} inviteSubscription = null; }
   const channel = client.channel('match-invites-feed');
-  inviteSubscription = channel
-    .on('postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'match_invites' },
-      (payload) => {
-        const inv = payload.new;
-        if (!inv) return;
-        if (inv.from_user_id === currentUser?.id) return;
-        if (isGameActive || inQueue) return;
-        if (shownInviteIds.has(inv.id)) return;
-        shownInviteIds.add(inv.id);
-        showInvitePopup(inv);
-      })
-    .subscribe();
+  inviteSubscription = channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'match_invites' }, (payload) => {
+    const inv = payload.new;
+    if (!inv) return;
+    if (inv.from_user_id === currentUser?.id) return;
+    if (isGameActive || inQueue) return;
+    if (shownInviteIds.has(inv.id)) return;
+    shownInviteIds.add(inv.id);
+    showInvitePopup(inv);
+  }).subscribe();
 
   if (inviteExpireInterval) clearInterval(inviteExpireInterval);
-  inviteExpireInterval = setInterval(async () => {
-    try { await client.rpc('expire_old_invites'); } catch (e) {}
-  }, 30000);
+  inviteExpireInterval = setInterval(async () => { try { await client.rpc('expire_old_invites'); } catch (e) {} }, 30000);
 }
 
 async function showInvitePopup(inv) {
   if (!invitePopupStack) return;
-  let fromName = 'A player';
-  let fromSeed = inv.from_user_id;
-  try {
-    const { data: u } = await client.from('users').select('full_name').eq('id', inv.from_user_id).maybeSingle();
-    if (u?.full_name) fromName = u.full_name;
-    fromSeed = inv.from_user_id;
-  } catch (e) {}
+  let fromName = 'A player', fromSeed = inv.from_user_id;
+  try { const { data: u } = await client.from('users').select('full_name').eq('id', inv.from_user_id).maybeSingle(); if (u?.full_name) fromName = u.full_name; } catch (e) {}
 
   const el = document.createElement('div');
   el.className = 'invite-popup';
   el.dataset.inviteId = inv.id;
   const avatarUrl = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(fromSeed);
   el.innerHTML = `
-    <div class="invite-row">
-      <img class="invite-avatar" src="${avatarUrl}" alt="${fromName}" />
-      <div class="invite-text">
-        <strong>${fromName}</strong> is waiting for a <strong>${inv.game_name}</strong> match
-        <small>Entry ₹${inv.entry_fee} · Win ₹${inv.reward}</small>
-      </div>
-    </div>
-    <div class="invite-actions">
-      <button class="invite-btn skip" data-action="skip">Skip</button>
-      <button class="invite-btn join" data-action="join">Join</button>
-    </div>
+    <div class="invite-row"><img class="invite-avatar" src="${avatarUrl}" alt="${fromName}" /><div class="invite-text"><strong>${fromName}</strong> is waiting for a <strong>${inv.game_name}</strong> match<small>Entry ₹${inv.entry_fee} · Win ₹${inv.reward}</small></div></div>
+    <div class="invite-actions"><button class="invite-btn skip" data-action="skip">Skip</button><button class="invite-btn join" data-action="join">Join</button></div>
     <div class="invite-timer"></div>
   `;
   invitePopupStack.appendChild(el);
-
-  const dismiss = () => {
-    el.classList.add('out');
-    setTimeout(() => el.remove(), 300);
-  };
+  const dismiss = () => { el.classList.add('out'); setTimeout(() => el.remove(), 300); };
   const autoTimer = setTimeout(dismiss, INVITE_SECONDS * 1000);
-
-  el.querySelector('[data-action="skip"]')?.addEventListener('click', () => {
-    clearTimeout(autoTimer);
-    dismiss();
-  });
-  el.querySelector('[data-action="join"]')?.addEventListener('click', async () => {
-    clearTimeout(autoTimer);
-    el.querySelectorAll('.invite-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
-    await joinInvite(inv, el);
-  });
+  el.querySelector('[data-action="skip"]')?.addEventListener('click', () => { clearTimeout(autoTimer); dismiss(); });
+  el.querySelector('[data-action="join"]')?.addEventListener('click', async () => { clearTimeout(autoTimer); el.querySelectorAll('.invite-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; }); await joinInvite(inv, el); });
 }
 
 async function joinInvite(inv, popupEl) {
   if (isGameActive || inQueue) { showToast('You are already in a game.', 'error'); popupEl.remove(); return; }
-
-  if (currentBalance < inv.entry_fee) {
-    showToast('Insufficient balance. Need ' + formatRupees(inv.entry_fee), 'error');
-    popupEl.remove();
-    return;
-  }
-
+  if (currentBalance < inv.entry_fee) { showToast('Insufficient balance. Need ' + formatRupees(inv.entry_fee), 'error'); popupEl.remove(); return; }
   try {
     await persistWalletDelta(-inv.entry_fee);
     await recordTransaction('Stake — ' + inv.game_name, 'debit', inv.entry_fee);
     showWalletToast(inv.entry_fee, 'debit', 'Stake — ' + inv.game_name);
-  } catch (e) {
-    showToast('Could not process entry stake.', 'error');
-    popupEl.remove();
-    return;
-  }
+  } catch (e) { showToast('Could not process entry stake.', 'error'); popupEl.remove(); return; }
 
   try {
     const { data, error } = await client.rpc('accept_match_invite', { p_invite_id: inv.id });
@@ -4340,38 +4189,26 @@ async function joinInvite(inv, popupEl) {
       popupEl.remove();
       return;
     }
-
     const { data: oppUser } = await client.from('users').select('full_name').eq('id', inv.from_user_id).maybeSingle();
-
     activeGame = { name: inv.game_name, type: inv.game_type };
     currentEntryFee = inv.entry_fee;
     currentReward = inv.reward;
     isRealPlayerMatch = true;
     myRole = 'player2';
     activeGameSessionId = data.session_id;
-
-    popupEl.classList.add('out');
-    setTimeout(() => popupEl.remove(), 300);
-
-    launchArena(
-      { name: oppUser?.full_name || 'Player', seed: inv.from_user_id, isBot: false, id: inv.from_user_id },
-      { session_id: data.session_id, you_are: 'player2' }
-    );
+    try { const { data: sess } = await client.from('game_sessions').select('*').eq('id', data.session_id).maybeSingle(); activeGameSession = sess || null; } catch (e) { activeGameSession = null; }
+    popupEl.classList.add('out'); setTimeout(() => popupEl.remove(), 300);
+    launchArena({ name: oppUser?.full_name || 'Player', seed: inv.from_user_id, isBot: false, id: inv.from_user_id }, { session_id: data.session_id, you_are: 'player2' });
   } catch (e) {
-    try {
-      await persistWalletDelta(inv.entry_fee);
-      await recordTransaction('Stake Refunded — invite error', 'credit', inv.entry_fee);
-      showWalletToast(inv.entry_fee, 'credit', 'Invite error — refunded');
-    } catch (err) {}
+    try { await persistWalletDelta(inv.entry_fee); await recordTransaction('Stake Refunded — invite error', 'credit', inv.entry_fee); showWalletToast(inv.entry_fee, 'credit', 'Invite error — refunded'); } catch (err) {}
     showToast('Could not join that match.', 'error');
     popupEl.remove();
   }
 }
 
+// ===== LANDING ANIMATIONS =====
 const revealEls = document.querySelectorAll('.reveal');
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('in'); revealObserver.unobserve(entry.target); } });
-}, { threshold: 0.12 });
+const revealObserver = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('in'); revealObserver.unobserve(entry.target); } }); }, { threshold: 0.12 });
 revealEls.forEach(el => revealObserver.observe(el));
 
 function animateCount(el, target) {
@@ -4386,23 +4223,13 @@ function animateCount(el, target) {
   }
   requestAnimationFrame(tick);
 }
-document.querySelectorAll('[data-count]').forEach(el => {
-  const obs = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { animateCount(el, parseInt(el.dataset.count, 10)); obs.unobserve(el); } }); }, { threshold: 0.5 });
-  obs.observe(el);
-});
-document.querySelectorAll('[data-count-el]').forEach(el => {
-  const obs = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { animateCount(el, parseInt(el.dataset.countEl, 10)); obs.unobserve(el); } }); }, { threshold: 0.5 });
-  obs.observe(el);
-});
-document.querySelectorAll('.challenge-fill').forEach(el => {
-  const obs = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.style.width = entry.target.dataset.fill + '%'; obs.unobserve(entry.target); } }); }, { threshold: 0.3 });
-  obs.observe(el);
-});
+document.querySelectorAll('[data-count]').forEach(el => { const obs = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { animateCount(el, parseInt(el.dataset.count, 10)); obs.unobserve(el); } }); }, { threshold: 0.5 }); obs.observe(el); });
+document.querySelectorAll('[data-count-el]').forEach(el => { const obs = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { animateCount(el, parseInt(el.dataset.countEl, 10)); obs.unobserve(el); } }); }, { threshold: 0.5 }); obs.observe(el); });
+document.querySelectorAll('.challenge-fill').forEach(el => { const obs = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.style.width = entry.target.dataset.fill + '%'; obs.unobserve(entry.target); } }); }, { threshold: 0.3 }); obs.observe(el); });
 
-// ---- AI CHAT BOT ----
+// ===== AI CHAT BOT =====
 const agentNames = ['Vishal', 'Priya', 'Arjun', 'Neha', 'Rahul', 'Ananya', 'Karan', 'Sneha'];
 let chatAgentName = 'Vishal';
-
 function initChatBot() {
   const chatInput = document.getElementById('chatInput');
   const chatSendBtn = document.getElementById('chatSendBtn');
@@ -4412,72 +4239,38 @@ function initChatBot() {
   const agentAvatar = document.getElementById('chatAgentAvatar');
   const agentNameDisplay = document.getElementById('chatAgentName');
   const agentTypingName = document.getElementById('chatTypingName');
-
   const randomName = agentNames[Math.floor(Math.random() * agentNames.length)];
   chatAgentName = randomName;
   if (agentNameEl) agentNameEl.textContent = randomName;
   if (agentNameDisplay) agentNameDisplay.textContent = randomName;
   if (agentTypingName) agentTypingName.textContent = randomName;
   if (agentAvatar) agentAvatar.textContent = randomName.charAt(0).toUpperCase();
-
-  function addMsg(text, isUser) {
-    if (!chatMsgs) return;
-    const div = document.createElement('div');
-    div.className = `chat-msg ${isUser ? 'user' : 'bot'}`;
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    div.innerHTML = `${text}<span class="time">${time}</span>`;
-    chatMsgs.appendChild(div);
-    chatMsgs.scrollTop = chatMsgs.scrollHeight;
-  }
-
+  function addMsg(text, isUser) { if (!chatMsgs) return; const div = document.createElement('div'); div.className = `chat-msg ${isUser ? 'user' : 'bot'}`; const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); div.innerHTML = `${text}<span class="time">${time}</span>`; chatMsgs.appendChild(div); chatMsgs.scrollTop = chatMsgs.scrollHeight; }
   function showTyping(show) { if (chatTyping) chatTyping.classList.toggle('show', show); if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight; }
-
   function getAIResponse(userMessage) {
     const msg = userMessage.toLowerCase();
-    const responses = {
-      'game': 'We have over 20 skill-based games including Tic-Tac-Toe, Connect 4, Nim Duel, Dots & Boxes, Memory Match, Word Scramble, Battleship Mini and more. Entry fees from ₹15 to ₹20 and rewards up to ₹35. Which game interests you?',
-      'wallet': 'Your wallet shows your current balance. You can add funds via UPI (min ₹1) and withdraw to your bank account when you reach ₹150. All transactions are secure and instant.',
-      'tournament': 'We run daily and weekly tournaments with free entry and prize pools up to ₹250. Check the Tournaments section on the landing page for live events.',
-      'refer': 'Refer a friend and both of you get ₹50. Just share your referral code from Profile → Refer & Earn. No limit on referrals.',
-      'withdraw': 'Withdrawals are processed within 7-8 hours to your UPI ID. Minimum withdrawal is ₹150. Go to the Cashout tab in your dashboard.',
-      'fairplay': 'FairPlay is our anti-cheat system that ensures all matches are fair. We use skill-based matchmaking and real-time move validation to prevent cheating.',
-      'help': 'I am here to help. You can ask me about games, wallet, tournaments, referrals, withdrawals, or anything else about SkillClash.',
-      'signup': 'Sign up with Google in one tap — no forms, no passwords. Just click Sign Up on the landing page and you are in.',
-      'free': 'SkillClash is a skill-based gaming platform for 18+. Games have small entry stakes, and winners receive the reward shown on each game card. Your signup includes a ₹50 welcome balance.'
-    };
+    const responses = { 'game': 'We have over 20 skill-based games including Tic-Tac-Toe, Connect 4, Nim Duel, Dots & Boxes, Memory Match, Word Scramble, Battleship Mini and more.', 'wallet': 'Your wallet shows your current balance. Add funds via UPI (min ₹1) and withdraw when you reach ₹150.', 'tournament': 'We run daily and weekly tournaments with free entry and prize pools up to ₹250.', 'refer': 'Refer a friend and both of you get ₹50. No limit on referrals.', 'withdraw': 'Withdrawals are processed within 7-8 hours to your UPI ID. Minimum ₹150.', 'fairplay': 'FairPlay is our anti-cheat system ensuring all matches are fair.', 'help': 'I am here to help. Ask me about games, wallet, tournaments, referrals, withdrawals.', 'signup': 'Sign up with Google in one tap.', 'free': 'SkillClash is a skill-based gaming platform for 18+.' };
     for (const [key, value] of Object.entries(responses)) if (msg.includes(key)) return value;
-    const fallbacks = [
-      "That's a great question. Could you tell me more about what you're looking for?",
-      "I'm here to help. If you're asking about games, wallet, or tournaments, I can guide you through it.",
-      `For more details, check the Help Center or ask me to explain any specific feature. I'm ${chatAgentName}, by the way.`,
-      "Can you rephrase your question or ask me about a specific feature like games, wallet, or tournaments?",
-      "Great question. The SkillClash platform is designed to be intuitive. Which part are you most curious about?"
-    ];
+    const fallbacks = ["That's a great question. Could you tell me more about what you're looking for?", "I'm here to help. If you're asking about games, wallet, or tournaments, I can guide you.", `For more details, check the Help Center. I'm ${chatAgentName}, by the way.`, "Can you rephrase your question or ask me about a specific feature?", "Great question. The SkillClash platform is designed to be intuitive."];
     return fallbacks[Math.floor(Math.random() * fallbacks.length)];
   }
-
   async function sendMessage() {
     if (!chatInput) return;
     const text = chatInput.value.trim();
     if (!text) return;
-    chatInput.value = '';
-    chatInput.disabled = true;
-    chatSendBtn.disabled = true;
+    chatInput.value = ''; chatInput.disabled = true; chatSendBtn.disabled = true;
     addMsg(text, true); showTyping(true);
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
     const response = getAIResponse(text);
     addMsg(response, false); showTyping(false);
-    chatInput.disabled = false;
-    chatSendBtn.disabled = false;
-    chatInput.focus();
+    chatInput.disabled = false; chatSendBtn.disabled = false; chatInput.focus();
   }
-
   chatSendBtn?.addEventListener('click', sendMessage);
   chatInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
   setTimeout(() => chatInput?.focus(), 500);
 }
 
-// ---- Dashboard Init ----
+// ===== DASHBOARD INIT =====
 async function initDashboard() {
   try {
     const { data: { session } } = await client.auth.getSession();
@@ -4504,7 +4297,6 @@ async function initDashboard() {
     checkPaymentReturn();
   } catch (e) { console.error(e); }
 }
-
 async function routeOnLoad() {
   const { data: { session } } = await client.auth.getSession();
   if (session) {
@@ -4517,16 +4309,13 @@ async function routeOnLoad() {
     document.getElementById('dashboard').classList.add('hidden');
   }
 }
-
 window.addEventListener('beforeunload', (e) => {
   if (isGameActive) { e.preventDefault(); e.returnValue = 'You are currently in a game. Are you sure you want to leave?'; return e.returnValue; }
   if (inQueue && currentUser) client.from('matchmaking_queue').delete().eq('user_id', currentUser.id).then(() => {}, () => {});
 });
-
 window.endDuel = endDuel;
-
 routeOnLoad();
-console.log('SkillClash v9.1 loaded — real-invite detection during matchmaking, single turn indicator, invite TTL = 8s');
+console.log('SkillClash v10 loaded — A-wins-B-stuck fixed, PWA install, How to Play, terms on both Sign Up + Log In, Account row spacing fixed');
 </script>
 </body>
 </html>
