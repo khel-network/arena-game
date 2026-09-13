@@ -716,6 +716,94 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   .invite-btn { font-size: 0.7rem; padding: 7px 10px; }
 }
 
+/* ===== v12: APP MODE UI ===== */
+.app-auth-screen {
+  display: none;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background: #fafafc;
+  text-align: center;
+}
+body.in-app .app-auth-screen.active { display: flex; }
+
+.app-auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, #161522 0%, #5b3df0 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.app-auth-logo svg { width: 32px; height: 32px; color: #5b3df0; background: none; }
+.app-auth-logo .clash {
+  background: linear-gradient(90deg, #5b3df0 0%, #f0a742 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.app-auth-tagline {
+  font-size: 0.9rem; color: #5c5a6e; margin-bottom: 40px;
+  max-width: 280px; line-height: 1.55;
+}
+.app-auth-btn {
+  width: 100%; max-width: 320px;
+  padding: 15px 20px;
+  border-radius: 14px;
+  background: #161522;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: 0.2s;
+  box-shadow: 0 10px 26px rgba(22, 21, 34, 0.15);
+}
+.app-auth-btn:hover {
+  background: #5b3df0;
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(91, 61, 240, 0.3);
+}
+.app-auth-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+.app-auth-terms {
+  font-size: 0.7rem; color: #918fa3; margin-top: 26px;
+  max-width: 300px; line-height: 1.55;
+}
+.app-auth-terms a { color: #5b3df0; font-weight: 600; text-decoration: underline; }
+.app-auth-footer {
+  position: fixed; bottom: 24px; left: 0; right: 0;
+  text-align: center; font-size: 0.68rem; color: #918fa3;
+}
+
+/* In app mode: hide the landing page entirely */
+body.in-app #page-landing { display: none !important; }
+body.in-app #page-container { display: none !important; }
+
+/* In app mode: hide Download App buttons and menu toggle */
+body.in-app #hero-download-btn,
+body.in-app #closing-download-btn,
+body.in-app #menu-toggle-btn { display: none !important; }
+
+/* In app mode: hide every marketing section */
+body.in-app .site-nav,
+body.in-app .mobile-menu,
+body.in-app .hero-wrap,
+body.in-app #modes,
+body.in-app #challenges,
+body.in-app #how-it-works,
+body.in-app .compare-row,
+body.in-app .scoreboard-grid,
+body.in-app .testi-list,
+body.in-app #faq,
+body.in-app .community-grid,
+body.in-app .closing-cta,
+body.in-app .site-footer { display: none !important; }
+
 /* ===== HOW TO PLAY MODAL ===== */
 .how-to-play-overlay { position: fixed; inset: 0; background: rgba(22,21,34,0.55); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 6000; padding: 20px; }
 .how-to-play-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
@@ -738,6 +826,26 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 <body>
 
 <div class="background-wash"></div>
+
+<!-- ===== v12: APP AUTH SCREEN (only visible in app mode, logged out) ===== -->
+<div id="app-auth-screen" class="app-auth-screen">
+  <div class="app-auth-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
+    Skill<span class="clash">Clash</span>
+  </div>
+  <p class="app-auth-tagline">India's skill-based 1v1 arena.<br>Sign in to start playing.</p>
+
+  <button id="app-auth-google-btn" class="app-auth-btn">
+    <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/></svg>
+    Continue with Google
+  </button>
+
+  <p class="app-auth-terms">
+    By continuing, you confirm you are 18 or older and agree to our <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.
+  </p>
+
+  <div class="app-auth-footer">SkillClash · v1.0.0</div>
+</div>
 
 <!-- ===== LANDING PAGE ===== -->
 <div id="page-landing">
@@ -1409,19 +1517,19 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 <p style="font-size:0.55rem; color:#918fa3; margin-top:4px;">18+ only. Skill-based gaming. Play responsibly.</p>
 </footer>
 </div>
-
 <script>
 // ============================================================
-// SKILLCLASH - v11
+// SKILLCLASH - v12
 // ============================================================
-// Changes vs v10:
-//   - Registers /service-worker.js
-//   - Links external /manifest.json
-//   - Nav: Log In + Sign Up only
-//   - Hero + closing CTA: Sign Up + Download App
-//   - Download App downloads /skillclash.apk
-//   - Footer text no longer claims "no entry fees"
-// All game / wallet / invite logic identical to v10.
+// Changes vs v11:
+//   - v12: App mode detection (installed PWA / APK)
+//   - v12: Dedicated app-auth screen for logged-out app users
+//   - v12: Marketing landing page fully hidden in app mode
+//   - v12: Download App buttons hidden in app mode
+//   - v12: Logout routes to auth screen (app) or landing (web)
+//   - v11: Service worker + external manifest
+//   - v11: Nav = Log In + Sign Up
+//   - v11: Hero + closing CTA = Sign Up + Download App
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -1458,6 +1566,20 @@ const GAME_PRICES = {
 };
 
 function getGamePrice(t) { return GAME_PRICES[t] || { entry: 15, reward: 25 }; }
+
+// ===== v12: APP MODE DETECTION =====
+const isInstalledApp =
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.matchMedia('(display-mode: fullscreen)').matches ||
+  window.navigator.standalone === true ||
+  document.referrer.includes('android-app://');
+
+if (isInstalledApp) {
+  document.body.classList.add('in-app');
+  console.log('SkillClash running in APP mode');
+} else {
+  console.log('SkillClash running in WEB mode');
+}
 
 let currentUser = null, currentBalance = 0, matchHistory = [], transactions = [];
 let activeOpponent = null, activeGame = null, inQueue = false, isGameActive = false;
@@ -1580,7 +1702,12 @@ function hidePageToPrevious() {
     document.getElementById('dashboard').classList.remove('hidden');
     loadWallet(); loadTransactions(); loadMatchHistory(); updateUI();
   } else {
-    document.getElementById('page-landing').style.display = 'block';
+    if (isInstalledApp) {
+      document.getElementById('page-landing').style.display = 'none';
+      if (!currentUser) document.getElementById('app-auth-screen').classList.add('active');
+    } else {
+      document.getElementById('page-landing').style.display = 'block';
+    }
     document.getElementById('dashboard').classList.add('hidden');
   }
 }
@@ -1634,6 +1761,11 @@ signupGoogleBtn?.addEventListener('click', () => {
   if (termsCheckbox?.checked) triggerGoogleLogin();
 });
 
+// v12: app auth screen Google button — direct login
+document.getElementById('app-auth-google-btn')?.addEventListener('click', () => {
+  triggerGoogleLogin();
+});
+
 document.getElementById('menu-toggle-btn')?.addEventListener('click', function() {
   document.getElementById('mobile-menu')?.classList.toggle('open');
 });
@@ -1650,10 +1782,8 @@ if ('serviceWorker' in navigator) {
 
 function triggerApkDownload() {
   if (!APK_DOWNLOAD_URL || APK_DOWNLOAD_URL === '/skillclash.apk') {
-    // Check if APK actually exists by making a HEAD request. If not, fall back to PWA instructions.
     fetch(APK_DOWNLOAD_URL, { method: 'HEAD' }).then((res) => {
       if (res.ok) {
-        // APK exists, trigger download
         const link = document.createElement('a');
         link.href = APK_DOWNLOAD_URL;
         link.download = 'SkillClash-v' + APK_VERSION + '.apk';
@@ -1690,7 +1820,6 @@ function showApkFallback() {
 document.getElementById('hero-download-btn')?.addEventListener('click', triggerApkDownload);
 document.getElementById('closing-download-btn')?.addEventListener('click', triggerApkDownload);
 
-// Keep the install prompt hook so Android Chrome still offers native PWA install
 let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
@@ -1846,9 +1975,16 @@ logoutConfirmBtn?.addEventListener('click', async () => {
   logoutConfirmOverlay?.classList.add('hidden');
   currentUser = null;
   document.body.classList.remove('game-active');
-  document.getElementById('page-landing').style.display = 'block';
-  document.getElementById('page-container').style.display = 'none';
   document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('page-container').style.display = 'none';
+  // v12: in app mode, return to auth screen instead of landing
+  if (isInstalledApp) {
+    document.getElementById('page-landing').style.display = 'none';
+    document.getElementById('app-auth-screen').classList.add('active');
+  } else {
+    document.getElementById('page-landing').style.display = 'block';
+    document.getElementById('app-auth-screen').classList.remove('active');
+  }
 });
 
 ledgerBackBtn?.addEventListener('click', () => switchView('view-profile'));
@@ -3480,9 +3616,16 @@ async function initDashboard() {
   try {
     const { data: { session } } = await client.auth.getSession();
     if (!session) {
-      document.getElementById('page-landing').style.display = 'block';
       document.getElementById('page-container').style.display = 'none';
       document.getElementById('dashboard').classList.add('hidden');
+      // v12: app mode shows the auth screen; web mode shows the landing page
+      if (isInstalledApp) {
+        document.getElementById('page-landing').style.display = 'none';
+        document.getElementById('app-auth-screen').classList.add('active');
+      } else {
+        document.getElementById('page-landing').style.display = 'block';
+        document.getElementById('app-auth-screen').classList.remove('active');
+      }
       return;
     }
     currentUser = session.user;
@@ -3498,6 +3641,7 @@ async function initDashboard() {
     subscribeToInvites();
     document.getElementById('page-landing').style.display = 'none';
     document.getElementById('page-container').style.display = 'none';
+    document.getElementById('app-auth-screen')?.classList.remove('active');
     document.getElementById('dashboard').classList.remove('hidden');
     checkPaymentReturn();
   } catch (e) { console.error(e); }
@@ -3507,11 +3651,18 @@ async function routeOnLoad() {
   if (session) {
     document.getElementById('page-landing').style.display = 'none';
     document.getElementById('page-container').style.display = 'none';
+    document.getElementById('app-auth-screen')?.classList.remove('active');
     await initDashboard();
   } else {
-    document.getElementById('page-landing').style.display = 'block';
     document.getElementById('page-container').style.display = 'none';
     document.getElementById('dashboard').classList.add('hidden');
+    if (isInstalledApp) {
+      document.getElementById('page-landing').style.display = 'none';
+      document.getElementById('app-auth-screen').classList.add('active');
+    } else {
+      document.getElementById('page-landing').style.display = 'block';
+      document.getElementById('app-auth-screen').classList.remove('active');
+    }
   }
 }
 window.addEventListener('beforeunload', (e) => {
@@ -3520,7 +3671,7 @@ window.addEventListener('beforeunload', (e) => {
 });
 window.endDuel = endDuel;
 routeOnLoad();
-console.log('SkillClash v11 loaded — PWA-ready with service worker, external manifest, nav = Log In + Sign Up, hero/closing CTA = Sign Up + Download App');
+console.log('SkillClash v12 loaded — PWA app mode ready, app auth screen active when installed');
 </script>
 </body>
 </html>
