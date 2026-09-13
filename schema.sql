@@ -1,5 +1,5 @@
 -- ============================================================
--- SkillClash - MASTER SCHEMA v9
+-- SkillClash - MASTER SCHEMA v9.1
 -- ============================================================
 -- Includes:
 --   - v4 base: users, wallet, matchmaking, matches, transactions,
@@ -7,6 +7,9 @@
 --     payment_requests, welcome bonus, realtime for game_sessions
 --   - v9 additions: match_invites (with realtime), terms/age
 --     acceptance tracking, expire_old_invites, accept_match_invite
+--   - v9.1: match invite TTL extended 5s -> 8s to match the
+--     matchmaking window (prevents invites expiring while the
+--     inviter is still waiting for a real opponent)
 --
 -- Safe to re-run. All statements are idempotent:
 --   add column if not exists / create table if not exists /
@@ -450,12 +453,17 @@ create trigger on_payment_approved
 
 -- ============================================================
 -- v9 ADDITIONS — match invites (realtime), invite accept logic
+-- v9.1 UPDATE — invite TTL extended from 5s to 8s
 -- ============================================================
 
 -- ------------------------------------------------------------
 -- MATCH INVITES
 -- A lightweight realtime broadcast that a player is waiting in
--- queue, so others on the dashboard can join them within 5s.
+-- queue, so others on the dashboard can join them.
+--
+-- v9.1: expires_at default changed 5s -> 8s to match the
+-- matchmaking window. This prevents invites from expiring
+-- while the inviter is still waiting for a real opponent.
 -- ------------------------------------------------------------
 create table if not exists public.match_invites (
   id uuid primary key default gen_random_uuid(),
@@ -468,8 +476,13 @@ create table if not exists public.match_invites (
     check (status in ('open', 'accepted', 'expired', 'cancelled')),
   accepted_by uuid references public.users (id),
   created_at timestamptz not null default now(),
-  expires_at timestamptz not null default (now() + interval '5 seconds')
+  expires_at timestamptz not null default (now() + interval '8 seconds')
 );
+
+-- Ensure existing installs get the new 8s default even if the
+-- table was created earlier with a 5s default.
+alter table public.match_invites
+  alter column expires_at set default (now() + interval '8 seconds');
 
 create index if not exists match_invites_open_idx
   on public.match_invites (status, game_type, expires_at);
@@ -595,5 +608,5 @@ grant execute on function public.accept_match_invite(uuid) to authenticated;
 
 
 -- ============================================================
--- END OF SCHEMA v9
+-- END OF SCHEMA v9.1
 -- ============================================================
