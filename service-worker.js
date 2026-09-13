@@ -1,9 +1,10 @@
 /* ============================================================
-   SkillClash Service Worker v13
-   - Caches the app shell so it opens instantly and works offline
-   - Network-first for Supabase / ZapUPI (always fresh)
-   - Cache-first for the app shell and icons (fast)
-   - Skips caching for auth/analytics/CDN dynamic content
+   SkillClash Service Worker v13 (offline-fixed)
+   - Caches app shell on install
+   - Network-first for HTML (so updates land fast)
+   - Cache-first for icons/manifest (fast)
+   - Serves /offline.html when navigation fails while offline
+   - Never caches Supabase / ZapUPI / auth / CDN dynamic
    ============================================================ */
 
 const APP_CACHE = 'skillclash-app-v13';
@@ -12,12 +13,12 @@ const RUNTIME_CACHE = 'skillclash-runtime-v13';
 const APP_SHELL = [
   '/',
   '/index.html',
+  '/offline.html',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png'
 ];
 
-// Hosts that must NEVER be cached — always live network
 const NETWORK_ONLY_HOSTS = [
   'supabase.co',
   'zapupi.com',
@@ -32,17 +33,24 @@ const NETWORK_ONLY_HOSTS = [
   'fonts.gstatic.com'
 ];
 
+// ===== Install: pre-cache the shell =====
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(APP_CACHE).then((cache) => {
-      return cache.addAll(APP_SHELL).catch((err) => {
-        console.warn('[SW] Some shell files failed to pre-cache:', err);
-      });
+      // Cache each file individually so one 404 doesn't break the whole install
+      return Promise.all(
+        APP_SHELL.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn('[SW] Skipped pre-cache:', url, err);
+          })
+        )
+      );
     })
   );
 });
 
+// ===== Activate: clean old caches =====
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -55,54 +63,69 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// ===== Fetch =====
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Ignore non-GET requests
   if (req.method !== 'GET') return;
-
-  // Ignore non-http(s) schemes (chrome-extension, data:, etc.)
   if (!url.protocol.startsWith('http')) return;
 
-  // Never cache auth, payment, realtime, or CDN dynamic content — always live
+  // Never cache auth / payments / CDNs
   if (NETWORK_ONLY_HOSTS.some((h) => url.hostname.includes(h))) {
-    return; // let the browser handle these normally
+    return; // browser handles it directly
   }
 
-  // Same-origin requests — cache-first with network fallback
+  // --- Navigation requests (HTML page loads) ---
+  // Network-first so users get the newest index.html when online,
+  // fall back to cached index.html (or offline.html) when offline.
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(APP_CACHE).then((c) => c.put('/index.html', copy));
+          }
+          return res;
+        })
+        .catch(async () => {
+          const cachedIndex = await caches.match('/index.html');
+          if (cachedIndex) return cachedIndex;
+          const offline = await caches.match('/offline.html');
+          if (offline) return offline;
+          return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+        })
+    );
+    return;
+  }
+
+  // --- Same-origin static assets (icons, manifest, etc.) ---
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(req).then((cached) => {
-        const fetchPromise = fetch(req)
-          .then((networkRes) => {
-            if (networkRes && networkRes.status === 200 && networkRes.type === 'basic') {
-              const copy = networkRes.clone();
-              caches.open(RUNTIME_CACHE).then((cache) => cache.put(req, copy));
+        if (cached) return cached;
+        return fetch(req)
+          .then((res) => {
+            if (res && res.status === 200 && res.type === 'basic') {
+              const copy = res.clone();
+              caches.open(RUNTIME_CACHE).then((c) => c.put(req, copy));
             }
-            return networkRes;
+            return res;
           })
-          .catch(() => {
-            // Offline: fall back to cached version, or cached index.html for navigation
-            if (cached) return cached;
-            if (req.mode === 'navigate') {
-              return caches.match('/index.html') || caches.match('/');
-            }
-            return Response.error();
-          });
-        return cached || fetchPromise;
+          .catch(() => Response.error());
       })
     );
     return;
   }
 
-  // Everything else — try network, fall back to cache
+  // --- Other cross-origin GETs (shouldn't reach here due to NETWORK_ONLY, but safe) ---
   event.respondWith(
     fetch(req).catch(() => caches.match(req))
   );
 });
 
-// ===== Allow the page to force-activate a new SW version =====
+// ===== Allow page to force-activate a new SW =====
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
