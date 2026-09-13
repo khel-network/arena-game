@@ -1,12 +1,13 @@
 /* ============================================================
-   SkillClash Service Worker v11
+   SkillClash Service Worker v13
    - Caches the app shell so it opens instantly and works offline
    - Network-first for Supabase / ZapUPI (always fresh)
    - Cache-first for the app shell and icons (fast)
+   - Skips caching for auth/analytics/CDN dynamic content
    ============================================================ */
 
-const APP_CACHE = 'skillclash-app-v11';
-const RUNTIME_CACHE = 'skillclash-runtime-v11';
+const APP_CACHE = 'skillclash-app-v13';
+const RUNTIME_CACHE = 'skillclash-runtime-v13';
 
 const APP_SHELL = [
   '/',
@@ -16,11 +17,28 @@ const APP_SHELL = [
   '/icon-512.png'
 ];
 
+// Hosts that must NEVER be cached — always live network
+const NETWORK_ONLY_HOSTS = [
+  'supabase.co',
+  'zapupi.com',
+  'zapupi.in',
+  'google.com',
+  'googleapis.com',
+  'gstatic.com',
+  'dicebear.com',
+  'cdnjs.cloudflare.com',
+  'jsdelivr.net',
+  'fonts.googleapis.com',
+  'fonts.gstatic.com'
+];
+
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(APP_CACHE).then((cache) => {
-      return cache.addAll(APP_SHELL).catch(() => {});
+      return cache.addAll(APP_SHELL).catch((err) => {
+        console.warn('[SW] Some shell files failed to pre-cache:', err);
+      });
     })
   );
 });
@@ -44,17 +62,11 @@ self.addEventListener('fetch', (event) => {
   // Ignore non-GET requests
   if (req.method !== 'GET') return;
 
-  // Never cache Supabase, ZapUPI, or Google (auth) — always live
-  if (
-    url.hostname.includes('supabase.co') ||
-    url.hostname.includes('zapupi.com') ||
-    url.hostname.includes('google') ||
-    url.hostname.includes('googleapis.com') ||
-    url.hostname.includes('gstatic.com') ||
-    url.hostname.includes('dicebear.com') ||
-    url.hostname.includes('cdnjs.cloudflare.com') ||
-    url.hostname.includes('jsdelivr.net')
-  ) {
+  // Ignore non-http(s) schemes (chrome-extension, data:, etc.)
+  if (!url.protocol.startsWith('http')) return;
+
+  // Never cache auth, payment, realtime, or CDN dynamic content — always live
+  if (NETWORK_ONLY_HOSTS.some((h) => url.hostname.includes(h))) {
     return; // let the browser handle these normally
   }
 
@@ -70,7 +82,14 @@ self.addEventListener('fetch', (event) => {
             }
             return networkRes;
           })
-          .catch(() => cached);
+          .catch(() => {
+            // Offline: fall back to cached version, or cached index.html for navigation
+            if (cached) return cached;
+            if (req.mode === 'navigate') {
+              return caches.match('/index.html') || caches.match('/');
+            }
+            return Response.error();
+          });
         return cached || fetchPromise;
       })
     );
@@ -81,4 +100,11 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(req).catch(() => caches.match(req))
   );
+});
+
+// ===== Allow the page to force-activate a new SW version =====
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
