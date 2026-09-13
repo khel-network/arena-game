@@ -1,0 +1,42 @@
+// ===== v11: SERVICE WORKER + APK DOWNLOAD =====
+// Replace this URL after you sign and host your APK:
+const APK_DOWNLOAD_URL = '/skillclash.apk';
+const APK_VERSION = '1.0.0';
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+  });
+}
+
+function triggerApkDownload() {
+  if (!APK_DOWNLOAD_URL || APK_DOWNLOAD_URL === '/skillclash.apk') {
+    // APK not yet hosted — show instructions as a temporary fallback
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      alert('SkillClash app for iPhone is coming soon.\n\nFor now you can use the website — open Safari, tap Share, then "Add to Home Screen".');
+    } else {
+      alert('SkillClash APK is being prepared.\n\nThe website works perfectly in your browser for now. The direct APK download will be enabled soon.');
+    }
+    return;
+  }
+  // Trigger download
+  const link = document.createElement('a');
+  link.href = APK_DOWNLOAD_URL;
+  link.download = 'SkillClash-v' + APK_VERSION + '.apk';
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+document.getElementById('hero-download-btn')?.addEventListener('click', triggerApkDownload);
+document.getElementById('closing-download-btn')?.addEventListener('click', triggerApkDownload);
+
+// If the browser offers a native install prompt, still hook it so
+// users on Android Chrome get the PWA install too as a bonus.
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+});
