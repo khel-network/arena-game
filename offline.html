@@ -2,21 +2,160 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#5b3df0" />
 <title>Offline — SkillClash</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23fafafc'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%235b3df0'/%3E%3C/svg%3E" />
 <style>
-  body { margin:0; font-family: system-ui, -apple-system, sans-serif; background:#fafafc; color:#161522; display:flex; min-height:100vh; align-items:center; justify-content:center; text-align:center; padding:24px; }
-  .card { max-width:320px; }
-  h1 { font-size:1.4rem; margin-bottom:10px; color:#5b3df0; }
-  p { color:#5c5a6e; font-size:0.9rem; line-height:1.6; }
-  button { margin-top:20px; padding:12px 24px; border-radius:12px; background:#5b3df0; color:#fff; font-weight:700; border:none; cursor:pointer; font-size:0.9rem; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: #fafafc;
+    color: #161522;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    -webkit-font-smoothing: antialiased;
+  }
+  .card {
+    max-width: 360px;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #eee9f7;
+    border-radius: 24px;
+    padding: 40px 28px 32px;
+    box-shadow: 0 20px 50px rgba(20, 15, 50, 0.06);
+    animation: fadeUp 0.4s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .icon-wrap {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f3f0ff, #ede9fe);
+    border: 1px solid #ddd6fe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-wrap svg {
+    width: 34px;
+    height: 34px;
+    color: #5b3df0;
+    stroke-width: 2;
+  }
+  h1 {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: #161522;
+    letter-spacing: -0.01em;
+  }
+  p {
+    color: #5c5a6e;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  button {
+    width: 100%;
+    padding: 13px 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #5b3df0, #7c5cf5);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(91, 61, 240, 0.25);
+    transition: 0.2s;
+    font-family: inherit;
+  }
+  button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(91, 61, 240, 0.35);
+  }
+  button:active { transform: translateY(0); }
+  .status {
+    font-size: 0.68rem;
+    color: #918fa3;
+    margin-top: 16px;
+    min-height: 1em;
+  }
+  .status.online { color: #16c46b; font-weight: 600; }
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>You're offline</h1>
-  <p>SkillClash needs an internet connection for matches and wallet updates. Please reconnect and try again.</p>
-  <button onclick="location.reload()">Retry</button>
-</div>
+  <div class="card">
+    <div class="icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="1" y1="1" x2="23" y2="23" />
+        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
+        <path d="M10.71 5.05A16 16 0 0 1 22.58 9" />
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88" />
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+        <line x1="12" y1="20" x2="12.01" y2="20" />
+      </svg>
+    </div>
+    <h1>You're offline</h1>
+    <p>SkillClash needs an internet connection to load games, sync your wallet, and match you with players. Reconnect and try again.</p>
+    <button onclick="retry()">Retry Connection</button>
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('statusMsg');
+
+    function retry() {
+      statusEl.textContent = 'Checking connection…';
+      statusEl.classList.remove('online');
+
+      // If the browser thinks we're online, reload (SW will serve fresh HTML)
+      if (navigator.onLine) {
+        statusEl.textContent = 'Reconnecting…';
+        statusEl.classList.add('online');
+        setTimeout(() => location.replace('/'), 400);
+        return;
+      }
+
+      // Otherwise poll until online
+      let attempts = 0;
+      const check = setInterval(() => {
+        attempts++;
+        if (navigator.onLine) {
+          clearInterval(check);
+          statusEl.textContent = 'Back online! Loading…';
+          statusEl.classList.add('online');
+          setTimeout(() => location.replace('/'), 400);
+        } else if (attempts >= 20) {
+          clearInterval(check);
+          statusEl.textContent = 'Still offline. Check your network and try again.';
+          statusEl.classList.remove('online');
+        }
+      }, 500);
+    }
+
+    // Auto-retry when the browser fires online event
+    window.addEventListener('online', () => {
+      statusEl.textContent = 'Back online! Loading…';
+      statusEl.classList.add('online');
+      setTimeout(() => location.replace('/'), 400);
+    });
+
+    // Update button label if online at load
+    if (navigator.onLine) {
+      statusEl.textContent = 'Connection detected — tap Retry.';
+      statusEl.classList.add('online');
+    }
+  </script>
 </body>
 </html>
