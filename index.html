@@ -47,7 +47,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
 .grad-text { background: linear-gradient(90deg, #5b3df0 15%, #f0a742 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-/* ===== UNIFIED BRAND LOGO (landing + dashboard identical) ===== */
+/* ===== UNIFIED BRAND LOGO ===== */
 .brand, .brand-small {
   display: flex; align-items: center; gap: 7px;
   font-family: 'Poppins', sans-serif; font-weight: 800;
@@ -334,9 +334,9 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 @media (min-width:500px) { .app-wrap .games-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
 .app-wrap .game-card { background: rgba(255,255,255,0.85); border: 1px solid #e9e5f5; border-radius: 16px; overflow: hidden; transition: 0.25s ease; display: flex; flex-direction: column; box-shadow: 0 4px 16px rgba(20,15,50,0.04); min-height: 190px; }
 .app-wrap .game-card:hover { transform: translateY(-4px); border-color: #b8a8f0; box-shadow: 0 10px 28px rgba(91,61,240,0.12); }
-.app-wrap .card-media { height: 80px; display: flex; align-items: center; justify-content: center; position: relative; }
-.app-wrap .card-media span { font-size: 2rem; line-height: 1; }
-.app-wrap .card-badge { position: absolute; top: 6px; left: 8px; background: rgba(22,21,34,0.75); padding: 2px 6px !important; border-radius: 100px; font-size: 9px !important; font-weight: 700; letter-spacing: 0.02em !important; color: #fff; text-transform: uppercase; max-width: calc(100% - 16px) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4 !important; }
+.app-wrap .card-media { height: 110px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.app-wrap .card-media svg { width: 100%; height: 100%; display: block; }
+.app-wrap .card-badge { position: absolute; top: 8px; left: 8px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); padding: 3px 8px; border-radius: 100px; font-size: 9px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2; }
 .app-wrap .card-content { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; }
 .app-wrap .card-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 1px; color: #161522; line-height: 1.2; }
 .app-wrap .card-desc { font-size: 10px; color: #5c5a6e; line-height: 1.3; flex: 1; margin-bottom: 4px; }
@@ -651,8 +651,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   .app-wrap .user-name { font-size: 0.7rem; max-width: 60px; }
   .app-wrap .tab-btn { font-size: 0.5rem; }
   .app-wrap .tab-btn svg { width: 18px; height: 18px; }
-  .app-wrap .card-media { height: 70px; }
-  .app-wrap .card-media span { font-size: 1.6rem; }
+  .app-wrap .card-media { height: 90px; }
   .app-wrap .card-title { font-size: 12px; }
   .app-wrap .card-desc { font-size: 9px; }
   .app-wrap .card-meta { font-size: 9px; }
@@ -703,59 +702,65 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .chat-input-row button:hover { transform: translateY(-1px); }
 .chat-input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ===== NEW LIVE GAME STYLES ===== */
-/* Nim */
-.app-wrap .nim-row { display: flex; gap: 10px; justify-content: center; margin: 12px 0; flex-wrap: wrap; }
-.app-wrap .nim-pile { background: linear-gradient(135deg, #ffffff, #f8f6ff); border: 2px solid #ddd6fe; border-radius: 12px; padding: 10px 14px; cursor: pointer; transition: 0.15s; min-width: 90px; }
-.app-wrap .nim-pile:hover { border-color: #5b3df0; transform: translateY(-2px); }
-.app-wrap .nim-pile.disabled { opacity: 0.5; cursor: not-allowed; }
-.app-wrap .nim-count { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.6rem; color: #5b3df0; }
-.app-wrap .nim-dots { font-size: 0.9rem; letter-spacing: 2px; color: #f0a742; margin-top: 2px; }
-.app-wrap .nim-take-btn { padding: 8px 18px; border-radius: 8px; border: none; background: linear-gradient(135deg, #5b3df0, #7c5cf5); color: #fff; font-weight: 700; cursor: pointer; transition: 0.2s; }
+/* ===== GAME CARD THUMBNAIL ANIMATIONS ===== */
+/* All animations used inside game card SVGs. */
+@keyframes drawStroke {
+  0% { stroke-dashoffset: 40; opacity: 0; }
+  50% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: -40; opacity: 0; }
+}
+.anim-draw { stroke-dasharray: 40; animation: drawStroke 2s infinite ease-in-out; }
 
-/* Dots & Boxes */
-.app-wrap .dots-grid { display: grid; gap: 0; margin: 0 auto; position: relative; }
-.app-wrap .dot-node { width: 10px; height: 10px; border-radius: 50%; background: #5b3df0; }
-.app-wrap .dots-line-h { height: 4px; background: #ddd6fe; cursor: pointer; transition: 0.15s; }
-.app-wrap .dots-line-h:hover { background: #b8a8f0; }
-.app-wrap .dots-line-h.player1 { background: #5b3df0; cursor: default; }
-.app-wrap .dots-line-h.player2 { background: #f0a742; cursor: default; }
-.app-wrap .dots-line-v { width: 4px; background: #ddd6fe; cursor: pointer; transition: 0.15s; }
-.app-wrap .dots-line-v:hover { background: #b8a8f0; }
-.app-wrap .dots-line-v.player1 { background: #5b3df0; cursor: default; }
-.app-wrap .dots-line-v.player2 { background: #f0a742; cursor: default; }
-.app-wrap .dots-cell { background: #f8f6ff; border-radius: 3px; }
-.app-wrap .dots-cell.player1 { background: rgba(91,61,240,0.25); }
-.app-wrap .dots-cell.player2 { background: rgba(240,167,66,0.3); }
+@keyframes dropDown {
+  0% { transform: translateY(-35px); opacity: 0; }
+  40% { transform: translateY(0px); opacity: 1; }
+  80%, 100% { transform: translateY(0px); opacity: 1; }
+}
+.anim-drop { animation: dropDown 2s infinite cubic-bezier(0.25, 1, 0.5, 1); transform-origin: center; }
 
-/* Word Scramble */
-.app-wrap .scramble-word { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: 6px; color: #5b3df0; margin: 14px 0; }
-.app-wrap .scramble-input { padding: 10px 14px; border: 1px solid #ddd6fe; border-radius: 10px; font-size: 1rem; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+@keyframes slideTake {
+  0%, 30% { transform: translateX(0); opacity: 1; }
+  60% { transform: translateX(18px) scale(0.5); opacity: 0; }
+  100% { transform: translateX(0); opacity: 0; }
+}
+.anim-slide { animation: slideTake 2s infinite ease-in-out; }
 
-/* Memory Grid (5x4) */
-.app-wrap .mem-board-lg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; max-width: 320px; margin: 0 auto; }
-.app-wrap .mem-card-lg { aspect-ratio: 1; border-radius: 8px; background: linear-gradient(135deg, #5b3df0, #8b6ff0); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #fff; transition: 0.25s; }
-.app-wrap .mem-card-lg.revealed { background: #fff; border: 2px solid #5b3df0; color: #161522; }
-.app-wrap .mem-card-lg.matched { background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #16c46b; }
+@keyframes tapBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.82) translateY(5px); }
+}
+.anim-tap { animation: tapBounce 0.8s infinite ease-in-out; transform-origin: center; }
 
-/* Battleship */
-.app-wrap .bs-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 240px; margin: 0 auto; }
-.app-wrap .bs-cell { aspect-ratio: 1; border-radius: 6px; background: linear-gradient(135deg, #f3f0ff, #ede9fe); border: 1px solid #ddd6fe; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-.app-wrap .bs-cell:hover { background: #ddd6fe; }
-.app-wrap .bs-cell.hit { background: #e2555a; color: #fff; cursor: default; }
-.app-wrap .bs-cell.miss { background: #cbd5e1; color: #fff; cursor: default; }
+@keyframes flashColor {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; filter: drop-shadow(0 0 6px currentColor); }
+}
+.anim-flash { animation: flashColor 1.2s infinite ease-in-out; }
 
-/* Odd One Out */
-.app-wrap .odd-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 260px; margin: 12px auto; }
-.app-wrap .odd-tile { aspect-ratio: 1; border-radius: 10px; cursor: pointer; transition: 0.15s; }
-.app-wrap .odd-tile:hover { transform: scale(1.05); }
+@keyframes popUp {
+  0%, 60%, 100% { transform: translateY(12px); }
+  20%, 40% { transform: translateY(-3px); }
+}
+.anim-mole { animation: popUp 2s infinite ease-in-out; transform-origin: bottom; }
 
-/* Reaction Duel */
-.app-wrap .react-arena { text-align: center; padding: 20px 0; }
-.app-wrap .react-box { width: 220px; height: 220px; margin: 12px auto; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.1rem; color: #fff; cursor: pointer; user-select: none; transition: 0.1s; }
-.app-wrap .react-box.wait { background: linear-gradient(135deg, #e2555a, #f07075); }
-.app-wrap .react-box.go { background: linear-gradient(135deg, #16c46b, #22d47a); }
-.app-wrap .react-box.done { background: linear-gradient(135deg, #5b3df0, #7c5cf5); cursor: default; }
+@keyframes rollDiceAnim {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  35% { transform: rotate(-20deg) scale(1.08); }
+  70% { transform: rotate(15deg) scale(0.95); }
+}
+.anim-dice { animation: rollDiceAnim 2.5s infinite ease-in-out; transform-origin: center; }
+
+@keyframes floatIndicator {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.anim-float { animation: floatIndicator 1.8s infinite ease-in-out; }
+
+@keyframes rotateGear {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.anim-spin { animation: rotateGear 4s infinite linear; transform-origin: center; }
 </style>
 </head>
 <body>
@@ -1302,7 +1307,7 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 </div>
 <span class="vs-badge">VS</span>
 <div class="player-stat opp-side" id="arena-opp-side">
-<img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
+<img id="arena-opp-avatar" class="arena-opp-avatar" src="" alt="Opponent" />
 <span id="arena-opp-name" class="arena-name">Opponent</span>
 </div>
 </div>
@@ -1395,10 +1400,8 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 
 <script>
 // ============================================================
-// SKILLCLASH - v6
-// Adds: 6 new live 2-player games (Nim, Dots & Boxes, Word Scramble,
-// Memory Grid 20, Battleship, Odd One Out, Reaction Duel)
-// Fixes: landing brand logo now identical to dashboard brand logo
+// SKILLCLASH - v7
+// Adds: animated SVG thumbnails on game cards (matching each game's style)
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -2055,37 +2058,94 @@ document.getElementById('cashout-submit-btn')?.addEventListener('click', functio
   showToast('Withdrawal request submitted!', 'credit');
 });
 
-// ===== GAMES CATALOG =====
+/* ============================================================
+   GAME CATALOG — with thumbnail SVGs (animation + colors)
+   ============================================================
+   HOW TO EDIT THUMBNAILS LATER
+   -----------------------------
+   Each game below has a "thumb" object with:
+     - bg     : background color of the card media area
+     - icon   : inline SVG markup drawn inside a 60x50 viewBox
+                (coordinates are relative to center = 0,0)
+   Just edit "bg" or "icon" for any game. Animations are applied via
+   CSS classes (see .anim-* in the <style> block above).
+   Available animation classes:
+     anim-draw  → stroke draw (for lines)
+     anim-drop  → drops down (for falling pieces)
+     anim-slide → slides away (for taking stones)
+     anim-tap   → bounce down/up (for tap/click objects)
+     anim-flash → opacity flash (for lit tiles / highlights)
+     anim-mole  → pop-up motion (for moles / pop-ups)
+     anim-dice  → rotating wobble (for dice)
+     anim-float → gentle up/down float (for text / indicators)
+     anim-spin  → full rotation (for gears)
+   ============================================================ */
 const GAME_CATALOG = [
-  { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', icon: '×', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25 },
-  { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four in a row. Strategic battles.', icon: '◉', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 },
-  { type: 'nim', name: 'Nim Duel', desc: 'Take stones from piles. Player who takes the last stone wins.', icon: '●', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25 },
-  { type: 'dots', name: 'Dots & Boxes', desc: 'Complete more boxes than your opponent on a 4x4 grid.', icon: '□', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 },
-  { type: 'rps', name: 'RPS Duel', desc: 'Best-of-3 rock, paper, scissors. Outsmart your opponent.', icon: '✊', badge: 'CLASSIC', category: 'strategy', entry: 15, reward: 25 },
-  { type: 'dice', name: 'Dice Battle', desc: 'Roll the dice. Higher number wins the round.', icon: '⚄', badge: 'LUCK', category: 'strategy', entry: 15, reward: 25 },
-  { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board. Test your memory.', icon: '⬛', badge: 'BRAIN', category: 'brain', entry: 15, reward: 25 },
-  { type: 'memorylg', name: 'Memory Grid Pro', desc: '20-card memory grid. Find pairs before your opponent.', icon: '▦', badge: 'BRAIN', category: 'brain', entry: 20, reward: 35 },
-  { type: 'higherlower', name: 'Higher-Lower', desc: 'Guess the secret number in fewest tries.', icon: '⇅', badge: 'LOGIC', category: 'brain', entry: 15, reward: 25 },
-  { type: 'scramble', name: 'Word Scramble', desc: 'Unscramble the word. Fastest fingers win.', icon: 'A', badge: 'WORD', category: 'brain', entry: 15, reward: 25 },
-  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed.', icon: '☝', badge: 'SPEED', category: 'reflex', entry: 15, reward: 25 },
-  { type: 'simon', name: 'Simon Says', desc: 'Repeat the growing color pattern. Memory challenge.', icon: '◐', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25 },
-  { type: 'whack', name: 'Whack-a-Mole', desc: 'First to 15 hits wins. Reflexes matter.', icon: '◆', badge: 'REFLEX', category: 'reflex', entry: 20, reward: 35 },
-  { type: 'reaction', name: 'Reaction Duel', desc: 'Wait for green, then tap fastest. Classic reflex test.', icon: '!', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
-  { type: 'oddone', name: 'Odd One Out', desc: 'Spot the different tile. First to 8 correct wins.', icon: '◈', badge: 'VISION', category: 'reflex', entry: 15, reward: 25 },
-  { type: 'mathduel', name: 'Math Duel', desc: 'Solve equations fastest to win. Quick math.', icon: '∑', badge: 'MATH', category: 'math', entry: 15, reward: 25 },
-  { type: 'reflex', name: 'Reflex Grid', desc: 'Tap the lit tile before it fades. Speed.', icon: '⚡', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
-  { type: 'stroop', name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', icon: '◉', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
-  { type: 'recall', name: 'Sequence Recall', desc: 'Numbers flash, tap them back in order. Memory.', icon: '①②', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25 },
-  { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve quick sums back-to-back. Speed math.', icon: '∷', badge: 'MATH', category: 'math', entry: 15, reward: 25 },
-  { type: 'battleship', name: 'Battleship Mini', desc: '5x5 grid. Find all 4 hidden ships first.', icon: '⌖', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 }
+  { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25,
+    thumb: { bg: '#fef3c7', icon: '<line x1="-15" y1="-15" x2="15" y2="15" stroke="#d97706" stroke-width="4" class="anim-draw"/><circle cx="0" cy="0" r="14" stroke="#4f46e5" stroke-width="3" fill="none"/>' } },
+  { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four in a row. Strategic battles.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35,
+    thumb: { bg: '#e0f2fe', icon: '<rect x="-24" y="-18" width="48" height="36" rx="4" fill="#0284c7"/><circle cx="-12" cy="0" r="5" fill="#ffffff"/><circle cx="0" cy="0" r="5" fill="#ef4444"/><circle cx="12" cy="0" r="5" class="anim-drop" fill="#eab308"/>' } },
+  { type: 'nim', name: 'Nim Duel', desc: 'Take stones from piles. Player who takes the last stone wins.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25,
+    thumb: { bg: '#f1f5f9', icon: '<circle cx="-15" cy="5" r="4" fill="#334155"/><circle cx="-5" cy="0" r="4" fill="#334155"/><circle cx="5" cy="-5" r="4" fill="#334155"/><circle cx="15" cy="-10" r="5" fill="#6366f1" class="anim-slide"/>' } },
+  { type: 'dots', name: 'Dots & Boxes', desc: 'Complete more boxes than your opponent on a 4x4 grid.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35,
+    thumb: { bg: '#ecfdf5', icon: '<rect x="-15" y="-15" width="30" height="30" fill="#10b981" fill-opacity="0.3" class="anim-flash"/><circle cx="-15" cy="-15" r="3" fill="#047857"/><circle cx="15" cy="-15" r="3" fill="#047857"/><circle cx="-15" cy="15" r="3" fill="#047857"/><circle cx="15" cy="15" r="3" fill="#047857"/>' } },
+  { type: 'rps', name: 'RPS Duel', desc: 'Best-of-3 rock, paper, scissors. Outsmart your opponent.', badge: 'CLASSIC', category: 'strategy', entry: 15, reward: 25,
+    thumb: { bg: '#fef9c3', icon: '<text x="0" y="8" font-size="28" text-anchor="middle" class="anim-tap">✊</text>' } },
+  { type: 'dice', name: 'Dice Battle', desc: 'Roll the dice. Higher number wins the round.', badge: 'LUCK', category: 'strategy', entry: 15, reward: 25,
+    thumb: { bg: '#dcfce7', icon: '<g class="anim-dice"><rect x="-18" y="-12" width="24" height="24" rx="4" fill="#ffffff" stroke="#166534" stroke-width="2"/><circle cx="-10" cy="-4" r="2" fill="#166534"/><circle cx="-2" cy="-4" r="2" fill="#166534"/><circle cx="-10" cy="4" r="2" fill="#166534"/><circle cx="-2" cy="4" r="2" fill="#166534"/></g>' } },
+  { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board. Test your memory.', badge: 'BRAIN', category: 'brain', entry: 15, reward: 25,
+    thumb: { bg: '#f3e8ff', icon: '<rect x="-18" y="-14" width="16" height="28" rx="3" fill="#9333ea" class="anim-float"/><rect x="2" y="-14" width="16" height="28" rx="3" fill="#c084fc"/>' } },
+  { type: 'memorylg', name: 'Memory Grid Pro', desc: '20-card memory grid. Find pairs before your opponent.', badge: 'BRAIN', category: 'brain', entry: 20, reward: 35,
+    thumb: { bg: '#e0e7ff', icon: '<rect x="-18" y="-18" width="8" height="8" fill="#4f46e5" class="anim-flash"/><rect x="-6" y="-18" width="8" height="8" fill="#818cf8"/><rect x="6" y="-18" width="8" height="8" fill="#4f46e5"/><rect x="-18" y="-6" width="8" height="8" fill="#818cf8"/><rect x="-6" y="-6" width="8" height="8" fill="#4f46e5" class="anim-flash"/><rect x="6" y="-6" width="8" height="8" fill="#818cf8"/>' } },
+  { type: 'higherlower', name: 'Higher-Lower', desc: 'Guess the secret number in fewest tries.', badge: 'LOGIC', category: 'brain', entry: 15, reward: 25,
+    thumb: { bg: '#ccfbf1', icon: '<path d="M0 -15 L10 0 L-10 0 Z" fill="#0d9488" class="anim-float"/><path d="M0 15 L10 0 L-10 0 Z" fill="#e11d48"/>' } },
+  { type: 'scramble', name: 'Word Scramble', desc: 'Unscramble the word. Fastest fingers win.', badge: 'WORD', category: 'brain', entry: 15, reward: 25,
+    thumb: { bg: '#fae8ff', icon: '<text x="0" y="6" font-size="22" font-weight="bold" fill="#a21caf" text-anchor="middle" class="anim-float">ABC</text>' } },
+  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed.', badge: 'SPEED', category: 'reflex', entry: 15, reward: 25,
+    thumb: { bg: '#ffedd5', icon: '<circle cx="0" cy="0" r="16" fill="#ea580c"/><circle cx="0" cy="0" r="8" fill="#ffffff" class="anim-tap"/>' } },
+  { type: 'simon', name: 'Simon Says', desc: 'Repeat the growing color pattern. Memory challenge.', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25,
+    thumb: { bg: '#fce7f3', icon: '<circle cx="0" cy="0" r="18" fill="#db2777"/><path d="M0 0 L0 -18 A18 18 0 0 1 18 0 Z" fill="#9333ea" class="anim-flash"/>' } },
+  { type: 'whack', name: 'Whack-a-Mole', desc: 'First to 15 hits wins. Reflexes matter.', badge: 'REFLEX', category: 'reflex', entry: 20, reward: 35,
+    thumb: { bg: '#fee2e2', icon: '<ellipse cx="0" cy="5" rx="14" ry="8" fill="#b91c1c"/><circle cx="0" cy="-4" r="7" fill="#f87171" class="anim-mole"/>' } },
+  { type: 'reaction', name: 'Reaction Duel', desc: 'Wait for green, then tap fastest. Classic reflex test.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25,
+    thumb: { bg: '#f3f4f6', icon: '<path d="M-4 -18 L6 -2 L0 -2 L4 18 L-6 2 L0 2 Z" fill="#eab308" class="anim-flash"/>' } },
+  { type: 'oddone', name: 'Odd One Out', desc: 'Spot the different tile. First to 8 correct wins.', badge: 'VISION', category: 'reflex', entry: 15, reward: 25,
+    thumb: { bg: '#ccfbf1', icon: '<rect x="-14" y="-14" width="10" height="10" fill="#0d9488"/><rect x="4" y="-14" width="10" height="10" fill="#0d9488"/><rect x="-14" y="4" width="10" height="10" fill="#f43f5e" class="anim-float"/><rect x="4" y="4" width="10" height="10" fill="#0d9488"/>' } },
+  { type: 'mathduel', name: 'Math Duel', desc: 'Solve equations fastest to win. Quick math.', badge: 'MATH', category: 'math', entry: 15, reward: 25,
+    thumb: { bg: '#e0f2fe', icon: '<text x="0" y="8" font-size="24" font-weight="bold" fill="#0284c7" text-anchor="middle" class="anim-float">∑ =</text>' } },
+  { type: 'reflex', name: 'Reflex Grid', desc: 'Tap the lit tile before it fades. Speed.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25,
+    thumb: { bg: '#fee2e2', icon: '<rect x="-12" y="-12" width="10" height="10" fill="#ef4444" class="anim-flash"/><rect x="2" y="-12" width="10" height="10" fill="#fca5a5"/><rect x="-12" y="2" width="10" height="10" fill="#fca5a5"/><rect x="2" y="2" width="10" height="10" fill="#fca5a5"/>' } },
+  { type: 'stroop', name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25,
+    thumb: { bg: '#fef3c7', icon: '<circle cx="-6" cy="0" r="10" fill="#3b82f6" fill-opacity="0.8" class="anim-float"/><circle cx="6" cy="0" r="10" fill="#eab308" fill-opacity="0.8"/>' } },
+  { type: 'recall', name: 'Sequence Recall', desc: 'Numbers flash, tap them back in order. Memory.', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25,
+    thumb: { bg: '#f3e8ff', icon: '<text x="0" y="6" font-size="18" font-weight="bold" fill="#7c3aed" text-anchor="middle" class="anim-float">1 2 3</text>' } },
+  { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve quick sums back-to-back. Speed math.', badge: 'MATH', category: 'math', entry: 15, reward: 25,
+    thumb: { bg: '#e0f2fe', icon: '<text x="0" y="6" font-size="16" font-weight="bold" fill="#0369a1" text-anchor="middle" class="anim-float">10 + 5</text>' } },
+  { type: 'battleship', name: 'Battleship Mini', desc: '5x5 grid. Find all 4 hidden ships first.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35,
+    thumb: { bg: '#dcfce7', icon: '<path d="M-12 6 L12 6 L8 0 L-8 0 Z" fill="#15803d" class="anim-float"/><circle cx="4" cy="-8" r="3" fill="#dc2626"/>' } }
 ];
 
 function renderGameCards() {
   const grid = document.getElementById('gamesGrid');
   if (!grid) return;
-  grid.innerHTML = GAME_CATALOG.map((g, i) => {
-    const bg = `hsl(${i * 22 % 360}, 55%, 92%)`;
-    return `<div class="game-card" data-category="${g.category}"><div class="card-media" style="background:${bg};"><span>${g.icon}</span><span class="card-badge">${g.badge}</span></div><div class="card-content"><h3 class="card-title">${g.name}</h3><p class="card-desc">${g.desc}</p><div class="card-meta"><span>₹${g.entry}</span><span class="win">+₹${g.reward}</span></div><button class="play-btn" data-game="${g.name}" data-type="${g.type}" data-entry="${g.entry}" data-reward="${g.reward}">Play</button></div></div>`;
+  grid.innerHTML = GAME_CATALOG.map((g) => {
+    return `<div class="game-card" data-category="${g.category}">
+      <div class="card-media" style="background: ${g.thumb.bg};">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 -25 60 50">
+          ${g.thumb.icon}
+        </svg>
+        <span class="card-badge">${g.badge}</span>
+      </div>
+      <div class="card-content">
+        <h3 class="card-title">${g.name}</h3>
+        <p class="card-desc">${g.desc}</p>
+        <div class="card-meta">
+          <span>₹${g.entry}</span>
+          <span class="win">+₹${g.reward}</span>
+        </div>
+        <button class="play-btn" data-game="${g.name}" data-type="${g.type}" data-entry="${g.entry}" data-reward="${g.reward}">Play</button>
+      </div>
+    </div>`;
   }).join('');
 }
 renderGameCards();
@@ -2422,12 +2482,11 @@ function runConnect4(opponent, live) {
   render();
 }
 
-// ===== NEW GAME: NIM (live + bot) =====
+// ===== GAME: NIM (live + bot) =====
 function runNim(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
   const isLive = !!live;
-  // 3 piles: 3, 5, 7 stones. Last player to take a stone wins (normal play).
   let piles = [3, 5, 7];
   let gameOver = false;
   let myTurn = isLive ? (myRole === 'player1') : true;
@@ -2508,7 +2567,6 @@ function runNim(opponent, live) {
 
   function botMove() {
     if (gameOver) return;
-    // Simple smart-ish: aim for XOR = 0 (Nim-sum)
     let nimSum = piles[0] ^ piles[1] ^ piles[2];
     let bestPile = -1, bestTake = 1;
     if (nimSum !== 0) {
@@ -2521,7 +2579,6 @@ function runNim(opponent, live) {
       }
     }
     if (bestPile === -1) {
-      // random legal move
       const legal = [];
       for (let i = 0; i < piles.length; i++) {
         if (piles[i] >= 1) legal.push({ i, t: 1 });
@@ -2555,16 +2612,13 @@ function runNim(opponent, live) {
   render();
 }
 
-// ===== NEW GAME: DOTS & BOXES (live + bot) =====
+// ===== GAME: DOTS & BOXES (live + bot) =====
 function runDots(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
   const isLive = !!live;
-  const N = 4; // 4x4 cells => 5x5 dots
+  const N = 4;
   const DOT = N + 1;
-  // State: horizontal lines H[row][col] for row 0..DOT-1, col 0..N-1
-  //        vertical lines V[row][col] for row 0..N-1, col 0..DOT-1
-  //        boxes B[row][col] for row 0..N-1, col 0..N-1: null | '1' | '2'
   let H = Array.from({ length: DOT }, () => Array(N).fill(null));
   let V = Array.from({ length: N }, () => Array(DOT).fill(null));
   let B = Array.from({ length: N }, () => Array(N).fill(null));
@@ -2587,57 +2641,7 @@ function runDots(opponent, live) {
   function render() {
     const boxCount = B.flat().filter(v => v === '1').length;
     const boxCountOpp = B.flat().filter(v => v === '2').length;
-    const cellSize = 56, lineLen = cellSize - 12;
-    let html = `<div style="width:100%;text-align:center;">
-      <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;font-size:0.8rem;font-weight:700;">
-        <span style="color:#5b3df0;">You: ${isLive ? (myChip === '1' ? boxCount : boxCountOpp) : boxCount}</span>
-        <span style="color:#f0a742;">${opponent.name}: ${isLive ? (myChip === '1' ? boxCountOpp : boxCount) : boxCountOpp}</span>
-      </div>
-      <div style="font-size:0.8rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:10px;">
-        ${gameOver ? 'Game over' : (myTurn ? 'Your Turn — draw a line' : opponent.name + "'s Turn")}
-      </div>
-      <div style="display:inline-block;position:relative;padding:6px;">`;
-
-    // Render dots and lines using CSS grid
-    for (let r = 0; r < DOT; r++) {
-      html += `<div style="display:flex;align-items:center;">`;
-      for (let c = 0; c < DOT; c++) {
-        html += `<div style="width:10px;height:10px;border-radius:50%;background:#5b3df0;"></div>`;
-        if (c < N) {
-          const lineVal = H[r][c];
-          const cls = lineVal ? ('player' + lineVal) : '';
-          const clickable = !gameOver && myTurn && !lineVal && !isAdjacentBoxComplete('H', r, c);
-          html += `<div class="dots-line-h ${cls}" data-type="H" data-r="${r}" data-c="${c}" style="width:${lineLen}px;"></div>`;
-        }
-      }
-      html += `</div>`;
-      if (r < N) {
-        html += `<div style="display:flex;align-items:center;">`;
-        for (let c = 0; c < DOT; c++) {
-          if (c < N) {
-            const vVal = V[r][c];
-            const vCls = vVal ? ('player' + vVal) : '';
-            html += `<div class="dots-line-v ${vCls}" data-type="V" data-r="${r}" data-c="${c}" style="height:${lineLen}px;margin:6px 0;"></div>`;
-          }
-          if (c < DOT - 1) {
-            const boxVal = B[r][c];
-            const boxCls = boxVal ? ('player' + boxVal) : '';
-            html += `<div class="dots-cell ${boxCls}" style="width:${cellSize}px;height:${cellSize}px;margin:0;"></div>`;
-          } else {
-            const boxVal = B[r][N-1];
-            const boxCls = boxVal ? ('player' + boxVal) : '';
-            html += `<div class="dots-cell ${boxCls}" style="width:${cellSize}px;height:${cellSize}px;margin:0;"></div>`;
-            html += `<div style="width:10px;height:10px;border-radius:50%;background:#5b3df0;"></div>`;
-          }
-        }
-        html += `</div>`;
-      }
-    }
-    // Fix layout: rebuild more simply
-    html += `</div></div>`;
-
-    // Simpler approach - build with grid
+    const cellSize = 56;
     let gridHtml = `<div style="display:inline-grid;grid-template-columns:10px repeat(${N}, ${cellSize}px 10px);grid-template-rows:10px repeat(${N}, ${cellSize}px 10px);gap:0;position:relative;">`;
     for (let r = 0; r < DOT; r++) {
       for (let c = 0; c < DOT; c++) {
@@ -2689,11 +2693,6 @@ function runDots(opponent, live) {
     }
   }
 
-  function isAdjacentBoxComplete(type, r, c) {
-    // Not needed for gameplay, always allow line
-    return false;
-  }
-
   async function drawLine(type, r, c) {
     if (gameOver) return;
     if (type === 'H') {
@@ -2740,10 +2739,8 @@ function runDots(opponent, live) {
     for (let r = 0; r < DOT; r++) for (let c = 0; c < N; c++) if (!H[r][c]) legal.push({ type: 'H', r, c });
     for (let r = 0; r < N; r++) for (let c = 0; c < DOT; c++) if (!V[r][c]) legal.push({ type: 'V', r, c });
     if (legal.length === 0) return;
-    // Try to complete a box
     let pick = legal[Math.floor(Math.random() * legal.length)];
     for (const move of legal) {
-      const savedH = H, savedV = V;
       if (move.type === 'H') H[move.r][move.c] = oppChip;
       else V[move.r][move.c] = oppChip;
       let completes = false;
@@ -2787,13 +2784,13 @@ function runDots(opponent, live) {
   render();
 }
 
-// ===== NEW GAME: MEMORY GRID PRO (20 cards, live + bot) =====
+// ===== GAME: MEMORY GRID PRO (live + bot) =====
 function runMemoryLarge(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
   const isLive = !!live;
   const SYMBOLS = ['◆','●','▲','■','★','✦','♠','♥','♦','♣'];
-  const DECK = [...SYMBOLS, ...SYMBOLS]; // 20 cards
+  const DECK = [...SYMBOLS, ...SYMBOLS];
   let cards = DECK.sort(() => Math.random() - 0.5).map((s, i) => ({ sym: s, flipped: false, matched: false, id: i }));
   let flipped = [], lock = false, playerPairs = 0, botPairs = 0, turn = 'you';
   let gameOver = false;
@@ -2882,18 +2879,13 @@ function runMemoryLarge(opponent, live) {
         cards = newState.cards;
         turn = (turnState === myRole) ? 'you' : 'bot';
         render();
-        const mine = cards.filter(c => c.matched && c.matchedBy === myChipId()).length;
-        // Just trigger render, let game logic continue via realtime
       }
     });
   }
   render();
 }
 
-// helper (unused placeholder to avoid runtime errors in live path)
-function myChipId() { return myRole || 'player1'; }
-
-// ===== NEW GAME: WORD SCRAMBLE (live + bot) =====
+// ===== GAME: WORD SCRAMBLE (live + bot) =====
 function runScramble(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -2933,10 +2925,8 @@ function runScramble(opponent, live) {
     </div>`;
     document.getElementById('scramble-submit')?.addEventListener('click', submit);
     document.getElementById('scramble-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
-    // Bot attempts after delay
     setTimeout(() => {
       if (!gameOver && current < TOTAL) {
-        // bot has a chance to score this round
         if (Math.random() < 0.55) { oppScore++; }
       }
     }, 5000);
@@ -2962,21 +2952,17 @@ function runScramble(opponent, live) {
   render();
 }
 
-// ===== NEW GAME: BATTLESHIP MINI (live + bot) =====
+// ===== GAME: BATTLESHIP MINI (live + bot) =====
 function runBattleship(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
   const isLive = !!live;
   const N = 5;
-  // Ships for each player: list of {cells: [{r,c}], hits:Set}
-  // Since we can't easily sync hidden ships with realtime jsonb, we use a deterministic
-  // seeding approach: each player has 4 ships (2x1,3x1,2x1,1x1) at random but stored in state.
-  // For simplicity in live mode, we'll pre-place ships from a shared state.
   let myShips = null, oppShips = null;
-  let myShots = Array.from({ length: N }, () => Array(N).fill(null)); // 'hit' | 'miss'
+  let myShots = Array.from({ length: N }, () => Array(N).fill(null));
   let gameOver = false;
   let myTurn = isLive ? (myRole === 'player1') : true;
-  const SHIPS = [3, 2, 2, 1]; // sizes
+  const SHIPS = [3, 2, 2, 1];
   const TOTAL_HITS = SHIPS.reduce((a,b) => a+b, 0);
   let myHits = 0, oppHits = 0;
 
@@ -3075,15 +3061,10 @@ function runBattleship(opponent, live) {
   function botFire() {
     if (gameOver) return;
     const available = [];
-    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
-      // Bot has its own tracking of shots on my board
-      available.push({ r, c });
-    }
-    // Bot tracks its own shots with a separate array
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) available.push({ r, c });
     if (!botFire.shots) botFire.shots = Array.from({ length: N }, () => Array(N).fill(false));
     const remaining = available.filter(p => !botFire.shots[p.r][p.c]);
     if (remaining.length === 0) return;
-    // Slight smartness: prefer neighbours of previous hits
     let pick = remaining[Math.floor(Math.random() * remaining.length)];
     const wasHit = myShips.some(s => s.cells.some(cell => cell.r === pick.r && cell.c === pick.c));
     if (wasHit) oppHits++;
@@ -3111,7 +3092,7 @@ function runBattleship(opponent, live) {
   render();
 }
 
-// ===== NEW GAME: ODD ONE OUT (bot only) =====
+// ===== GAME: ODD ONE OUT (bot only) =====
 function runOddOne(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3147,7 +3128,6 @@ function runOddOne(opponent, live) {
         if (gameOver) return;
         const i = parseInt(el.dataset.i);
         if (i === oddIdx) myScore++;
-        // bot scores occasionally
         if (Math.random() < 0.55) oppScore++;
         current++;
         if (current >= TOTAL) return finish();
@@ -3155,7 +3135,6 @@ function runOddOne(opponent, live) {
         render();
       });
     });
-    // Bot timer
     setTimeout(() => {
       if (!gameOver && current < TOTAL) { if (Math.random() < 0.5) oppScore++; }
     }, 3500);
@@ -3171,7 +3150,7 @@ function runOddOne(opponent, live) {
   render();
 }
 
-// ===== NEW GAME: REACTION DUEL (bot only) =====
+// ===== GAME: REACTION DUEL (bot only) =====
 function runReaction(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3209,7 +3188,6 @@ function runReaction(opponent, live) {
       box.classList.add('done');
       box.textContent = 'Too early!';
       clearTimeout(timer);
-      // Opponent wins the round
       botTimes.push(300 + Math.floor(Math.random() * 200));
       current++;
       setTimeout(() => { if (current >= TOTAL) finish(); else renderIntro(); }, 900);
@@ -3218,7 +3196,6 @@ function runReaction(opponent, live) {
     if (boxState === 'go') {
       const t = Math.round(performance.now() - startTime);
       myTimes.push(t);
-      // Bot time between 250-500ms
       botTimes.push(250 + Math.floor(Math.random() * 250));
       boxState = 'done';
       box.classList.remove('go');
@@ -3240,7 +3217,7 @@ function runReaction(opponent, live) {
   renderIntro();
 }
 
-// ===== Existing games (bot-only): RPS, Dice, Memory, HigherLower, Tap, Simon, Whack, MathDuel, Reflex, Stroop, Recall, MathChain =====
+// ===== Existing bot games: RPS, Dice, Memory, HigherLower, Tap, Simon, Whack, MathDuel, Reflex, Stroop, Recall, MathChain =====
 
 function runRPS(opponent) {
   const stage = document.getElementById('arena-stage');
@@ -4335,7 +4312,7 @@ window.addEventListener('beforeunload', (e) => {
 window.endDuel = endDuel;
 
 routeOnLoad();
-console.log('SkillClash v6 loaded — 6 new live games, unified brand logo, all prior fixes preserved');
+console.log('SkillClash v7 loaded — animated SVG thumbnails on game cards, all v6 features preserved');
 </script>
 </body>
 </html>
