@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5b3df0"/>
+      <stop offset="1" stop-color="#7c5cf5"/>
+    </linearGradient>
+    <linearGradient id="boltGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e9e4ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="42" fill="url(#bgGrad)"/>
+  <g transform="translate(96, 96)">
+    <polygon points="14,-70 -44,4 -2,4 -16,70 42,-4 0,-4"
+             fill="url(#boltGrad)"/>
+  </g>
+</svg>
