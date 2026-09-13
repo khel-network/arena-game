@@ -415,10 +415,6 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .opp-side .arena-avatar { border-color: #f0a742; }
 .app-wrap .arena-name { font-weight: 600; font-size: 0.7rem; color: #161522; }
 .app-wrap .vs-badge { font-weight: 800; color: #918fa3; font-size: 1rem; }
-.app-wrap .arena-turn-indicator { text-align: center; margin-bottom: 10px; font-weight: 600; font-size: 0.85rem; }
-.app-wrap .turn-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
-.app-wrap .turn-dot-you { background: #5b3df0; }
-.app-wrap .turn-dot-opp { background: #f0a742; }
 .app-wrap .arena-stage { min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
 /* Game board styles */
@@ -716,6 +712,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   max-width: 400px; width: 100%;
   box-shadow: 0 24px 64px rgba(0,0,0,0.15);
   animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
 }
 .signup-terms-card h3 { font-family: 'Poppins', sans-serif; font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; color: #161522; }
 .signup-terms-card p.sub { font-size: 0.8rem; color: #5c5a6e; margin-bottom: 16px; line-height: 1.5; }
@@ -768,7 +765,6 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   background: none; border: none; font-size: 1.4rem;
   color: #918fa3; cursor: pointer; padding: 4px 8px;
 }
-.signup-terms-card { position: relative; }
 
 /* ===== MATCH INVITE POPUP ===== */
 .invite-popup-stack {
@@ -840,7 +836,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   position: absolute; bottom: 0; left: 0; height: 3px;
   background: linear-gradient(90deg, #5b3df0, #f0a742);
   border-radius: 0 0 0 4px;
-  animation: inviteTimer 5s linear forwards;
+  animation: inviteTimer 8s linear forwards;
 }
 @keyframes inviteTimer {
   from { width: 100%; }
@@ -1417,7 +1413,7 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 </div>
 </div>
 
-<!-- Game Arena -->
+<!-- Game Arena (v9.1: outer static turn indicator removed) -->
 <div id="game-arena-overlay" class="modal-overlay hidden">
 <div class="arena-card">
 <div class="arena-header">
@@ -1431,10 +1427,6 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 <img id="arena-opp-avatar" class="arena-avatar" src="" alt="Opponent" />
 <span id="arena-opp-name" class="arena-name">Opponent</span>
 </div>
-</div>
-<div class="arena-turn-indicator hidden" id="arena-turn-indicator">
-<span class="turn-dot turn-dot-you" id="turn-dot"></span>
-<span class="turn-text turn-text-you" id="turn-indicator-text">Your Turn</span>
 </div>
 <div id="arena-stage" class="arena-stage"></div>
 </div>
@@ -1521,10 +1513,17 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 
 <script>
 // ============================================================
-// SKILLCLASH - v9
-// Adds: signup terms checkbox, corrected legal pages,
-//       match invite popup system (Vishal challenged you).
-// All v8 features preserved exactly.
+// SKILLCLASH - v9.1
+// Fixes:
+//   1. Removed static outer "Your Turn" indicator — only the
+//      dynamic in-stage one now shows.
+//   2. Real-user A now polls game_sessions every second during
+//      matchmaking and checks again before bot fallback, so if
+//      real-user B accepts A's invite, A joins B in the real
+//      match instead of falling back to a bot.
+//   3. Invite TTL extended to 8s (SQL side).
+// All v9 features preserved: terms checkbox, corrected legal,
+// invite popup system.
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -1534,7 +1533,7 @@ const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const ZAPUPI_API_KEY = 'zapce570e671e2f07f3bc9837566a44ec4c';
 const SEARCH_SECONDS = 8;
 const CASHOUT_MIN = 150;
-const INVITE_SECONDS = 5;
+const INVITE_SECONDS = 8;
 
 const GAME_PRICES = {
   'tictactoe': { entry: 15, reward: 25 },
@@ -1573,7 +1572,6 @@ let gameRealtimeSubscription = null;
 let isRealPlayerMatch = false;
 let myRole = null;
 
-// v9: invite tracking
 let currentInviteId = null;
 let inviteSubscription = null;
 let inviteExpireTimer = null;
@@ -1809,7 +1807,6 @@ function closeSignupTerms() {
 }
 
 termsCheckboxLabel?.addEventListener('click', (e) => {
-  // Don't toggle if clicking a link inside
   if (e.target.tagName === 'A') return;
   setTimeout(() => {
     const checked = termsCheckbox.checked;
@@ -1818,7 +1815,6 @@ termsCheckboxLabel?.addEventListener('click', (e) => {
     signupGoogleBtn.classList.toggle('enabled', checked);
   }, 0);
 });
-// Also handle direct change on the hidden input
 termsCheckbox?.addEventListener('change', () => {
   const checked = termsCheckbox.checked;
   termsCheckboxLabel.classList.toggle('checked', checked);
@@ -1833,22 +1829,18 @@ signupTermsOverlay?.addEventListener('click', (e) => {
 
 function triggerGoogleLogin() {
   try {
-    // Save terms acceptance timestamp locally before redirect
     localStorage.setItem('skillclash_terms_accepted_at', new Date().toISOString());
     const redirectUrl = window.location.origin + window.location.pathname;
     client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl } });
   } catch (e) { alert('Login failed. Please try again.'); }
 }
 
-// Sign-up buttons open the terms modal first
 document.querySelectorAll('#nav-signup-btn, #hero-signup-btn, #closing-signup-btn').forEach(el =>
   el?.addEventListener('click', openSignupTerms)
 );
-// Login buttons go straight to Google (existing users already accepted)
 document.querySelectorAll('#nav-login-link, #hero-login-btn, #closing-login-btn').forEach(el =>
   el?.addEventListener('click', triggerGoogleLogin)
 );
-// The Google button inside the modal starts the actual OAuth flow
 signupGoogleBtn?.addEventListener('click', () => {
   if (termsCheckbox?.checked) triggerGoogleLogin();
 });
@@ -1874,7 +1866,6 @@ async function syncProfileToDatabase(name) {
   try { await client.from('users').upsert({ id: currentUser.id, email: currentUser.email, full_name: name, avatar_url: avatarUrl }); } catch (e) {}
 }
 
-// v9: record terms acceptance on the server after login
 async function recordTermsAcceptance() {
   const acceptedAt = localStorage.getItem('skillclash_terms_accepted_at');
   if (!acceptedAt || !currentUser) return;
@@ -2024,7 +2015,6 @@ logoutConfirmBtn?.addEventListener('click', async () => {
   gameTimers.forEach(t => clearInterval(t)); gameTimers = [];
   if (matchmakingInterval) clearInterval(matchmakingInterval);
   if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {} }
-  // v9: clean up invite tracking
   if (inviteSubscription) { try { await inviteSubscription.unsubscribe(); } catch (e) {} }
   if (inviteExpireTimer) clearTimeout(inviteExpireTimer);
   if (inviteExpireInterval) clearInterval(inviteExpireInterval);
@@ -2326,7 +2316,7 @@ document.getElementById('cashout-submit-btn')?.addEventListener('click', functio
 });
 
 /* ============================================================
-   GAME CATALOG (v8 thumbnails preserved exactly)
+   GAME CATALOG
    ============================================================ */
 const GAME_CATALOG = [
   { type: 'tictactoe',  name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25 },
@@ -2522,7 +2512,6 @@ async function launchArena(opponent, sessionInfo) {
   arenaOppName.textContent = opponent.name;
   arenaOppAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + opponent.seed;
   arenaOverlay.classList.remove('hidden');
-  document.getElementById('arena-turn-indicator')?.classList.remove('hidden');
 
   if (sessionInfo && sessionInfo.session_id) {
     activeGameSessionId = sessionInfo.session_id;
@@ -2578,7 +2567,7 @@ function launchLiveGame(type, opponent, sessionId, initialTurn) {
   }
 }
 
-// ===== GAME: TIC-TAC-TOE (live + bot) =====
+// ===== GAME: TIC-TAC-TOE (live + bot) — dynamic turn indicator only =====
 function runTicTacToe(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3417,8 +3406,7 @@ function runReaction(opponent, live) {
   renderIntro();
 }
 
-// ===== Existing bot games: RPS, Dice, Memory, HigherLower, Tap, Simon, Whack, MathDuel, Reflex, Stroop, Recall, MathChain =====
-
+// ===== Existing bot games =====
 function runRPS(opponent) {
   const stage = document.getElementById('arena-stage'); if (!stage) return;
   const choices = ['✊', '✋', '✌'];
@@ -3912,7 +3900,6 @@ async function endDuel(won, analysisText) {
 
   await recordMatch(activeGame.name, activeOpponent.name, won ? 'VICTORY' : 'DEFEAT', reward);
   updateUI();
-  document.getElementById('arena-turn-indicator')?.classList.add('hidden');
   const stage = document.getElementById('arena-stage');
   if (stage) {
     const rewardLine = won ? '+' + formatRupees(currentReward) + ' Awarded' : formatRupees(-currentEntryFee) + ' Stake Lost';
@@ -3950,7 +3937,6 @@ async function endDrawnMatch() {
     showWalletToast(currentEntryFee, 'credit', 'Draw refund — ' + activeGame.name);
   } catch (e) {}
   updateUI();
-  document.getElementById('arena-turn-indicator')?.classList.add('hidden');
   const stage = document.getElementById('arena-stage');
   if (stage) {
     stage.innerHTML = `<div class="result-card">
@@ -3971,7 +3957,53 @@ async function endDrawnMatch() {
   gameTimers = [];
 }
 
-// ===== MATCHMAKING (v9: also creates a match_invite) =====
+/* ============================================================
+   MATCHMAKING (v9.1)
+   - Broadcasts invite
+   - Polls game_sessions every second for accepted invite
+   - Final session check before bot fallback
+   ============================================================ */
+async function checkForLiveSession() {
+  // Returns the session row if there's an active game_session where we're a player
+  try {
+    const { data } = await client
+      .from('game_sessions')
+      .select('id, player1_id, player2_id, created_at')
+      .eq('game_type', activeGame.type)
+      .eq('status', 'active')
+      .or(`player1_id.eq.${currentUser.id},player2_id.eq.${currentUser.id}`)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data && data.player1_id && data.player2_id) return data;
+  } catch (e) {}
+  return null;
+}
+
+async function joinLiveSession(liveSession) {
+  // Cancel queue + invites, then launch arena against the real opponent
+  try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
+  if (currentInviteId) {
+    try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
+    currentInviteId = null;
+  }
+  if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
+
+  const oppId = liveSession.player1_id === currentUser.id ? liveSession.player2_id : liveSession.player1_id;
+  const { data: oppUser } = await client.from('users').select('full_name').eq('id', oppId).maybeSingle();
+
+  if (matchStatus) matchStatus.textContent = 'Real player joined. Starting match...';
+
+  setTimeout(() => {
+    if (matchOverlay) matchOverlay.classList.add('hidden');
+    inQueue = false;
+    launchArena(
+      { name: oppUser?.full_name || 'Player', seed: oppId, isBot: false, id: oppId },
+      { session_id: liveSession.id, you_are: liveSession.player1_id === currentUser.id ? 'player1' : 'player2' }
+    );
+  }, 600);
+}
+
 async function beginMatchmaking() {
   inQueue = true;
   isGameActive = false;
@@ -4009,7 +4041,7 @@ async function beginMatchmaking() {
     await client.from('matchmaking_queue').upsert({ user_id: currentUser.id, game_type: activeGame.type });
   } catch (e) {}
 
-  // v9: broadcast a match_invite for others on the dashboard
+  // Broadcast invite for others to join
   try {
     const { data: invite } = await client.from('match_invites').insert({
       from_user_id: currentUser.id,
@@ -4037,6 +4069,19 @@ async function beginMatchmaking() {
     remaining = Math.max(0, TOTAL - searchTime);
     updateRing();
 
+    // v9.1: every second, first check if someone accepted our invite
+    if (!matched) {
+      const liveSession = await checkForLiveSession();
+      if (liveSession) {
+        matched = true;
+        clearInterval(matchmakingInterval);
+        matchmakingInterval = null;
+        joinLiveSession(liveSession);
+        return;
+      }
+    }
+
+    // Also try claim_opponent (matches us with others in queue)
     try {
       const { data: result, error } = await client.rpc('claim_opponent', {
         p_game_type: activeGame.type,
@@ -4050,7 +4095,6 @@ async function beginMatchmaking() {
         clearInterval(matchmakingInterval);
         matchmakingInterval = null;
 
-        // Cancel any open invite we broadcast
         if (currentInviteId) {
           try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
           currentInviteId = null;
@@ -4073,12 +4117,21 @@ async function beginMatchmaking() {
       }
     } catch (e) { console.error('Matchmaking error:', e); }
 
+    // Time's up
     if (searchTime >= TOTAL && !matched) {
       clearInterval(matchmakingInterval);
       matchmakingInterval = null;
 
+      // v9.1: FINAL check — did someone accept our invite?
+      const finalSession = await checkForLiveSession();
+      if (finalSession) {
+        matched = true;
+        joinLiveSession(finalSession);
+        return;
+      }
+
+      // Truly no real opponent → fall back to bot
       try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
-      // Cancel our invite since we're going bot
       if (currentInviteId) {
         try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
         currentInviteId = null;
@@ -4116,7 +4169,6 @@ cancelMatchBtn?.addEventListener('click', async () => {
   if (matchOverlay) matchOverlay.classList.add('hidden');
   if (currentUser && was) {
     await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
-    // v9: cancel broadcast invite
     if (currentInviteId) {
       try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
       currentInviteId = null;
@@ -4183,11 +4235,7 @@ function startPresenceHeartbeat() {
 }
 
 /* ============================================================
-   v9: MATCH INVITE POPUP SYSTEM
-   - Listens to match_invites realtime inserts
-   - Shows a small 5-second popup to any authenticated user
-     who isn't already in a game or queue
-   - Join → accept_match_invite RPC → create game session
+   MATCH INVITE POPUP SYSTEM
    ============================================================ */
 async function subscribeToInvites() {
   if (inviteSubscription) {
@@ -4201,9 +4249,7 @@ async function subscribeToInvites() {
       (payload) => {
         const inv = payload.new;
         if (!inv) return;
-        // Ignore our own invites
         if (inv.from_user_id === currentUser?.id) return;
-        // Ignore if we're busy
         if (isGameActive || inQueue) return;
         if (shownInviteIds.has(inv.id)) return;
         shownInviteIds.add(inv.id);
@@ -4211,7 +4257,6 @@ async function subscribeToInvites() {
       })
     .subscribe();
 
-  // Cleanup expired invites once every 30s
   if (inviteExpireInterval) clearInterval(inviteExpireInterval);
   inviteExpireInterval = setInterval(async () => {
     try { await client.rpc('expire_old_invites'); } catch (e) {}
@@ -4220,7 +4265,6 @@ async function subscribeToInvites() {
 
 async function showInvitePopup(inv) {
   if (!invitePopupStack) return;
-  // Fetch the sender's name + avatar
   let fromName = 'A player';
   let fromSeed = inv.from_user_id;
   try {
@@ -4249,7 +4293,6 @@ async function showInvitePopup(inv) {
   `;
   invitePopupStack.appendChild(el);
 
-  // Auto-dismiss after INVITE_SECONDS
   const dismiss = () => {
     el.classList.add('out');
     setTimeout(() => el.remove(), 300);
@@ -4262,24 +4305,20 @@ async function showInvitePopup(inv) {
   });
   el.querySelector('[data-action="join"]')?.addEventListener('click', async () => {
     clearTimeout(autoTimer);
-    // Disable buttons to prevent double-click
     el.querySelectorAll('.invite-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
     await joinInvite(inv, el);
   });
 }
 
 async function joinInvite(inv, popupEl) {
-  // Guard: don't join if we're now busy
   if (isGameActive || inQueue) { showToast('You are already in a game.', 'error'); popupEl.remove(); return; }
 
-  // Check balance
   if (currentBalance < inv.entry_fee) {
     showToast('Insufficient balance. Need ' + formatRupees(inv.entry_fee), 'error');
     popupEl.remove();
     return;
   }
 
-  // Deduct stake + record debit
   try {
     await persistWalletDelta(-inv.entry_fee);
     await recordTransaction('Stake — ' + inv.game_name, 'debit', inv.entry_fee);
@@ -4290,12 +4329,10 @@ async function joinInvite(inv, popupEl) {
     return;
   }
 
-  // Call the RPC to atomically accept the invite
   try {
     const { data, error } = await client.rpc('accept_match_invite', { p_invite_id: inv.id });
     if (error) throw error;
     if (!data || !data.ok) {
-      // Refund on failure
       await persistWalletDelta(inv.entry_fee);
       await recordTransaction('Stake Refunded — invite unavailable', 'credit', inv.entry_fee);
       showWalletToast(inv.entry_fee, 'credit', 'Invite unavailable');
@@ -4304,10 +4341,8 @@ async function joinInvite(inv, popupEl) {
       return;
     }
 
-    // Fetch opponent's display name
     const { data: oppUser } = await client.from('users').select('full_name').eq('id', inv.from_user_id).maybeSingle();
 
-    // Set up active game and launch the arena
     activeGame = { name: inv.game_name, type: inv.game_type };
     currentEntryFee = inv.entry_fee;
     currentReward = inv.reward;
@@ -4315,17 +4350,14 @@ async function joinInvite(inv, popupEl) {
     myRole = 'player2';
     activeGameSessionId = data.session_id;
 
-    // Dismiss popup
     popupEl.classList.add('out');
     setTimeout(() => popupEl.remove(), 300);
 
-    // Launch the shared live game
     launchArena(
       { name: oppUser?.full_name || 'Player', seed: inv.from_user_id, isBot: false, id: inv.from_user_id },
       { session_id: data.session_id, you_are: 'player2' }
     );
   } catch (e) {
-    // Refund on error
     try {
       await persistWalletDelta(inv.entry_fee);
       await recordTransaction('Stake Refunded — invite error', 'credit', inv.entry_fee);
@@ -4458,7 +4490,6 @@ async function initDashboard() {
     currentUser = session.user;
     if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '—';
     await loadUserName();
-    // v9: record terms acceptance if pending
     await recordTermsAcceptance();
     await loadWallet();
     await loadTransactions();
@@ -4466,7 +4497,6 @@ async function initDashboard() {
     await loadReferralInfo();
     updateUI();
     startPresenceHeartbeat();
-    // v9: listen for match invites
     subscribeToInvites();
     document.getElementById('page-landing').style.display = 'none';
     document.getElementById('page-container').style.display = 'none';
@@ -4496,7 +4526,7 @@ window.addEventListener('beforeunload', (e) => {
 window.endDuel = endDuel;
 
 routeOnLoad();
-console.log('SkillClash v9 loaded — signup terms gate, corrected legal pages, match invite popup system; all v8 features preserved');
+console.log('SkillClash v9.1 loaded — real-invite detection during matchmaking, single turn indicator, invite TTL = 8s');
 </script>
 </body>
 </html>
