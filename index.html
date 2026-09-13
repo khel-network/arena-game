@@ -702,6 +702,158 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .chat-input-row button { padding: 10px 18px; background: linear-gradient(135deg, #5b3df0, #7c5cf5); color: #fff; border-radius: 100px; font-weight: 700; font-size: 0.8rem; transition: 0.2s; white-space: nowrap; flex-shrink: 0; }
 .chat-input-row button:hover { transform: translateY(-1px); }
 .chat-input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== SIGNUP TERMS MODAL ===== */
+.signup-terms-overlay {
+  position: fixed; inset: 0; background: rgba(22,21,34,0.5);
+  backdrop-filter: blur(6px); display: none;
+  align-items: center; justify-content: center;
+  z-index: 5000; padding: 20px;
+}
+.signup-terms-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
+.signup-terms-card {
+  background: #fff; border-radius: 20px; padding: 24px 22px;
+  max-width: 400px; width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.15);
+  animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.signup-terms-card h3 { font-family: 'Poppins', sans-serif; font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; color: #161522; }
+.signup-terms-card p.sub { font-size: 0.8rem; color: #5c5a6e; margin-bottom: 16px; line-height: 1.5; }
+.signup-terms-check {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #fafafc; border: 1px solid #eee9f7;
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;
+  cursor: pointer; user-select: none;
+  transition: border-color .2s, background .2s;
+}
+.signup-terms-check:hover { border-color: #b8a8f0; background: #f6f3ff; }
+.signup-terms-check.checked { border-color: #5b3df0; background: #f3f0ff; }
+.signup-terms-check input { display: none; }
+.signup-terms-check .box {
+  width: 22px; height: 22px; min-width: 22px;
+  border-radius: 6px; border: 2px solid #c8bfe8;
+  background: #fff; display: flex; align-items: center; justify-content: center;
+  transition: background .15s, border-color .15s;
+  margin-top: 1px;
+}
+.signup-terms-check.checked .box {
+  background: linear-gradient(135deg, #5b3df0, #7c5cf5);
+  border-color: #5b3df0;
+}
+.signup-terms-check .box svg { width: 14px; height: 14px; opacity: 0; transition: opacity .15s; color: #fff; }
+.signup-terms-check.checked .box svg { opacity: 1; }
+.signup-terms-check .label {
+  font-size: 0.8rem; color: #3a3850; line-height: 1.55;
+}
+.signup-terms-check .label a { color: #5b3df0; font-weight: 600; text-decoration: underline; }
+.btn-google-continue {
+  width: 100%; padding: 13px; border-radius: 12px;
+  background: #fff; border: 1.5px solid #e4e1f0;
+  font-weight: 700; font-size: 0.9rem; color: #161522;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: 0.2s; cursor: not-allowed; opacity: 0.5;
+}
+.btn-google-continue.enabled {
+  cursor: pointer; opacity: 1;
+}
+.btn-google-continue.enabled:hover {
+  border-color: #5b3df0; background: #faf8ff;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(91,61,240,0.15);
+}
+.btn-google-continue svg { width: 18px; height: 18px; }
+.signup-terms-card .hint { font-size: 0.68rem; color: #918fa3; text-align: center; margin-top: 10px; }
+.signup-terms-card .close-x {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none; font-size: 1.4rem;
+  color: #918fa3; cursor: pointer; padding: 4px 8px;
+}
+.signup-terms-card { position: relative; }
+
+/* ===== MATCH INVITE POPUP ===== */
+.invite-popup-stack {
+  position: fixed;
+  top: 82px;
+  right: 14px;
+  z-index: 9997;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 320px;
+  pointer-events: none;
+}
+.invite-popup {
+  background: rgba(255,255,255,0.98);
+  backdrop-filter: blur(14px);
+  border: 1px solid #e9e5f5;
+  border-radius: 16px;
+  padding: 14px 16px 14px 14px;
+  box-shadow: 0 12px 32px rgba(20,15,50,0.15);
+  animation: inviteIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+}
+@keyframes inviteIn {
+  from { opacity: 0; transform: translateX(60px) scale(0.95); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+.invite-popup.out { opacity: 0; transform: translateX(60px); transition: 0.3s ease; }
+.invite-popup::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: linear-gradient(180deg, #5b3df0, #f0a742);
+}
+.invite-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.invite-avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid #5b3df0; object-fit: cover;
+}
+.invite-text {
+  flex: 1; font-size: 0.78rem; color: #161522; line-height: 1.35;
+}
+.invite-text strong { font-weight: 800; color: #161522; }
+.invite-text small {
+  display: block; color: #5c5a6e; font-size: 0.68rem; margin-top: 2px;
+}
+.invite-actions {
+  display: flex; gap: 8px;
+}
+.invite-btn {
+  flex: 1; padding: 8px 12px;
+  border-radius: 10px; font-weight: 700; font-size: 0.75rem;
+  transition: 0.2s; cursor: pointer;
+}
+.invite-btn.join {
+  background: linear-gradient(135deg, #5b3df0, #7c5cf5);
+  color: #fff; border: none;
+  box-shadow: 0 4px 12px rgba(91,61,240,0.25);
+}
+.invite-btn.join:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(91,61,240,0.35); }
+.invite-btn.skip {
+  background: transparent; border: 1px solid #e4e1f0; color: #5c5a6e;
+}
+.invite-btn.skip:hover { background: #f5f3fc; }
+.invite-timer {
+  position: absolute; bottom: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, #5b3df0, #f0a742);
+  border-radius: 0 0 0 4px;
+  animation: inviteTimer 5s linear forwards;
+}
+@keyframes inviteTimer {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+@media (max-width:640px) {
+  .invite-popup-stack { top: 72px; right: 8px; max-width: 280px; }
+  .invite-popup { padding: 12px 14px; }
+  .invite-avatar { width: 32px; height: 32px; }
+  .invite-text { font-size: 0.72rem; }
+  .invite-btn { font-size: 0.7rem; padding: 7px 10px; }
+}
 </style>
 </head>
 <body>
@@ -883,7 +1035,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 <div class="section-eyebrow-pill">FAQ</div>
 <h2 class="section-title">Got Questions? We got <span class="grad-text">answers.</span></h2>
 <div class="faq-list" style="margin-top:10px;">
-<details class="faq-item"><summary>Is SkillClash really free to play? <span class="plus">+</span></summary><p>Yes. There are no entry fees anywhere on the platform — every duel and challenge is free to join. Rewards come as ₹, badges, and leaderboard rank.</p></details>
+<details class="faq-item"><summary>Is SkillClash really free to play? <span class="plus">+</span></summary><p>SkillClash is a skill-based gaming platform for users 18 and above. Games have small entry stakes that go into the match pool, and winners receive the reward shown on each game card. Your first signup includes a ₹50 welcome balance.</p></details>
 <details class="faq-item"><summary>How fast does the leaderboard update? <span class="plus">+</span></summary><p>Instantly. The moment a match ends, your ₹, rank, and match history sync in real time.</p></details>
 <details class="faq-item"><summary>How does the anti-cheat system work? <span class="plus">+</span></summary><p>In-house anti-cheat and behaviour checks flag suspicious activity; confirmed rule-breaking results in a suspension.</p></details>
 <details class="faq-item"><summary>Is my profile data secure? <span class="plus">+</span></summary><p>Yes. Accounts are protected with encrypted sign-in and your match history is only visible to you.</p></details>
@@ -963,6 +1115,34 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 
 <!-- ===== GENERAL TOAST ===== -->
 <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+
+<!-- ===== MATCH INVITE POPUPS ===== -->
+<div id="invite-popup-stack" class="invite-popup-stack" aria-live="polite"></div>
+
+<!-- ===== SIGNUP TERMS MODAL ===== -->
+<div id="signup-terms-overlay" class="signup-terms-overlay">
+  <div class="signup-terms-card">
+    <button class="close-x" id="signup-terms-close" aria-label="Close">&times;</button>
+    <h3>Before you continue</h3>
+    <p class="sub">SkillClash is a skill-based gaming platform. Please confirm you meet the requirements.</p>
+
+    <label class="signup-terms-check" id="terms-checkbox-label">
+      <input type="checkbox" id="terms-checkbox" />
+      <span class="box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+      </span>
+      <span class="label">
+        I am 18 or older, I agree to the <a href="terms.html" target="_blank" onclick="event.stopPropagation()">Terms of Use</a> and <a href="privacy.html" target="_blank" onclick="event.stopPropagation()">Privacy Policy</a>, and I understand this is a skill-based gaming platform.
+      </span>
+    </label>
+
+    <button class="btn-google-continue" id="signup-google-btn" disabled>
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/></svg>
+      Continue with Google
+    </button>
+    <p class="hint">We use Google to verify your identity. No passwords stored.</p>
+  </div>
+</div>
 
 <!-- ===== DASHBOARD ===== -->
 <div id="dashboard" class="app-wrap hidden">
@@ -1341,9 +1521,10 @@ Secure payment via <strong>ZapUPI</strong> • UPI ID: <span class="upi-id-highl
 
 <script>
 // ============================================================
-// SKILLCLASH - v8
-// Updates: dark minimal line-art thumbnails for all 21 games
-// Everything else identical to v6 (games, wallet, 2P, toasts, etc.)
+// SKILLCLASH - v9
+// Adds: signup terms checkbox, corrected legal pages,
+//       match invite popup system (Vishal challenged you).
+// All v8 features preserved exactly.
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -1353,6 +1534,7 @@ const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const ZAPUPI_API_KEY = 'zapce570e671e2f07f3bc9837566a44ec4c';
 const SEARCH_SECONDS = 8;
 const CASHOUT_MIN = 150;
+const INVITE_SECONDS = 5;
 
 const GAME_PRICES = {
   'tictactoe': { entry: 15, reward: 25 },
@@ -1390,6 +1572,13 @@ let activeGameSessionId = null;
 let gameRealtimeSubscription = null;
 let isRealPlayerMatch = false;
 let myRole = null;
+
+// v9: invite tracking
+let currentInviteId = null;
+let inviteSubscription = null;
+let inviteExpireTimer = null;
+let inviteExpireInterval = null;
+const shownInviteIds = new Set();
 
 const balanceEl = document.getElementById('balance-value');
 const playerNameEl = document.getElementById('player-name');
@@ -1431,6 +1620,7 @@ const arenaStage = document.getElementById('arena-stage');
 const txModal = document.getElementById('transaction-modal');
 const txModalClose = document.getElementById('tx-modal-close');
 const txListContainer = document.getElementById('tx-list-container');
+const invitePopupStack = document.getElementById('invite-popup-stack');
 
 // ===== WALLET SIDE TOAST =====
 function showWalletToast(amount, type, reason) {
@@ -1500,9 +1690,76 @@ function showPage(type) {
       <p style="font-size:0.7rem; color:#918fa3; margin-top:12px;">AI assistant • Your feedback helps us improve</p>
     `,
     contact: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Contact Us</h1><p>We'd love to hear from you.</p><h2>Email</h2><p><strong>General Inquiries:</strong> support@skillclash.in</p><p><strong>Partnerships:</strong> partnerships@skillclash.in</p><h2>Community</h2><ul><li><strong>Discord:</strong> discord.gg/skillclash</li><li><strong>Twitter:</strong> @skillclash</li></ul><h2>Support Hours</h2><p>24×7, 365 days a year.</p>`,
-    terms: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Terms &amp; Conditions</h1><p><strong>Last Updated: January 2026</strong></p><h2>1. Acceptance of Terms</h2><p>By using SkillClash, you agree to these Terms &amp; Conditions.</p><h2>2. Eligibility</h2><p>You must be at least 18 years old to use SkillClash.</p><h2>3. Account</h2><p>You are responsible for maintaining the security of your account.</p><h2>4. FairPlay Policy</h2><p>Any form of cheating, hacking, or exploiting will result in permanent account suspension.</p><h2>5. User Conduct</h2><p>You agree to respect other players and not use offensive language.</p><h2>6. Intellectual Property</h2><p>All content on SkillClash is the property of SkillClash Technologies.</p>`,
-    privacy: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Privacy Policy</h1><p><strong>Last Updated: January 2026</strong></p><h2>1. Information We Collect</h2><ul><li><strong>Google Account:</strong> Email and name</li><li><strong>Game Data:</strong> Match history, scores</li><li><strong>Usage Data:</strong> How you interact with our platform</li></ul><h2>2. How We Use Your Information</h2><ul><li>To provide and improve our games</li><li>To maintain leaderboards</li></ul><h2>3. Data Security</h2><p>Your information is encrypted and stored securely.</p><h2>4. Contact</h2><p>privacy@skillclash.in</p>`,
-    disclaimer: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button><h1>Disclaimer</h1><p><strong>Last Updated: January 2026</strong></p><h2>1. Skill-Based Gaming</h2><p>SkillClash is a <strong>skill-based gaming platform</strong> where outcomes depend on player skill.</p><h2>2. No Real Money Gambling</h2><p>SkillClash does not involve real money gambling.</p><h2>3. 18+ Only</h2><p>Our platform is strictly for users aged 18 and above.</p><h2>4. Play Responsibly</h2><p>We encourage responsible gaming.</p><h2>5. Legal Compliance</h2><p>SkillClash complies with all applicable Indian laws.</p>`
+    terms: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
+<h1>Terms &amp; Conditions</h1>
+<p><strong>Last Updated: January 2026</strong></p>
+<h2>1. Acceptance of Terms</h2>
+<p>By creating an account and using SkillClash ("the Platform"), you agree to be bound by these Terms &amp; Conditions. If you do not agree, please do not use the Platform.</p>
+<h2>2. Eligibility</h2>
+<p>You must be at least 18 years of age to create an account, participate in matches, or make any payment on SkillClash. By using the Platform you confirm that you meet this requirement. Accounts found to belong to minors will be suspended and any balance forfeited.</p>
+<h2>3. Skill-Based Gaming</h2>
+<p>SkillClash hosts skill-based games where outcomes are determined predominantly by the skill, reaction time, and mental ability of players — not by chance alone. Players pay a small entry stake into a match pool. Winners receive the reward shown on each game card. All amounts shown on the Platform are in Indian Rupees (₹).</p>
+<h2>4. Account &amp; Security</h2>
+<p>You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs on your account. Notify us immediately at support@skillclash.in if you suspect unauthorised access.</p>
+<h2>5. Payments &amp; Withdrawals</h2>
+<p>Payments are processed through our payment gateway partner. Deposits are credited to your in-app wallet after confirmation. Withdrawals require a minimum balance of ₹150 and are processed within 7–8 business hours after verification. All transactions are final once credited to the wallet. You are responsible for any applicable taxes on your winnings.</p>
+<h2>6. FairPlay Policy</h2>
+<p>Any form of cheating, hacking, using scripts, exploiting bugs, colluding with other players, or attempting to manipulate match outcomes will result in permanent suspension of your account and forfeiture of any balance. We run automated anti-cheat and behaviour checks.</p>
+<h2>7. User Conduct</h2>
+<p>You agree to interact respectfully with other players and not to use offensive language, harass other users, or attempt to abuse the referral program or bonus system.</p>
+<h2>8. State Restrictions</h2>
+<p>Participation in paid skill-based games is not permitted in certain Indian states as per local regulations. It is your responsibility to confirm that your jurisdiction permits skill-based paid gaming before you play. SkillClash is not liable for violations caused by users in restricted jurisdictions.</p>
+<h2>9. Limitation of Liability</h2>
+<p>SkillClash provides the Platform on an "as is" basis. We are not liable for losses arising from network issues, device failures, third-party payment delays, or actions taken by other players.</p>
+<h2>10. Changes to Terms</h2>
+<p>We may update these Terms from time to time. Continued use of the Platform after changes constitutes acceptance of the revised Terms.</p>
+<h2>11. Contact</h2>
+<p>For questions about these Terms, email support@skillclash.in.</p>`,
+    privacy: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
+<h1>Privacy Policy</h1>
+<p><strong>Last Updated: January 2026</strong></p>
+<h2>1. Information We Collect</h2>
+<ul>
+<li><strong>Google Account:</strong> Your name, email address, and profile picture provided when you sign in with Google.</li>
+<li><strong>Game Data:</strong> Match history, scores, in-game stats, and wallet transactions.</li>
+<li><strong>Usage Data:</strong> How you interact with the Platform, including device type, browser, IP address, and general location (city-level).</li>
+<li><strong>Payment Data:</strong> Transaction IDs and UPI IDs used for payments. We do not store card details or UPI PINs.</li>
+</ul>
+<h2>2. How We Use Your Information</h2>
+<ul>
+<li>To provide, operate, and improve our games and services.</li>
+<li>To maintain leaderboards, matchmaking, and match history.</li>
+<li>To process payments, withdrawals, and referral bonuses.</li>
+<li>To detect fraud, cheating, and abuse.</li>
+<li>To send important service updates and, with your consent, marketing messages.</li>
+</ul>
+<h2>3. Data Sharing</h2>
+<p>We do not sell your personal data. We share data only with trusted service providers (payment gateways, authentication) strictly to operate the Platform, and when required by law.</p>
+<h2>4. Data Security</h2>
+<p>Your information is encrypted in transit and stored securely. Access is restricted to authorised personnel only.</p>
+<h2>5. Your Rights</h2>
+<p>You may request access to, correction of, or deletion of your personal data by emailing privacy@skillclash.in. Some data (like transaction records) may be retained as required by law.</p>
+<h2>6. Children</h2>
+<p>SkillClash is strictly for users aged 18 and above. We do not knowingly collect data from anyone under 18.</p>
+<h2>7. Contact</h2>
+<p>For privacy-related questions, email privacy@skillclash.in.</p>`,
+    disclaimer: `<button class="back-link" onclick="hidePageToPrevious()"><i class="fas fa-arrow-left"></i> Back</button>
+<h1>Disclaimer</h1>
+<p><strong>Last Updated: January 2026</strong></p>
+<h2>1. Skill-Based Gaming</h2>
+<p>SkillClash is a <strong>skill-based gaming platform</strong>. Outcomes of every match depend predominantly on the player's skill, reaction time, and mental ability — not chance. The Platform is not a gambling or betting service.</p>
+<h2>2. 18+ Only</h2>
+<p>Our Platform is strictly for users aged 18 and above. By using SkillClash you confirm you meet this requirement.</p>
+<h2>3. State Restrictions</h2>
+<p>Skill-based paid gaming is not permitted in certain Indian states. It is the user's sole responsibility to check whether paid skill-based gaming is legal in their jurisdiction before participating. SkillClash does not encourage or facilitate play from restricted jurisdictions.</p>
+<h2>4. Play Responsibly</h2>
+<p>We encourage responsible gaming. Set personal limits, take regular breaks, and never play with money you cannot afford to lose. If gaming is affecting your wellbeing, please seek help from a qualified professional.</p>
+<h2>5. No Guarantees</h2>
+<p>Rewards and outcomes depend entirely on your skill and the performance of your opponents. SkillClash makes no guarantee of earnings or winnings.</p>
+<h2>6. Third-Party Services</h2>
+<p>Payments are handled by third-party gateways. SkillClash is not responsible for delays or issues caused by these providers.</p>
+<h2>7. Legal Compliance</h2>
+<p>SkillClash complies with applicable Indian laws. Users are responsible for ensuring their own compliance with local regulations.</p>`
   };
   content.innerHTML = pages[type] || '<h1>Page Not Found</h1>';
   container.style.display = 'block';
@@ -1538,16 +1795,63 @@ function hidePageToLandingAndScroll(sectionId) {
   setTimeout(() => { const el = document.getElementById(sectionId); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 300);
 }
 
-// ===== AUTH =====
+// ===== AUTH (v9: terms checkbox gate) =====
+const signupTermsOverlay = document.getElementById('signup-terms-overlay');
+const termsCheckbox = document.getElementById('terms-checkbox');
+const termsCheckboxLabel = document.getElementById('terms-checkbox-label');
+const signupGoogleBtn = document.getElementById('signup-google-btn');
+
+function openSignupTerms() {
+  signupTermsOverlay.classList.add('show');
+}
+function closeSignupTerms() {
+  signupTermsOverlay.classList.remove('show');
+}
+
+termsCheckboxLabel?.addEventListener('click', (e) => {
+  // Don't toggle if clicking a link inside
+  if (e.target.tagName === 'A') return;
+  setTimeout(() => {
+    const checked = termsCheckbox.checked;
+    termsCheckboxLabel.classList.toggle('checked', checked);
+    signupGoogleBtn.disabled = !checked;
+    signupGoogleBtn.classList.toggle('enabled', checked);
+  }, 0);
+});
+// Also handle direct change on the hidden input
+termsCheckbox?.addEventListener('change', () => {
+  const checked = termsCheckbox.checked;
+  termsCheckboxLabel.classList.toggle('checked', checked);
+  signupGoogleBtn.disabled = !checked;
+  signupGoogleBtn.classList.toggle('enabled', checked);
+});
+
+document.getElementById('signup-terms-close')?.addEventListener('click', closeSignupTerms);
+signupTermsOverlay?.addEventListener('click', (e) => {
+  if (e.target === signupTermsOverlay) closeSignupTerms();
+});
+
 function triggerGoogleLogin() {
   try {
+    // Save terms acceptance timestamp locally before redirect
+    localStorage.setItem('skillclash_terms_accepted_at', new Date().toISOString());
     const redirectUrl = window.location.origin + window.location.pathname;
     client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl } });
   } catch (e) { alert('Login failed. Please try again.'); }
 }
 
-document.querySelectorAll('#nav-signup-btn, #hero-signup-btn, #closing-signup-btn').forEach(el => el?.addEventListener('click', triggerGoogleLogin));
-document.querySelectorAll('#nav-login-link, #hero-login-btn, #closing-login-btn').forEach(el => el?.addEventListener('click', triggerGoogleLogin));
+// Sign-up buttons open the terms modal first
+document.querySelectorAll('#nav-signup-btn, #hero-signup-btn, #closing-signup-btn').forEach(el =>
+  el?.addEventListener('click', openSignupTerms)
+);
+// Login buttons go straight to Google (existing users already accepted)
+document.querySelectorAll('#nav-login-link, #hero-login-btn, #closing-login-btn').forEach(el =>
+  el?.addEventListener('click', triggerGoogleLogin)
+);
+// The Google button inside the modal starts the actual OAuth flow
+signupGoogleBtn?.addEventListener('click', () => {
+  if (termsCheckbox?.checked) triggerGoogleLogin();
+});
 
 document.getElementById('menu-toggle-btn')?.addEventListener('click', function() {
   document.getElementById('mobile-menu')?.classList.toggle('open');
@@ -1568,6 +1872,19 @@ async function loadUserName() {
 async function syncProfileToDatabase(name) {
   const avatarUrl = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(name);
   try { await client.from('users').upsert({ id: currentUser.id, email: currentUser.email, full_name: name, avatar_url: avatarUrl }); } catch (e) {}
+}
+
+// v9: record terms acceptance on the server after login
+async function recordTermsAcceptance() {
+  const acceptedAt = localStorage.getItem('skillclash_terms_accepted_at');
+  if (!acceptedAt || !currentUser) return;
+  try {
+    await client.from('users').update({
+      terms_accepted_at: acceptedAt,
+      age_confirmed: true
+    }).eq('id', currentUser.id);
+    localStorage.removeItem('skillclash_terms_accepted_at');
+  } catch (e) {}
 }
 
 function setUserDisplayName(name) {
@@ -1707,6 +2024,14 @@ logoutConfirmBtn?.addEventListener('click', async () => {
   gameTimers.forEach(t => clearInterval(t)); gameTimers = [];
   if (matchmakingInterval) clearInterval(matchmakingInterval);
   if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {} }
+  // v9: clean up invite tracking
+  if (inviteSubscription) { try { await inviteSubscription.unsubscribe(); } catch (e) {} }
+  if (inviteExpireTimer) clearTimeout(inviteExpireTimer);
+  if (inviteExpireInterval) clearInterval(inviteExpireInterval);
+  if (currentInviteId && currentUser) {
+    try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('from_user_id', currentUser.id); } catch (e) {}
+  }
+  currentInviteId = null;
   await client.auth.signOut();
   logoutConfirmBtn.disabled = false;
   logoutConfirmOverlay?.classList.add('hidden');
@@ -2001,18 +2326,7 @@ document.getElementById('cashout-submit-btn')?.addEventListener('click', functio
 });
 
 /* ============================================================
-   GAME CATALOG
-   ============================================================
-   Each game object controls the card. Fields you can edit:
-     name    → title shown on card
-     desc    → subtitle
-     badge   → tiny pill top-left of thumbnail
-     entry   → stake ₹
-     reward  → win payout ₹
-     thumbnail → OPTIONAL image URL. If set, it renders as <img>.
-                 If not set, a dark SVG line-art thumbnail is
-                 generated automatically from the game's type.
-   To swap a thumbnail later: set `thumbnail: 'https://...'`.
+   GAME CATALOG (v8 thumbnails preserved exactly)
    ============================================================ */
 const GAME_CATALOG = [
   { type: 'tictactoe',  name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25 },
@@ -2038,26 +2352,10 @@ const GAME_CATALOG = [
   { type: 'battleship', name: 'Battleship Mini', desc: '5x5 grid. Find all 4 hidden ships first.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 }
 ];
 
-// ---------------------------------------------------------------------------
-// Thumbnail engine — dark, adult "competitive esports" look.
-// Each game gets an inline SVG line-art icon keyed to its badge/category,
-// wrapped in a moody charcoal gradient card with a soft accent glow.
-// No image files, no emoji, no children's-app pastel look.
-// ---------------------------------------------------------------------------
-
-// Accent colour per category — this is what gives each thumbnail its identity.
 const CATEGORY_ACCENT = {
-  STRATEGY: '#8b6ef5',
-  CLASSIC:  '#f0a83e',
-  LUCK:     '#f2c94c',
-  BRAIN:    '#4fd1e0',
-  LOGIC:    '#f5567c',
-  WORD:     '#4be3a0',
-  SPEED:    '#ff7a45',
-  MEMORY:   '#b98cf7',
-  REFLEX:   '#ff5d73',
-  VISION:   '#4fe0c4',
-  MATH:     '#6f8dff'
+  STRATEGY: '#8b6ef5', CLASSIC: '#f0a83e', LUCK: '#f2c94c', BRAIN: '#4fd1e0',
+  LOGIC: '#f5567c', WORD: '#4be3a0', SPEED: '#ff7a45', MEMORY: '#b98cf7',
+  REFLEX: '#ff5d73', VISION: '#4fe0c4', MATH: '#6f8dff'
 };
 const INK = '#f2f0ff';
 
@@ -2090,148 +2388,28 @@ function squareGrid(cols, rows, cell, gap, highlightIndex, accent) {
   return out;
 }
 
-// One icon builder per game "type". Every icon lives in a -30..30 box.
 const ICONS = {
-  tictactoe: (a) => `
-    ${el.line(-9,-26,-9,26)}${el.line(9,-26,9,26)}
-    ${el.line(-26,-9,26,-9)}${el.line(-26,9,26,9)}
-    <g stroke="${a}">${el.line(-22,-22,-13,-13)}${el.line(-13,-22,-22,-13)}</g>
-    ${el.circle(19.5,19.5,6,`stroke="${a}" fill="none"`)}
-  `,
-  connect4: (a) => `
-    ${el.rect(-24,-24,48,52,6,'fill="none"')}
-    ${el.line(-8,-24,-8,28)}${el.line(8,-24,8,28)}
-    ${el.circle(-16,16,6,`fill="${a}" stroke="none"`)}
-    ${el.circle(0,4,6,`fill="${INK}" stroke="none"`)}
-    ${el.circle(16,16,6,`fill="${a}" stroke="none"`)}
-    ${el.circle(0,-15,6,`stroke="${a}" stroke-dasharray="2 3" fill="none"`)}
-  `,
-  nim: (a) => `
-    ${el.line(-24,6,-24,24)}${el.line(-19,6,-19,24)}${el.line(-14,6,-14,24)}${el.line(-9,6,-9,24)}
-    ${el.line(3,10,3,24)}${el.line(9,10,9,24)}
-    <g stroke="${a}">${el.line(21,-4,21,24)}</g>
-    <g stroke="${a}">${el.line(4,-22,17,-9)}</g>
-    ${el.circle(18,-8,2,`fill="${a}" stroke="none"`)}
-  `,
-  dots: (a) => `
-    ${[-20,0,20].map(x=>[-20,0,20].map(y=>el.circle(x,y,2.3,`fill="${INK}" stroke="none"`)).join('')).join('')}
-    ${el.rect(-20,-20,20,20,0,`fill="${a}" fill-opacity="0.25" stroke="none"`)}
-    <g stroke="${a}">${el.line(-20,-20,0,-20)}${el.line(-20,-20,-20,0)}${el.line(0,-20,0,0)}${el.line(-20,0,0,0)}</g>
-  `,
-  rps: (a) => `
-    <g transform="translate(-13,9)">${el.poly('-8,-14 6,-14 13,0 6,14 -8,14 -15,0', `fill="none" stroke="${INK}"`)}</g>
-    <g transform="translate(14,9)">${el.line(-9,-9,9,9)}${el.line(9,-9,-9,9)}</g>
-    <g transform="translate(0,-15)">${el.rect(-11,-11,22,22,3,`fill="none" stroke="${a}"`)}</g>
-  `,
-  dice: (a) => `
-    ${el.rect(-23,-7,20,20,4,`fill="none" stroke="${INK}"`)}
-    ${el.circle(-18,-2,1.6,`fill="${INK}" stroke="none"`)}${el.circle(-8,-2,1.6,`fill="${INK}" stroke="none"`)}
-    ${el.circle(-18,8,1.6,`fill="${INK}" stroke="none"`)}${el.circle(-8,8,1.6,`fill="${INK}" stroke="none"`)}
-    ${el.rect(-3,-19,20,20,4,`fill="none" stroke="${a}"`)}
-    ${el.circle(7,-9,1.6,`fill="${a}" stroke="none"`)}
-    ${el.circle(2,-14,1.6,`fill="${a}" stroke="none"`)}${el.circle(12,-14,1.6,`fill="${a}" stroke="none"`)}
-    ${el.circle(2,-4,1.6,`fill="${a}" stroke="none"`)}${el.circle(12,-4,1.6,`fill="${a}" stroke="none"`)}
-    <g stroke="${INK}" stroke-opacity="0.5">${el.line(-27,-18,-23,-22)}${el.line(-20,-24,-16,-27)}</g>
-  `,
-  memory: (a) => `
-    ${el.rect(-20,-17,26,34,4,`fill="none" stroke="${INK}"`)}
-    ${el.line(-14,-9,-1,-3)}${el.line(-14,3,-1,9)}
-    ${el.rect(-6,-20,26,34,4,`fill="none" stroke="${a}"`)}
-    ${el.poly('7,-10 13,-4 7,2 1,-4', `fill="${a}" stroke="none"`)}
-  `,
-  memorylg: (a) => {
-    const cols = 4, rows = 4, cell = 9, gap = 3.2;
-    const w = cols * cell + (cols - 1) * gap;
-    const h = rows * cell + (rows - 1) * gap;
-    const hi = [5, 10];
-    let squares = '';
-    const centers = [];
-    let i = 0;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const x = -w / 2 + c * (cell + gap);
-        const y = -h / 2 + r * (cell + gap);
-        const isHi = hi.includes(i);
-        squares += el.rect(x, y, cell, cell, 2, isHi
-          ? `fill="${a}" fill-opacity="0.85" stroke="none"`
-          : `fill="none" stroke="${INK}" stroke-opacity="0.5" stroke-width="1.4"`);
-        if (isHi) centers.push([x + cell / 2, y + cell / 2]);
-        i++;
-      }
-    }
-    const link = centers.length === 2
-      ? el.line(centers[0][0], centers[0][1], centers[1][0], centers[1][1], `stroke="${a}" stroke-dasharray="1.5 2.5"`)
-      : '';
-    return squares + link;
-  },
-  higherlower: (a) => `
-    ${el.path('M -11,-6 L 0,-19 L 11,-6', `fill="none" stroke="${INK}"`)}
-    ${el.path('M -11,7 L 0,20 L 11,7', `fill="none" stroke="${a}"`)}
-    ${el.circle(0,0,3,`fill="${a}" stroke="none"`)}
-  `,
-  scramble: (a) => `
-    <g transform="translate(-14,-4) rotate(-12)">${el.rect(-10,-10,20,20,4,`fill="none" stroke="${INK}"`)}${el.text(0,6,'A',`font-size="14" font-weight="700" fill="${INK}"`)}</g>
-    <g transform="translate(11,-8) rotate(9)">${el.rect(-10,-10,20,20,4,`fill="none" stroke="${a}"`)}${el.text(0,6,'B',`font-size="14" font-weight="700" fill="${a}"`)}</g>
-    <g transform="translate(2,17) rotate(-5)">${el.rect(-10,-10,20,20,4,`fill="none" stroke="${INK}"`)}${el.text(0,6,'C',`font-size="14" font-weight="700" fill="${INK}"`)}</g>
-  `,
-  tap: (a) => `
-    ${el.circle(0,0,22,`fill="none" stroke="${INK}" stroke-opacity="0.45"`)}
-    ${el.circle(0,0,13,`fill="none" stroke="${a}"`)}
-    ${el.circle(0,0,4,`fill="${a}" stroke="none"`)}
-    <g stroke="${INK}" stroke-opacity="0.6">
-      ${el.line(0,-27,0,-32)}${el.line(0,27,0,32)}${el.line(-27,0,-32,0)}${el.line(27,0,32,0)}
-    </g>
-  `,
-  simon: (a) => `
-    ${el.circle(0,0,24,`fill="none" stroke="${INK}"`)}
-    ${el.path('M 0,0 L 0,-24 A 24,24 0 0 1 24,0 Z', `fill="${a}" fill-opacity="0.85" stroke="none"`)}
-    ${el.line(-24,0,24,0)}${el.line(0,-24,0,24)}
-  `,
-  whack: (a) => `
-    ${[-16,0,16].map(x=>el.g(``, el.path(`M ${x-8},10 Q ${x},2 ${x+8},10`, `fill="none" stroke="${INK}" stroke-opacity="0.55"`))).join('')}
-    ${[-16,0,16].map(x=>el.g(``, el.path(`M ${x-8},-8 Q ${x},-16 ${x+8},-8`, `fill="none" stroke="${INK}" stroke-opacity="0.55"`))).join('')}
-    ${el.path('M -7,10 Q 0,-6 7,10 Z', `fill="${a}" stroke="none"`)}
-    ${el.circle(0,-2,13,`fill="none" stroke="${a}"`)}
-    ${el.line(-16,-2,-9,-2,`stroke="${a}"`)}${el.line(9,-2,16,-2,`stroke="${a}"`)}
-    ${el.line(0,-15,0,-9,`stroke="${a}"`)}
-  `,
-  reaction: (a) => `
-    ${el.circle(0,1,20,`fill="none" stroke="${INK}" stroke-opacity="0.45" stroke-dasharray="3 4"`)}
-    ${el.line(0,-19,0,-24)}
-    ${el.poly('-3,-15 7,-1 1,-1 6,15 -9,-1 -2,-1', `fill="${a}" stroke="none"`)}
-  `,
+  tictactoe: (a) => `${el.line(-9,-26,-9,26)}${el.line(9,-26,9,26)}${el.line(-26,-9,26,-9)}${el.line(-26,9,26,9)}<g stroke="${a}">${el.line(-22,-22,-13,-13)}${el.line(-13,-22,-22,-13)}</g>${el.circle(19.5,19.5,6,`stroke="${a}" fill="none"`)}`,
+  connect4: (a) => `${el.rect(-24,-24,48,52,6,'fill="none"')}${el.line(-8,-24,-8,28)}${el.line(8,-24,8,28)}${el.circle(-16,16,6,`fill="${a}" stroke="none"`)}${el.circle(0,4,6,`fill="${INK}" stroke="none"`)}${el.circle(16,16,6,`fill="${a}" stroke="none"`)}${el.circle(0,-15,6,`stroke="${a}" stroke-dasharray="2 3" fill="none"`)}`,
+  nim: (a) => `${el.line(-24,6,-24,24)}${el.line(-19,6,-19,24)}${el.line(-14,6,-14,24)}${el.line(-9,6,-9,24)}${el.line(3,10,3,24)}${el.line(9,10,9,24)}<g stroke="${a}">${el.line(21,-4,21,24)}</g><g stroke="${a}">${el.line(4,-22,17,-9)}</g>${el.circle(18,-8,2,`fill="${a}" stroke="none"`)}`,
+  dots: (a) => `${[-20,0,20].map(x=>[-20,0,20].map(y=>el.circle(x,y,2.3,`fill="${INK}" stroke="none"`)).join('')).join('')}${el.rect(-20,-20,20,20,0,`fill="${a}" fill-opacity="0.25" stroke="none"`)}<g stroke="${a}">${el.line(-20,-20,0,-20)}${el.line(-20,-20,-20,0)}${el.line(0,-20,0,0)}${el.line(-20,0,0,0)}</g>`,
+  rps: (a) => `<g transform="translate(-13,9)">${el.poly('-8,-14 6,-14 13,0 6,14 -8,14 -15,0', `fill="none" stroke="${INK}"`)}</g><g transform="translate(14,9)">${el.line(-9,-9,9,9)}${el.line(9,-9,-9,9)}</g><g transform="translate(0,-15)">${el.rect(-11,-11,22,22,3,`fill="none" stroke="${a}"`)}</g>`,
+  dice: (a) => `${el.rect(-23,-7,20,20,4,`fill="none" stroke="${INK}"`)}${el.circle(-18,-2,1.6,`fill="${INK}" stroke="none"`)}${el.circle(-8,-2,1.6,`fill="${INK}" stroke="none"`)}${el.circle(-18,8,1.6,`fill="${INK}" stroke="none"`)}${el.circle(-8,8,1.6,`fill="${INK}" stroke="none"`)}${el.rect(-3,-19,20,20,4,`fill="none" stroke="${a}"`)}${el.circle(7,-9,1.6,`fill="${a}" stroke="none"`)}${el.circle(2,-14,1.6,`fill="${a}" stroke="none"`)}${el.circle(12,-14,1.6,`fill="${a}" stroke="none"`)}${el.circle(2,-4,1.6,`fill="${a}" stroke="none"`)}${el.circle(12,-4,1.6,`fill="${a}" stroke="none"`)}<g stroke="${INK}" stroke-opacity="0.5">${el.line(-27,-18,-23,-22)}${el.line(-20,-24,-16,-27)}</g>`,
+  memory: (a) => `${el.rect(-20,-17,26,34,4,`fill="none" stroke="${INK}"`)}${el.line(-14,-9,-1,-3)}${el.line(-14,3,-1,9)}${el.rect(-6,-20,26,34,4,`fill="none" stroke="${a}"`)}${el.poly('7,-10 13,-4 7,2 1,-4', `fill="${a}" stroke="none"`)}`,
+  memorylg: (a) => { const cols=4,rows=4,cell=9,gap=3.2; const w=cols*cell+(cols-1)*gap; const h=rows*cell+(rows-1)*gap; const hi=[5,10]; let sq=''; const ctr=[]; let i=0; for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const x=-w/2+c*(cell+gap);const y=-h/2+r*(cell+gap);const isHi=hi.includes(i);sq+=el.rect(x,y,cell,cell,2,isHi?`fill="${a}" fill-opacity="0.85" stroke="none"`:`fill="none" stroke="${INK}" stroke-opacity="0.5" stroke-width="1.4"`);if(isHi)ctr.push([x+cell/2,y+cell/2]);i++;}const link=ctr.length===2?el.line(ctr[0][0],ctr[0][1],ctr[1][0],ctr[1][1],`stroke="${a}" stroke-dasharray="1.5 2.5"`):'';return sq+link; },
+  higherlower: (a) => `${el.path('M -11,-6 L 0,-19 L 11,-6', `fill="none" stroke="${INK}"`)}${el.path('M -11,7 L 0,20 L 11,7', `fill="none" stroke="${a}"`)}${el.circle(0,0,3,`fill="${a}" stroke="none"`)}`,
+  scramble: (a) => `<g transform="translate(-14,-4) rotate(-12)">${el.rect(-10,-10,20,20,4,`fill="none" stroke="${INK}"`)}${el.text(0,6,'A',`font-size="14" font-weight="700" fill="${INK}"`)}</g><g transform="translate(11,-8) rotate(9)">${el.rect(-10,-10,20,20,4,`fill="none" stroke="${a}"`)}${el.text(0,6,'B',`font-size="14" font-weight="700" fill="${a}"`)}</g><g transform="translate(2,17) rotate(-5)">${el.rect(-10,-10,20,20,4,`fill="none" stroke="${INK}"`)}${el.text(0,6,'C',`font-size="14" font-weight="700" fill="${INK}"`)}</g>`,
+  tap: (a) => `${el.circle(0,0,22,`fill="none" stroke="${INK}" stroke-opacity="0.45"`)}${el.circle(0,0,13,`fill="none" stroke="${a}"`)}${el.circle(0,0,4,`fill="${a}" stroke="none"`)}<g stroke="${INK}" stroke-opacity="0.6">${el.line(0,-27,0,-32)}${el.line(0,27,0,32)}${el.line(-27,0,-32,0)}${el.line(27,0,32,0)}</g>`,
+  simon: (a) => `${el.circle(0,0,24,`fill="none" stroke="${INK}"`)}${el.path('M 0,0 L 0,-24 A 24,24 0 0 1 24,0 Z', `fill="${a}" fill-opacity="0.85" stroke="none"`)}${el.line(-24,0,24,0)}${el.line(0,-24,0,24)}`,
+  whack: (a) => `${[-16,0,16].map(x=>el.g(``, el.path(`M ${x-8},10 Q ${x},2 ${x+8},10`, `fill="none" stroke="${INK}" stroke-opacity="0.55"`))).join('')}${[-16,0,16].map(x=>el.g(``, el.path(`M ${x-8},-8 Q ${x},-16 ${x+8},-8`, `fill="none" stroke="${INK}" stroke-opacity="0.55"`))).join('')}${el.path('M -7,10 Q 0,-6 7,10 Z', `fill="${a}" stroke="none"`)}${el.circle(0,-2,13,`fill="none" stroke="${a}"`)}${el.line(-16,-2,-9,-2,`stroke="${a}"`)}${el.line(9,-2,16,-2,`stroke="${a}"`)}${el.line(0,-15,0,-9,`stroke="${a}"`)}`,
+  reaction: (a) => `${el.circle(0,1,20,`fill="none" stroke="${INK}" stroke-opacity="0.45" stroke-dasharray="3 4"`)}${el.line(0,-19,0,-24)}${el.poly('-3,-15 7,-1 1,-1 6,15 -9,-1 -2,-1', `fill="${a}" stroke="none"`)}`,
   oddone: (a) => squareGrid(3,3,13,4,4,a),
-  mathduel: (a) => `
-    <g stroke="${INK}" stroke-width="3.4">${el.line(-22,-6,-8,-6)}${el.line(-22,6,-8,6)}</g>
-    <g stroke="${a}" stroke-width="3.4">${el.line(8,-14,8,14)}${el.line(-2,0,18,0)}</g>
-  `,
+  mathduel: (a) => `<g stroke="${INK}" stroke-width="3.4">${el.line(-22,-6,-8,-6)}${el.line(-22,6,-8,6)}</g><g stroke="${a}" stroke-width="3.4">${el.line(8,-14,8,14)}${el.line(-2,0,18,0)}</g>`,
   reflex: (a) => el.circle(0,0,11,`fill="${a}" fill-opacity="0.28" stroke="none"`) + squareGrid(3,3,13,4,4,a),
-  stroop: (a) => `
-    ${el.circle(-9,0,16,`fill="none" stroke="${INK}"`)}
-    ${el.circle(9,0,16,`fill="none" stroke="${a}"`)}
-    ${el.path('M 0,-13.8 A 16,16 0 0 1 0,13.8 A 16,16 0 0 1 0,-13.8 Z', `fill="${a}" fill-opacity="0.22" stroke="none"`)}
-  `,
-  recall: (a) => `
-    ${el.path('M -20,2 Q -10,-14 0,-6 T 20,6', `fill="none" stroke="${INK}" stroke-opacity="0.5" stroke-dasharray="2 3.5"`)}
-    ${el.circle(-20,2,9,`fill="none" stroke="${INK}"`)}${el.text(-20,5.5,'1',`font-size="10" font-weight="700" fill="${INK}"`)}
-    ${el.circle(0,-6,9,`fill="none" stroke="${a}"`)}${el.text(0,-2.5,'2',`font-size="10" font-weight="700" fill="${a}"`)}
-    ${el.circle(20,6,9,`fill="none" stroke="${INK}"`)}${el.text(20,9.5,'3',`font-size="10" font-weight="700" fill="${INK}"`)}
-  `,
-  mathchain: (a) => `
-    ${el.rect(-16,-8,17,16,8,`fill="none" stroke="${INK}"`)}
-    ${el.rect(-2,-8,17,16,8,`fill="none" stroke="${a}"`)}
-    ${el.line(17,-19,17,-11,`stroke="${a}"`)}${el.line(13,-15,21,-15,`stroke="${a}"`)}
-  `,
-  battleship: (a) => `
-    <g stroke="${INK}" stroke-opacity="0.4">
-      ${[-25,-15,-5,5,15,25].map(v=>el.line(v,-25,v,25)).join('')}
-      ${[-25,-15,-5,5,15,25].map(v=>el.line(-25,v,25,v)).join('')}
-    </g>
-    ${el.rect(-25,-15,20,9,2,`fill="${a}" fill-opacity="0.85" stroke="none"`)}
-    ${el.rect(-5,5,10,9,2,`fill="${INK}" fill-opacity="0.55" stroke="none"`)}
-    ${el.circle(15,-10,7,`fill="none" stroke="${a}"`)}
-    ${el.line(15,-20,15,-3,`stroke="${a}" stroke-width="1"`)}${el.line(5,-10,25,-10,`stroke="${a}" stroke-width="1"`)}
-  `
+  stroop: (a) => `${el.circle(-9,0,16,`fill="none" stroke="${INK}"`)}${el.circle(9,0,16,`fill="none" stroke="${a}"`)}${el.path('M 0,-13.8 A 16,16 0 0 1 0,13.8 A 16,16 0 0 1 0,-13.8 Z', `fill="${a}" fill-opacity="0.22" stroke="none"`)}`,
+  recall: (a) => `${el.path('M -20,2 Q -10,-14 0,-6 T 20,6', `fill="none" stroke="${INK}" stroke-opacity="0.5" stroke-dasharray="2 3.5"`)}${el.circle(-20,2,9,`fill="none" stroke="${INK}"`)}${el.text(-20,5.5,'1',`font-size="10" font-weight="700" fill="${INK}"`)}${el.circle(0,-6,9,`fill="none" stroke="${a}"`)}${el.text(0,-2.5,'2',`font-size="10" font-weight="700" fill="${a}"`)}${el.circle(20,6,9,`fill="none" stroke="${INK}"`)}${el.text(20,9.5,'3',`font-size="10" font-weight="700" fill="${INK}"`)}`,
+  mathchain: (a) => `${el.rect(-16,-8,17,16,8,`fill="none" stroke="${INK}"`)}${el.rect(-2,-8,17,16,8,`fill="none" stroke="${a}"`)}${el.line(17,-19,17,-11,`stroke="${a}"`)}${el.line(13,-15,21,-15,`stroke="${a}"`)}`,
+  battleship: (a) => `<g stroke="${INK}" stroke-opacity="0.4">${[-25,-15,-5,5,15,25].map(v=>el.line(v,-25,v,25)).join('')}${[-25,-15,-5,5,15,25].map(v=>el.line(-25,v,25,v)).join('')}</g>${el.rect(-25,-15,20,9,2,`fill="${a}" fill-opacity="0.85" stroke="none"`)}${el.rect(-5,5,10,9,2,`fill="${INK}" fill-opacity="0.55" stroke="none"`)}${el.circle(15,-10,7,`fill="none" stroke="${a}"`)}${el.line(15,-20,15,-3,`stroke="${a}" stroke-width="1"`)}${el.line(5,-10,25,-10,`stroke="${a}" stroke-width="1"`)}`
 };
 
 function buildThumbnail(game) {
@@ -2266,8 +2444,6 @@ function renderGameCards() {
   const grid = document.getElementById('gamesGrid');
   if (!grid) return;
   grid.innerHTML = GAME_CATALOG.map((g) => {
-    // If a game has a manual `thumbnail` URL, use it. Otherwise auto-generate
-    // the dark SVG line-art thumbnail from its type + badge.
     const src = g.thumbnail || buildThumbnail(g);
     return `<div class="game-card" data-category="${g.category}">
       <div class="card-media">
@@ -2644,9 +2820,7 @@ function runNim(opponent, live) {
         <div style="font-size:0.65rem;color:#918fa3;margin-top:4px;">Pile ${i+1}</div>
       </div>`;
     });
-    html += `</div>
-      <p style="font-size:0.75rem;color:#5c5a6e;margin-top:12px;">${totalStones} stones remaining · Take the last stone to win</p>
-    </div>`;
+    html += `</div><p style="font-size:0.75rem;color:#5c5a6e;margin-top:12px;">${totalStones} stones remaining · Take the last stone to win</p></div>`;
     stage.innerHTML = html;
     if (!gameOver && myTurn) {
       document.querySelectorAll('.nim-pile').forEach(pile => {
@@ -2664,13 +2838,7 @@ function runNim(opponent, live) {
     const maxTake = Math.min(2, piles[pileIdx]);
     let buttons = '';
     for (let t = 1; t <= maxTake; t++) buttons += `<button class="nim-take-btn" data-take="${t}">Take ${t}</button>`;
-    stage.innerHTML += `<div style="position:fixed;inset:0;background:rgba(22,21,34,0.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:2000;" id="nim-take-overlay">
-      <div class="modal-card" style="max-width:280px;text-align:center;">
-        <h3 style="margin-bottom:12px;">Pile ${pileIdx+1} has ${piles[pileIdx]} stones</h3>
-        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">${buttons}</div>
-        <button class="btn-cancel" id="nim-cancel" style="margin-top:12px;">Cancel</button>
-      </div>
-    </div>`;
+    stage.innerHTML += `<div style="position:fixed;inset:0;background:rgba(22,21,34,0.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:2000;" id="nim-take-overlay"><div class="modal-card" style="max-width:280px;text-align:center;"><h3 style="margin-bottom:12px;">Pile ${pileIdx+1} has ${piles[pileIdx]} stones</h3><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">${buttons}</div><button class="btn-cancel" id="nim-cancel" style="margin-top:12px;">Cancel</button></div></div>`;
     document.querySelectorAll('#nim-take-overlay .nim-take-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const t = parseInt(btn.dataset.take);
@@ -2678,9 +2846,7 @@ function runNim(opponent, live) {
         makeMove(pileIdx, t);
       });
     });
-    document.getElementById('nim-cancel')?.addEventListener('click', () => {
-      document.getElementById('nim-take-overlay').remove();
-    });
+    document.getElementById('nim-cancel')?.addEventListener('click', () => { document.getElementById('nim-take-overlay').remove(); });
   }
 
   async function makeMove(pileIdx, take) {
@@ -2689,12 +2855,7 @@ function runNim(opponent, live) {
     const total = piles.reduce((a,b) => a+b, 0);
     myTurn = false;
     render();
-    if (total === 0) {
-      gameOver = true;
-      if (isLive) await markSessionComplete(live.sessionId, currentUser.id);
-      setTimeout(() => endDuel(true, 'You took the last stone.'), 700);
-      return;
-    }
+    if (total === 0) { gameOver = true; if (isLive) await markSessionComplete(live.sessionId, currentUser.id); setTimeout(() => endDuel(true, 'You took the last stone.'), 700); return; }
     if (isLive) {
       const nextTurn = myRole === 'player1' ? 'player2' : 'player1';
       await pushSessionState(live.sessionId, { piles: [...piles] }, nextTurn);
@@ -2718,10 +2879,7 @@ function runNim(opponent, live) {
     }
     if (bestPile === -1) {
       const legal = [];
-      for (let i = 0; i < piles.length; i++) {
-        if (piles[i] >= 1) legal.push({ i, t: 1 });
-        if (piles[i] >= 2) legal.push({ i, t: 2 });
-      }
+      for (let i = 0; i < piles.length; i++) { if (piles[i] >= 1) legal.push({ i, t: 1 }); if (piles[i] >= 2) legal.push({ i, t: 2 }); }
       const pick = legal[Math.floor(Math.random() * legal.length)];
       bestPile = pick.i; bestTake = pick.t;
     }
@@ -2729,10 +2887,7 @@ function runNim(opponent, live) {
     const total = piles.reduce((a,b) => a+b, 0);
     myTurn = true;
     render();
-    if (total === 0) {
-      gameOver = true;
-      setTimeout(() => endDuel(false, 'Opponent took the last stone.'), 700);
-    }
+    if (total === 0) { gameOver = true; setTimeout(() => endDuel(false, 'Opponent took the last stone.'), 700); }
   }
 
   if (isLive) {
@@ -2768,10 +2923,7 @@ function runDots(opponent, live) {
   function checkBoxes() {
     let completed = 0;
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
-      if (!B[r][c] && H[r][c] && H[r+1][c] && V[r][c] && V[r][c+1]) {
-        B[r][c] = myTurn ? myChip : oppChip;
-        completed++;
-      }
+      if (!B[r][c] && H[r][c] && H[r+1][c] && V[r][c] && V[r][c+1]) { B[r][c] = myTurn ? myChip : oppChip; completed++; }
     }
     return completed;
   }
@@ -2784,62 +2936,36 @@ function runDots(opponent, live) {
     for (let r = 0; r < DOT; r++) {
       for (let c = 0; c < DOT; c++) {
         gridHtml += `<div style="grid-row:${r*2+1};grid-column:${c*2+1};width:10px;height:10px;border-radius:50%;background:#5b3df0;align-self:center;justify-self:center;"></div>`;
-        if (c < N) {
-          const val = H[r][c];
-          const cls = val ? ('player' + val) : '';
-          gridHtml += `<div class="dots-line-h ${cls}" data-type="H" data-r="${r}" data-c="${c}" style="grid-row:${r*2+1};grid-column:${c*2+2};align-self:center;"></div>`;
-        }
+        if (c < N) { const val = H[r][c]; const cls = val ? ('player' + val) : ''; gridHtml += `<div class="dots-line-h ${cls}" data-type="H" data-r="${r}" data-c="${c}" style="grid-row:${r*2+1};grid-column:${c*2+2};align-self:center;"></div>`; }
       }
       if (r < N) {
         for (let c = 0; c < DOT; c++) {
-          if (c < N) {
-            const val = V[r][c];
-            const cls = val ? ('player' + val) : '';
-            gridHtml += `<div class="dots-line-v ${cls}" data-type="V" data-r="${r}" data-c="${c}" style="grid-row:${r*2+2};grid-column:${c*2+1};justify-self:center;"></div>`;
-          }
-          if (c < N) {
-            const bval = B[r][c];
-            const bcls = bval ? ('player' + bval) : '';
-            gridHtml += `<div class="dots-cell ${bcls}" style="grid-row:${r*2+2};grid-column:${c*2+2};"></div>`;
-          }
+          if (c < N) { const val = V[r][c]; const cls = val ? ('player' + val) : ''; gridHtml += `<div class="dots-line-v ${cls}" data-type="V" data-r="${r}" data-c="${c}" style="grid-row:${r*2+2};grid-column:${c*2+1};justify-self:center;"></div>`; }
+          if (c < N) { const bval = B[r][c]; const bcls = bval ? ('player' + bval) : ''; gridHtml += `<div class="dots-cell ${bcls}" style="grid-row:${r*2+2};grid-column:${c*2+2};"></div>`; }
         }
       }
     }
     gridHtml += `</div>`;
-
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p>
       <div style="display:flex;justify-content:space-around;margin:8px 0;font-size:0.8rem;font-weight:700;">
         <span style="color:#5b3df0;">You: ${isLive ? (myChip === '1' ? boxCount : boxCountOpp) : boxCount}</span>
         <span style="color:#f0a742;">${opponent.name}: ${isLive ? (myChip === '1' ? boxCountOpp : boxCount) : boxCountOpp}</span>
       </div>
-      <div style="font-size:0.8rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:10px;">
-        ${gameOver ? 'Game over' : (myTurn ? 'Your Turn — draw a line' : opponent.name + "'s Turn")}
-      </div>
+      <div style="font-size:0.8rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:10px;">${gameOver ? 'Game over' : (myTurn ? 'Your Turn — draw a line' : opponent.name + "'s Turn")}</div>
       ${gridHtml}
     </div>`;
-
     if (!gameOver && myTurn) {
       document.querySelectorAll('.dots-line-h:not(.player1):not(.player2), .dots-line-v:not(.player1):not(.player2)').forEach(el => {
-        el.addEventListener('click', () => {
-          const type = el.dataset.type;
-          const r = parseInt(el.dataset.r);
-          const c = parseInt(el.dataset.c);
-          drawLine(type, r, c);
-        });
+        el.addEventListener('click', () => { drawLine(el.dataset.type, parseInt(el.dataset.r), parseInt(el.dataset.c)); });
       });
     }
   }
 
   async function drawLine(type, r, c) {
     if (gameOver) return;
-    if (type === 'H') {
-      if (H[r][c]) return;
-      H[r][c] = myTurn ? myChip : oppChip;
-    } else {
-      if (V[r][c]) return;
-      V[r][c] = myTurn ? myChip : oppChip;
-    }
+    if (type === 'H') { if (H[r][c]) return; H[r][c] = myTurn ? myChip : oppChip; }
+    else { if (V[r][c]) return; V[r][c] = myTurn ? myChip : oppChip; }
     const completed = checkBoxes();
     if (completed === 0) myTurn = false;
     render();
@@ -2862,12 +2988,8 @@ function runDots(opponent, live) {
       return;
     }
     if (!myTurn) {
-      if (isLive) {
-        const nextTurn = myRole === 'player1' ? 'player2' : 'player1';
-        await pushSessionState(live.sessionId, { H, V, B }, nextTurn);
-      } else {
-        setTimeout(botMove, 500 + Math.random() * 400);
-      }
+      if (isLive) { const nextTurn = myRole === 'player1' ? 'player2' : 'player1'; await pushSessionState(live.sessionId, { H, V, B }, nextTurn); }
+      else { setTimeout(botMove, 500 + Math.random() * 400); }
     }
   }
 
@@ -2879,18 +3001,13 @@ function runDots(opponent, live) {
     if (legal.length === 0) return;
     let pick = legal[Math.floor(Math.random() * legal.length)];
     for (const move of legal) {
-      if (move.type === 'H') H[move.r][move.c] = oppChip;
-      else V[move.r][move.c] = oppChip;
+      if (move.type === 'H') H[move.r][move.c] = oppChip; else V[move.r][move.c] = oppChip;
       let completes = false;
-      for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
-        if (!B[r][c] && H[r][c] && H[r+1][c] && V[r][c] && V[r][c+1]) completes = true;
-      }
-      if (move.type === 'H') H[move.r][move.c] = null;
-      else V[move.r][move.c] = null;
+      for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) { if (!B[r][c] && H[r][c] && H[r+1][c] && V[r][c] && V[r][c+1]) completes = true; }
+      if (move.type === 'H') H[move.r][move.c] = null; else V[move.r][move.c] = null;
       if (completes) { pick = move; break; }
     }
-    if (pick.type === 'H') H[pick.r][pick.c] = oppChip;
-    else V[pick.r][pick.c] = oppChip;
+    if (pick.type === 'H') H[pick.r][pick.c] = oppChip; else V[pick.r][pick.c] = oppChip;
     const completed = checkBoxes();
     if (completed === 0) myTurn = true;
     render();
@@ -2961,13 +3078,7 @@ function runMemoryLarge(opponent, live) {
               render();
               if (playerPairs + botPairs === SYMBOLS.length) return finish();
             } else {
-              setTimeout(() => {
-                cards[a].flipped = cards[b].flipped = false;
-                flipped = []; lock = false;
-                turn = 'bot';
-                render();
-                setTimeout(botPlay, 700);
-              }, 700);
+              setTimeout(() => { cards[a].flipped = cards[b].flipped = false; flipped = []; lock = false; turn = 'bot'; render(); setTimeout(botPlay, 700); }, 700);
             }
           }
         });
@@ -2994,11 +3105,7 @@ function runMemoryLarge(opponent, live) {
         if (playerPairs + botPairs === SYMBOLS.length) return finish();
         setTimeout(botPlay, 500);
       } else {
-        setTimeout(() => {
-          cards[pickA].flipped = cards[pickB].flipped = false;
-          turn = 'you';
-          render();
-        }, 700);
+        setTimeout(() => { cards[pickA].flipped = cards[pickB].flipped = false; turn = 'you'; render(); }, 700);
       }
     }, 700);
   }
@@ -3039,10 +3146,7 @@ function runScramble(opponent, live) {
     return out === w ? scramble(w) : out;
   }
 
-  function makeRound() {
-    word = WORDS[Math.floor(Math.random() * WORDS.length)];
-    scrambled = scramble(word);
-  }
+  function makeRound() { word = WORDS[Math.floor(Math.random() * WORDS.length)]; scrambled = scramble(word); }
 
   function render() {
     if (current >= TOTAL) return finish();
@@ -3061,11 +3165,7 @@ function runScramble(opponent, live) {
     </div>`;
     document.getElementById('scramble-submit')?.addEventListener('click', submit);
     document.getElementById('scramble-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
-    setTimeout(() => {
-      if (!gameOver && current < TOTAL) {
-        if (Math.random() < 0.55) { oppScore++; }
-      }
-    }, 5000);
+    setTimeout(() => { if (!gameOver && current < TOTAL) { if (Math.random() < 0.55) { oppScore++; } } }, 5000);
   }
 
   function submit() {
@@ -3115,19 +3215,10 @@ function runBattleship(opponent, live) {
         if (horiz && c + size > N) continue;
         if (!horiz && r + size > N) continue;
         let ok = true;
-        for (let k = 0; k < size; k++) {
-          const rr = horiz ? r : r + k;
-          const cc = horiz ? c + k : c;
-          if (grid[rr][cc] !== 0) { ok = false; break; }
-        }
+        for (let k = 0; k < size; k++) { const rr = horiz ? r : r + k; const cc = horiz ? c + k : c; if (grid[rr][cc] !== 0) { ok = false; break; } }
         if (!ok) continue;
         const cells = [];
-        for (let k = 0; k < size; k++) {
-          const rr = horiz ? r : r + k;
-          const cc = horiz ? c + k : c;
-          grid[rr][cc] = 1;
-          cells.push({ r: rr, c: cc });
-        }
+        for (let k = 0; k < size; k++) { const rr = horiz ? r : r + k; const cc = horiz ? c + k : c; grid[rr][cc] = 1; cells.push({ r: rr, c: cc }); }
         ships.push({ cells });
         placed = true;
       }
@@ -3140,12 +3231,10 @@ function runBattleship(opponent, live) {
 
   function render() {
     let gridHtml = '';
-    for (let r = 0; r < N; r++) {
-      for (let c = 0; c < N; c++) {
-        const shot = myShots[r][c];
-        const cls = shot === 'hit' ? 'hit' : shot === 'miss' ? 'miss' : '';
-        gridHtml += `<div class="bs-cell ${cls}" data-r="${r}" data-c="${c}">${shot === 'hit' ? '×' : shot === 'miss' ? '·' : ''}</div>`;
-      }
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const shot = myShots[r][c];
+      const cls = shot === 'hit' ? 'hit' : shot === 'miss' ? 'miss' : '';
+      gridHtml += `<div class="bs-cell ${cls}" data-r="${r}" data-c="${c}">${shot === 'hit' ? '×' : shot === 'miss' ? '·' : ''}</div>`;
     }
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p>
@@ -3153,18 +3242,12 @@ function runBattleship(opponent, live) {
         <div><div style="font-size:1rem;font-weight:800;color:#5b3df0;">${myHits}/${TOTAL_HITS}</div><div style="font-size:0.65rem;color:#5c5a6e;">Your hits</div></div>
         <div><div style="font-size:1rem;font-weight:800;color:#f0a742;">${oppHits}/${TOTAL_HITS}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div>
       </div>
-      <p style="font-size:0.8rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:8px;">
-        ${gameOver ? 'Game over' : (myTurn ? 'Your Turn — fire a shot' : opponent.name + "'s Turn")}
-      </p>
+      <p style="font-size:0.8rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:8px;">${gameOver ? 'Game over' : (myTurn ? 'Your Turn — fire a shot' : opponent.name + "'s Turn")}</p>
       <div class="bs-grid">${gridHtml}</div>
     </div>`;
     if (!gameOver && myTurn) {
       document.querySelectorAll('.bs-cell').forEach(el => {
-        el.addEventListener('click', () => {
-          const r = parseInt(el.dataset.r);
-          const c = parseInt(el.dataset.c);
-          fire(r, c);
-        });
+        el.addEventListener('click', () => { fire(parseInt(el.dataset.r), parseInt(el.dataset.c)); });
       });
     }
   }
@@ -3175,21 +3258,11 @@ function runBattleship(opponent, live) {
     const isHit = oppShips.some(s => s.cells.some(cell => cell.r === r && cell.c === c));
     myShots[r][c] = isHit ? 'hit' : 'miss';
     if (isHit) myHits++;
-    if (myHits >= TOTAL_HITS) {
-      gameOver = true;
-      render();
-      if (isLive) await markSessionComplete(live.sessionId, currentUser.id);
-      setTimeout(() => endDuel(true, `You sank all ships in ${countShots()} shots.`), 700);
-      return;
-    }
+    if (myHits >= TOTAL_HITS) { gameOver = true; render(); if (isLive) await markSessionComplete(live.sessionId, currentUser.id); setTimeout(() => endDuel(true, `You sank all ships in ${countShots()} shots.`), 700); return; }
     myTurn = false;
     render();
-    if (isLive) {
-      const nextTurn = myRole === 'player1' ? 'player2' : 'player1';
-      await pushSessionState(live.sessionId, { shots: myShots }, nextTurn);
-    } else {
-      setTimeout(botFire, 500 + Math.random() * 400);
-    }
+    if (isLive) { const nextTurn = myRole === 'player1' ? 'player2' : 'player1'; await pushSessionState(live.sessionId, { shots: myShots }, nextTurn); }
+    else { setTimeout(botFire, 500 + Math.random() * 400); }
   }
 
   function countShots() { return myShots.flat().filter(v => v).length; }
@@ -3207,11 +3280,7 @@ function runBattleship(opponent, live) {
     botFire.shots[pick.r][pick.c] = true;
     myTurn = true;
     render();
-    if (oppHits >= TOTAL_HITS) {
-      gameOver = true;
-      setTimeout(() => endDuel(false, `Opponent sank all your ships.`), 700);
-      return;
-    }
+    if (oppHits >= TOTAL_HITS) { gameOver = true; setTimeout(() => endDuel(false, `Opponent sank all your ships.`), 700); return; }
   }
 
   if (isLive) {
@@ -3271,9 +3340,7 @@ function runOddOne(opponent, live) {
         render();
       });
     });
-    setTimeout(() => {
-      if (!gameOver && current < TOTAL) { if (Math.random() < 0.5) oppScore++; }
-    }, 3500);
+    setTimeout(() => { if (!gameOver && current < TOTAL) { if (Math.random() < 0.5) oppScore++; } }, 3500);
   }
 
   function finish() {
@@ -3309,8 +3376,7 @@ function runReaction(opponent, live) {
     box.addEventListener('click', handleClick);
     timer = setTimeout(() => {
       boxState = 'go';
-      box.classList.remove('wait');
-      box.classList.add('go');
+      box.classList.remove('wait'); box.classList.add('go');
       box.textContent = 'TAP NOW!';
       startTime = performance.now();
     }, 1500 + Math.random() * 2500);
@@ -3320,8 +3386,7 @@ function runReaction(opponent, live) {
     const box = document.getElementById('react-box');
     if (!box) return;
     if (boxState === 'wait') {
-      box.classList.remove('wait');
-      box.classList.add('done');
+      box.classList.remove('wait'); box.classList.add('done');
       box.textContent = 'Too early!';
       clearTimeout(timer);
       botTimes.push(300 + Math.floor(Math.random() * 200));
@@ -3334,8 +3399,7 @@ function runReaction(opponent, live) {
       myTimes.push(t);
       botTimes.push(250 + Math.floor(Math.random() * 250));
       boxState = 'done';
-      box.classList.remove('go');
-      box.classList.add('done');
+      box.classList.remove('go'); box.classList.add('done');
       box.textContent = `${t}ms`;
       current++;
       setTimeout(() => { if (current >= TOTAL) finish(); else renderIntro(); }, 900);
@@ -3353,15 +3417,13 @@ function runReaction(opponent, live) {
   renderIntro();
 }
 
-// ===== Existing bot games =====
+// ===== Existing bot games: RPS, Dice, Memory, HigherLower, Tap, Simon, Whack, MathDuel, Reflex, Stroop, Recall, MathChain =====
 
 function runRPS(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const choices = ['✊', '✋', '✌'];
   let playerScore = 0, botScore = 0, roundOver = false, matchOver = false;
   const targetWins = 2;
-
   function render() {
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Best of 3</p>
@@ -3370,67 +3432,43 @@ function runRPS(opponent) {
         <div style="font-size:0.9rem;color:#918fa3;">VS</div>
         <div><div style="font-size:1.6rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div>
       </div>
-      <div class="rps-choices">
-        ${choices.map((c, i) => `<button class="rps-btn" data-i="${i}" ${roundOver || matchOver ? 'disabled' : ''}>${c}</button>`).join('')}
-      </div>
+      <div class="rps-choices">${choices.map((c, i) => `<button class="rps-btn" data-i="${i}" ${roundOver || matchOver ? 'disabled' : ''}>${c}</button>`).join('')}</div>
       <p style="font-size:0.75rem;color:#5c5a6e;">First to ${targetWins} wins</p>
     </div>`;
     if (!roundOver && !matchOver) {
-      document.querySelectorAll('.rps-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const i = parseInt(btn.dataset.i);
-          playRound(i);
-        });
-      });
+      document.querySelectorAll('.rps-btn').forEach(btn => { btn.addEventListener('click', () => playRound(parseInt(btn.dataset.i))); });
     }
   }
-
   function playRound(pick) {
     const botPick = Math.floor(Math.random() * 3);
     let result;
     if (pick === botPick) result = 0;
     else if ((pick === 0 && botPick === 2) || (pick === 1 && botPick === 0) || (pick === 2 && botPick === 1)) result = 1;
     else result = -1;
-    if (result === 1) playerScore++;
-    else if (result === -1) botScore++;
+    if (result === 1) playerScore++; else if (result === -1) botScore++;
     roundOver = true;
     const resultText = result === 1 ? 'You win this round' : result === -1 ? 'You lose this round' : 'Draw';
     const resultColor = result === 1 ? '#16c46b' : result === -1 ? '#e2555a' : '#5c5a6e';
-    stage.innerHTML = `<div style="width:100%;text-align:center;">
-      <div style="display:flex;justify-content:space-around;align-items:center;margin:14px 0;">
-        <div><div style="font-size:2.6rem;">${choices[pick]}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div>
-        <div style="font-size:0.9rem;color:#918fa3;">VS</div>
-        <div><div style="font-size:2.6rem;">${choices[botPick]}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div>
-      </div>
-      <p style="font-weight:700;color:${resultColor};margin:10px 0;">${resultText}</p>
-      <p style="font-size:0.8rem;color:#5c5a6e;">Score: You ${playerScore} – ${botScore} ${opponent.name}</p>
-    </div>`;
+    stage.innerHTML = `<div style="width:100%;text-align:center;"><div style="display:flex;justify-content:space-around;align-items:center;margin:14px 0;"><div><div style="font-size:2.6rem;">${choices[pick]}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;">VS</div><div><div style="font-size:2.6rem;">${choices[botPick]}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div></div><p style="font-weight:700;color:${resultColor};margin:10px 0;">${resultText}</p><p style="font-size:0.8rem;color:#5c5a6e;">Score: You ${playerScore} – ${botScore} ${opponent.name}</p></div>`;
     setTimeout(() => {
       if (playerScore >= targetWins) { matchOver = true; endDuel(true, 'You won the RPS duel.'); return; }
       if (botScore >= targetWins) { matchOver = true; endDuel(false, 'Opponent won the RPS duel.'); return; }
-      roundOver = false;
-      render();
+      roundOver = false; render();
     }, 1200);
   }
   render();
 }
 
 function runDice(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
   let playerRoll = null, botRoll = null, rolled = false;
-
   function render() {
     const pFace = playerRoll !== null ? faces[playerRoll - 1] : '⚄';
     const bFace = botRoll !== null ? faces[botRoll - 1] : '⚄';
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
-      <div class="dice-arena">
-        <div><div class="dice-face">${pFace}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div>
-        <div style="font-size:0.9rem;color:#918fa3;">VS</div>
-        <div><div class="dice-face">${bFace}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div>
-      </div>
+      <div class="dice-arena"><div><div class="dice-face">${pFace}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;">VS</div><div><div class="dice-face">${bFace}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div></div>
       ${!rolled ? `<button class="dice-roll-btn" id="dice-roll">Roll Dice</button>` : ''}
     </div>`;
     document.getElementById('dice-roll')?.addEventListener('click', () => {
@@ -3450,12 +3488,10 @@ function runDice(opponent) {
 }
 
 function runMemory(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const SYMBOLS = ['◆','●','▲','■','★','✦','♠','♥'];
   let cards = [...SYMBOLS, ...SYMBOLS].sort(() => Math.random() - 0.5).map((s, i) => ({ sym: s, flipped: false, matched: false, id: i }));
   let flipped = [], lock = false, playerPairs = 0, botPairs = 0, turn = 'you';
-
   function render() {
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}</p>
@@ -3472,32 +3508,22 @@ function runMemory(opponent) {
           const i = parseInt(el.dataset.i);
           if (cards[i].flipped || cards[i].matched || lock) return;
           cards[i].flipped = true;
-          flipped.push(i);
-          render();
+          flipped.push(i); render();
           if (flipped.length === 2) {
             lock = true;
             const [a, b] = flipped;
             if (cards[a].sym === cards[b].sym) {
-              cards[a].matched = cards[b].matched = true;
-              playerPairs++;
-              flipped = []; lock = false;
-              render();
+              cards[a].matched = cards[b].matched = true; playerPairs++;
+              flipped = []; lock = false; render();
               if (playerPairs + botPairs === SYMBOLS.length) return finish();
             } else {
-              setTimeout(() => {
-                cards[a].flipped = cards[b].flipped = false;
-                flipped = []; lock = false;
-                turn = 'bot';
-                render();
-                setTimeout(botPlay, 700);
-              }, 700);
+              setTimeout(() => { cards[a].flipped = cards[b].flipped = false; flipped = []; lock = false; turn = 'bot'; render(); setTimeout(botPlay, 700); }, 700);
             }
           }
         });
       });
     }
   }
-
   function botPlay() {
     if (turn !== 'bot') return;
     const unflipped = cards.map((c, i) => c.matched ? null : i).filter(v => v !== null && !cards[v].flipped);
@@ -3511,21 +3537,12 @@ function runMemory(opponent) {
     render();
     setTimeout(() => {
       if (cards[pickA].sym === cards[pickB].sym) {
-        cards[pickA].matched = cards[pickB].matched = true;
-        botPairs++;
-        render();
+        cards[pickA].matched = cards[pickB].matched = true; botPairs++; render();
         if (playerPairs + botPairs === SYMBOLS.length) return finish();
         setTimeout(botPlay, 500);
-      } else {
-        setTimeout(() => {
-          cards[pickA].flipped = cards[pickB].flipped = false;
-          turn = 'you';
-          render();
-        }, 700);
-      }
+      } else { setTimeout(() => { cards[pickA].flipped = cards[pickB].flipped = false; turn = 'you'; render(); }, 700); }
     }, 700);
   }
-
   function finish() {
     if (playerPairs > botPairs) endDuel(true, `You found ${playerPairs} pairs, opponent found ${botPairs}.`);
     else if (playerPairs < botPairs) endDuel(false, `Opponent found ${botPairs} pairs, you found ${playerPairs}.`);
@@ -3535,12 +3552,9 @@ function runMemory(opponent) {
 }
 
 function runHigherLower(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const secret = Math.floor(Math.random() * 100) + 1;
-  let attempts = 0, gameOver = false;
-  const log = [];
-
+  let attempts = 0, gameOver = false; const log = [];
   function render() {
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Guess 1–100</p>
@@ -3554,46 +3568,28 @@ function runHigherLower(opponent) {
     document.getElementById('hl-submit')?.addEventListener('click', guess);
     document.getElementById('hl-guess')?.addEventListener('keydown', e => { if (e.key === 'Enter') guess(); });
   }
-
   function guess() {
     if (gameOver) return;
     const input = document.getElementById('hl-guess');
     const val = parseInt(input.value);
     if (isNaN(val) || val < 1 || val > 100) return;
     attempts++;
-    if (val === secret) {
-      log.unshift({ text: `${val} — Correct.`, cls: 'correct' });
-      gameOver = true;
-      render();
-      setTimeout(() => endDuel(true, `You guessed ${secret} in ${attempts} tries.`), 800);
-      return;
-    }
+    if (val === secret) { log.unshift({ text: `${val} — Correct.`, cls: 'correct' }); gameOver = true; render(); setTimeout(() => endDuel(true, `You guessed ${secret} in ${attempts} tries.`), 800); return; }
     log.unshift({ text: `${val} — ${val < secret ? 'Too low' : 'Too high'}`, cls: val < secret ? 'high' : 'low' });
-    if (attempts >= 7) {
-      gameOver = true;
-      render();
-      setTimeout(() => endDuel(false, `Out of attempts. Number was ${secret}.`), 800);
-      return;
-    }
+    if (attempts >= 7) { gameOver = true; render(); setTimeout(() => endDuel(false, `Out of attempts. Number was ${secret}.`), 800); return; }
     render();
   }
   render();
 }
 
 function runTap(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   let myTaps = 0, botTaps = 0, running = false, timeLeft = 5, finished = false;
   let timer = null, botTimer = null;
-
   function render() {
     stage.innerHTML = `<div class="tap-arena">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · 5 seconds</p>
-      <div class="tap-scoreboard">
-        <div><div class="tap-score-value" style="color:#5b3df0;">${myTaps}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div>
-        <div style="font-size:0.9rem;color:#918fa3;align-self:center;">VS</div>
-        <div><div class="tap-score-value" style="color:#f0a742;">${botTaps}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div>
-      </div>
+      <div class="tap-scoreboard"><div><div class="tap-score-value" style="color:#5b3df0;">${myTaps}</div><div style="font-size:0.7rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;align-self:center;">VS</div><div><div class="tap-score-value" style="color:#f0a742;">${botTaps}</div><div style="font-size:0.7rem;color:#5c5a6e;">${opponent.name}</div></div></div>
       <div class="tap-timer">${timeLeft}s</div>
       ${!running && !finished ? '<button class="tap-btn-big" id="tap-start">Start</button>' : ''}
       ${running ? '<button class="tap-btn-big" id="tap-btn">TAP</button>' : ''}
@@ -3601,7 +3597,6 @@ function runTap(opponent) {
     document.getElementById('tap-start')?.addEventListener('click', start);
     document.getElementById('tap-btn')?.addEventListener('click', () => { if (running) { myTaps++; render(); } });
   }
-
   function start() {
     if (running) return;
     myTaps = 0; botTaps = 0; timeLeft = 5; running = true; finished = false;
@@ -3611,8 +3606,7 @@ function runTap(opponent) {
       timeLeft--;
       if (timeLeft <= 0) {
         clearInterval(timer); clearInterval(botTimer);
-        running = false; finished = true;
-        render();
+        running = false; finished = true; render();
         setTimeout(() => {
           if (myTaps > botTaps) endDuel(true, `You tapped ${myTaps} vs ${botTaps}.`);
           else if (myTaps < botTaps) endDuel(false, `You tapped ${myTaps}, opponent ${botTaps}.`);
@@ -3625,45 +3619,30 @@ function runTap(opponent) {
 }
 
 function runSimon(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const COLORS = ['#5b3df0','#f0a742','#16c46b','#e2555a'];
   let sequence = [], userInput = [], showing = false, level = 1, gameOver = false;
-
   function render() {
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Round ${level}</p>
       <p style="font-size:0.8rem;color:${showing ? '#f0a742' : '#5b3df0'};margin-bottom:8px;">${showing ? 'Watch the pattern…' : 'Your turn — repeat the pattern'}</p>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:240px;margin:0 auto;">
-        ${COLORS.map((c, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:14px;background:${c};opacity:0.5;border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}
-      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:240px;margin:0 auto;">${COLORS.map((c, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:14px;background:${c};opacity:0.5;border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}</div>
     </div>`;
     document.querySelectorAll('#arena-stage button[data-i]').forEach(btn => {
       btn.addEventListener('click', () => {
         if (showing || gameOver) return;
         const i = parseInt(btn.dataset.i);
         userInput.push(i);
-        btn.style.opacity = '1';
-        setTimeout(() => btn.style.opacity = '0.5', 180);
-        if (userInput[userInput.length - 1] !== sequence[userInput.length - 1]) {
-          gameOver = true;
-          setTimeout(() => endDuel(false, `You reached round ${level}.`), 500);
-          return;
-        }
-        if (userInput.length === sequence.length) {
-          level++;
-          userInput = [];
-          setTimeout(nextRound, 600);
-        }
+        btn.style.opacity = '1'; setTimeout(() => btn.style.opacity = '0.5', 180);
+        if (userInput[userInput.length - 1] !== sequence[userInput.length - 1]) { gameOver = true; setTimeout(() => endDuel(false, `You reached round ${level}.`), 500); return; }
+        if (userInput.length === sequence.length) { level++; userInput = []; setTimeout(nextRound, 600); }
       });
     });
   }
-
   function nextRound() {
     if (level > 5) { endDuel(true, 'You cleared 5 rounds.'); return; }
     sequence.push(Math.floor(Math.random() * 4));
-    showing = true;
-    render();
+    showing = true; render();
     let i = 0;
     const playNext = () => {
       if (i >= sequence.length) { showing = false; userInput = []; render(); return; }
@@ -3680,23 +3659,15 @@ function runSimon(opponent) {
 }
 
 function runWhack(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const TARGET = 15;
   let myScore = 0, botScore = 0, running = false, current = -1, gameOver = false;
   let moleTimer = null, botTimer = null;
-
   function render() {
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · First to ${TARGET}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;">
-        <div><div style="font-size:1.4rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div>
-        <div style="font-size:0.9rem;color:#918fa3;align-self:center;">VS</div>
-        <div><div style="font-size:1.4rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:8px auto;">
-        ${Array.from({length:9}).map((_, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:12px;background:${i===current ? '#5b3df0' : '#f0eef8'};border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}
-      </div>
+      <div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.4rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div style="font-size:0.9rem;color:#918fa3;align-self:center;">VS</div><div><div style="font-size:1.4rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:8px auto;">${Array.from({length:9}).map((_, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:12px;background:${i===current ? '#5b3df0' : '#f0eef8'};border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}</div>
       ${!running && !gameOver ? '<button class="dice-roll-btn" id="whack-start">Start</button>' : ''}
     </div>`;
     document.querySelectorAll('#arena-stage button[data-i]').forEach(btn => {
@@ -3708,23 +3679,12 @@ function runWhack(opponent) {
     });
     document.getElementById('whack-start')?.addEventListener('click', start);
   }
-
   function start() {
     if (running) return;
-    running = true; gameOver = false; myScore = 0; botScore = 0;
-    render();
-    moleTimer = setInterval(() => {
-      if (!running) return;
-      current = Math.floor(Math.random() * 9);
-      render();
-      setTimeout(() => { if (current !== -1) { current = -1; render(); } }, 700);
-    }, 800);
-    botTimer = setInterval(() => {
-      if (!running) return;
-      if (Math.random() < 0.4) { botScore++; render(); if (botScore >= TARGET) finish(false); }
-    }, 900);
+    running = true; gameOver = false; myScore = 0; botScore = 0; render();
+    moleTimer = setInterval(() => { if (!running) return; current = Math.floor(Math.random() * 9); render(); setTimeout(() => { if (current !== -1) { current = -1; render(); } }, 700); }, 800);
+    botTimer = setInterval(() => { if (!running) return; if (Math.random() < 0.4) { botScore++; render(); if (botScore >= TARGET) finish(false); } }, 900);
   }
-
   function finish(won) {
     running = false; gameOver = true;
     clearInterval(moleTimer); clearInterval(botTimer);
@@ -3735,12 +3695,10 @@ function runWhack(opponent) {
 }
 
 function runMathDuel(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const QUESTIONS = 5;
   let current = 0, myScore = 0, botScore = 0, gameOver = false;
   let a = 0, b = 0, op = '+', answer = 0;
-
   function makeQ() {
     const ops = ['+', '-', '×'];
     op = ops[Math.floor(Math.random() * ops.length)];
@@ -3748,65 +3706,46 @@ function runMathDuel(opponent) {
     else if (op === '-') { a = Math.floor(Math.random() * 20) + 10; b = Math.floor(Math.random() * 10) + 1; answer = a - b; }
     else { a = Math.floor(Math.random() * 9) + 2; b = Math.floor(Math.random() * 9) + 2; answer = a * b; }
   }
-
   function render() {
     if (current >= QUESTIONS) return finish();
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Question ${current + 1}/${QUESTIONS}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;">
-        <div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div>
-        <div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div>
-      </div>
+      <div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div>
       <div style="font-size:1.8rem;font-weight:800;margin:14px 0;">${a} ${op} ${b} = ?</div>
-      <div class="hl-input-row">
-        <input type="number" class="hl-input" id="md-input" placeholder="#">
-        <button class="hl-submit" id="md-submit">Submit</button>
-      </div>
+      <div class="hl-input-row"><input type="number" class="hl-input" id="md-input" placeholder="#"><button class="hl-submit" id="md-submit">Submit</button></div>
     </div>`;
     document.getElementById('md-submit')?.addEventListener('click', submit);
     document.getElementById('md-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
   }
-
   function submit() {
     if (gameOver) return;
-    const input = document.getElementById('md-input');
-    const val = parseInt(input.value);
+    const val = parseInt(document.getElementById('md-input').value);
     if (isNaN(val)) return;
     if (val === answer) myScore++;
     if (Math.random() < 0.6) botScore++;
     current++;
     if (current >= QUESTIONS) return finish();
-    makeQ();
-    render();
+    makeQ(); render();
   }
-
   function finish() {
     gameOver = true;
     if (myScore > botScore) endDuel(true, `You scored ${myScore}/${QUESTIONS}.`);
     else if (myScore < botScore) endDuel(false, `You scored ${myScore}, opponent ${botScore}.`);
     else endDrawnMatch();
   }
-  makeQ();
-  render();
+  makeQ(); render();
 }
 
 function runReflex(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const TARGET = 10;
   let myScore = 0, botScore = 0, current = -1, running = false, gameOver = false;
   let moleTimer = null, botTimer = null;
-
   function render() {
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · First to ${TARGET}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;">
-        <div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div>
-        <div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:260px;margin:8px auto;">
-        ${Array.from({length:16}).map((_, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:8px;background:${i===current ? '#5b3df0' : '#f0eef8'};border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}
-      </div>
+      <div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:260px;margin:8px auto;">${Array.from({length:16}).map((_, i) => `<button data-i="${i}" style="aspect-ratio:1;border-radius:8px;background:${i===current ? '#5b3df0' : '#f0eef8'};border:none;cursor:pointer;transition:0.15s;"></button>`).join('')}</div>
       ${!running && !gameOver ? '<button class="dice-roll-btn" id="reflex-start">Start</button>' : ''}
     </div>`;
     document.querySelectorAll('#arena-stage button[data-i]').forEach(btn => {
@@ -3818,23 +3757,12 @@ function runReflex(opponent) {
     });
     document.getElementById('reflex-start')?.addEventListener('click', start);
   }
-
   function start() {
     if (running) return;
-    running = true; gameOver = false;
-    render();
-    moleTimer = setInterval(() => {
-      if (!running) return;
-      current = Math.floor(Math.random() * 16);
-      render();
-      setTimeout(() => { if (current !== -1) { current = -1; render(); } }, 600);
-    }, 700);
-    botTimer = setInterval(() => {
-      if (!running) return;
-      if (Math.random() < 0.35) { botScore++; render(); if (botScore >= TARGET) finish(false); }
-    }, 800);
+    running = true; gameOver = false; render();
+    moleTimer = setInterval(() => { if (!running) return; current = Math.floor(Math.random() * 16); render(); setTimeout(() => { if (current !== -1) { current = -1; render(); } }, 600); }, 700);
+    botTimer = setInterval(() => { if (!running) return; if (Math.random() < 0.35) { botScore++; render(); if (botScore >= TARGET) finish(false); } }, 800);
   }
-
   function finish(won) {
     running = false; gameOver = true;
     clearInterval(moleTimer); clearInterval(botTimer);
@@ -3845,33 +3773,19 @@ function runReflex(opponent) {
 }
 
 function runStroop(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
-  const COLORS = [
-    { name: 'RED', css: '#e2555a' }, { name: 'BLUE', css: '#5b3df0' },
-    { name: 'GREEN', css: '#16c46b' }, { name: 'ORANGE', css: '#f0a742' }
-  ];
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
+  const COLORS = [{ name: 'RED', css: '#e2555a' }, { name: 'BLUE', css: '#5b3df0' }, { name: 'GREEN', css: '#16c46b' }, { name: 'ORANGE', css: '#f0a742' }];
   const TOTAL = 8;
   let current = 0, myScore = 0, botScore = 0, gameOver = false, word, ink;
-
-  function makeRound() {
-    word = COLORS[Math.floor(Math.random() * COLORS.length)];
-    ink = COLORS[Math.floor(Math.random() * COLORS.length)];
-  }
-
+  function makeRound() { word = COLORS[Math.floor(Math.random() * COLORS.length)]; ink = COLORS[Math.floor(Math.random() * COLORS.length)]; }
   function render() {
     if (current >= TOTAL) return finish();
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Round ${current + 1}/${TOTAL}</p>
-      <div style="display:flex;justify-content:space-around;margin:8px 0;">
-        <div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div>
-        <div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div>
-      </div>
+      <div style="display:flex;justify-content:space-around;margin:8px 0;"><div><div style="font-size:1.2rem;font-weight:800;color:#5b3df0;">${myScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">You</div></div><div><div style="font-size:1.2rem;font-weight:800;color:#f0a742;">${botScore}</div><div style="font-size:0.65rem;color:#5c5a6e;">${opponent.name}</div></div></div>
       <p style="font-size:0.8rem;color:#5c5a6e;margin-bottom:10px;">Tap the INK color of the word</p>
       <div style="font-family:Poppins;font-weight:800;font-size:2.4rem;color:${ink.css};margin:12px 0;">${word.name}</div>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;">
-        ${COLORS.map(c => `<button data-name="${c.name}" style="padding:10px 16px;border-radius:10px;background:${c.css};color:#fff;font-weight:700;border:none;cursor:pointer;">${c.name}</button>`).join('')}
-      </div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;">${COLORS.map(c => `<button data-name="${c.name}" style="padding:10px 16px;border-radius:10px;background:${c.css};color:#fff;font-weight:700;border:none;cursor:pointer;">${c.name}</button>`).join('')}</div>
     </div>`;
     document.querySelectorAll('#arena-stage button[data-name]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3880,35 +3794,28 @@ function runStroop(opponent) {
         if (Math.random() < 0.7) botScore++;
         current++;
         if (current >= TOTAL) return finish();
-        makeRound();
-        render();
+        makeRound(); render();
       });
     });
   }
-
   function finish() {
     gameOver = true;
     if (myScore > botScore) endDuel(true, `You scored ${myScore}/${TOTAL}.`);
     else if (myScore < botScore) endDuel(false, `You scored ${myScore}, opponent ${botScore}.`);
     else endDrawnMatch();
   }
-  makeRound();
-  render();
+  makeRound(); render();
 }
 
 function runRecall(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   let sequence = [], userInput = [], showing = false, level = 1, gameOver = false;
   const MAX_LEVEL = 5;
-
   function render() {
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Level ${level}</p>
       <p style="font-size:0.85rem;color:${showing ? '#f0a742' : '#5b3df0'};margin-bottom:10px;">${showing ? 'Watch the sequence' : 'Tap the numbers in order'}</p>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto;">
-        ${[1,2,3,4,5,6,7,8,9].map(n => `<button data-n="${n}" style="aspect-ratio:1;border-radius:12px;background:#f0eef8;font-weight:800;font-size:1.2rem;color:#161522;border:none;cursor:pointer;transition:0.15s;">${n}</button>`).join('')}
-      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto;">${[1,2,3,4,5,6,7,8,9].map(n => `<button data-n="${n}" style="aspect-ratio:1;border-radius:12px;background:#f0eef8;font-weight:800;font-size:1.2rem;color:#161522;border:none;cursor:pointer;transition:0.15s;">${n}</button>`).join('')}</div>
     </div>`;
     document.querySelectorAll('#arena-stage button[data-n]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3917,24 +3824,17 @@ function runRecall(opponent) {
         userInput.push(n);
         btn.style.background = '#5b3df0'; btn.style.color = '#fff';
         setTimeout(() => { btn.style.background = '#f0eef8'; btn.style.color = '#161522'; }, 180);
-        if (userInput[userInput.length - 1] !== sequence[userInput.length - 1]) {
-          gameOver = true;
-          setTimeout(() => endDuel(false, `You reached level ${level}.`), 500);
-          return;
-        }
+        if (userInput[userInput.length - 1] !== sequence[userInput.length - 1]) { gameOver = true; setTimeout(() => endDuel(false, `You reached level ${level}.`), 500); return; }
         if (userInput.length === sequence.length) {
           if (level >= MAX_LEVEL) { endDuel(true, 'You cleared all levels.'); return; }
-          level++; userInput = [];
-          setTimeout(nextRound, 700);
+          level++; userInput = []; setTimeout(nextRound, 700);
         }
       });
     });
   }
-
   function nextRound() {
     sequence.push(Math.floor(Math.random() * 9) + 1);
-    showing = true;
-    render();
+    showing = true; render();
     let i = 0;
     const playNext = () => {
       if (i >= sequence.length) { showing = false; userInput = []; render(); return; }
@@ -3945,17 +3845,14 @@ function runRecall(opponent) {
     };
     setTimeout(playNext, 600);
   }
-  render();
-  nextRound();
+  render(); nextRound();
 }
 
 function runMathChain(opponent) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
+  const stage = document.getElementById('arena-stage'); if (!stage) return;
   const TOTAL = 5;
   let current = 0, myScore = 0, botScore = 0, gameOver = false;
   let a = 0, b = 0, op = '+', answer = 0;
-
   function makeQ() {
     const ops = ['+', '-', '×'];
     op = ops[Math.floor(Math.random() * ops.length)];
@@ -3963,23 +3860,18 @@ function runMathChain(opponent) {
     else if (op === '-') { a = Math.floor(Math.random() * 50) + 20; b = Math.floor(Math.random() * 20) + 1; answer = a - b; }
     else { a = Math.floor(Math.random() * 9) + 2; b = Math.floor(Math.random() * 9) + 2; answer = a * b; }
   }
-
   function render() {
     if (current >= TOTAL) return finish();
     stage.innerHTML = `<div style="width:100%;text-align:center;">
       <p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward} · Sum ${current + 1}/${TOTAL}</p>
       <div style="font-size:1.8rem;font-weight:800;margin:14px 0;">${a} ${op} ${b} = ?</div>
-      <div class="hl-input-row">
-        <input type="number" class="hl-input" id="mc-input" placeholder="#">
-        <button class="hl-submit" id="mc-submit">Submit</button>
-      </div>
+      <div class="hl-input-row"><input type="number" class="hl-input" id="mc-input" placeholder="#"><button class="hl-submit" id="mc-submit">Submit</button></div>
       <p style="font-size:0.75rem;color:#5c5a6e;margin-top:12px;">Correct: ${myScore} · Opponent: ${botScore}</p>
     </div>`;
     document.getElementById('mc-submit')?.addEventListener('click', submit);
     document.getElementById('mc-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
     setTimeout(() => { if (!gameOver && current < TOTAL) { if (Math.random() < 0.75) botScore++; } }, 4000);
   }
-
   function submit() {
     if (gameOver) return;
     const val = parseInt(document.getElementById('mc-input').value);
@@ -3987,18 +3879,15 @@ function runMathChain(opponent) {
     if (val === answer) myScore++;
     current++;
     if (current >= TOTAL) return finish();
-    makeQ();
-    render();
+    makeQ(); render();
   }
-
   function finish() {
     gameOver = true;
     if (myScore > botScore) endDuel(true, `You solved ${myScore}/${TOTAL}.`);
     else if (myScore < botScore) endDuel(false, `You solved ${myScore}, opponent ${botScore}.`);
     else endDrawnMatch();
   }
-  makeQ();
-  render();
+  makeQ(); render();
 }
 
 // ===== END DUEL =====
@@ -4006,14 +3895,8 @@ async function endDuel(won, analysisText) {
   if (!isGameActive) return;
   isGameActive = false;
   document.body.classList.remove('game-active');
-  if (gameRealtimeSubscription) {
-    try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {}
-    gameRealtimeSubscription = null;
-  }
-  if (activeGameSessionId) {
-    try { await markSessionComplete(activeGameSessionId, won ? currentUser.id : (activeOpponent?.id || null)); } catch (e) {}
-    activeGameSessionId = null;
-  }
+  if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {} gameRealtimeSubscription = null; }
+  if (activeGameSessionId) { try { await markSessionComplete(activeGameSessionId, won ? currentUser.id : (activeOpponent?.id || null)); } catch (e) {} activeGameSessionId = null; }
 
   let reward = -currentEntryFee;
   if (won) {
@@ -4043,17 +3926,12 @@ async function endDuel(won, analysisText) {
       </div>
     </div>`;
     document.getElementById('rematch-btn')?.addEventListener('click', () => {
-      arenaOverlay.classList.add('hidden');
-      document.body.classList.remove('game-active');
+      arenaOverlay.classList.add('hidden'); document.body.classList.remove('game-active');
       const p = getGamePrice(activeGame.type);
       if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; }
       beginMatchmaking();
     });
-    document.getElementById('return-dash-btn')?.addEventListener('click', () => {
-      arenaOverlay.classList.add('hidden');
-      isGameActive = false;
-      document.body.classList.remove('game-active');
-    });
+    document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); isGameActive = false; document.body.classList.remove('game-active'); });
   }
   gameTimers.forEach(t => clearInterval(t));
   gameTimers = [];
@@ -4063,14 +3941,8 @@ async function endDrawnMatch() {
   if (!isGameActive) return;
   isGameActive = false;
   document.body.classList.remove('game-active');
-  if (gameRealtimeSubscription) {
-    try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {}
-    gameRealtimeSubscription = null;
-  }
-  if (activeGameSessionId) {
-    try { await markSessionComplete(activeGameSessionId, null); } catch (e) {}
-    activeGameSessionId = null;
-  }
+  if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {} gameRealtimeSubscription = null; }
+  if (activeGameSessionId) { try { await markSessionComplete(activeGameSessionId, null); } catch (e) {} activeGameSessionId = null; }
   try {
     await persistWalletDelta(currentEntryFee);
     await recordTransaction('Stake Refunded — ' + activeGame.name, 'credit', currentEntryFee);
@@ -4085,29 +3957,21 @@ async function endDrawnMatch() {
       <h2 style="color:#5c5a6e;">DRAW</h2>
       <p style="font-weight:700;color:#918fa3;">Stake Refunded</p>
       <div class="result-analytics">Stalemate — entry fee refunded.</div>
-      <div class="result-btn-row">
-        <button class="btn-secondary" id="rematch-btn">Rematch</button>
-        <button class="btn-primary" id="return-dash-btn">Dashboard</button>
-      </div>
+      <div class="result-btn-row"><button class="btn-secondary" id="rematch-btn">Rematch</button><button class="btn-primary" id="return-dash-btn">Dashboard</button></div>
     </div>`;
     document.getElementById('rematch-btn')?.addEventListener('click', () => {
-      arenaOverlay.classList.add('hidden');
-      document.body.classList.remove('game-active');
+      arenaOverlay.classList.add('hidden'); document.body.classList.remove('game-active');
       const p = getGamePrice(activeGame.type);
       if (currentBalance < p.entry) { alert('Insufficient balance. Need ' + formatRupees(p.entry)); return; }
       beginMatchmaking();
     });
-    document.getElementById('return-dash-btn')?.addEventListener('click', () => {
-      arenaOverlay.classList.add('hidden');
-      isGameActive = false;
-      document.body.classList.remove('game-active');
-    });
+    document.getElementById('return-dash-btn')?.addEventListener('click', () => { arenaOverlay.classList.add('hidden'); isGameActive = false; document.body.classList.remove('game-active'); });
   }
   gameTimers.forEach(t => clearInterval(t));
   gameTimers = [];
 }
 
-// ===== MATCHMAKING =====
+// ===== MATCHMAKING (v9: also creates a match_invite) =====
 async function beginMatchmaking() {
   inQueue = true;
   isGameActive = false;
@@ -4126,10 +3990,7 @@ async function beginMatchmaking() {
   const numEl = document.getElementById('mm-num');
   function updateRing() {
     if (numEl) numEl.textContent = remaining;
-    if (progEl) {
-      const offset = circumference * (1 - remaining / TOTAL);
-      progEl.style.strokeDashoffset = offset;
-    }
+    if (progEl) { const offset = circumference * (1 - remaining / TOTAL); progEl.style.strokeDashoffset = offset; }
   }
   updateRing();
 
@@ -4148,6 +4009,25 @@ async function beginMatchmaking() {
     await client.from('matchmaking_queue').upsert({ user_id: currentUser.id, game_type: activeGame.type });
   } catch (e) {}
 
+  // v9: broadcast a match_invite for others on the dashboard
+  try {
+    const { data: invite } = await client.from('match_invites').insert({
+      from_user_id: currentUser.id,
+      game_type: activeGame.type,
+      game_name: activeGame.name,
+      entry_fee: currentEntryFee,
+      reward: currentReward,
+      status: 'open'
+    }).select().single();
+    if (invite && invite.id) {
+      currentInviteId = invite.id;
+      if (inviteExpireTimer) clearTimeout(inviteExpireTimer);
+      inviteExpireTimer = setTimeout(async () => {
+        try { await client.from('match_invites').update({ status: 'expired' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
+      }, INVITE_SECONDS * 1000);
+    }
+  } catch (e) {}
+
   let matched = false;
   let searchTime = 0;
 
@@ -4163,13 +4043,19 @@ async function beginMatchmaking() {
         p_entry_fee: currentEntryFee,
         p_reward: currentReward
       });
-
       if (error) throw error;
 
       if (result && result.matched) {
         matched = true;
         clearInterval(matchmakingInterval);
         matchmakingInterval = null;
+
+        // Cancel any open invite we broadcast
+        if (currentInviteId) {
+          try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
+          currentInviteId = null;
+        }
+        if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
 
         const oppId = result.opponent_id;
         const { data: userData } = await client.from('users').select('full_name').eq('id', oppId).maybeSingle();
@@ -4192,6 +4078,12 @@ async function beginMatchmaking() {
       matchmakingInterval = null;
 
       try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
+      // Cancel our invite since we're going bot
+      if (currentInviteId) {
+        try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
+        currentInviteId = null;
+      }
+      if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
 
       const bot = getRandomBot();
       if (matchStatus) matchStatus.textContent = 'No players online. Connecting with ' + bot.name;
@@ -4224,6 +4116,12 @@ cancelMatchBtn?.addEventListener('click', async () => {
   if (matchOverlay) matchOverlay.classList.add('hidden');
   if (currentUser && was) {
     await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+    // v9: cancel broadcast invite
+    if (currentInviteId) {
+      try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
+      currentInviteId = null;
+    }
+    if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
     try {
       await persistWalletDelta(currentEntryFee);
       await recordTransaction('Stake Refunded — ' + activeGame.name, 'credit', currentEntryFee);
@@ -4240,10 +4138,7 @@ document.getElementById('arena-back-btn')?.addEventListener('click', function() 
 document.getElementById('exit-cancel-btn')?.addEventListener('click', () => document.getElementById('exitConfirmOverlay').classList.add('hidden'));
 document.getElementById('exit-confirm-btn')?.addEventListener('click', async () => {
   document.getElementById('exitConfirmOverlay').classList.add('hidden');
-  if (isGameActive) {
-    await endDuel(false, 'Game exited — defeat.');
-    isGameActive = false;
-  }
+  if (isGameActive) { await endDuel(false, 'Game exited — defeat.'); isGameActive = false; }
   arenaOverlay.classList.add('hidden');
   document.body.classList.remove('game-active');
 });
@@ -4285,6 +4180,160 @@ function startPresenceHeartbeat() {
   presenceHeartbeatTimer = setInterval(touchPresence, 5000);
   document.addEventListener('visibilitychange', () => { if (isTabActive()) touchPresence(); });
   window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
+}
+
+/* ============================================================
+   v9: MATCH INVITE POPUP SYSTEM
+   - Listens to match_invites realtime inserts
+   - Shows a small 5-second popup to any authenticated user
+     who isn't already in a game or queue
+   - Join → accept_match_invite RPC → create game session
+   ============================================================ */
+async function subscribeToInvites() {
+  if (inviteSubscription) {
+    try { await inviteSubscription.unsubscribe(); } catch (e) {}
+    inviteSubscription = null;
+  }
+  const channel = client.channel('match-invites-feed');
+  inviteSubscription = channel
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'match_invites' },
+      (payload) => {
+        const inv = payload.new;
+        if (!inv) return;
+        // Ignore our own invites
+        if (inv.from_user_id === currentUser?.id) return;
+        // Ignore if we're busy
+        if (isGameActive || inQueue) return;
+        if (shownInviteIds.has(inv.id)) return;
+        shownInviteIds.add(inv.id);
+        showInvitePopup(inv);
+      })
+    .subscribe();
+
+  // Cleanup expired invites once every 30s
+  if (inviteExpireInterval) clearInterval(inviteExpireInterval);
+  inviteExpireInterval = setInterval(async () => {
+    try { await client.rpc('expire_old_invites'); } catch (e) {}
+  }, 30000);
+}
+
+async function showInvitePopup(inv) {
+  if (!invitePopupStack) return;
+  // Fetch the sender's name + avatar
+  let fromName = 'A player';
+  let fromSeed = inv.from_user_id;
+  try {
+    const { data: u } = await client.from('users').select('full_name').eq('id', inv.from_user_id).maybeSingle();
+    if (u?.full_name) fromName = u.full_name;
+    fromSeed = inv.from_user_id;
+  } catch (e) {}
+
+  const el = document.createElement('div');
+  el.className = 'invite-popup';
+  el.dataset.inviteId = inv.id;
+  const avatarUrl = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(fromSeed);
+  el.innerHTML = `
+    <div class="invite-row">
+      <img class="invite-avatar" src="${avatarUrl}" alt="${fromName}" />
+      <div class="invite-text">
+        <strong>${fromName}</strong> is waiting for a <strong>${inv.game_name}</strong> match
+        <small>Entry ₹${inv.entry_fee} · Win ₹${inv.reward}</small>
+      </div>
+    </div>
+    <div class="invite-actions">
+      <button class="invite-btn skip" data-action="skip">Skip</button>
+      <button class="invite-btn join" data-action="join">Join</button>
+    </div>
+    <div class="invite-timer"></div>
+  `;
+  invitePopupStack.appendChild(el);
+
+  // Auto-dismiss after INVITE_SECONDS
+  const dismiss = () => {
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 300);
+  };
+  const autoTimer = setTimeout(dismiss, INVITE_SECONDS * 1000);
+
+  el.querySelector('[data-action="skip"]')?.addEventListener('click', () => {
+    clearTimeout(autoTimer);
+    dismiss();
+  });
+  el.querySelector('[data-action="join"]')?.addEventListener('click', async () => {
+    clearTimeout(autoTimer);
+    // Disable buttons to prevent double-click
+    el.querySelectorAll('.invite-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
+    await joinInvite(inv, el);
+  });
+}
+
+async function joinInvite(inv, popupEl) {
+  // Guard: don't join if we're now busy
+  if (isGameActive || inQueue) { showToast('You are already in a game.', 'error'); popupEl.remove(); return; }
+
+  // Check balance
+  if (currentBalance < inv.entry_fee) {
+    showToast('Insufficient balance. Need ' + formatRupees(inv.entry_fee), 'error');
+    popupEl.remove();
+    return;
+  }
+
+  // Deduct stake + record debit
+  try {
+    await persistWalletDelta(-inv.entry_fee);
+    await recordTransaction('Stake — ' + inv.game_name, 'debit', inv.entry_fee);
+    showWalletToast(inv.entry_fee, 'debit', 'Stake — ' + inv.game_name);
+  } catch (e) {
+    showToast('Could not process entry stake.', 'error');
+    popupEl.remove();
+    return;
+  }
+
+  // Call the RPC to atomically accept the invite
+  try {
+    const { data, error } = await client.rpc('accept_match_invite', { p_invite_id: inv.id });
+    if (error) throw error;
+    if (!data || !data.ok) {
+      // Refund on failure
+      await persistWalletDelta(inv.entry_fee);
+      await recordTransaction('Stake Refunded — invite unavailable', 'credit', inv.entry_fee);
+      showWalletToast(inv.entry_fee, 'credit', 'Invite unavailable');
+      showToast('That match is no longer available.', 'error');
+      popupEl.remove();
+      return;
+    }
+
+    // Fetch opponent's display name
+    const { data: oppUser } = await client.from('users').select('full_name').eq('id', inv.from_user_id).maybeSingle();
+
+    // Set up active game and launch the arena
+    activeGame = { name: inv.game_name, type: inv.game_type };
+    currentEntryFee = inv.entry_fee;
+    currentReward = inv.reward;
+    isRealPlayerMatch = true;
+    myRole = 'player2';
+    activeGameSessionId = data.session_id;
+
+    // Dismiss popup
+    popupEl.classList.add('out');
+    setTimeout(() => popupEl.remove(), 300);
+
+    // Launch the shared live game
+    launchArena(
+      { name: oppUser?.full_name || 'Player', seed: inv.from_user_id, isBot: false, id: inv.from_user_id },
+      { session_id: data.session_id, you_are: 'player2' }
+    );
+  } catch (e) {
+    // Refund on error
+    try {
+      await persistWalletDelta(inv.entry_fee);
+      await recordTransaction('Stake Refunded — invite error', 'credit', inv.entry_fee);
+      showWalletToast(inv.entry_fee, 'credit', 'Invite error — refunded');
+    } catch (err) {}
+    showToast('Could not join that match.', 'error');
+    popupEl.remove();
+  }
 }
 
 const revealEls = document.querySelectorAll('.reveal');
@@ -4349,10 +4398,7 @@ function initChatBot() {
     chatMsgs.scrollTop = chatMsgs.scrollHeight;
   }
 
-  function showTyping(show) {
-    if (chatTyping) chatTyping.classList.toggle('show', show);
-    if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
-  }
+  function showTyping(show) { if (chatTyping) chatTyping.classList.toggle('show', show); if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight; }
 
   function getAIResponse(userMessage) {
     const msg = userMessage.toLowerCase();
@@ -4365,7 +4411,7 @@ function initChatBot() {
       'fairplay': 'FairPlay is our anti-cheat system that ensures all matches are fair. We use skill-based matchmaking and real-time move validation to prevent cheating.',
       'help': 'I am here to help. You can ask me about games, wallet, tournaments, referrals, withdrawals, or anything else about SkillClash.',
       'signup': 'Sign up with Google in one tap — no forms, no passwords. Just click Sign Up on the landing page and you are in.',
-      'free': 'Yes, SkillClash is completely free to play. You get free daily tokens and can earn rewards without spending any money.'
+      'free': 'SkillClash is a skill-based gaming platform for 18+. Games have small entry stakes, and winners receive the reward shown on each game card. Your signup includes a ₹50 welcome balance.'
     };
     for (const [key, value] of Object.entries(responses)) if (msg.includes(key)) return value;
     const fallbacks = [
@@ -4385,12 +4431,10 @@ function initChatBot() {
     chatInput.value = '';
     chatInput.disabled = true;
     chatSendBtn.disabled = true;
-    addMsg(text, true);
-    showTyping(true);
+    addMsg(text, true); showTyping(true);
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
     const response = getAIResponse(text);
-    addMsg(response, false);
-    showTyping(false);
+    addMsg(response, false); showTyping(false);
     chatInput.disabled = false;
     chatSendBtn.disabled = false;
     chatInput.focus();
@@ -4414,12 +4458,16 @@ async function initDashboard() {
     currentUser = session.user;
     if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '—';
     await loadUserName();
+    // v9: record terms acceptance if pending
+    await recordTermsAcceptance();
     await loadWallet();
     await loadTransactions();
     await loadMatchHistory();
     await loadReferralInfo();
     updateUI();
     startPresenceHeartbeat();
+    // v9: listen for match invites
+    subscribeToInvites();
     document.getElementById('page-landing').style.display = 'none';
     document.getElementById('page-container').style.display = 'none';
     document.getElementById('dashboard').classList.remove('hidden');
@@ -4448,7 +4496,7 @@ window.addEventListener('beforeunload', (e) => {
 window.endDuel = endDuel;
 
 routeOnLoad();
-console.log('SkillClash v8 loaded — dark minimal line-art thumbnails, all v6 features preserved');
+console.log('SkillClash v9 loaded — signup terms gate, corrected legal pages, match invite popup system; all v8 features preserved');
 </script>
 </body>
 </html>
