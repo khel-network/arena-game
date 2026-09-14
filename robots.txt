@@ -1,4 +1,40 @@
+# robots.txt for skillclash.in
+# SkillClash — India's skill-based 1v1 gaming arena
+
 User-agent: *
 Allow: /
+Allow: /games/
+Allow: /blog/
 
+# Block sensitive routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /*?game=
+Disallow: /*?status=
+Disallow: /*?order_id=
+Disallow: /*?code=
+
+# Block crawlers from auth flows
+Disallow: /?source=
+
+# Sitemap location
 Sitemap: https://skillclash.in/sitemap.xml
+
+# Favicon and icons
+Allow: /icon-*.png
+Allow: /apple-touch-icon.png
+Allow: /favicon.ico
+
+# Common crawlers we're fine with
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
