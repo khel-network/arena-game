@@ -1868,7 +1868,19 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// Opens the confirmation modal instead of downloading immediately
 function triggerApkDownload() {
+  const overlay = document.getElementById('download-confirm-overlay');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+  } else {
+    // Fallback: if modal is missing, just download
+    performApkDownload();
+  }
+}
+
+// Actually performs the download (called from the modal's "Yes, Download" button)
+function performApkDownload() {
   if (!APK_DOWNLOAD_URL || APK_DOWNLOAD_URL === '/skillclash.apk') {
     fetch(APK_DOWNLOAD_URL, { method: 'HEAD' }).then((res) => {
       if (res.ok) {
@@ -1907,6 +1919,20 @@ function showApkFallback() {
 
 document.getElementById('hero-download-btn')?.addEventListener('click', triggerApkDownload);
 document.getElementById('closing-download-btn')?.addEventListener('click', triggerApkDownload);
+// Download confirmation modal handlers
+document.getElementById('download-cancel-btn')?.addEventListener('click', () => {
+  document.getElementById('download-confirm-overlay')?.classList.add('hidden');
+});
+document.getElementById('download-confirm-btn')?.addEventListener('click', () => {
+  document.getElementById('download-confirm-overlay')?.classList.add('hidden');
+  performApkDownload();
+});
+// Close modal if user taps outside the card
+document.getElementById('download-confirm-overlay')?.addEventListener('click', (e) => {
+  if (e.target.id === 'download-confirm-overlay') {
+    e.target.classList.add('hidden');
+  }
+});
 
 let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
