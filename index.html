@@ -4066,7 +4066,34 @@ window.addEventListener('beforeunload', (e) => {
 });
 window.endDuel = endDuel;
 routeOnLoad();
-console.log('SkillClash v13 loaded — game fixes: Dots lines, Dice Bo3, dumber Memory bot, Lights Out, Pattern Match, Tower Stack, 20s Scramble timer, scroll lock + restore');
+
+// ===== v14: Deep-link handler — auto-launch a game from ?game= param =====
+(function handleGameParam() {
+  const params = new URLSearchParams(window.location.search);
+  const gameType = params.get('game');
+  if (!gameType) return;
+  const game = GAME_CATALOG.find(g => g.type === gameType);
+  if (!game) return;
+
+  let attempts = 0;
+  const tryLaunch = setInterval(() => {
+    attempts++;
+    if (currentUser && document.getElementById('gamesGrid') && !document.getElementById('dashboard').classList.contains('hidden')) {
+      clearInterval(tryLaunch);
+      switchView('view-earn');
+      setTimeout(() => {
+        const btn = document.querySelector(`.play-btn[data-type="${gameType}"]`);
+        if (btn) {
+          saveScrollY();
+          btn.click();
+        }
+      }, 500);
+    }
+    if (attempts > 200) clearInterval(tryLaunch); // give up after ~60s
+  }, 300);
+})();
+
+console.log('SkillClash v13 + v14 deep-link loaded — 21 games live, SEO entry pages ready');
 </script>
 </body>
 </html>
