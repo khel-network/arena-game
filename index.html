@@ -1933,13 +1933,6 @@ document.getElementById('download-confirm-overlay')?.addEventListener('click', (
     e.target.classList.add('hidden');
   }
 });
-
-let deferredInstallPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-});
-
 // ===== SUPABASE HELPERS =====
 async function loadUserName() {
   const meta = currentUser.user_metadata || {};
