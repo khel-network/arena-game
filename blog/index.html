@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SkillClash Blog — Skill Gaming Tips, Strategies & Guides India</title>
-<meta name="description" content="Strategy guides, skill gaming tips, and game breakdowns from SkillClash — India's skill-based 1v1 gaming arena." />
+<meta name="description" content="Strategy guides, skill gaming tips, and game breakdowns from SkillClash.in — India's 1v1 skill game arena." />
 <link rel="canonical" href="https://skillclash.in/blog/" />
 <meta name="robots" content="index, follow" />
 <meta name="theme-color" content="#5b3df0" />
@@ -13,6 +13,11 @@
 <meta property="og:title" content="SkillClash Blog — Skill Gaming Tips & Guides" />
 <meta property="og:url" content="https://skillclash.in/blog/" />
 <meta property="og:image" content="https://skillclash.in/og-image.png" />
+<meta property="og:site_name" content="SkillClash" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="SkillClash Blog — Skill Gaming Tips & Guides" />
+<meta name="twitter:image" content="https://skillclash.in/og-image.png" />
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23fafafc'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%235b3df0'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,16 +33,20 @@
   .logo svg { width: 22px; height: 22px; color: #5b3df0; }
   .logo .clash { background: linear-gradient(90deg, #5b3df0 0%, #f0a742 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .back { margin-left: auto; color: #5b3df0; font-weight: 600; font-size: 0.8rem; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
   h1 { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
   .intro { color: #5c5a6e; margin-bottom: 32px; font-size: 0.95rem; }
-  .post-list { display: grid; gap: 16px; }
+  .section-label { font-size: 0.7rem; font-weight: 700; color: #5b3df0; text-transform: uppercase; letter-spacing: 0.08em; margin: 28px 0 12px; }
+  .section-label:first-of-type { margin-top: 0; }
+  .post-list { display: grid; gap: 14px; }
   .post-card { display: block; padding: 22px; background: #fff; border: 1px solid #eee9f7; border-radius: 16px; text-decoration: none; color: inherit; transition: 0.2s; }
   .post-card:hover { border-color: #b8a8f0; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(91,61,240,0.1); }
-  .post-card h2 { font-family: 'Poppins', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: #161522; }
-  .post-card p { color: #5c5a6e; font-size: 0.9rem; margin-bottom: 10px; }
+  .post-card h2 { font-family: 'Poppins', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; color: #161522; }
+  .post-card p { color: #5c5a6e; font-size: 0.88rem; margin-bottom: 10px; }
   .post-card .meta { font-size: 0.7rem; color: #918fa3; text-transform: uppercase; letter-spacing: 0.04em; }
   .footer { text-align: center; padding: 32px 24px 40px; color: #918fa3; font-size: 0.75rem; border-top: 1px solid #f0eef8; margin-top: 40px; }
   .footer a { color: #5b3df0; text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -51,8 +60,33 @@
   </div>
 
   <h1>SkillClash Blog</h1>
-  <p class="intro">Strategy guides, skill gaming tips, and comparisons for Indian players.</p>
+  <p class="intro">Strategy guides, skill gaming tips, and comparisons for Indian players. New articles every week.</p>
 
+  <div class="section-label">Strategy Guides</div>
+  <div class="post-list">
+    <a class="post-card" href="/blog/how-to-win-connect-4.html">
+      <div class="meta">Strategy · 6 min read</div>
+      <h2>How to Win at Connect 4: 5 Fork Strategies That Beat 90% of Players</h2>
+      <p>The two-way fork technique, center control, and diagonal traps that win real Connect 4 matches.</p>
+    </a>
+    <a class="post-card" href="/blog/how-to-win-nim-duel.html">
+      <div class="meta">Strategy · 7 min read</div>
+      <h2>How to Win at Nim Duel: The XOR Trick That Makes You Unbeatable</h2>
+      <p>The mathematical strategy behind Nim — including the XOR trick that wins matches against players who don't know it.</p>
+    </a>
+    <a class="post-card" href="/blog/dots-and-boxes-strategy.html">
+      <div class="meta">Strategy · 7 min read</div>
+      <h2>Dots and Boxes Strategy: Why the "Safe Move" Actually Loses</h2>
+      <p>The counterintuitive Dots and Boxes strategy that most players get wrong — including the chain-counting rule.</p>
+    </a>
+    <a class="post-card" href="/blog/how-to-win-tic-tac-toe.html">
+      <div class="meta">Strategy · 4 min read</div>
+      <h2>How to Win at Tic-Tac-Toe: 7 Strategy Tips</h2>
+      <p>The fork technique, blocking rules, and small-mistake exploitation that wins real matches.</p>
+    </a>
+  </div>
+
+  <div class="section-label">Guides & Comparisons</div>
   <div class="post-list">
     <a class="post-card" href="/blog/top-10-skill-games-india.html">
       <div class="meta">Guide · 5 min read</div>
@@ -64,21 +98,17 @@
       <h2>Is Skill Gaming Legal in India? Complete 2026 Guide</h2>
       <p>Which states allow paid skill gaming, which restrict it, and how the law defines "skill-based" games.</p>
     </a>
-    <a class="post-card" href="/blog/how-to-win-tic-tac-toe.html">
-      <div class="meta">Strategy · 4 min read</div>
-      <h2>How to Win at Tic-Tac-Toe: 7 Strategy Tips</h2>
-      <p>The fork technique, blocking rules, and small-mistake exploitation that wins real matches.</p>
-    </a>
     <a class="post-card" href="/blog/skillclash-vs-mpl.html">
       <div class="meta">Comparison · 5 min read</div>
       <h2>SkillClash vs MPL: Which Skill Gaming App is Better?</h2>
       <p>An honest comparison of game variety, fees, payouts, and matchmaking between the two platforms.</p>
     </a>
   </div>
+
 </div>
 
 <div class="footer">
-  © 2026 SkillClash · <a href="/">Home</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a><br>
+  © 2026 SkillClash.in · <a href="/">Home</a> · <a href="/about.html">About</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a><br>
   18+ only · Skill-based gaming · Play responsibly
 </div>
 </body>
