@@ -908,7 +908,7 @@ body.in-app .site-footer { display: none !important; }
 <p class="hero-sub">Where skill meets recognition. Compete against real players, enjoy FairPlay matchmaking, and instant leaderboard sync.</p>
 <div class="hero-cta-row">
 <button id="hero-signup-btn" class="btn-signup-lg"><svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/></svg> Sign Up</button>
-<button id="download-confirm-overlay" class="btn-login-lg"><i class="fas fa-download"></i> Download App</button>
+<button id="hero-download-btn" class="btn-login-lg"><i class="fas fa-download"></i> Download App</button>
 </div>
 <div class="hero-trust"><span class="stars">★★★★★</span> Trusted by <strong>15k+ Players</strong> across India</div>
 <div class="hero-stats-grid">
@@ -1917,8 +1917,8 @@ function showApkFallback() {
   }
 }
 
-document.getElementById('download-confirm-overlay')?.addEventListener('click', triggerApkDownload);
-document.getElementById('closing-download-btn')?.addEventListener('click', triggerApkDownload);
+document.getElementById('hero-download-btn')?.addEventListener('click', triggerApkDownload);
+  document.getElementById('closing-download-btn')?.addEventListener('click', triggerApkDownload);
 // Download confirmation modal handlers
 document.getElementById('download-cancel-btn')?.addEventListener('click', () => {
   document.getElementById('download-confirm-overlay')?.classList.add('hidden');
