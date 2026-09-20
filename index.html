@@ -2371,29 +2371,29 @@ document.getElementById('cashout-submit-btn')?.addEventListener('click', functio
    GAME CATALOG + HOW TO PLAY
    ============================================================ */
 const GAME_CATALOG = [
-  { type: 'tictactoe',  name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25 },
-  { type: 'connect4',   name: 'Connect 4', desc: 'Drop discs and connect four in a row. Strategic battles.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 },
-  { type: 'nim',        name: 'Nim Duel', desc: 'Take stones from piles. Player who takes the last stone wins.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25 },
-  { type: 'dots',       name: 'Dots & Boxes', desc: 'Complete more boxes than your opponent on a 4x4 grid.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 },
-  { type: 'rps',        name: 'RPS Duel', desc: 'Best-of-3 rock, paper, scissors. Outsmart your opponent.', badge: 'CLASSIC', category: 'strategy', entry: 15, reward: 25 },
-  { type: 'dice',       name: 'Dice Battle', desc: 'Best of 3 rounds — roll higher, win the round.', badge: 'LUCK', category: 'strategy', entry: 15, reward: 25 },
-  { type: 'memory',     name: 'Memory Match', desc: 'Flip pairs and clear the board. Test your memory.', badge: 'BRAIN', category: 'brain', entry: 15, reward: 25 },
-  { type: 'memorylg',   name: 'Lights Out', desc: 'Tap tiles to toggle them and their neighbors. Clear all lights.', badge: 'BRAIN', category: 'brain', entry: 20, reward: 35 },
-  { type: 'higherlower',name: 'Higher-Lower', desc: 'Guess the secret number in fewest tries.', badge: 'LOGIC', category: 'brain', entry: 15, reward: 25 },
-  { type: 'scramble',   name: 'Word Scramble', desc: '20 seconds — solve as many scrambled words as you can.', badge: 'WORD', category: 'brain', entry: 15, reward: 25 },
-  { type: 'tap',        name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed.', badge: 'SPEED', category: 'reflex', entry: 15, reward: 25 },
-  { type: 'simon',      name: 'Simon Says', desc: 'Repeat the growing color pattern. Memory challenge.', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25 },
-  { type: 'whack',      name: 'Whack-a-Mole', desc: 'First to 15 hits wins. Reflexes matter.', badge: 'REFLEX', category: 'reflex', entry: 20, reward: 35 },
-  { type: 'reaction',   name: 'Reaction Duel', desc: 'Wait for green, then tap fastest. Classic reflex test.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
-  { type: 'oddone',     name: 'Pattern Match', desc: 'Tap the shape that matches the target. First to 8 wins.', badge: 'VISION', category: 'reflex', entry: 15, reward: 25 },
-  { type: 'mathduel',   name: 'Math Duel', desc: 'Solve equations fastest to win. Quick math.', badge: 'MATH', category: 'math', entry: 15, reward: 25 },
-  { type: 'reflex',     name: 'Reflex Grid', desc: 'Tap the lit tile before it fades. Speed.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
-  { type: 'stroop',     name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25 },
-  { type: 'recall',     name: 'Sequence Recall', desc: 'Numbers flash, tap them back in order. Memory.', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25 },
-  { type: 'mathchain',  name: 'Fast Math Chain', desc: 'Solve quick sums back-to-back. Speed math.', badge: 'MATH', category: 'math', entry: 15, reward: 25 },
-  { type: 'battleship', name: 'Tower Stack', desc: 'Tap to stop the moving block. Stack it highest to win.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35 }
+  { type: 'tictactoe',  name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25, banner: '/images/tictactoe-banner.png' },
+  { type: 'connect4',   name: 'Connect 4', desc: 'Drop discs and connect four in a row. Strategic battles.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35, banner: '/images/connect4-banner.png' },
+  { type: 'nim',        name: 'Nim Duel', desc: 'Take stones from piles. Player who takes the last stone wins.', badge: 'STRATEGY', category: 'strategy', entry: 15, reward: 25, banner: '/images/nim-banner.png' },
+  { type: 'dots',       name: 'Dots & Boxes', desc: 'Complete more boxes than your opponent on a 4x4 grid.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35, banner: '/images/dots-banner.png' },
+  { type: 'rps',        name: 'RPS Duel', desc: 'Best-of-3 rock, paper, scissors. Outsmart your opponent.', badge: 'CLASSIC', category: 'strategy', entry: 15, reward: 25, banner: '/images/rps-banner.png' },
+  { type: 'dice',       name: 'Dice Battle', desc: 'Best of 3 rounds — roll higher, win the round.', badge: 'LUCK', category: 'strategy', entry: 15, reward: 25, banner: '/images/dice-banner.png' },
+  { type: 'memory',     name: 'Memory Match', desc: 'Flip pairs and clear the board. Test your memory.', badge: 'BRAIN', category: 'brain', entry: 15, reward: 25, banner: '/images/memory-banner.png' },
+  { type: 'memorylg',   name: 'Lights Out', desc: 'Tap tiles to toggle them and their neighbors. Clear all lights.', badge: 'BRAIN', category: 'brain', entry: 20, reward: 35, banner: '/images/lightsout-banner.png' },
+  { type: 'higherlower',name: 'Higher-Lower', desc: 'Guess the secret number in fewest tries.', badge: 'LOGIC', category: 'brain', entry: 15, reward: 25, banner: '/images/higherlower-banner.png' },
+  { type: 'scramble',   name: 'Word Scramble', desc: '20 seconds — solve as many scrambled words as you can.', badge: 'WORD', category: 'brain', entry: 15, reward: 25, banner: '/images/scramble-banner.png' },
+  { type: 'tap',        name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed.', badge: 'SPEED', category: 'reflex', entry: 15, reward: 25, banner: '/images/tap-banner.png' },
+  { type: 'simon',      name: 'Simon Says', desc: 'Repeat the growing color pattern. Memory challenge.', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25, banner: '/images/simon-banner.png' },
+  { type: 'whack',      name: 'Whack-a-Mole', desc: 'First to 15 hits wins. Reflexes matter.', badge: 'REFLEX', category: 'reflex', entry: 20, reward: 35, banner: '/images/whack-banner.png' },
+  { type: 'reaction',   name: 'Reaction Duel', desc: 'Wait for green, then tap fastest. Classic reflex test.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25, banner: '/images/reaction-banner.png' },
+  { type: 'oddone',     name: 'Pattern Match', desc: 'Tap the shape that matches the target. First to 8 wins.', badge: 'VISION', category: 'reflex', entry: 15, reward: 25, banner: '/images/pattern-banner.png' },
+  { type: 'mathduel',   name: 'Math Duel', desc: 'Solve equations fastest to win. Quick math.', badge: 'MATH', category: 'math', entry: 15, reward: 25, banner: '/images/mathduel-banner.png' },
+  { type: 'reflex',     name: 'Reflex Grid', desc: 'Tap the lit tile before it fades. Speed.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25, banner: '/images/reflex-banner.png' },
+  { type: 'stroop',     name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', badge: 'REFLEX', category: 'reflex', entry: 15, reward: 25, banner: '/images/stroop-banner.png' },
+  { type: 'recall',     name: 'Sequence Recall', desc: 'Numbers flash, tap them back in order. Memory.', badge: 'MEMORY', category: 'brain', entry: 15, reward: 25, banner: '/images/recall-banner.png' },
+  { type: 'mathchain',  name: 'Fast Math Chain', desc: 'Solve quick sums back-to-back. Speed math.', badge: 'MATH', category: 'math', entry: 15, reward: 25, banner: '/images/mathchain-banner.png' },
+  { type: 'battleship', name: 'Tower Stack', desc: 'Tap to stop the moving block. Stack it highest to win.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 35, banner: '/images/towerstack-banner.png' }
 ];
-
+  
 const HOW_TO_PLAY = {
   tictactoe: { icon: '×', mode: '1v1 Live', steps: ['You and your opponent take turns placing X or O on a 3×3 grid.', 'The first player to get three of their marks in a row — horizontally, vertically, or diagonally — wins.', 'If the board fills with no winner, the match is a draw and both stakes are refunded.'], tip: 'Control the center square early — it belongs to the most winning lines.' },
   connect4: { icon: '◉', mode: '1v1 Live', steps: ['You and your opponent take turns dropping colored discs into a 7-column, 6-row grid.', 'Discs fall to the lowest empty slot in the column you choose.', 'The first player to line up four of their discs in a row wins.'], tip: 'Build two-way threats — make a line that can win on either side.' },
@@ -2419,11 +2419,10 @@ const HOW_TO_PLAY = {
 };
 
 function buildGameCardHTML(g, index) {
-  const hsl = (index * 22) % 360;
-  const bg = `hsl(${hsl}, 55%, 92%)`;
+  const bg = `#100e19`;
   return `<div class="game-card" data-category="${g.category}">
     <div class="card-media" style="background:${bg};">
-      <img class="thumbnail" src="${g.thumbnail || buildThumbnail(g)}" alt="${g.name}" loading="lazy" />
+      <img class="thumbnail" src="${g.banner || g.thumbnail || buildThumbnail(g)}" alt="${g.name} — play 1v1 on SkillClash.in" loading="lazy" />
       <span class="card-badge">${g.badge}</span>
       <button class="help-btn" data-help="${g.type}" title="How to play">?</button>
     </div>
