@@ -1,37 +1,11 @@
 -- ============================================================
--- SkillClash - MASTER SCHEMA v10.0
+-- SkillClash - MASTER SCHEMA v10.2 (₹-column safe + wallet realtime)
 -- ============================================================
--- Includes:
---   - v4 base: users, wallet, matchmaking, matches, transactions,
---     match_history, game_sessions, claim_opponent, referrals,
---     payment_requests, welcome bonus, realtime for game_sessions
---   - v9 additions: match_invites (with realtime), terms/age
---     acceptance tracking, expire_old_invites, accept_match_invite
---   - v9.1: match invite TTL extended 5s -> 8s
---   - v9.2: wallet stores email, full_name, first_login_at
---
--- v10.0 CHANGES (compatible with SkillClash frontend v17):
---   * Welcome bonus reduced ₹50 -> ₹25  (prevents loss-making UX)
---   * Referral bonus reduced ₹50 -> ₹25 (balanced economics)
---   * Default entry_fee 15 -> 20, reward 25 -> 30 (₹10 net margin)
---   * NEW canonical wallet.balance column (keeps legacy "₹")
---   * NEW game_sessions.stake_locked flag (idempotency guard)
---   * NEW game_sessions.abandoned_at column
---   * NEW RPC: refund_stake_on_no_opponent(p_session_id)
---   * NEW RPC: abandon_session(p_session_id)
---   * NEW RPC: settle_game(p_session_id, p_winner_id)
---   * NEW table: game_events (debug/audit, optional)
---   * claim_opponent hardened: no self-match, cleaner locks,
---     queue TTL 15s -> 25s (better on flaky mobile networks)
---   * accept_match_invite hardened: no self-accept, seat guard
---   * Backfill: old wallet.₹ copied to wallet.balance; also
---     rewrites any wallets still holding the ₹50 welcome bonus
---     to the correct ₹25 for consistency on fresh installs.
---
--- Safe to re-run. All statements idempotent:
---   add column if not exists / create table if not exists /
---   drop policy if exists then create / create or replace fn /
---   DO blocks swallow duplicate_object.
+-- v10.2 change (vs v10.1):
+--   * Added `alter publication supabase_realtime add table public.wallet`
+--     inside a safe DO block. This enables the frontend's realtime
+--     wallet subscription so the balance auto-updates across devices
+--     when credit/debit happens (top-up, match win, admin approval).
 -- ============================================================
 
 
@@ -73,32 +47,37 @@ create policy "Users can insert their own profile"
 
 
 -- ------------------------------------------------------------
--- WALLET
--- v10.0: canonical column is `balance`. Legacy `₹` kept for
--- backward compatibility (older frontends may still read it).
--- Default balance is 25 (welcome bonus, updated in v10).
+-- WALLET (canonical `balance`; legacy `₹` handled dynamically)
 -- ------------------------------------------------------------
 create table if not exists public.wallet (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.users (id) on delete cascade,
-  ₹ integer not null default 25 check (₹ >= 0),
+  balance integer not null default 25 check (balance >= 0),
   updated_at timestamptz not null default now()
 );
 
--- v10.0 canonical column
 alter table public.wallet add column if not exists balance integer;
 alter table public.wallet add column if not exists email text;
 alter table public.wallet add column if not exists full_name text;
 alter table public.wallet add column if not exists first_login_at timestamptz not null default now();
 
--- Backfill: copy legacy ₹ -> balance for any rows missing balance
-update public.wallet
-set balance = coalesce(balance, ₹, 0)
-where balance is null;
+do $$
+declare
+  v_has_rupee boolean;
+begin
+  select exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
+  ) into v_has_rupee;
 
--- Enforce: not null + default + check
+  if v_has_rupee then
+    execute 'update public.wallet set balance = coalesce(balance, "₹", 0) where balance is null';
+  else
+    update public.wallet set balance = coalesce(balance, 0) where balance is null;
+  end if;
+end $$;
+
 alter table public.wallet alter column balance set default 25;
-update public.wallet set balance = 25 where balance is null;
 alter table public.wallet alter column balance set not null;
 
 do $$
@@ -110,7 +89,6 @@ begin
   end;
 end $$;
 
--- v9.2 backfill: fill email/full_name/first_login_at from users
 update public.wallet w
 set
   email = coalesce(w.email, u.email),
@@ -135,6 +113,31 @@ create policy "Users can update their own wallet"
 drop policy if exists "Users can insert their own wallet" on public.wallet;
 create policy "Users can insert their own wallet"
   on public.wallet for insert with check (auth.uid() = user_id);
+
+
+-- ============================================================
+-- PART E — Enable realtime on wallet table
+-- ============================================================
+-- This allows the frontend's realtime subscription to receive
+-- UPDATE events whenever wallet.balance changes (top-up,
+-- match win/loss settlement, admin approval, refunds).
+-- Without this, subscribeToWalletRealtime() will connect but
+-- never receive any events.
+-- ============================================================
+do $$
+begin
+  begin
+    alter publication supabase_realtime add table public.wallet;
+  exception
+    when duplicate_object then null;   -- already added, safe to ignore
+    when undefined_object then null;   -- publication doesn't exist (older Supabase)
+  end;
+end $$;
+
+-- Also ensure REPLICA IDENTITY is full so we get the full row
+-- in the realtime payload (not just the primary key).
+-- This is required for payload.new.balance to be present.
+alter table public.wallet replica identity full;
 
 
 -- ------------------------------------------------------------
@@ -187,7 +190,7 @@ create policy "Users can leave the queue"
 
 
 -- ------------------------------------------------------------
--- MATCHES (legacy - kept for compatibility)
+-- MATCHES (legacy, kept for compatibility)
 -- ------------------------------------------------------------
 create table if not exists public.matches (
   id uuid primary key default gen_random_uuid(),
@@ -267,8 +270,7 @@ create policy "Users can insert their own match history"
 
 
 -- ------------------------------------------------------------
--- GAME SESSIONS — shared live state for real 2-player games
--- v10.0 additions: stake_locked (idempotency), abandoned_at
+-- GAME SESSIONS
 -- ------------------------------------------------------------
 create table if not exists public.game_sessions (
   id uuid primary key default gen_random_uuid(),
@@ -286,7 +288,6 @@ create table if not exists public.game_sessions (
   updated_at timestamptz not null default now()
 );
 
--- v10.0 new columns
 alter table public.game_sessions add column if not exists stake_locked boolean not null default false;
 alter table public.game_sessions add column if not exists abandoned_at timestamptz;
 alter table public.game_sessions add column if not exists settled_at timestamptz;
@@ -318,7 +319,6 @@ create policy "Players can update their game sessions"
   on public.game_sessions for update
   using (auth.uid() = player1_id or auth.uid() = player2_id);
 
--- Realtime
 do $$
 begin
   begin
@@ -331,7 +331,7 @@ end $$;
 
 
 -- ------------------------------------------------------------
--- GAME EVENTS — audit trail for match lifecycle (optional but useful)
+-- GAME EVENTS (audit trail)
 -- ------------------------------------------------------------
 create table if not exists public.game_events (
   id bigserial primary key,
@@ -365,7 +365,7 @@ create policy "Authenticated can insert events"
 
 
 -- ------------------------------------------------------------
--- AUTO-PROVISION NEW USERS — ₹25 welcome bonus (v10)
+-- AUTO-PROVISION NEW USERS — ₹25 welcome bonus
 -- ------------------------------------------------------------
 create or replace function public.handle_new_user()
 returns trigger
@@ -373,6 +373,8 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  v_has_rupee boolean;
 begin
   insert into public.users (id, email, full_name, avatar_url)
   values (
@@ -382,17 +384,25 @@ begin
   )
   on conflict (id) do nothing;
 
-  -- v10: Welcome bonus reduced to ₹25
-  insert into public.wallet (user_id, ₹, balance, email, full_name, first_login_at)
-  values (
-    new.id, 25, 25,
-    new.email,
-    new.raw_user_meta_data ->> 'full_name',
-    now()
-  )
-  on conflict (user_id) do nothing;
+  select exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
+  ) into v_has_rupee;
 
-  -- Log the welcome event
+  if v_has_rupee then
+    execute $sql$
+      insert into public.wallet (user_id, balance, "₹", email, full_name, first_login_at)
+      values ($1, 25, 25, $2, $3, now())
+      on conflict (user_id) do nothing
+    $sql$ using new.id, new.email, new.raw_user_meta_data ->> 'full_name';
+  else
+    execute $sql$
+      insert into public.wallet (user_id, balance, email, full_name, first_login_at)
+      values ($1, 25, $2, $3, now())
+      on conflict (user_id) do nothing
+    $sql$ using new.id, new.email, new.raw_user_meta_data ->> 'full_name';
+  end if;
+
   insert into public.transactions (user_id, description, type, amount)
   values (new.id, 'Welcome bonus', 'credit', 25)
   on conflict do nothing;
@@ -408,11 +418,7 @@ create trigger on_auth_user_created
 
 
 -- ------------------------------------------------------------
--- CLAIM_OPPONENT — v10 hardened
--- Pairs you with a genuinely-online waiting player.
--- - Queue TTL: 25s (was 15s) — better for flaky mobile networks
--- - No self-match possible
--- - Returns: { matched, session_id, opponent_id, you_are }
+-- CLAIM_OPPONENT
 -- ------------------------------------------------------------
 create or replace function public.claim_opponent(
   p_game_type text,
@@ -433,14 +439,12 @@ begin
     return json_build_object('matched', false, 'reason', 'not_authenticated');
   end if;
 
-  -- purge stale queue entries (offline > 25s)
   delete from public.matchmaking_queue mq
   using public.users u
   where mq.user_id = u.id
     and mq.game_type = p_game_type
     and u.last_seen < now() - interval '25 seconds';
 
-  -- pick a genuinely-online waiting opponent (NOT me)
   select mq.user_id into v_opponent_id
   from public.matchmaking_queue mq
   join public.users u on u.id = mq.user_id
@@ -455,10 +459,8 @@ begin
     return json_build_object('matched', false);
   end if;
 
-  -- remove both from the queue
   delete from public.matchmaking_queue where user_id in (v_opponent_id, v_me);
 
-  -- create the shared live session
   insert into public.game_sessions (
     game_type, player1_id, player2_id, state, current_turn,
     status, entry_fee, reward, stake_locked
@@ -469,7 +471,6 @@ begin
   )
   returning id into v_session_id;
 
-  -- log the event
   insert into public.game_events (session_id, user_id, event_type, payload)
   values (
     v_session_id, v_me, 'match_created',
@@ -489,7 +490,7 @@ grant execute on function public.claim_opponent(text, integer, integer) to authe
 
 
 -- ------------------------------------------------------------
--- REDEEM_REFERRAL_CODE — ₹25 for referrer and ₹25 for new user (v10)
+-- REDEEM_REFERRAL_CODE
 -- ------------------------------------------------------------
 create or replace function public.redeem_referral_code(p_code text)
 returns json
@@ -501,7 +502,8 @@ declare
   v_referrer_id uuid;
   v_me uuid := auth.uid();
   v_already uuid;
-  v_bonus constant integer := 25;  -- v10: was 50
+  v_bonus constant integer := 25;
+  v_has_rupee boolean;
 begin
   if v_me is null then
     return json_build_object('success', false, 'message', 'Not authenticated.');
@@ -528,17 +530,26 @@ begin
 
   update public.users set referred_by = v_referrer_id where id = v_me;
 
-  update public.wallet
-    set balance = balance + v_bonus,
-        "₹" = "₹" + v_bonus,
-        updated_at = now()
-    where user_id = v_me;
+  select exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
+  ) into v_has_rupee;
 
-  update public.wallet
-    set balance = balance + v_bonus,
-        "₹" = "₹" + v_bonus,
-        updated_at = now()
-    where user_id = v_referrer_id;
+  if v_has_rupee then
+    update public.wallet
+      set balance = balance + v_bonus,
+          "₹" = "₹" + v_bonus,
+          updated_at = now()
+      where user_id = v_me;
+    update public.wallet
+      set balance = balance + v_bonus,
+          "₹" = "₹" + v_bonus,
+          updated_at = now()
+      where user_id = v_referrer_id;
+  else
+    update public.wallet set balance = balance + v_bonus, updated_at = now() where user_id = v_me;
+    update public.wallet set balance = balance + v_bonus, updated_at = now() where user_id = v_referrer_id;
+  end if;
 
   insert into public.transactions (user_id, description, type, amount)
   values (v_me, 'Referral bonus redeemed', 'credit', v_bonus);
@@ -588,14 +599,27 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  v_has_rupee boolean;
 begin
   if new.status = 'approved' and old.status = 'pending' then
-    -- update both canonical + legacy column
-    update public.wallet
-    set balance = balance + new.tokens_to_credit,
-        "₹" = "₹" + new.tokens_to_credit,
-        updated_at = now()
-    where user_id = new.user_id;
+    select exists (
+      select 1 from information_schema.columns
+      where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
+    ) into v_has_rupee;
+
+    if v_has_rupee then
+      update public.wallet
+      set balance = balance + new.tokens_to_credit,
+          "₹" = "₹" + new.tokens_to_credit,
+          updated_at = now()
+      where user_id = new.user_id;
+    else
+      update public.wallet
+      set balance = balance + new.tokens_to_credit,
+          updated_at = now()
+      where user_id = new.user_id;
+    end if;
 
     insert into public.transactions (user_id, description, type, amount)
     values (new.user_id, 'Top-up: UTR ' || new.txn_id, 'credit', new.tokens_to_credit);
@@ -614,7 +638,6 @@ create trigger on_payment_approved
 
 -- ------------------------------------------------------------
 -- MATCH INVITES
--- v10: TTL extended 8s -> 12s (matches frontend INVITE_SECONDS)
 -- ------------------------------------------------------------
 create table if not exists public.match_invites (
   id uuid primary key default gen_random_uuid(),
@@ -688,7 +711,7 @@ grant execute on function public.expire_old_invites() to authenticated;
 
 
 -- ------------------------------------------------------------
--- ACCEPT_MATCH_INVITE — v10 hardened
+-- ACCEPT_MATCH_INVITE
 -- ------------------------------------------------------------
 create or replace function public.accept_match_invite(p_invite_id uuid)
 returns json
@@ -756,14 +779,9 @@ grant execute on function public.accept_match_invite(uuid) to authenticated;
 
 
 -- ============================================================
--- v10.0 NEW RPCs — settlement helpers
+-- Settlement RPCs
 -- ============================================================
 
--- ------------------------------------------------------------
--- END_SESSION_WITH_STATE
--- Called by frontend when a match finishes.
--- Idempotent: only the first caller settles; others get ok:true
--- ------------------------------------------------------------
 create or replace function public.end_session_with_state(
   p_session_id uuid,
   p_final_state jsonb default '{}'::jsonb,
@@ -780,6 +798,7 @@ declare
   v_is_player boolean;
   v_entry integer;
   v_reward integer;
+  v_has_rupee boolean;
 begin
   if v_me is null then
     return json_build_object('ok', false, 'reason', 'not_authenticated');
@@ -798,17 +817,11 @@ begin
     return json_build_object('ok', false, 'reason', 'not_a_player');
   end if;
 
-  -- Idempotency: already settled → return existing outcome
   if v_session.status <> 'active' then
-    return json_build_object(
-      'ok', true,
-      'already_settled', true,
-      'winner_id', v_session.winner_id,
-      'status', v_session.status
-    );
+    return json_build_object('ok', true, 'already_settled', true,
+      'winner_id', v_session.winner_id, 'status', v_session.status);
   end if;
 
-  -- validate winner_id belongs to the session
   if p_winner_id is not null
      and p_winner_id <> v_session.player1_id
      and p_winner_id <> v_session.player2_id then
@@ -825,31 +838,39 @@ begin
     updated_at = now()
   where id = p_session_id;
 
-  v_entry  := v_session.entry_fee;
+  v_entry := v_session.entry_fee;
   v_reward := v_session.reward;
 
-  -- Award the winner (both players already paid entry at matchmaking)
+  select exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
+  ) into v_has_rupee;
+
   if p_winner_id is not null then
-    update public.wallet
-    set balance = balance + v_reward,
-        "₹" = "₹" + v_reward,
-        updated_at = now()
-    where user_id = p_winner_id;
+    if v_has_rupee then
+      execute $sql$
+        update public.wallet
+        set balance = balance + $1, "₹" = "₹" + $1, updated_at = now()
+        where user_id = $2
+      $sql$ using v_reward, p_winner_id;
+    else
+      update public.wallet
+      set balance = balance + v_reward, updated_at = now()
+      where user_id = p_winner_id;
+    end if;
 
     insert into public.transactions (user_id, description, type, amount)
     values (p_winner_id, 'Duel Victory — ' || v_session.game_type, 'credit', v_reward);
 
     insert into public.match_history (user_id, game, opponent, result, reward)
     select p_winner_id, v_session.game_type,
-           coalesce(u.full_name, 'Opponent'),
-           'VICTORY', v_reward
+           coalesce(u.full_name, 'Opponent'), 'VICTORY', v_reward
     from public.users u
     where u.id = case
       when v_session.player1_id = p_winner_id then v_session.player2_id
       else v_session.player1_id
     end;
 
-    -- Loser's history entry
     insert into public.match_history (user_id, game, opponent, result, reward)
     select case when v_session.player1_id = p_winner_id then v_session.player2_id
                 else v_session.player1_id end,
@@ -859,12 +880,17 @@ begin
     from public.users u
     where u.id = p_winner_id;
   else
-    -- Draw: refund both players' entry fee
-    update public.wallet
-    set balance = balance + v_entry,
-        "₹" = "₹" + v_entry,
-        updated_at = now()
-    where user_id in (v_session.player1_id, v_session.player2_id);
+    if v_has_rupee then
+      execute $sql$
+        update public.wallet
+        set balance = balance + $1, "₹" = "₹" + $1, updated_at = now()
+        where user_id in ($2, $3)
+      $sql$ using v_entry, v_session.player1_id, v_session.player2_id;
+    else
+      update public.wallet
+      set balance = balance + v_entry, updated_at = now()
+      where user_id in (v_session.player1_id, v_session.player2_id);
+    end if;
 
     insert into public.transactions (user_id, description, type, amount)
     values (v_session.player1_id, 'Draw refund — ' || v_session.game_type, 'credit', v_entry);
@@ -878,27 +904,16 @@ begin
   end if;
 
   insert into public.game_events (session_id, user_id, event_type, payload)
-  values (
-    p_session_id, v_me, 'session_ended',
-    jsonb_build_object('winner_id', p_winner_id, 'settled_by', v_me)
-  );
+  values (p_session_id, v_me, 'session_ended',
+    jsonb_build_object('winner_id', p_winner_id, 'settled_by', v_me));
 
-  return json_build_object(
-    'ok', true,
-    'winner_id', p_winner_id,
-    'status', 'completed'
-  );
+  return json_build_object('ok', true, 'winner_id', p_winner_id, 'status', 'completed');
 end;
 $$;
 
 grant execute on function public.end_session_with_state(uuid, jsonb, uuid) to authenticated;
 
 
--- ------------------------------------------------------------
--- ABANDON_SESSION
--- Called when a player force-exits mid-game.
--- The abandoning player loses; the other player gets the reward.
--- ------------------------------------------------------------
 create or replace function public.abandon_session(p_session_id uuid)
 returns json
 language plpgsql
@@ -909,14 +924,14 @@ declare
   v_session public.game_sessions;
   v_me uuid := auth.uid();
   v_opponent uuid;
+  v_has_rupee boolean;
 begin
   if v_me is null then
     return json_build_object('ok', false, 'reason', 'not_authenticated');
   end if;
 
   select * into v_session from public.game_sessions
-  where id = p_session_id
-  for update;
+  where id = p_session_id for update;
 
   if v_session is null then
     return json_build_object('ok', false, 'reason', 'not_found');
@@ -930,8 +945,7 @@ begin
     return json_build_object('ok', true, 'already_settled', true);
   end if;
 
-  v_opponent := case
-    when v_me = v_session.player1_id then v_session.player2_id
+  v_opponent := case    when v_me = v_session.player1_id then v_session.player2_id
     else v_session.player1_id
   end;
 
@@ -944,12 +958,22 @@ begin
       updated_at = now()
   where id = p_session_id;
 
+  select exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
+  ) into v_has_rupee;
+
   if v_opponent is not null then
-    update public.wallet
-    set balance = balance + v_session.reward,
-        "₹" = "₹" + v_session.reward,
-        updated_at = now()
-    where user_id = v_opponent;
+    if v_has_rupee then
+      execute $sql$
+        update public.wallet
+        set balance = balance + $1, "₹" = "₹" + $1, updated_at = now()
+        where user_id = $2
+      $sql$ using v_session.reward, v_opponent;
+    else
+      update public.wallet set balance = balance + v_session.reward, updated_at = now()
+      where user_id = v_opponent;
+    end if;
 
     insert into public.transactions (user_id, description, type, amount)
     values (v_opponent, 'Opponent abandoned — ' || v_session.game_type, 'credit', v_session.reward);
@@ -971,11 +995,6 @@ $$;
 grant execute on function public.abandon_session(uuid) to authenticated;
 
 
--- ------------------------------------------------------------
--- REFUND_STAKE_ON_NO_OPPONENT
--- Called when matchmaking times out (no real opponent).
--- Refunds the caller's entry fee exactly once per session.
--- ------------------------------------------------------------
 create or replace function public.refund_stake_on_no_opponent(
   p_game_type text,
   p_entry_fee integer
@@ -987,27 +1006,33 @@ set search_path = public
 as $$
 declare
   v_me uuid := auth.uid();
+  v_has_rupee boolean;
 begin
   if v_me is null then
     return json_build_object('ok', false, 'reason', 'not_authenticated');
   end if;
 
-  -- Remove from queue just in case
   delete from public.matchmaking_queue where user_id = v_me and game_type = p_game_type;
 
-  -- Cancel any open invites for this user+game
   update public.match_invites
   set status = 'cancelled'
-  where from_user_id = v_me
-    and game_type = p_game_type
-    and status = 'open';
+  where from_user_id = v_me and game_type = p_game_type and status = 'open';
 
-  -- Refund
-  update public.wallet
-  set balance = balance + p_entry_fee,
-      "₹" = "₹" + p_entry_fee,
-      updated_at = now()
-  where user_id = v_me;
+  select exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
+  ) into v_has_rupee;
+
+  if v_has_rupee then
+    execute $sql$
+      update public.wallet
+      set balance = balance + $1, "₹" = "₹" + $1, updated_at = now()
+      where user_id = $2
+    $sql$ using p_entry_fee, v_me;
+  else
+    update public.wallet set balance = balance + p_entry_fee, updated_at = now()
+    where user_id = v_me;
+  end if;
 
   insert into public.transactions (user_id, description, type, amount)
   values (v_me, 'Stake refund — no opponent found (' || p_game_type || ')', 'credit', p_entry_fee);
@@ -1020,35 +1045,5 @@ grant execute on function public.refund_stake_on_no_opponent(text, integer) to a
 
 
 -- ============================================================
--- v10.0 — one-time migration for existing ₹50 welcome balances
--- Only affects users created before this schema was applied who
--- still have exactly ₹50 with a single welcome-bonus transaction
--- and no other activity. New users get ₹25 going forward.
--- ============================================================
-do $$
-declare
-  v_user record;
-begin
-  for v_user in
-    select w.user_id, w.balance, w."₹"
-    from public.wallet w
-    where (w.balance = 50 or w."₹" = 50)
-      and not exists (
-        select 1 from public.transactions t
-        where t.user_id = w.user_id
-          and t.description <> 'Welcome bonus'
-      )
-  loop
-    update public.wallet
-    set balance = 25, "₹" = 25, updated_at = now()
-    where user_id = v_user.user_id;
-
-    insert into public.transactions (user_id, description, type, amount)
-    values (v_user.user_id, 'Welcome bonus adjusted to ₹25', 'debit', 25);
-  end loop;
-end $$;
-
-
--- ============================================================
--- END OF SCHEMA v10.0
+-- END OF SCHEMA v10.2
 -- ============================================================
