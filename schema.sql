@@ -1,5 +1,5 @@
 -- ============================================================
--- SkillClash - MASTER SCHEMA v9.1
+-- SkillClash - MASTER SCHEMA v9.2
 -- ============================================================
 -- Includes:
 --   - v4 base: users, wallet, matchmaking, matches, transactions,
@@ -10,6 +10,9 @@
 --   - v9.1: match invite TTL extended 5s -> 8s to match the
 --     matchmaking window (prevents invites expiring while the
 --     inviter is still waiting for a real opponent)
+--   - v9.2: wallet now stores email, full_name, and first_login_at
+--     for easier admin/table-editor viewing. Auto-populated on
+--     signup and kept in sync when profile changes.
 --
 -- Safe to re-run. All statements are idempotent:
 --   add column if not exists / create table if not exists /
@@ -59,13 +62,25 @@ create policy "Users can insert their own profile"
 
 -- ------------------------------------------------------------
 -- WALLET - Default balance is 50 (welcome bonus)
+-- v9.2: Added email, full_name, first_login_at for admin view
 -- ------------------------------------------------------------
 create table if not exists public.wallet (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.users (id) on delete cascade,
-  dummy_token integer not null default 50 check (dummy_token >= 0),
+  ₹ integer not null default 50 check (₹ >= 0),
   updated_at timestamptz not null default now()
 );
+
+-- ============================================================
+-- v9.2 NEW WALLET COLUMNS
+-- ============================================================
+-- Denormalized user info stored directly on the wallet row so
+-- admins can see who owns which balance without joining tables.
+-- These are auto-populated by the trigger below and stay synced.
+-- ============================================================
+alter table public.wallet add column if not exists email text;
+alter table public.wallet add column if not exists full_name text;
+alter table public.wallet add column if not exists first_login_at timestamptz not null default now();
 
 alter table public.wallet enable row level security;
 
@@ -82,6 +97,48 @@ create policy "Users can update their own wallet"
 drop policy if exists "Users can insert their own wallet" on public.wallet;
 create policy "Users can insert their own wallet"
   on public.wallet for insert with check (auth.uid() = user_id);
+
+
+-- ------------------------------------------------------------
+-- BACKFILL: populate v9.2 columns on existing wallet rows
+-- Uses the matching users row for email/full_name.
+-- first_login_at is set to wallet.created_at for existing rows
+-- (best-available approximation of first login).
+-- ------------------------------------------------------------
+update public.wallet w
+set
+  email = coalesce(w.email, u.email),
+  full_name = coalesce(w.full_name, u.full_name),
+  first_login_at = coalesce(w.first_login_at, w.updated_at, now())
+from public.users u
+where w.user_id = u.id
+  and (w.email is null or w.full_name is null);
+
+
+-- ------------------------------------------------------------
+-- SYNC TRIGGER: keep wallet.email / wallet.full_name in sync
+-- whenever the users row is updated (e.g., user renames themselves)
+-- ------------------------------------------------------------
+create or replace function public.sync_wallet_from_users()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.wallet
+  set
+    email = new.email,
+    full_name = new.full_name
+  where user_id = new.id;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_user_profile_updated on public.users;
+create trigger on_user_profile_updated
+  after update of email, full_name on public.users
+  for each row execute procedure public.sync_wallet_from_users();
 
 
 -- ------------------------------------------------------------
@@ -244,6 +301,7 @@ end $$;
 
 -- ------------------------------------------------------------
 -- AUTO-PROVISION NEW USERS - Welcome bonus ₹50
+-- v9.2: also writes email + full_name into the wallet row
 -- ------------------------------------------------------------
 create or replace function public.handle_new_user()
 returns trigger
@@ -260,8 +318,13 @@ begin
   )
   on conflict (id) do nothing;
 
-  insert into public.wallet (user_id, dummy_token)
-  values (new.id, 50)  -- ₹50 welcome bonus
+  insert into public.wallet (user_id, ₹, email, full_name, first_login_at)
+  values (
+    new.id, 50,                                      -- ₹50 welcome bonus
+    new.email,
+    new.raw_user_meta_data ->> 'full_name',
+    now()
+  )
   on conflict (user_id) do nothing;
 
   return new;
@@ -379,8 +442,8 @@ begin
   update public.users set referred_by = v_referrer_id where id = v_me;
 
   -- ₹50 for new user, ₹50 for referrer
-  update public.wallet set dummy_token = dummy_token + 50, updated_at = now() where user_id = v_me;
-  update public.wallet set dummy_token = dummy_token + 50, updated_at = now() where user_id = v_referrer_id;
+  update public.wallet set ₹ = ₹ + 50, updated_at = now() where user_id = v_me;
+  update public.wallet set ₹ = ₹ + 50, updated_at = now() where user_id = v_referrer_id;
 
   insert into public.transactions (user_id, description, type, amount)
   values (v_me, 'Referral bonus redeemed', 'credit', 50);
@@ -432,7 +495,7 @@ as $$
 begin
   if new.status = 'approved' and old.status = 'pending' then
     update public.wallet
-    set dummy_token = dummy_token + new.tokens_to_credit,
+    set ₹ = ₹ + new.tokens_to_credit,
         updated_at = now()
     where user_id = new.user_id;
 
@@ -458,12 +521,6 @@ create trigger on_payment_approved
 
 -- ------------------------------------------------------------
 -- MATCH INVITES
--- A lightweight realtime broadcast that a player is waiting in
--- queue, so others on the dashboard can join them.
---
--- v9.1: expires_at default changed 5s -> 8s to match the
--- matchmaking window. This prevents invites from expiring
--- while the inviter is still waiting for a real opponent.
 -- ------------------------------------------------------------
 create table if not exists public.match_invites (
   id uuid primary key default gen_random_uuid(),
@@ -479,8 +536,6 @@ create table if not exists public.match_invites (
   expires_at timestamptz not null default (now() + interval '8 seconds')
 );
 
--- Ensure existing installs get the new 8s default even if the
--- table was created earlier with a 5s default.
 alter table public.match_invites
   alter column expires_at set default (now() + interval '8 seconds');
 
@@ -492,25 +547,21 @@ create index if not exists match_invites_from_idx
 
 alter table public.match_invites enable row level security;
 
--- Anyone authenticated can see open invites (needed for the popup)
 drop policy if exists "Open invites are visible" on public.match_invites;
 create policy "Open invites are visible"
   on public.match_invites for select
   using (auth.role() = 'authenticated');
 
--- Only the creator can create an invite for themselves
 drop policy if exists "Users can create their own invites" on public.match_invites;
 create policy "Users can create their own invites"
   on public.match_invites for insert
   with check (auth.uid() = from_user_id);
 
--- Only the invite creator or the accepter can update
 drop policy if exists "Users can update invites they created or accepted" on public.match_invites;
 create policy "Users can update invites they created or accepted"
   on public.match_invites for update
   using (auth.uid() = from_user_id or auth.uid() = accepted_by);
 
--- Enable realtime on match_invites
 do $$
 begin
   begin
@@ -524,8 +575,6 @@ end $$;
 
 -- ------------------------------------------------------------
 -- EXPIRE_OLD_INVITES
--- Flips any open invite past its expires_at to 'expired'.
--- Cheap to run; called by the client periodically.
 -- ------------------------------------------------------------
 create or replace function public.expire_old_invites()
 returns void
@@ -546,9 +595,6 @@ grant execute on function public.expire_old_invites() to authenticated;
 
 -- ------------------------------------------------------------
 -- ACCEPT_MATCH_INVITE
--- Atomically accepts an open invite and creates the shared
--- game_session. Uses FOR UPDATE to prevent double-accept races.
--- Returns: { ok, session_id, opponent_id } or { ok:false, reason }
 -- ------------------------------------------------------------
 create or replace function public.accept_match_invite(p_invite_id uuid)
 returns json
@@ -560,7 +606,6 @@ declare
   v_invite public.match_invites;
   v_session_id uuid;
 begin
-  -- Lock the row so two people can't both accept
   select * into v_invite from public.match_invites
   where id = p_invite_id
   for update;
@@ -579,12 +624,10 @@ begin
     return json_build_object('ok', false, 'reason', 'self');
   end if;
 
-  -- Mark accepted
   update public.match_invites
   set status = 'accepted', accepted_by = auth.uid()
   where id = p_invite_id;
 
-  -- Create the shared live game session
   insert into public.game_sessions (
     game_type, player1_id, player2_id, state, current_turn,
     status, entry_fee, reward
@@ -608,5 +651,5 @@ grant execute on function public.accept_match_invite(uuid) to authenticated;
 
 
 -- ============================================================
--- END OF SCHEMA v9.1
+-- END OF SCHEMA v9.2
 -- ============================================================
