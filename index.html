@@ -68,25 +68,6 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
 .grad-text { background: linear-gradient(90deg, #5b3df0 15%, #f0a742 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-  #balance-value {
-  display: inline-flex;
-  align-items: center;
-  font-variant-numeric: tabular-nums;
-  vertical-align: middle;
-}
-#balance-value .digit-roll {
-  display: inline-block;
-  height: 1em;
-  overflow: hidden;
-  line-height: 1em;
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-}
-#balance-value .digit-roll > span {
-  display: block;
-  height: 1em;
-  line-height: 1em;
-  text-align: center;
-}
 /* ===== BRAND LOGO ===== */
 .brand, .brand-small {
   display: flex; align-items: center; gap: 7px;
@@ -2142,68 +2123,11 @@ async function subscribeToWalletRealtime() {
     })
     .subscribe();
 }
-/// ===== SLOT-MACHINE DIGIT ROLL (no borders) =====
+// ===== BALANCE UPDATE (no animation) =====
 function animateBalanceChange(fromVal, toVal) {
   const el = document.getElementById('balance-value');
   if (!el) return;
-
-  const from = String(Number(fromVal) || 0);
-  const to   = String(Number(toVal)   || 0);
-
-  if (from === to) {
-    el.textContent = Number(to).toLocaleString('en-IN');
-    return;
-  }
-
-  const isCredit = Number(to) > Number(from);
-  const flashColor = isCredit ? '#16c46b' : '#e2555a';
-  const originalColor = el.style.color || '';
-
-  // Align right by padding shorter string
-  const maxLen = Math.max(from.length, to.length);
-  const fromPad = from.padStart(maxLen, ' ');
-  const toPad   = to.padStart(maxLen, ' ');
-
-  let html = '';
-  for (let i = 0; i < maxLen; i++) {
-    const f = fromPad[i];
-    const t = toPad[i];
-
-    // Non-digit or unchanged digit → static
-    if (f === t || isNaN(parseInt(f)) || isNaN(parseInt(t))) {
-      html += `<span style="display:inline-block;">${t}</span>`;
-      continue;
-    }
-
-    // Build roll strip for this digit
-    const fromDigit = parseInt(f);
-    const toDigit   = parseInt(t);
-    const steps = fromDigit <= toDigit
-      ? Array.from({ length: toDigit - fromDigit + 1 }, (_, k) => fromDigit + k)
-      : Array.from({ length: 10 - fromDigit + toDigit + 1 }, (_, k) => (fromDigit + k) % 10);
-
-    const strip = steps.map(d => `<span>${d}</span>`).join('');
-    html += `<span class="digit-roll" style="--dist:${steps.length - 1}em;">${strip}</span>`;
-  }
-
-  el.innerHTML = html;
-  el.style.transition = 'color 0.3s ease';
-  el.style.color = flashColor;
-
-  // Trigger roll after a frame
-  requestAnimationFrame(() => {
-    el.querySelectorAll('.digit-roll').forEach(r => {
-      r.style.transform = `translateY(calc(-1 * var(--dist)))`;
-    });
-  });
-
-  // Restore color
-  setTimeout(() => { el.style.color = originalColor; }, 500);
-
-  // Settle to final plain value
-  setTimeout(() => {
-    el.innerHTML = Number(to).toLocaleString('en-IN');
-  }, 900);
+  el.textContent = Number(toVal || 0).toLocaleString('en-IN');
 }
 async function loadTransactions() {
   try {
@@ -2230,14 +2154,7 @@ async function recordMatch(game, opponent, result, reward) {
   try { await client.from('match_history').insert({ user_id: currentUser.id, game, opponent, result, reward }); } catch (e) {}
 }
 function updateUI() {
-if (balanceEl) {
-  const prevShown = Number(balanceEl.textContent.replace(/,/g, '').trim()) || 0;
-  if (prevShown !== currentBalance && prevShown !== 0) {
-    animateBalanceChange(prevShown, currentBalance);
-  } else {
-    balanceEl.textContent = currentBalance.toLocaleString('en-IN');
-  }
-}
+if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString('en-IN');
   const pct = Math.min(100, Math.round((currentBalance / CASHOUT_MIN) * 100));
   const pf = document.getElementById('progress-fill'); if (pf) pf.style.width = pct + '%';
   const pt = document.getElementById('progress-text'); if (pt) pt.textContent = formatRupees(currentBalance) + ' / ' + formatRupees(CASHOUT_MIN);
