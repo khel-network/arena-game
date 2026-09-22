@@ -68,6 +68,25 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
 .grad-text { background: linear-gradient(90deg, #5b3df0 15%, #f0a742 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
+  #balance-value {
+  display: inline-flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+#balance-value .digit-roll {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  line-height: 1em;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#balance-value .digit-roll > span {
+  display: block;
+  height: 1em;
+  line-height: 1em;
+  text-align: center;
+}
 /* ===== BRAND LOGO ===== */
 .brand, .brand-small {
   display: flex; align-items: center; gap: 7px;
@@ -2123,45 +2142,68 @@ async function subscribeToWalletRealtime() {
     })
     .subscribe();
 }
-// ===== ANIMATED BALANCE COUNTER (no borders, smooth digit roll) =====
+/// ===== SLOT-MACHINE DIGIT ROLL (no borders) =====
 function animateBalanceChange(fromVal, toVal) {
   const el = document.getElementById('balance-value');
   if (!el) return;
-  const from = Number(fromVal) || 0;
-  const to = Number(toVal) || 0;
 
-  // If values are equal, just render
-  if (from === to) { renderBalanceDigits(to); return; }
+  const from = String(Number(fromVal) || 0);
+  const to   = String(Number(toVal)   || 0);
 
-  // Pulse color (credit = green, debit = red)
-  const isCredit = to > from;
-  const flashColor = isCredit ? '#16c46b' : '#e2555a';
-  const originalColor = getComputedStyle(el).color;
-
-  // Animate the number with a smooth ease
-  const duration = 700;
-  const start = performance.now();
-  function tick(now) {
-    const progress = Math.min((now - start) / duration, 1);
-    // easeOutCubic
-    const eased = 1 - Math.pow(1 - progress, 3);
-    const current = Math.round(from + (to - from) * eased);
-    renderBalanceDigits(current);
-    if (progress < 1) requestAnimationFrame(tick);
+  if (from === to) {
+    el.textContent = Number(to).toLocaleString('en-IN');
+    return;
   }
-  requestAnimationFrame(tick);
 
-  // Flash the parent badge's text color briefly (no border added)
-  el.style.transition = 'color 0.25s ease';
+  const isCredit = Number(to) > Number(from);
+  const flashColor = isCredit ? '#16c46b' : '#e2555a';
+  const originalColor = el.style.color || '';
+
+  // Align right by padding shorter string
+  const maxLen = Math.max(from.length, to.length);
+  const fromPad = from.padStart(maxLen, ' ');
+  const toPad   = to.padStart(maxLen, ' ');
+
+  let html = '';
+  for (let i = 0; i < maxLen; i++) {
+    const f = fromPad[i];
+    const t = toPad[i];
+
+    // Non-digit or unchanged digit → static
+    if (f === t || isNaN(parseInt(f)) || isNaN(parseInt(t))) {
+      html += `<span style="display:inline-block;">${t}</span>`;
+      continue;
+    }
+
+    // Build roll strip for this digit
+    const fromDigit = parseInt(f);
+    const toDigit   = parseInt(t);
+    const steps = fromDigit <= toDigit
+      ? Array.from({ length: toDigit - fromDigit + 1 }, (_, k) => fromDigit + k)
+      : Array.from({ length: 10 - fromDigit + toDigit + 1 }, (_, k) => (fromDigit + k) % 10);
+
+    const strip = steps.map(d => `<span>${d}</span>`).join('');
+    html += `<span class="digit-roll" style="--dist:${steps.length - 1}em;">${strip}</span>`;
+  }
+
+  el.innerHTML = html;
+  el.style.transition = 'color 0.3s ease';
   el.style.color = flashColor;
-  setTimeout(() => { el.style.color = originalColor; }, 500);
-}
 
-function renderBalanceDigits(value) {
-  const el = document.getElementById('balance-value');
-  if (!el) return;
-  // Just show the number with Indian commas, no borders, no wrappers
-  el.textContent = Number(value).toLocaleString('en-IN');
+  // Trigger roll after a frame
+  requestAnimationFrame(() => {
+    el.querySelectorAll('.digit-roll').forEach(r => {
+      r.style.transform = `translateY(calc(-1 * var(--dist)))`;
+    });
+  });
+
+  // Restore color
+  setTimeout(() => { el.style.color = originalColor; }, 500);
+
+  // Settle to final plain value
+  setTimeout(() => {
+    el.innerHTML = Number(to).toLocaleString('en-IN');
+  }, 900);
 }
 async function loadTransactions() {
   try {
@@ -2189,9 +2231,11 @@ async function recordMatch(game, opponent, result, reward) {
 }
 function updateUI() {
 if (balanceEl) {
-  const prevShown = Number(balanceEl.textContent.replace(/,/g, '')) || 0;
-  if (prevShown !== currentBalance) {
+  const prevShown = Number(balanceEl.textContent.replace(/,/g, '').trim()) || 0;
+  if (prevShown !== currentBalance && prevShown !== 0) {
     animateBalanceChange(prevShown, currentBalance);
+  } else {
+    balanceEl.textContent = currentBalance.toLocaleString('en-IN');
   }
 }
   const pct = Math.min(100, Math.round((currentBalance / CASHOUT_MIN) * 100));
@@ -2262,6 +2306,7 @@ logoutConfirmBtn?.addEventListener('click', async () => {
   if (matchmakingInterval) clearInterval(matchmakingInterval);
   if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {} }
   if (inviteSubscription) { try { await inviteSubscription.unsubscribe(); } catch (e) {} }
+  if (walletRealtimeChannel) { try { await client.removeChannel(walletRealtimeChannel); } catch (e) {} walletRealtimeChannel = null; }
   if (inviteExpireTimer) clearTimeout(inviteExpireTimer);
   if (inviteExpireInterval) clearInterval(inviteExpireInterval);
   if (currentInviteId && currentUser) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('from_user_id', currentUser.id); } catch (e) {} }
@@ -4224,7 +4269,7 @@ async function joinLiveSession(liveSession) {
 }
 function showNoOpponentFound() {
   matchmakingLock = false;
-  inProgress = false;
+  inQueue = false;      // ← fix
   const refAmt = document.getElementById('no-opp-refund');
   if (refAmt) refAmt.textContent = currentEntryFee;
   if (matchOverlay) matchOverlay.classList.add('hidden');
@@ -4565,9 +4610,10 @@ async function initDashboard() {
     await loadTransactions();
     await loadMatchHistory();
     await loadReferralInfo();
-    updateUI();
+       updateUI();
     renderGameCards();
     startPresenceHeartbeat();
+    subscribeToWalletRealtime();   // ← ADD THIS ONE LINE
     subscribeToInvites();
     document.getElementById('page-landing').style.display = 'none';
     document.getElementById('page-container').style.display = 'none';
