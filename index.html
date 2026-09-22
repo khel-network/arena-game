@@ -2080,22 +2080,88 @@ function setUserDisplayName(name) {
 }
 async function loadWallet() {
   try {
-    const { data, error } = await client.from('wallet').select('dummy_token').eq('user_id', currentUser.id).single();
+    const { data, error } = await client.from('wallet').select('balance').eq('user_id', currentUser.id).single();
     if (error) throw error;
-    currentBalance = data?.dummy_token || 0;
+    currentBalance = data?.balance || 0;
   } catch (e) {
     if (e.message && e.message.includes('No rows found')) {
-      try { await client.from('wallet').insert({ user_id: currentUser.id, dummy_token: 0 }); currentBalance = 0; } catch (err) { currentBalance = 0; }
+      try { await client.from('wallet').insert({ user_id: currentUser.id, balance: 0 }); currentBalance = 0; } catch (err) { currentBalance = 0; }
     } else currentBalance = 0;
   }
 }
 async function persistWalletDelta(delta) {
-  let { data: wallet, error } = await client.from('wallet').select('dummy_token').eq('user_id', currentUser.id).single();
-  if (error || !wallet) { await client.from('wallet').insert({ user_id: currentUser.id, dummy_token: 0 }); wallet = { dummy_token: 0 }; }
-  const newBalance = Math.max(0, (wallet.dummy_token || 0) + delta);
-  await client.from('wallet').update({ dummy_token: newBalance, updated_at: new Date().toISOString() }).eq('user_id', currentUser.id);
+  let { data: wallet, error } = await client.from('wallet').select('balance').eq('user_id', currentUser.id).single();
+  if (error || !wallet) {
+    await client.from('wallet').insert({ user_id: currentUser.id, balance: 0 });
+    wallet = { balance: 0 };
+  }
+  const newBalance = Math.max(0, (wallet.balance || 0) + delta);
+  await client.from('wallet').update({ balance: newBalance, updated_at: new Date().toISOString() }).eq('user_id', currentUser.id);
   currentBalance = newBalance;
   return newBalance;
+}
+  // ===== REALTIME WALLET SYNC =====
+let walletRealtimeChannel = null;
+async function subscribeToWalletRealtime() {
+  if (walletRealtimeChannel) { try { await client.removeChannel(walletRealtimeChannel); } catch (e) {} walletRealtimeChannel = null; }
+  walletRealtimeChannel = client
+    .channel('wallet-' + currentUser.id)
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'wallet',
+      filter: 'user_id=eq.' + currentUser.id
+    }, (payload) => {
+      const newBal = payload.new?.balance;
+      if (typeof newBal === 'number' && newBal !== currentBalance) {
+        const oldBal = currentBalance;
+        currentBalance = newBal;
+        animateBalanceChange(oldBal, newBal);
+        // Also refresh transactions list quietly
+        loadTransactions().then(() => { renderTxModalList(); renderLedger(); });
+      }
+    })
+    .subscribe();
+}
+// ===== ANIMATED BALANCE COUNTER (no borders, smooth digit roll) =====
+function animateBalanceChange(fromVal, toVal) {
+  const el = document.getElementById('balance-value');
+  if (!el) return;
+  const from = Number(fromVal) || 0;
+  const to = Number(toVal) || 0;
+
+  // If values are equal, just render
+  if (from === to) { renderBalanceDigits(to); return; }
+
+  // Pulse color (credit = green, debit = red)
+  const isCredit = to > from;
+  const flashColor = isCredit ? '#16c46b' : '#e2555a';
+  const originalColor = getComputedStyle(el).color;
+
+  // Animate the number with a smooth ease
+  const duration = 700;
+  const start = performance.now();
+  function tick(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    // easeOutCubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(from + (to - from) * eased);
+    renderBalanceDigits(current);
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // Flash the parent badge's text color briefly (no border added)
+  el.style.transition = 'color 0.25s ease';
+  el.style.color = flashColor;
+  setTimeout(() => { el.style.color = originalColor; }, 500);
+}
+
+function renderBalanceDigits(value) {
+  const el = document.getElementById('balance-value');
+  if (!el) return;
+  // Just show the number with Indian commas, no borders, no wrappers
+  el.textContent = Number(value).toLocaleString('en-IN');
 }
 async function loadTransactions() {
   try {
@@ -2122,7 +2188,12 @@ async function recordMatch(game, opponent, result, reward) {
   try { await client.from('match_history').insert({ user_id: currentUser.id, game, opponent, result, reward }); } catch (e) {}
 }
 function updateUI() {
-  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString('en-IN');
+if (balanceEl) {
+  const prevShown = Number(balanceEl.textContent.replace(/,/g, '')) || 0;
+  if (prevShown !== currentBalance) {
+    animateBalanceChange(prevShown, currentBalance);
+  }
+}
   const pct = Math.min(100, Math.round((currentBalance / CASHOUT_MIN) * 100));
   const pf = document.getElementById('progress-fill'); if (pf) pf.style.width = pct + '%';
   const pt = document.getElementById('progress-text'); if (pt) pt.textContent = formatRupees(currentBalance) + ' / ' + formatRupees(CASHOUT_MIN);
