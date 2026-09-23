@@ -2802,21 +2802,73 @@ async function checkPaymentReturn() {
   else if (status === 'timeout') { showToast('Payment timed out. Please try again.', 'error'); window.history.replaceState({}, document.title, window.location.pathname); }
 }
 
-document.getElementById('cashout-submit-btn')?.addEventListener('click', function() {
+document.getElementById('cashout-submit-btn')?.addEventListener('click', async function() {
   if (cashoutLock) return;
   const upi = document.getElementById('cashout-upi')?.value.trim();
-  const amount = parseFloat(document.getElementById('cashout-amount')?.value);
+  const amount = parseInt(document.getElementById('cashout-amount')?.value);
   const st = document.getElementById('cashout-status-msg');
   if (!st) return;
+
   st.className = 'refer-status-msg';
-  if (!upi || upi.length < 3) { st.textContent = 'Please enter a valid UPI ID.'; st.className = 'refer-status-msg error'; return; }
-  if (!amount || amount < CASHOUT_MIN) { st.textContent = 'Minimum withdrawal is ₹' + CASHOUT_MIN + '.'; st.className = 'refer-status-msg error'; return; }
-  if (amount > currentBalance) { st.textContent = 'Insufficient balance.'; st.className = 'refer-status-msg error'; return; }
+  st.textContent = '';
+
+  // Validation
+  if (!upi || upi.length < 3) {
+    st.textContent = 'Please enter a valid UPI ID.';
+    st.className = 'refer-status-msg error';
+    return;
+  }
+  if (!amount || amount < CASHOUT_MIN) {
+    st.textContent = 'Minimum withdrawal is ₹' + CASHOUT_MIN + '.';
+    st.className = 'refer-status-msg error';
+    return;
+  }
+  if (amount > currentBalance) {
+    st.textContent = 'Insufficient balance.';
+    st.className = 'refer-status-msg error';
+    return;
+  }
+
   cashoutLock = true;
-  st.textContent = `Withdrawal request for ₹${amount} to ${upi} submitted. It will be processed in 7–8 working hours.;
-  st.className = 'refer-status-msg success';
-  showToast('Withdrawal request submitted!', 'credit');
-  setTimeout(() => { cashoutLock = false; }, 2000);
+  const btn = this;
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = 'Submitting...';
+
+  try {
+    // Call the real RPC — this inserts into withdrawal_requests AND deducts wallet
+    const { data, error } = await client.rpc('create_withdrawal_request', {
+      p_upi_id: upi,
+      p_amount: amount
+    });
+
+    if (error) throw error;
+
+    if (data && data.ok) {
+      st.textContent = data.message || `Withdrawal request for ₹${amount} submitted. Processing in 7–8 hours.`;
+      st.className = 'refer-status-msg success';
+      showToast('Withdrawal request submitted!', 'credit');
+
+      // Clear form
+      document.getElementById('cashout-upi').value = '';
+      document.getElementById('cashout-amount').value = '';
+
+      // Refresh wallet
+      await loadWallet();
+      await loadTransactions();
+      updateUI();
+    } else {
+      st.textContent = data?.message || 'Could not submit withdrawal.';
+      st.className = 'refer-status-msg error';
+    }
+  } catch (e) {
+    st.textContent = 'Error: ' + (e.message || 'Please try again.');
+    st.className = 'refer-status-msg error';
+  } finally {
+    cashoutLock = false;
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
 });
 
 /* ============================================================
