@@ -1584,7 +1584,7 @@ body.in-app .site-footer { display: none !important; }
 <div class="support-icon"><i class="fab fa-instagram"></i></div>
 <div class="support-info">
 <div class="support-title">Withdrawal not credited?</div>
-<div class="support-sub">DM us on Instagram <strong>@skillclash.in_</strong> — resolution in <strong>60 minutes</strong>.</div>
+<div class="support-sub">DM us on Instagram <strong>@skillclash.in_</strong> </div>
 </div>
 <div class="support-cta"><i class="fab fa-instagram"></i> Contact</div>
 </a>
@@ -1599,7 +1599,7 @@ body.in-app .site-footer { display: none !important; }
 <input type="number" id="cashout-amount" placeholder="Enter amount" min="150" step="10" />
 </div>
 <button id="cashout-submit-btn">Submit Withdrawal Request</button>
-<div class="cashout-info-note">Processing Time: Withdrawals are processed within <strong>7–8 hours</strong>. Need help? DM <strong>@skillclash.in_</strong> on Instagram — response in <strong>60 minutes</strong>.</div>
+<div class="cashout-info-note">Processing Time: Withdrawals are processed within <strong>7–8 hours</strong>.
 <p id="cashout-status-msg" class="refer-status-msg" style="margin-top:8px;"></p>
 </div>
 </div>
@@ -2813,7 +2813,7 @@ document.getElementById('cashout-submit-btn')?.addEventListener('click', functio
   if (!amount || amount < CASHOUT_MIN) { st.textContent = 'Minimum withdrawal is ₹' + CASHOUT_MIN + '.'; st.className = 'refer-status-msg error'; return; }
   if (amount > currentBalance) { st.textContent = 'Insufficient balance.'; st.className = 'refer-status-msg error'; return; }
   cashoutLock = true;
-  st.textContent = `Withdrawal request for ₹${amount} to ${upi} submitted. It will be processed in 7–8 hours. Need help? DM @skillclash.in_ on Instagram (60 min response).`;
+  st.textContent = `Withdrawal request for ₹${amount} to ${upi} submitted. It will be processed in 7–8 working hours.;
   st.className = 'refer-status-msg success';
   showToast('Withdrawal request submitted!', 'credit');
   setTimeout(() => { cashoutLock = false; }, 2000);
