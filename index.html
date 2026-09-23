@@ -309,40 +309,17 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   color: #fff;
   font-size: 1.2rem;
 }
-.support-banner .support-info {
-  flex: 1;
-  min-width: 0;
-}
-.support-banner .support-title {
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: #161522;
-  margin-bottom: 2px;
-}
-.support-banner .support-sub {
-  font-size: 0.72rem;
-  color: #5c5a6e;
-  line-height: 1.4;
-}
+.support-banner .support-info { flex: 1; min-width: 0; }
+.support-banner .support-title { font-weight: 700; font-size: 0.85rem; color: #161522; margin-bottom: 2px; }
+.support-banner .support-sub { font-size: 0.72rem; color: #5c5a6e; line-height: 1.4; }
 .support-banner .support-cta {
-  padding: 8px 14px;
-  border-radius: 100px;
+  padding: 8px 14px; border-radius: 100px;
   background: linear-gradient(135deg, #e1306c, #fd1d1d);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.72rem;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: 0.2s;
-  flex-shrink: 0;
-  text-decoration: none;
+  color: #fff; font-weight: 700; font-size: 0.72rem;
+  white-space: nowrap; display: flex; align-items: center; gap: 5px;
+  transition: 0.2s; flex-shrink: 0; text-decoration: none;
 }
-.support-banner .support-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(225, 48, 108, 0.3);
-}
+.support-banner .support-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(225, 48, 108, 0.3); }
 
 /* ===== PAGE STYLES ===== */
 .page-content { max-width: 800px; margin: 0 auto; padding: 30px 20px; }
@@ -364,85 +341,71 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .token-badge:hover { border-color: #5b3df0; background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: #5b3df0; }
 .app-wrap .token-badge .rupee-circle { display: inline-flex; align-items: center; justify-content: center; background: #f5c842; color: #000; border-radius: 50%; width: 26px; height: 26px; font-size: 0.8rem; font-weight: 800; }
 .app-wrap .user-profile-chip { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.7); border: 1px solid #eee9f7; border-radius: 100px; padding: 4px 10px 4px 4px; cursor: pointer; transition: 0.2s; touch-action: manipulation; }
-  /* ===== NOTIFICATION BELL ===== */
+
+/* ===== NOTIFICATION BELL ===== */
 .app-wrap .notification-bell {
   position: relative;
-  width: 38px;
-  height: 38px;
+  width: 38px; height: 38px;
   border-radius: 50%;
   background: rgba(255,255,255,0.85);
   border: 1px solid #eee9f7;
   color: #5c5a6e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   font-size: 1rem;
   cursor: pointer;
   transition: 0.2s;
   touch-action: manipulation;
   flex-shrink: 0;
 }
-.app-wrap .notification-bell:hover {
-  border-color: #5b3df0;
-  color: #5b3df0;
-  transform: translateY(-1px);
-}
-.app-wrap .notification-bell.has-unread {
-  color: #5b3df0;
-  border-color: #b8a8f0;
-}
+.app-wrap .notification-bell:hover { border-color: #5b3df0; color: #5b3df0; transform: translateY(-1px); }
+.app-wrap .notification-bell.has-unread { color: #5b3df0; border-color: #b8a8f0; }
 .app-wrap .notification-count {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  position: absolute; top: -4px; right: -4px;
+  min-width: 18px; height: 18px; padding: 0 5px;
   border-radius: 100px;
   background: linear-gradient(135deg, #e2555a, #f07075);
-  color: #fff;
-  font-size: 0.6rem;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #fff; font-size: 0.6rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
   box-shadow: 0 2px 6px rgba(226,85,90,0.4);
   line-height: 1;
   font-family: 'Poppins', sans-serif;
 }
 .app-wrap .notification-count.hidden { display: none !important; }
 
-/* ===== NOTIFICATIONS PANEL (slide-down) ===== */
+/* ===== NOTIFICATIONS POPUP (floats below the bell) ===== */
 .app-wrap .notif-panel-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(22,21,34,0.35);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: transparent;
   display: none;
   z-index: 1500;
 }
-.app-wrap .notif-panel-overlay.show { display: block; animation: fadeIn 0.2s ease; }
+.app-wrap .notif-panel-overlay.show { display: block; }
+
 .app-wrap .notif-panel {
   position: fixed;
-  top: 0;
-  right: 0;
-  width: 100%;
-  max-width: 420px;
-  height: 100vh;
+  top: 66px;
+  right: 12px;
+  width: 340px;
+  max-width: calc(100vw - 24px);
+  max-height: 460px;
   background: #fff;
-  box-shadow: -10px 0 40px rgba(20,15,50,0.15);
+  border: 1px solid #eee9f7;
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(20,15,50,0.18);
   z-index: 1501;
   display: flex;
   flex-direction: column;
-  animation: notifSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+  animation: notifPopIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-@keyframes notifSlideIn {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+@keyframes notifPopIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
 }
+
 .app-wrap .notif-header {
-  padding: 18px 20px 14px;
+  padding: 14px 16px 12px;
   border-bottom: 1px solid #f0eef8;
   display: flex;
   justify-content: space-between;
@@ -450,81 +413,77 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   flex-shrink: 0;
   background: linear-gradient(135deg, #f3f0ff, #fdf5ee);
 }
-.app-wrap .notif-header h3 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #161522;
-}
-.app-wrap .notif-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.app-wrap .notif-mark-all-btn {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #5b3df0;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: rgba(91,61,240,0.08);
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.app-wrap .notif-mark-all-btn:hover { background: rgba(91,61,240,0.15); }
+.app-wrap .notif-header h3 { font-family: 'Poppins', sans-serif; font-size: 0.95rem; font-weight: 800; color: #161522; }
+.app-wrap .notif-header-actions { display: flex; align-items: center; gap: 8px; }
 .app-wrap .notif-close-btn {
-  width: 30px;
-  height: 30px;
+  width: 28px; height: 28px;
   border-radius: 50%;
   background: #fff;
   border: 1px solid #eee9f7;
   color: #5c5a6e;
-  font-size: 1rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   transition: 0.2s;
 }
 .app-wrap .notif-close-btn:hover { color: #e2555a; transform: rotate(90deg); }
+
 .app-wrap .notif-body {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 6px 0;
   -webkit-overflow-scrolling: touch;
+  min-height: 80px;
 }
+
+.app-wrap .notif-footer {
+  border-top: 1px solid #f0eef8;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  background: #fafafc;
+}
+.app-wrap .notif-mark-all-link {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #5b3df0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+.app-wrap .notif-mark-all-link:hover { background: rgba(91,61,240,0.08); }
+.app-wrap .notif-mark-all-link:disabled { opacity: 0.4; cursor: not-allowed; }
+
 .app-wrap .notif-item {
   display: flex;
   gap: 12px;
-  padding: 14px 20px;
+  padding: 12px 16px;
   border-bottom: 1px solid #f5f4fa;
   cursor: pointer;
   transition: 0.15s;
   position: relative;
 }
+.app-wrap .notif-item:last-child { border-bottom: none; }
 .app-wrap .notif-item:hover { background: #faf9ff; }
 .app-wrap .notif-item.unread { background: linear-gradient(135deg, #f8f5ff, #fdf8ff); }
 .app-wrap .notif-item.unread::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
+  left: 0; top: 0; bottom: 0;
   width: 3px;
   background: linear-gradient(180deg, #5b3df0, #7c5cf5);
 }
 .app-wrap .notif-icon-circle {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
+  width: 36px; height: 36px; min-width: 36px;
   border-radius: 50%;
   background: linear-gradient(135deg, #ede9fe, #ddd6fe);
   color: #5b3df0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.92rem;
 }
 .app-wrap .notif-icon-circle.gift { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
 .app-wrap .notif-icon-circle.check { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; }
@@ -532,40 +491,14 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .notif-icon-circle.fire { background: linear-gradient(135deg, #ffedd5, #fed7aa); color: #c2410c; }
 .app-wrap .notif-icon-circle.promo { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #9d174d; }
 .app-wrap .notif-content { flex: 1; min-width: 0; }
-.app-wrap .notif-title {
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: #161522;
-  margin-bottom: 3px;
-  line-height: 1.3;
-}
-.app-wrap .notif-body-text {
-  font-size: 0.75rem;
-  color: #5c5a6e;
-  line-height: 1.45;
-  margin-bottom: 4px;
-}
-.app-wrap .notif-time {
-  font-size: 0.65rem;
-  color: #918fa3;
-}
-.app-wrap .notif-empty {
-  padding: 60px 20px;
-  text-align: center;
-  color: #918fa3;
-}
-.app-wrap .notif-empty i {
-  font-size: 3rem;
-  margin-bottom: 12px;
-  opacity: 0.3;
-  color: #5b3df0;
-}
-.app-wrap .notif-empty p {
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
+.app-wrap .notif-title { font-weight: 700; font-size: 0.82rem; color: #161522; margin-bottom: 3px; line-height: 1.3; }
+.app-wrap .notif-body-text { font-size: 0.72rem; color: #5c5a6e; line-height: 1.45; margin-bottom: 4px; }
+.app-wrap .notif-time { font-size: 0.62rem; color: #918fa3; }
+.app-wrap .notif-empty { padding: 42px 20px; text-align: center; color: #918fa3; }
+.app-wrap .notif-empty i { font-size: 2.4rem; margin-bottom: 10px; opacity: 0.35; color: #5b3df0; }
+.app-wrap .notif-empty p { font-size: 0.8rem; line-height: 1.5; }
 
-/* ===== MATCH BLOCKED ERROR POPUP (shown inside matchmaking modal) ===== */
+/* ===== MATCH BLOCKED ERROR POPUP ===== */
 .app-wrap .match-blocked-box {
   margin: 14px 0;
   padding: 14px 16px;
@@ -575,30 +508,16 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   text-align: center;
 }
 .app-wrap .match-blocked-box .blocked-icon {
-  width: 48px;
-  height: 48px;
+  width: 48px; height: 48px;
   margin: 0 auto 10px;
   border-radius: 50%;
   background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   color: #e2555a;
   font-size: 1.4rem;
 }
-.app-wrap .match-blocked-box h4 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #991b1b;
-  margin-bottom: 4px;
-}
-.app-wrap .match-blocked-box p {
-  font-size: 0.78rem;
-  color: #7f1d1d;
-  line-height: 1.4;
-  margin-bottom: 10px;
-}
+.app-wrap .match-blocked-box h4 { font-family: 'Poppins', sans-serif; font-size: 0.95rem; font-weight: 800; color: #991b1b; margin-bottom: 4px; }
+.app-wrap .match-blocked-box p { font-size: 0.78rem; color: #7f1d1d; line-height: 1.4; margin-bottom: 10px; }
 .app-wrap .match-blocked-box .blocked-refund {
   display: inline-block;
   font-size: 0.72rem;
@@ -610,65 +529,23 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   margin-top: 2px;
 }
 
-/* ===== MATCH HISTORY (nicer table) ===== */
+/* ===== MATCH HISTORY ===== */
 .app-wrap .ledger-table.matches-table td { vertical-align: middle; }
-.app-wrap .ledger-table.matches-table .game-cell {
-  font-weight: 600;
-  font-size: 0.72rem;
-  color: #161522;
-  max-width: 110px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.app-wrap .ledger-table.matches-table .opp-cell {
-  font-size: 0.7rem;
-  color: #5c5a6e;
-  max-width: 90px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.app-wrap .badge-draw {
-  background: rgba(145,143,163,0.12);
-  color: #918fa3;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-weight: 700;
-  font-size: 0.6rem;
-}
+.app-wrap .ledger-table.matches-table .game-cell { font-weight: 600; font-size: 0.72rem; color: #161522; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-wrap .ledger-table.matches-table .opp-cell { font-size: 0.7rem; color: #5c5a6e; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-wrap .badge-draw { background: rgba(145,143,163,0.12); color: #918fa3; padding: 1px 6px; border-radius: 4px; font-weight: 700; font-size: 0.6rem; }
 .app-wrap .ledger-table .amount-credit { color: #16c46b; font-weight: 700; }
 .app-wrap .ledger-table .amount-debit { color: #e2555a; font-weight: 700; }
 .app-wrap .ledger-table .amount-draw { color: #918fa3; font-weight: 700; }
-.app-wrap .ledger-table .time-cell {
-  color: #918fa3;
-  font-size: 0.65rem;
-  white-space: nowrap;
-}
+.app-wrap .ledger-table .time-cell { color: #918fa3; font-size: 0.65rem; white-space: nowrap; }
 
-/* ===== TRANSACTION LEDGER (nicer table) ===== */
-.app-wrap .ledger-table.tx-table .desc-cell {
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 500;
-  font-size: 0.72rem;
-  color: #161522;
-}
+/* ===== TRANSACTION LEDGER ===== */
+.app-wrap .ledger-table.tx-table .desc-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; font-size: 0.72rem; color: #161522; }
 .app-wrap .ledger-table.tx-table .type-cell { white-space: nowrap; }
-.app-wrap .ledger-table.tx-table .amt-cell {
-  font-weight: 700;
-  white-space: nowrap;
-  font-family: 'Poppins', sans-serif;
-}
-.app-wrap .ledger-table.tx-table .date-cell {
-  color: #918fa3;
-  font-size: 0.62rem;
-  white-space: nowrap;
-}
+.app-wrap .ledger-table.tx-table .amt-cell { font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif; }
+.app-wrap .ledger-table.tx-table .date-cell { color: #918fa3; font-size: 0.62rem; white-space: nowrap; }
 
-/* ===== NOTIFICATIONS VIEW (in nav tabs section) ===== */
+/* ===== NOTIFICATIONS VIEW (full page in dashboard) ===== */
 .app-wrap .notif-view-item {
   display: flex;
   gap: 12px;
@@ -679,18 +556,11 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   margin-bottom: 8px;
   transition: 0.15s;
 }
-.app-wrap .notif-view-item.unread {
-  background: linear-gradient(135deg, #f8f5ff, #fdf8ff);
-  border-color: #ddd6fe;
-}
+.app-wrap .notif-view-item.unread { background: linear-gradient(135deg, #f8f5ff, #fdf8ff); border-color: #ddd6fe; }
 .app-wrap .notif-view-item .notif-icon-circle {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
+  width: 38px; height: 38px; min-width: 38px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   font-size: 0.95rem;
   background: linear-gradient(135deg, #ede9fe, #ddd6fe);
   color: #5b3df0;
@@ -704,6 +574,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .notif-view-item .notif-title { font-weight: 700; font-size: 0.85rem; color: #161522; margin-bottom: 2px; }
 .app-wrap .notif-view-item .notif-body-text { font-size: 0.75rem; color: #5c5a6e; line-height: 1.45; margin-bottom: 4px; }
 .app-wrap .notif-view-item .notif-time { font-size: 0.65rem; color: #918fa3; }
+
 .app-wrap .user-profile-chip:hover { border-color: #5b3df0; }
 .app-wrap .user-avatar { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #5b3df0; object-fit: cover; }
 .app-wrap .user-name { font-weight: 600; font-size: 0.8rem; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #161522; }
@@ -739,7 +610,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .game-card.featured { border-color: #5b3df0; box-shadow: 0 8px 24px rgba(91,61,240,0.15); }
 .app-wrap .game-card.featured::before { content: 'POPULAR'; position: absolute; top: 8px; right: 8px; background: linear-gradient(135deg, #f0a742, #f5b942); color: #fff; font-size: 8px; font-weight: 800; padding: 3px 8px; border-radius: 100px; letter-spacing: 0.05em; z-index: 3; }
 .app-wrap .card-media { height: 110px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #100e19; contain: strict; }
-.app-wrap .card-media img.thumbnail { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; transition: transform 0.35s ease; image-rendering: -webkit-optimize-contrast; image-rendering: auto; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.app-wrap .card-media img.thumbnail { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; transition: transform 0.35s ease; image-rendering: -webkit-optimize-contrast; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .app-wrap .game-card:hover .card-media img.thumbnail { transform: scale(1.04); }
 .app-wrap .card-badge { position: absolute; top: 6px; left: 8px; background: rgba(10, 9, 16, 0.55); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); padding: 2px 6px !important; border-radius: 100px; font-size: 9px !important; font-weight: 700; letter-spacing: 0.02em !important; color: #fff; text-transform: uppercase; max-width: calc(100% - 16px) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4 !important; z-index: 2; }
 .app-wrap .help-btn { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgba(10, 9, 16, 0.65); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; cursor: pointer; transition: 0.2s; z-index: 3; border: 1px solid rgba(255,255,255,0.2); }
@@ -824,7 +695,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .vs-badge { font-weight: 800; color: #918fa3; font-size: 1rem; }
 .app-wrap .arena-stage { min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; touch-action: none; }
 
-/* Game board styles */
+/* ===== GAME BOARDS ===== */
 .app-wrap .ttt-wrapper { position: relative; width: 210px; height: 210px; margin: 0 auto; }
 .app-wrap .ttt-board { display: grid; grid-template-columns: repeat(3, 1fr); width: 210px; height: 210px; background: linear-gradient(135deg, #f8f6ff, #f3f0ff); border-radius: 10px; padding: 4px; }
 .app-wrap .ttt-cell { background: rgba(255,255,255,0.95); border: 2px solid #e9e5f5; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 700; cursor: pointer; transition: 0.15s; color: #161522; border-radius: 6px; margin: 2px; touch-action: manipulation; }
@@ -834,30 +705,25 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .ttt-cell.o-mark { color: #f0a742; }
 .app-wrap .ttt-line-overlay { position: absolute; top: 0; left: 0; width: 210px; height: 210px; pointer-events: none; }
 .app-wrap .ttt-winline { stroke: #e2555a; stroke-width: 6; stroke-linecap: round; }
-
 .app-wrap .c4-board { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; max-width: 320px; margin: 0 auto; }
 .app-wrap .c4-col { display: flex; flex-direction: column; gap: 4px; cursor: pointer; }
 .app-wrap .c4-col:hover .c4-cell:not(.filled):last-child { transform: scale(1.06); }
 .app-wrap .c4-cell { aspect-ratio: 1; border-radius: 50%; background: linear-gradient(135deg, #f3f0ff, #ede9fe); border: 2px solid #ddd6fe; transition: 0.15s; display: flex; align-items: center; justify-content: center; }
 .app-wrap .c4-cell.player1 { background: linear-gradient(135deg, #5b3df0, #7c5cf5); border-color: #4a2fd0; }
 .app-wrap .c4-cell.player2 { background: linear-gradient(135deg, #f0a742, #f5b942); border-color: #d4922e; }
-
 .app-wrap .mem-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 280px; margin: 0 auto; }
 .app-wrap .mem-card { aspect-ratio: 1; border-radius: 10px; background: linear-gradient(135deg, #5b3df0, #8b6ff0); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: #fff; transition: 0.25s; }
 .app-wrap .mem-card.revealed { background: #fff; border: 2px solid #5b3df0; color: #161522; }
 .app-wrap .mem-card.matched { background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #16c46b; }
-
 .app-wrap .mem-board-lg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; max-width: 300px; margin: 0 auto; }
 .app-wrap .mem-card-lg { aspect-ratio: 1; border-radius: 8px; background: linear-gradient(135deg, #5b3df0, #8b6ff0); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #fff; transition: 0.25s; }
 .app-wrap .mem-card-lg.revealed { background: #fff; border: 2px solid #5b3df0; color: #161522; }
 .app-wrap .mem-card-lg.matched { background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #16c46b; }
-
 .app-wrap .dice-arena { display: flex; justify-content: space-around; align-items: center; margin: 16px 0; }
 .app-wrap .dice-face { font-size: 3.6rem; line-height: 1; }
 .app-wrap .dice-roll-btn { padding: 14px 32px; background: linear-gradient(135deg, #5b3df0, #7c5cf5); color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 16px rgba(91,61,240,0.25); }
 .app-wrap .dice-roll-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(91,61,240,0.35); }
 .app-wrap .dice-roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
 .app-wrap .hl-input-row { display: flex; gap: 8px; justify-content: center; margin: 14px 0; flex-wrap: wrap; }
 .app-wrap .hl-input { padding: 10px 14px; border: 1px solid #ddd6fe; border-radius: 10px; width: 110px; font-size: 1rem; text-align: center; background: linear-gradient(135deg, #ffffff, #f8f6ff); }
 .app-wrap .hl-input:focus { outline: none; border-color: #5b3df0; box-shadow: 0 0 0 3px rgba(91,61,240,0.1); }
@@ -868,14 +734,12 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .hl-log-item.high { color: #5b3df0; }
 .app-wrap .hl-log-item.low { color: #e2555a; }
 .app-wrap .hl-log-item.correct { color: #16c46b; font-weight: 700; }
-
 .app-wrap .tap-arena { text-align: center; padding: 12px 0; }
 .app-wrap .tap-scoreboard { display: flex; justify-content: space-around; margin: 14px 0; }
 .app-wrap .tap-score-value { font-size: 2.2rem; font-weight: 800; font-family: 'Poppins', sans-serif; }
 .app-wrap .tap-timer { font-size: 1.4rem; font-weight: 700; margin: 8px 0; }
 .app-wrap .tap-btn-big { padding: 28px 52px; background: linear-gradient(135deg, #5b3df0, #7c5cf5); color: #fff; border: none; border-radius: 18px; font-weight: 800; font-size: 1.4rem; cursor: pointer; transition: 0.1s; user-select: none; box-shadow: 0 8px 22px rgba(91,61,240,0.3); }
 .app-wrap .tap-btn-big:active { transform: scale(0.95); background: linear-gradient(135deg, #4a2fd0, #6b47e5); }
-
 .app-wrap .dots-line-h, .app-wrap .dots-line-v { background: #ddd6fe; border-radius: 3px; cursor: pointer; transition: background 0.15s, transform 0.15s; }
 .app-wrap .dots-line-h { width: 100%; height: 6px; }
 .app-wrap .dots-line-v { width: 6px; height: 100%; }
@@ -885,21 +749,17 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .dots-cell { border-radius: 4px; transition: background 0.2s; }
 .app-wrap .dots-cell.player1 { background: rgba(91,61,240,0.22); }
 .app-wrap .dots-cell.player2 { background: rgba(240,167,66,0.22); }
-
 .app-wrap .lo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 260px; margin: 0 auto; }
 .app-wrap .lo-tile { aspect-ratio: 1; border-radius: 12px; background: #f0eef8; border: 2px solid #e9e5f5; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; }
 .app-wrap .lo-tile.on { background: linear-gradient(135deg, #5b3df0, #7c5cf5); border-color: #4a2fd0; box-shadow: 0 0 16px rgba(91,61,240,0.5); }
 .app-wrap .lo-tile:active { transform: scale(0.94); }
-
 .app-wrap .pm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 260px; margin: 0 auto; }
 .app-wrap .pm-tile { aspect-ratio: 1; border-radius: 12px; background: #f8f6ff; border: 2px solid #e9e5f5; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; }
 .app-wrap .pm-tile:hover { border-color: #5b3df0; transform: translateY(-2px); }
 .app-wrap .pm-target { font-size: 3rem; text-align: center; margin: 12px 0; padding: 10px; background: linear-gradient(135deg, #f3f0ff, #ede9fe); border-radius: 12px; display: inline-block; }
-
 .app-wrap .ts-stage { position: relative; width: 100%; max-width: 260px; height: 260px; margin: 0 auto; background: linear-gradient(180deg, #f8f6ff, #f3f0ff); border-radius: 14px; overflow: hidden; border: 1px solid #e9e5f5; }
 .app-wrap .ts-block { position: absolute; height: 22px; border-radius: 4px; background: linear-gradient(135deg, #5b3df0, #7c5cf5); transition: 0.1s; }
 .app-wrap .ts-moving { background: linear-gradient(135deg, #f0a742, #f5b942); }
-
 .app-wrap .result-card { text-align: center; padding: 8px 0; }
 .app-wrap .result-card h2 { font-family: 'Poppins', sans-serif; font-size: 1.6rem; margin-bottom: 6px; }
 .app-wrap .win-text { color: #16c46b; }
@@ -910,7 +770,6 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .result-btn-row .btn-secondary:hover { background: linear-gradient(135deg, #f3f0ff, #ede9fe); }
 .app-wrap .result-btn-row .btn-primary { background: linear-gradient(135deg, #5b3df0, #7c5cf5); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; flex: 1; text-align: center; transition: 0.2s; cursor: pointer; border: none; box-shadow: 0 6px 16px rgba(91,61,240,0.25); }
 .app-wrap .result-btn-row .btn-primary:hover { transform: translateY(-1px); }
-
 .app-wrap .mm-countdown { text-align: center; padding: 10px 0; }
 .app-wrap .mm-ring { width: 90px; height: 90px; margin: 0 auto 12px; position: relative; }
 .app-wrap .mm-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -918,7 +777,6 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .mm-ring .track { stroke: #eee9f7; }
 .app-wrap .mm-ring .prog { stroke: #5b3df0; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
 .app-wrap .mm-ring .num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.5rem; color: #5b3df0; }
-
 .app-wrap .cashout-form-box { background: linear-gradient(135deg, #ffffff, #f8f6ff); border: 1px solid #eee9f7; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
 .app-wrap .cashout-form-box .field-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
 .app-wrap .cashout-form-box .field-group label { font-size: 0.7rem; font-weight: 600; color: #5c5a6e; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -930,7 +788,6 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap #cashout-submit-btn:hover { transform: translateY(-1px); }
 .app-wrap #submit-referral-btn { background: linear-gradient(135deg, #5b3df0, #7c5cf5); color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap; }
 .app-wrap #submit-referral-btn:hover { transform: translateY(-1px); }
-
 .app-wrap .package-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; margin: 12px 0; }
 .app-wrap .package-card { background: linear-gradient(135deg, #ffffff, #f8f6ff); border: 1px solid #e9e5f5; border-radius: 10px; padding: 10px 8px; text-align: center; cursor: pointer; transition: 0.25s ease; position: relative; }
 .app-wrap .package-card:hover { transform: translateY(-2px); border-color: #b8a8f0; }
@@ -951,13 +808,11 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .payment-instructions h4 i { color: #5b3df0; }
 .app-wrap .payment-instructions ol { padding-left: 20px; font-size: 0.75rem; color: #5c5a6e; line-height: 1.8; }
 .app-wrap .payment-instructions ol li::marker { color: #5b3df0; font-weight: 700; }
-.app-wrap .payment-instructions .upi-id-highlight { background: rgba(91,61,240,0.1); padding: 2px 10px; border-radius: 4px; font-weight: 700; color: #161522; font-family: 'Poppins', sans-serif; }
 .app-wrap .terms-section { background: linear-gradient(135deg, #ffffff, #f8f6ff); border: 1px solid #eee9f7; border-radius: 12px; padding: 14px 16px; margin-top: 12px; }
 .app-wrap .terms-section summary { font-weight: 600; font-size: 0.8rem; color: #161522; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 .app-wrap .terms-section summary:hover { color: #5b3df0; }
 .app-wrap .terms-section .terms-content { font-size: 0.7rem; color: #5c5a6e; line-height: 1.8; padding-top: 10px; border-top: 1px solid #f0eef8; margin-top: 10px; }
 .app-wrap .terms-section .terms-content strong { color: #161522; }
-
 .app-wrap .payment-modal-overlay { position: fixed; inset: 0; background: rgba(22,21,34,0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none !important; align-items: center; justify-content: center; z-index: 2000; padding: 16px; }
 .app-wrap .payment-modal-overlay.show { display: flex !important; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -978,7 +833,6 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .app-wrap .payment-modal .cancel-payment-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #ddd6fe; border-radius: 12px; color: #5c5a6e; font-weight: 600; margin-top: 8px; transition: 0.2s; min-height: 44px; }
 .app-wrap .payment-modal .cancel-payment-btn:hover { background: linear-gradient(135deg, #f3f0ff, #ede9fe); }
-
 .app-wrap .payment-animation-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; }
 .app-wrap .payment-animation-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
 .app-wrap .payment-animation-overlay .checkmark { width: 100px; height: 100px; border-radius: 50%; background: #16c46b; display: flex; align-items: center; justify-content: center; animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -1069,6 +923,7 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   .support-banner .support-title { font-size: 0.78rem; }
   .support-banner .support-sub { font-size: 0.68rem; }
   .support-banner .support-cta { padding: 6px 12px; font-size: 0.65rem; }
+  .app-wrap .notif-panel { top: 58px; right: 8px; width: calc(100vw - 16px); max-width: 360px; max-height: 70vh; }
 }
 @media (max-width:400px) {
   .app-wrap .games-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1189,65 +1044,36 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
   text-align: center;
 }
 body.in-app .app-auth-screen.active { display: flex; }
-
 .app-auth-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 800;
-  font-size: 1.6rem;
-  letter-spacing: -0.01em;
-  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Poppins', sans-serif; font-weight: 800;
+  font-size: 1.6rem; letter-spacing: -0.01em; margin-bottom: 12px;
   background: linear-gradient(90deg, #161522 0%, #5b3df0 100%);
-  -webkit-background-clip: text; background-clip: text;
-  color: transparent;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .app-auth-logo svg { width: 32px; height: 32px; color: #5b3df0; background: none; }
 .app-auth-logo .clash {
   background: linear-gradient(90deg, #5b3df0 0%, #f0a742 100%);
-  -webkit-background-clip: text; background-clip: text;
-  color: transparent;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.app-auth-tagline {
-  font-size: 0.9rem; color: #5c5a6e; margin-bottom: 40px;
-  max-width: 280px; line-height: 1.55;
-}
+.app-auth-tagline { font-size: 0.9rem; color: #5c5a6e; margin-bottom: 40px; max-width: 280px; line-height: 1.55; }
 .app-auth-btn {
-  width: 100%; max-width: 320px;
-  padding: 15px 20px;
-  border-radius: 14px;
-  background: #161522;
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.92rem;
+  width: 100%; max-width: 320px; padding: 15px 20px; border-radius: 14px;
+  background: #161522; color: #fff; font-weight: 700; font-size: 0.92rem;
   display: flex; align-items: center; justify-content: center; gap: 10px;
-  transition: 0.2s;
-  box-shadow: 0 10px 26px rgba(22, 21, 34, 0.15);
+  transition: 0.2s; box-shadow: 0 10px 26px rgba(22, 21, 34, 0.15);
 }
-.app-auth-btn:hover {
-  background: #5b3df0;
-  transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(91, 61, 240, 0.3);
-}
+.app-auth-btn:hover { background: #5b3df0; transform: translateY(-1px); box-shadow: 0 14px 30px rgba(91, 61, 240, 0.3); }
 .app-auth-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
-.app-auth-terms {
-  font-size: 0.7rem; color: #918fa3; margin-top: 26px;
-  max-width: 300px; line-height: 1.55;
-}
+.app-auth-terms { font-size: 0.7rem; color: #918fa3; margin-top: 26px; max-width: 300px; line-height: 1.55; }
 .app-auth-terms a { color: #5b3df0; font-weight: 600; text-decoration: underline; }
-.app-auth-footer {
-  position: fixed; bottom: 24px; left: 0; right: 0;
-  text-align: center; font-size: 0.68rem; color: #918fa3;
-}
+.app-auth-footer { position: fixed; bottom: 24px; left: 0; right: 0; text-align: center; font-size: 0.68rem; color: #918fa3; }
 
 body.in-app #page-landing { display: none !important; }
 body.in-app #page-container { display: none !important; }
-
 body.in-app #hero-download-btn,
 body.in-app #closing-download-btn,
 body.in-app #menu-toggle-btn { display: none !important; }
-
 body.in-app .site-nav,
 body.in-app .mobile-menu,
 body.in-app .hero-wrap,
@@ -1296,7 +1122,6 @@ body.in-app .site-footer { display: none !important; }
 <body>
 
 <div class="background-wash"></div>
-
 <!-- ===== APP AUTH SCREEN (only visible in app mode, logged out) ===== -->
 <div id="app-auth-screen" class="app-auth-screen">
   <div class="app-auth-logo">
@@ -1368,7 +1193,6 @@ body.in-app .site-footer { display: none !important; }
 </div>
 </section>
 
-<!-- ===== SUPPORT SECTION (Landing) ===== -->
 <section class="section reveal">
 <a href="https://www.instagram.com/skillclash.in_/" target="_blank" rel="noopener noreferrer" class="support-banner" style="text-decoration:none;">
 <div class="support-icon"><i class="fab fa-instagram"></i></div>
@@ -1518,8 +1342,7 @@ body.in-app .site-footer { display: none !important; }
 <h2 class="section-title">Join 15k+ players in the <span class="grad-text">arena</span></h2>
 <div class="community-grid" style="margin-top:6px;">
 <a href="https://www.instagram.com/skillclash.in_/" target="_blank" rel="noopener noreferrer" class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" /></svg><span>Instagram</span><small>@skillclash.in_</small></a>
-<a class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg><span>Announcements</span><small>@
-skillclash.in_</small></a>
+<a class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg><span>Announcements</span><small>@skillclash.in_</small></a>
 <a class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg><span>Community Chat</span><small>Join Updates</small></a>
 <a class="community-card"><svg class="ic glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg><span>SkillClash TV</span><small>Video Guides</small></a>
 </div>
@@ -1957,7 +1780,6 @@ Payment not credited? DM <strong>@skillclash.in_</strong> on Instagram — resol
 </div>
 </section>
 
-<!-- ===== NOTIFICATIONS VIEW ===== -->
 <section id="view-notifications" class="app-view">
 <div class="section-card">
 <button class="back-link" id="notif-back-btn"><i class="fas fa-arrow-left"></i> Back to Profile</button>
@@ -1975,7 +1797,6 @@ Payment not credited? DM <strong>@skillclash.in_</strong> on Instagram — resol
 <div id="match-overlay" class="modal-overlay hidden">
 <div class="modal-card">
 
-  <!-- Normal searching view -->
   <div id="mm-searching-view">
     <div class="mm-countdown">
       <div class="mm-ring">
@@ -1992,7 +1813,6 @@ Payment not credited? DM <strong>@skillclash.in_</strong> on Instagram — resol
     </div>
   </div>
 
-  <!-- Blocked match view (shown when anti-farm blocks a candidate) -->
   <div id="mm-blocked-view" style="display:none;">
     <div class="match-blocked-box">
       <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
@@ -2106,17 +1926,19 @@ Your ₹<span id="no-opp-refund">20</span> entry has been refunded.
 </div>
 <div id="confettiContainer" class="confetti-container"></div>
 
-  <!-- ===== NOTIFICATIONS PANEL ===== -->
+<!-- ===== NOTIFICATIONS POPUP ===== -->
 <div id="notif-panel-overlay" class="notif-panel-overlay"></div>
 <aside id="notif-panel" class="notif-panel" style="display:none;">
   <div class="notif-header">
     <h3>Notifications</h3>
     <div class="notif-header-actions">
-      <button id="notif-mark-all-btn" class="notif-mark-all-btn">Mark all read</button>
       <button id="notif-close-btn" class="notif-close-btn" aria-label="Close">×</button>
     </div>
   </div>
   <div id="notif-body" class="notif-body"></div>
+  <div class="notif-footer">
+    <button id="notif-mark-all-btn" class="notif-mark-all-link">Mark all as read</button>
+  </div>
 </aside>
 <footer class="app-footer">
 <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:6px;">
@@ -2133,16 +1955,15 @@ Your ₹<span id="no-opp-refund">20</span> entry has been refunded.
 </div>
 <script>
 // ============================================================
-// SKILLCLASH - v17 (Real Players Only, No Bots)
+// SKILLCLASH - v18 (Real Players Only, No Bots)
 // ============================================================
-// v17 changes:
-//   - REMOVED all bot matchmaking. Real players only.
-//   - New pricing: ₹20/₹30, ₹25/₹40, ₹30/₹50 (₹10 platform margin)
-//   - New users get ₹25 welcome bonus (use for 1 match)
-//   - Best games first in catalog
-//   - "No opponent found" flow → auto refund
-//   - Instagram support everywhere
-//   - Fixed all previously broken games
+// v18 changes:
+//   - Notifications popup now floats below the bell (matches transaction modal UX)
+//   - X at top-right, "Mark all as read" link at bottom
+//   - Realtime notifications wired in
+//   - Device fingerprint + IP for anti-farm
+//   - Blocked-match modal inside matchmaking
+//   - IST time formatting in ledgers + match history
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -2154,16 +1975,15 @@ const SEARCH_SECONDS = 12;
 const CASHOUT_MIN = 150;
 const INVITE_SECONDS = 8;
 const WELCOME_BONUS = 25;
+
 // ============================================================
 // v18: DEVICE FINGERPRINT + IP + IST TIME HELPERS
 // ============================================================
 
-// --- Simple stable device fingerprint (no external lib) ---
 async function getDeviceFingerprint() {
   try {
     const cached = localStorage.getItem('skillclash_fp');
     if (cached) return cached;
-
     const nav = window.navigator || {};
     const scr = window.screen || {};
     const parts = [
@@ -2179,8 +1999,6 @@ async function getDeviceFingerprint() {
       Intl.DateTimeFormat().resolvedOptions().timeZone || ''
     ];
     const raw = parts.join('|');
-
-    // SHA-256 (fallback to simple hash if crypto unavailable)
     let hash = '';
     if (window.crypto && window.crypto.subtle) {
       const buf = new TextEncoder().encode(raw);
@@ -2194,12 +2012,9 @@ async function getDeviceFingerprint() {
     hash = hash.slice(0, 40);
     localStorage.setItem('skillclash_fp', hash);
     return hash;
-  } catch (e) {
-    return 'fp_unavailable';
-  }
+  } catch (e) { return 'fp_unavailable'; }
 }
 
-// --- Cached IP (fetched once per session) ---
 let _cachedIP = null;
 async function getClientIP() {
   if (_cachedIP) return _cachedIP;
@@ -2212,14 +2027,11 @@ async function getClientIP() {
     clearTimeout(t);
     const data = await res.json();
     _cachedIP = data.ip || 'unknown';
-  } catch (e) {
-    _cachedIP = 'unknown';
-  }
+  } catch (e) { _cachedIP = 'unknown'; }
   try { sessionStorage.setItem('skillclash_ip', _cachedIP); } catch (e) {}
   return _cachedIP;
 }
 
-// --- IST (Asia/Kolkata) time helpers ---
 function formatIST(dateInput, opts) {
   const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
   if (isNaN(d.getTime())) return '—';
@@ -2230,17 +2042,14 @@ function formatIST(dateInput, opts) {
   }, opts || {});
   try {
     return new Intl.DateTimeFormat('en-IN', options).format(d).replace(/,/g, '').replace(/\b(am|pm)\b/i, m => m.toUpperCase());
-  } catch (e) {
-    return d.toLocaleString('en-IN');
-  }
+  } catch (e) { return d.toLocaleString('en-IN'); }
 }
 function formatISTTime(dateInput) {
   const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
   if (isNaN(d.getTime())) return '—';
   try {
     return new Intl.DateTimeFormat('en-IN', {
-      timeZone: 'Asia/Kolkata',
-      hour: '2-digit', minute: '2-digit', hour12: true
+      timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true
     }).format(d).replace(/\b(am|pm)\b/i, m => m.toUpperCase());
   } catch (e) { return '—'; }
 }
@@ -2259,34 +2068,20 @@ function formatISTRelative(dateInput) {
   return formatIST(d, { day: '2-digit', month: 'short' });
 }
 
-// ===== PRICING (Profit-focused: ₹10 margin per match) =====
+// ===== PRICING =====
 const GAME_PRICES = {
-  // Tier 1: ₹20 entry → ₹30 win (₹10 margin) — most games
-  'tictactoe':   { entry: 20, reward: 30 },
-  'connect4':    { entry: 20, reward: 30 },
-  'memory':      { entry: 20, reward: 30 },
-  'mathduel':    { entry: 20, reward: 30 },
-  'tap':         { entry: 20, reward: 30 },
-  'nim':         { entry: 20, reward: 30 },
-  'higherlower': { entry: 20, reward: 30 },
-  'recall':      { entry: 20, reward: 30 },
-  'simon':       { entry: 20, reward: 30 },
-  // Tier 2: ₹25 entry → ₹40 win (₹10 margin) — advanced
-  'memorylg':    { entry: 25, reward: 40 },
-  'scramble':    { entry: 25, reward: 40 },
-  'dots':        { entry: 25, reward: 40 },
-  'reaction':    { entry: 25, reward: 40 },
-  'oddone':      { entry: 25, reward: 40 },
-  'whack':       { entry: 25, reward: 40 },
-  'stroop':      { entry: 25, reward: 40 },
-  'mathchain':   { entry: 25, reward: 40 },
-  'reflex':      { entry: 25, reward: 40 },
-  // Tier 3: ₹30 entry → ₹50 win (₹10 margin) — premium
-  'battleship':  { entry: 30, reward: 50 },
-  'rps':         { entry: 20, reward: 30 },
-  'dice':        { entry: 20, reward: 30 }
+  'tictactoe': { entry: 20, reward: 30 }, 'connect4': { entry: 20, reward: 30 },
+  'memory': { entry: 20, reward: 30 }, 'mathduel': { entry: 20, reward: 30 },
+  'tap': { entry: 20, reward: 30 }, 'nim': { entry: 20, reward: 30 },
+  'higherlower': { entry: 20, reward: 30 }, 'recall': { entry: 20, reward: 30 },
+  'simon': { entry: 20, reward: 30 }, 'memorylg': { entry: 25, reward: 40 },
+  'scramble': { entry: 25, reward: 40 }, 'dots': { entry: 25, reward: 40 },
+  'reaction': { entry: 25, reward: 40 }, 'oddone': { entry: 25, reward: 40 },
+  'whack': { entry: 25, reward: 40 }, 'stroop': { entry: 25, reward: 40 },
+  'mathchain': { entry: 25, reward: 40 }, 'reflex': { entry: 25, reward: 40 },
+  'battleship': { entry: 30, reward: 50 }, 'rps': { entry: 20, reward: 30 },
+  'dice': { entry: 20, reward: 30 }
 };
-
 function getGamePrice(t) { return GAME_PRICES[t] || { entry: 20, reward: 30 }; }
 
 // ===== SAFE HTML =====
@@ -2305,7 +2100,6 @@ const isInstalledApp =
   window.matchMedia('(display-mode: fullscreen)').matches ||
   window.navigator.standalone === true ||
   document.referrer.includes('android-app://');
-
 if (isInstalledApp) document.body.classList.add('in-app');
 
 // ===== STATE =====
@@ -2595,16 +2389,15 @@ async function persistWalletDelta(delta) {
   currentBalance = newBalance;
   return newBalance;
 }
-  // ===== REALTIME WALLET SYNC =====
+
+// ===== REALTIME WALLET SYNC =====
 let walletRealtimeChannel = null;
 async function subscribeToWalletRealtime() {
   if (walletRealtimeChannel) { try { await client.removeChannel(walletRealtimeChannel); } catch (e) {} walletRealtimeChannel = null; }
   walletRealtimeChannel = client
     .channel('wallet-' + currentUser.id)
     .on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'wallet',
+      event: 'UPDATE', schema: 'public', table: 'wallet',
       filter: 'user_id=eq.' + currentUser.id
     }, (payload) => {
       const newBal = payload.new?.balance;
@@ -2612,13 +2405,11 @@ async function subscribeToWalletRealtime() {
         const oldBal = currentBalance;
         currentBalance = newBal;
         animateBalanceChange(oldBal, newBal);
-        // Also refresh transactions list quietly
         loadTransactions().then(() => { renderTxModalList(); renderLedger(); });
       }
     })
     .subscribe();
 }
-// ===== BALANCE UPDATE (no animation) =====
 function animateBalanceChange(fromVal, toVal) {
   const el = document.getElementById('balance-value');
   if (!el) return;
@@ -2628,19 +2419,17 @@ async function loadTransactions() {
   try {
     const { data, error } = await client.from('transactions').select('description,type,amount,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
     if (error) throw error;
-transactions = (data || []).map(t => ({
-  desc: t.description,
-  type: t.type,
-  amount: t.amount,
-  date: formatIST(t.created_at, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
-}));
+    transactions = (data || []).map(t => ({
+      desc: t.description, type: t.type, amount: t.amount,
+      date: formatIST(t.created_at, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
+    }));
   } catch (e) { transactions = []; }
 }
 async function recordTransaction(desc, type, amount) {
-transactions.unshift({
-  desc, type, amount,
-  date: formatIST(new Date(), { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
-});
+  transactions.unshift({
+    desc, type, amount,
+    date: formatIST(new Date(), { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
+  });
   updateUI();
   try { await client.from('transactions').insert({ user_id: currentUser.id, description: desc, type, amount }); } catch (e) {}
 }
@@ -2648,25 +2437,22 @@ async function loadMatchHistory() {
   try {
     const { data, error } = await client.from('match_history').select('game,opponent,result,reward,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
     if (error) throw error;
-matchHistory = (data || []).map(m => ({
-  game: m.game,
-  opponent: m.opponent,
-  result: m.result,
-  reward: m.reward,
-  date: formatIST(m.created_at, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
-}));
+    matchHistory = (data || []).map(m => ({
+      game: m.game, opponent: m.opponent, result: m.result, reward: m.reward,
+      date: formatIST(m.created_at, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
+    }));
   } catch (e) { matchHistory = []; }
 }
 async function recordMatch(game, opponent, result, reward) {
-matchHistory.unshift({
-  game, opponent, result, reward,
-  date: formatIST(new Date(), { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
-});
+  matchHistory.unshift({
+    game, opponent, result, reward,
+    date: formatIST(new Date(), { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
+  });
   updateUI();
   try { await client.from('match_history').insert({ user_id: currentUser.id, game, opponent, result, reward }); } catch (e) {}
 }
 function updateUI() {
-if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString('en-IN');
+  if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString('en-IN');
   const pct = Math.min(100, Math.round((currentBalance / CASHOUT_MIN) * 100));
   const pf = document.getElementById('progress-fill'); if (pf) pf.style.width = pct + '%';
   const pt = document.getElementById('progress-text'); if (pt) pt.textContent = formatRupees(currentBalance) + ' / ' + formatRupees(CASHOUT_MIN);
@@ -2707,11 +2493,11 @@ function renderMatchHistory() {
     return;
   }
   tbody.innerHTML = matchHistory.map(m => {
-    const isWin  = m.result === 'VICTORY';
+    const isWin = m.result === 'VICTORY';
     const isDraw = m.result === 'DRAW';
-    const cls    = isWin ? 'badge-credit' : isDraw ? 'badge-draw' : 'badge-debit';
+    const cls = isWin ? 'badge-credit' : isDraw ? 'badge-draw' : 'badge-debit';
     const amtCls = isWin ? 'amount-credit' : isDraw ? 'amount-draw' : 'amount-debit';
-    const sign   = m.reward > 0 ? '+' : '';
+    const sign = m.reward > 0 ? '+' : '';
     const reward = isDraw ? '—' : sign + formatRupees(m.reward);
     return `<tr>
       <td class="game-cell" title="${escapeHtml(m.game)}">${escapeHtml(m.game)}</td>
@@ -2761,8 +2547,8 @@ logoutConfirmBtn?.addEventListener('click', async () => {
   if (inviteSubscription) { try { await inviteSubscription.unsubscribe(); } catch (e) {} }
   if (walletRealtimeChannel) { try { await client.removeChannel(walletRealtimeChannel); } catch (e) {} walletRealtimeChannel = null; }
   if (notifRealtimeChannel) { try { await client.removeChannel(notifRealtimeChannel); } catch (e) {} notifRealtimeChannel = null; }
-notificationsCache = [];
-notificationsUnread = 0;
+  notificationsCache = [];
+  notificationsUnread = 0;
   if (inviteExpireTimer) clearTimeout(inviteExpireTimer);
   if (inviteExpireInterval) clearInterval(inviteExpireInterval);
   if (currentInviteId && currentUser) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('from_user_id', currentUser.id); } catch (e) {} }
@@ -2890,9 +2676,7 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
   client.from('payment_requests').insert({ user_id: currentUser.id, txn_id: orderId, amount_inr: customAmount, tokens_to_credit: tokens, status: 'pending' }).then(() => {
     sessionStorage.setItem('pending_order_' + orderId, JSON.stringify({ amount: customAmount, tokens }));
     ZapUPI.createOrder({
-      zap_key: ZAPUPI_API_KEY,
-      order_id: orderId,
-      amount: customAmount.toString(),
+      zap_key: ZAPUPI_API_KEY, order_id: orderId, amount: customAmount.toString(),
       success_url: currentUrl + '?status=success&order_id=' + orderId,
       failed_url: currentUrl + '?status=failed&order_id=' + orderId,
       timeout_url: currentUrl + '?status=timeout&order_id=' + orderId,
@@ -3036,36 +2820,34 @@ document.getElementById('cashout-submit-btn')?.addEventListener('click', functio
 });
 
 /* ============================================================
-   GAME CATALOG — Best games first (featured = POPULAR)
+   GAME CATALOG
    ============================================================ */
 const GAME_CATALOG = [
-  // ===== BEST GAMES FIRST =====
-  { type: 'tictactoe',  name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 30, banner: '/images/tictactoe-banner.png', featured: true },
-  { type: 'connect4',   name: 'Connect 4', desc: 'Drop discs and connect four in a row. Strategic battles.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 30, banner: '/images/connect4-banner.png', featured: true },
-  { type: 'memory',     name: 'Memory Match', desc: 'Flip pairs and clear the board. Test your memory.', badge: 'BRAIN', category: 'brain', entry: 20, reward: 30, banner: '/images/memory-banner.png', featured: true },
-  { type: 'mathduel',   name: 'Math Duel', desc: 'Solve equations fastest to win. Quick math.', badge: 'MATH', category: 'math', entry: 20, reward: 30, banner: '/images/mathduel-banner.png', featured: true },
-  { type: 'tap',        name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed.', badge: 'SPEED', category: 'reflex', entry: 20, reward: 30, banner: '/images/tap-banner.png', featured: true },
-  { type: 'nim',        name: 'Nim Duel', desc: 'Take stones from piles. Player who takes the last stone wins.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 30, banner: '/images/nim-banner.png', featured: true },
-  // ===== REST =====
-  { type: 'dots',       name: 'Dots & Boxes', desc: 'Complete more boxes than your opponent on a 4x4 grid.', badge: 'STRATEGY', category: 'strategy', entry: 25, reward: 40, banner: '/images/dots-banner.png' },
-  { type: 'memorylg',   name: 'Lights Out', desc: 'Tap tiles to toggle them and their neighbors. Clear all lights.', badge: 'BRAIN', category: 'brain', entry: 25, reward: 40, banner: '/images/lightsout-banner.png' },
-  { type: 'higherlower',name: 'Higher-Lower', desc: 'Guess the secret number in fewest tries.', badge: 'LOGIC', category: 'brain', entry: 20, reward: 30, banner: '/images/higherlower-banner.png' },
-  { type: 'scramble',   name: 'Word Scramble', desc: 'Solve as many scrambled words as you can in 20 seconds.', badge: 'WORD', category: 'brain', entry: 25, reward: 40, banner: '/images/scramble-banner.png' },
-  { type: 'simon',      name: 'Simon Says', desc: 'Repeat the growing color pattern. Memory challenge.', badge: 'MEMORY', category: 'brain', entry: 20, reward: 30, banner: '/images/simon-banner.png' },
-  { type: 'whack',      name: 'Whack-a-Mole', desc: 'First to 15 hits wins. Reflexes matter.', badge: 'REFLEX', category: 'reflex', entry: 25, reward: 40, banner: '/images/whack-banner.png' },
-  { type: 'reaction',   name: 'Reaction Duel', desc: 'Wait for green, then tap fastest.', badge: 'REFLEX', category: 'reflex', entry: 25, reward: 40, banner: '/images/reaction-banner.png' },
-  { type: 'oddone',     name: 'Pattern Match', desc: 'Tap the shape that matches the target.', badge: 'VISION', category: 'reflex', entry: 25, reward: 40, banner: '/images/pattern-banner.png' },
-  { type: 'reflex',     name: 'Reflex Grid', desc: 'Tap the lit tile before it fades. Speed.', badge: 'REFLEX', category: 'reflex', entry: 25, reward: 40, banner: '/images/reflex-banner.png' },
-  { type: 'stroop',     name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', badge: 'REFLEX', category: 'reflex', entry: 25, reward: 40, banner: '/images/stroop-banner.png' },
-  { type: 'recall',     name: 'Sequence Recall', desc: 'Numbers flash, tap them back in order. Memory.', badge: 'MEMORY', category: 'brain', entry: 20, reward: 30, banner: '/images/recall-banner.png' },
-  { type: 'mathchain',  name: 'Fast Math Chain', desc: 'Solve quick sums back-to-back. Speed math.', badge: 'MATH', category: 'math', entry: 25, reward: 40, banner: '/images/mathchain-banner.png' },
+  { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 30, banner: '/images/tictactoe-banner.png', featured: true },
+  { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four in a row. Strategic battles.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 30, banner: '/images/connect4-banner.png', featured: true },
+  { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board. Test your memory.', badge: 'BRAIN', category: 'brain', entry: 20, reward: 30, banner: '/images/memory-banner.png', featured: true },
+  { type: 'mathduel', name: 'Math Duel', desc: 'Solve equations fastest to win. Quick math.', badge: 'MATH', category: 'math', entry: 20, reward: 30, banner: '/images/mathduel-banner.png', featured: true },
+  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed.', badge: 'SPEED', category: 'reflex', entry: 20, reward: 30, banner: '/images/tap-banner.png', featured: true },
+  { type: 'nim', name: 'Nim Duel', desc: 'Take stones from piles. Player who takes the last stone wins.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 30, banner: '/images/nim-banner.png', featured: true },
+  { type: 'dots', name: 'Dots & Boxes', desc: 'Complete more boxes than your opponent on a 4x4 grid.', badge: 'STRATEGY', category: 'strategy', entry: 25, reward: 40, banner: '/images/dots-banner.png' },
+  { type: 'memorylg', name: 'Lights Out', desc: 'Tap tiles to toggle them and their neighbors. Clear all lights.', badge: 'BRAIN', category: 'brain', entry: 25, reward: 40, banner: '/images/lightsout-banner.png' },
+  { type: 'higherlower', name: 'Higher-Lower', desc: 'Guess the secret number in fewest tries.', badge: 'LOGIC', category: 'brain', entry: 20, reward: 30, banner: '/images/higherlower-banner.png' },
+  { type: 'scramble', name: 'Word Scramble', desc: 'Solve as many scrambled words as you can in 20 seconds.', badge: 'WORD', category: 'brain', entry: 25, reward: 40, banner: '/images/scramble-banner.png' },
+  { type: 'simon', name: 'Simon Says', desc: 'Repeat the growing color pattern. Memory challenge.', badge: 'MEMORY', category: 'brain', entry: 20, reward: 30, banner: '/images/simon-banner.png' },
+  { type: 'whack', name: 'Whack-a-Mole', desc: 'First to 15 hits wins. Reflexes matter.', badge: 'REFLEX', category: 'reflex', entry: 25, reward: 40, banner: '/images/whack-banner.png' },
+  { type: 'reaction', name: 'Reaction Duel', desc: 'Wait for green, then tap fastest.', badge: 'REFLEX', category: 'reflex', entry: 25, reward: 40, banner: '/images/reaction-banner.png' },
+  { type: 'oddone', name: 'Pattern Match', desc: 'Tap the shape that matches the target.', badge: 'VISION', category: 'reflex', entry: 25, reward: 40, banner: '/images/pattern-banner.png' },
+  { type: 'reflex', name: 'Reflex Grid', desc: 'Tap the lit tile before it fades. Speed.', badge: 'REFLEX', category: 'reflex', entry: 25, reward: 40, banner: '/images/reflex-banner.png' },
+  { type: 'stroop', name: 'Color Match Rush', desc: 'Fewest mistakes wins the color-word test.', badge: 'REFLEX', category: 'reflex', entry: 25, reward: 40, banner: '/images/stroop-banner.png' },
+  { type: 'recall', name: 'Sequence Recall', desc: 'Numbers flash, tap them back in order. Memory.', badge: 'MEMORY', category: 'brain', entry: 20, reward: 30, banner: '/images/recall-banner.png' },
+  { type: 'mathchain', name: 'Fast Math Chain', desc: 'Solve quick sums back-to-back. Speed math.', badge: 'MATH', category: 'math', entry: 25, reward: 40, banner: '/images/mathchain-banner.png' },
   { type: 'battleship', name: 'Tower Stack', desc: 'Tap to stop the moving block. Stack it highest to win.', badge: 'STRATEGY', category: 'strategy', entry: 30, reward: 50, banner: '/images/towerstack-banner.png' },
-  { type: 'rps',        name: 'RPS Duel', desc: 'Best-of-3 rock, paper, scissors. Outsmart your opponent.', badge: 'CLASSIC', category: 'strategy', entry: 20, reward: 30, banner: '/images/rps-banner.png' },
-  { type: 'dice',       name: 'Dice Battle', desc: 'Best of 3 rounds — roll higher, win the round.', badge: 'LUCK', category: 'strategy', entry: 20, reward: 30, banner: '/images/dice-banner.png' }
+  { type: 'rps', name: 'RPS Duel', desc: 'Best-of-3 rock, paper, scissors. Outsmart your opponent.', badge: 'CLASSIC', category: 'strategy', entry: 20, reward: 30, banner: '/images/rps-banner.png' },
+  { type: 'dice', name: 'Dice Battle', desc: 'Best of 3 rounds — roll higher, win the round.', badge: 'LUCK', category: 'strategy', entry: 20, reward: 30, banner: '/images/dice-banner.png' }
 ];
 
 const HOW_TO_PLAY = {
-  tictactoe: { icon: '×', mode: '1v1 Live', steps: ['You and your opponent take turns placing X or O on a 3×3 grid.', 'The first player to get three of their marks in a row — horizontally, vertically, or diagonally — wins.', 'If the board fills with no winner, the match is a draw and both stakes are refunded.'], tip: 'Control the center square early — it belongs to the most winning lines.' },
+  tictactoe: { icon: '×', mode: '1v1 Live', steps: ['You and your opponent take turns placing X or O on a 3×3 grid.', 'The first player to get three of their marks in a row — horizontally, vertically, or diagonally — wins.', 'If the board fills with no winner, the match is a draw and both stakes are refunded.'], tip: 'Control the center square early.' },
   connect4: { icon: '◉', mode: '1v1 Live', steps: ['Take turns dropping colored discs into a 7-column, 6-row grid.', 'Discs fall to the lowest empty slot in the column you choose.', 'The first player to line up four discs in a row wins.'], tip: 'Build two-way threats.' },
   nim: { icon: '●', mode: '1v1 Live', steps: ['Three piles: 3, 5, and 7 stones.', 'On your turn, take 1 or 2 stones from any single pile.', 'The player who takes the last stone wins.'], tip: 'Aim for even distribution.' },
   dots: { icon: '□', mode: '1v1 Live', steps: ['Take turns drawing lines between adjacent dots on a 4×4 grid.', 'Complete the fourth side of a box to claim it — and go again.', 'Player with more boxes wins.'], tip: 'Avoid completing the third side of a box.' },
@@ -3179,7 +2961,6 @@ async function launchArena(opponent, sessionInfo) {
     const turn = activeGameSession?.current_turn || 'player1';
     launchLiveGame(activeGame.type, opponent, activeGameSessionId, turn);
   } else {
-    // No session → this should not happen in v17. But handle gracefully.
     activeGameSessionId = null;
     activeGameSession = null;
     isRealPlayerMatch = false;
@@ -3221,10 +3002,9 @@ function launchLiveGame(type, opponent, sessionId, initialTurn) {
 }
 
 /* ============================================================
-   GAME IMPLEMENTATIONS — ALL 21 GAMES, LIVE PLAY
+   GAME IMPLEMENTATIONS
    ============================================================ */
 
-// ===== TIC-TAC-TOE =====
 function runTicTacToe(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3306,7 +3086,6 @@ function runTicTacToe(opponent, live) {
   render();
 }
 
-// ===== CONNECT 4 =====
 function runConnect4(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3315,7 +3094,6 @@ function runConnect4(opponent, live) {
   let gameOver = false;
   const isLive = !!live;
   const myChip = myRole === 'player1' ? '1' : '2';
-  const oppChip = myChip === '1' ? '2' : '1';
   let myTurn = (myRole === 'player1');
   let endHandled = false;
   function render() {
@@ -3367,7 +3145,6 @@ function runConnect4(opponent, live) {
   render();
 }
 
-// ===== NIM =====
 function runNim(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3419,7 +3196,6 @@ function runNim(opponent, live) {
   render();
 }
 
-// ===== DOTS & BOXES =====
 function runDots(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3430,7 +3206,6 @@ function runDots(opponent, live) {
   let V = Array.from({ length: N }, () => Array(DOT).fill(null));
   let B = Array.from({ length: N }, () => Array(N).fill(null));
   let myChip = myRole === 'player1' ? '1' : '2';
-  const oppChip = myChip === '1' ? '2' : '1';
   let myTurn = (myRole === 'player1');
   let gameOver = false;
   let endHandled = false;
@@ -3529,7 +3304,6 @@ function runDots(opponent, live) {
   render();
 }
 
-// ===== LIGHTS OUT (MemoryLG) — FIXED =====
 function runLightsOut(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3540,11 +3314,9 @@ function runLightsOut(opponent, live) {
   let endHandled = false;
   let myTurn = (myRole === 'player1');
   let moves = 0;
-  // Deterministic seed-based puzzle (both players see the SAME board)
   const seedStr = (live?.sessionId || 'local') + '-lightsout';
   let seed = 0; for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
   function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
-  // Create solvable puzzle by toggling random cells an odd number of times
   const toggleCount = 3 + Math.floor(rnd() * 3);
   function toggleCell(r, c) {
     const dirs = [[0,0],[1,0],[-1,0],[0,1],[0,-1]];
@@ -3553,9 +3325,7 @@ function runLightsOut(opponent, live) {
       if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) grid[nr][nc] = !grid[nr][nc];
     }
   }
-  for (let i = 0; i < toggleCount; i++) {
-    toggleCell(Math.floor(rnd() * SIZE), Math.floor(rnd() * SIZE));
-  }
+  for (let i = 0; i < toggleCount; i++) toggleCell(Math.floor(rnd() * SIZE), Math.floor(rnd() * SIZE));
   function isSolved() { return grid.every(row => row.every(v => !v)); }
   function render() {
     let html = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p><div style="font-size:0.85rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:8px;">${gameOver ? 'Game over' : (myTurn ? 'Your Turn — tap tiles to turn off all lights' : opponent.name + "'s Turn")}</div><div style="display:inline-grid;grid-template-columns:repeat(${SIZE}, 72px);gap:8px;padding:12px;background:#f8f6ff;border-radius:16px;">`;
@@ -3604,7 +3374,6 @@ function runLightsOut(opponent, live) {
   render();
 }
 
-// ===== TOWER STACK (Battleship) — FIXED =====
 function runTowerStack(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3648,7 +3417,6 @@ function runTowerStack(opponent, live) {
   render();
 }
 
-// ===== SCRAMBLE — FIXED =====
 function runScramble(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3660,7 +3428,6 @@ function runScramble(opponent, live) {
   let myScore = 0, oppScore = 0;
   let round = 1;
   const MAX_ROUNDS = 3;
-  // Deterministic word sequence so both players see the same words
   const seedStr = (live?.sessionId || 'local') + '-scramble';
   let seed = 0; for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
   function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
@@ -3732,7 +3499,6 @@ function runScramble(opponent, live) {
   render();
 }
 
-// ===== MEMORY MATCH (Live) =====
 function runMemory(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3825,7 +3591,6 @@ function runMemory(opponent, live) {
   render();
 }
 
-// ===== MATH DUEL (Live) =====
 function runMathDuel(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3897,7 +3662,6 @@ function runMathDuel(opponent, live) {
   render();
 }
 
-// ===== TAP RACE =====
 function runTap(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3954,7 +3718,6 @@ function runTap(opponent, live) {
   }
 }
 
-// ===== HIGHER-LOWER (Live) =====
 function runHigherLower(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4013,7 +3776,6 @@ function runHigherLower(opponent, live) {
   render();
 }
 
-// ===== SIMON SAYS =====
 function runSimon(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4092,7 +3854,6 @@ function runSimon(opponent, live) {
   setTimeout(playSequence, 800);
 }
 
-// ===== WHACK-A-MOLE =====
 function runWhack(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4154,7 +3915,6 @@ function runWhack(opponent, live) {
   }
 }
 
-// ===== REACTION DUEL =====
 function runReaction(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4203,7 +3963,6 @@ function runReaction(opponent, live) {
   render();
 }
 
-// ===== PATTERN MATCH (Odd One Out) =====
 function runPatternMatch(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4235,9 +3994,8 @@ function runPatternMatch(opponent, live) {
           }
           myTurn = false;
           if (isLive) await pushSessionState(live.sessionId, { myScore, oppScore, round }, myRole === 'player1' ? 'player2' : 'player1');
-          render(); 
+          render();
         } else {
-          // wrong → give turn to other
           myTurn = false;
           if (isLive) await pushSessionState(live.sessionId, { myScore, oppScore, round }, myRole === 'player1' ? 'player2' : 'player1');
           render();
@@ -4266,7 +4024,6 @@ function runPatternMatch(opponent, live) {
   render();
 }
 
-// ===== REFLEX GRID =====
 function runReflex(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4321,7 +4078,6 @@ function runReflex(opponent, live) {
   }
 }
 
-// ===== STROOP =====
 function runStroop(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4347,8 +4103,16 @@ function runStroop(opponent, live) {
     document.querySelectorAll('.stroop-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (gameOver || !myTurn) return;
-        if (btn.dataset.name === inkColor.name) { myScore++; if (myScore >= 5) { gameOver = true; if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, { myScore, oppScore }, currentUser.id); } setTimeout(() => endDuel(true, 'Stroop victory!'), 500); return; } myTurn = false; newRound(); if (isLive) pushSessionState(live.sessionId, { myScore, oppScore, round }, myRole === 'player1' ? 'player2' : 'player1'); }
-        else { myTurn = false; if (isLive) pushSessionState(live.sessionId, { myScore, oppScore, round }, myRole === 'player1' ? 'player2' : 'player1'); newRound(); }
+        if (btn.dataset.name === inkColor.name) {
+          myScore++;
+          if (myScore >= 5) { gameOver = true; if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, { myScore, oppScore }, currentUser.id); } setTimeout(() => endDuel(true, 'Stroop victory!'), 500); return; }
+          myTurn = false; newRound();
+          if (isLive) pushSessionState(live.sessionId, { myScore, oppScore, round }, myRole === 'player1' ? 'player2' : 'player1');
+        } else {
+          myTurn = false;
+          if (isLive) pushSessionState(live.sessionId, { myScore, oppScore, round }, myRole === 'player1' ? 'player2' : 'player1');
+          newRound();
+        }
       });
     });
   }
@@ -4372,7 +4136,6 @@ function runStroop(opponent, live) {
   }
 }
 
-// ===== SEQUENCE RECALL =====
 function runRecall(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4439,7 +4202,6 @@ function runRecall(opponent, live) {
   }
 }
 
-// ===== MATH CHAIN =====
 function runMathChain(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4499,7 +4261,6 @@ function runMathChain(opponent, live) {
   }
 }
 
-// ===== RPS DUEL =====
 function runRPS(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4541,7 +4302,6 @@ function runRPS(opponent, live) {
         if (typeof newState.myChoiceIdx === 'number') {
           oppChoice = CHOICES[newState.myChoiceIdx];
           if (myChoice !== null) {
-            // Determine winner
             const myIdx = CHOICES.indexOf(myChoice);
             const oppIdx = newState.myChoiceIdx;
             if (myIdx !== oppIdx) {
@@ -4558,8 +4318,6 @@ function runRPS(opponent, live) {
             }
             render();
           }
-        } else if (oppChoice === null && myChoice !== null) {
-          // opponent's choice not yet received
         }
         render();
       }
@@ -4567,7 +4325,6 @@ function runRPS(opponent, live) {
   }
 }
 
-// ===== DICE BATTLE =====
 function runDice(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4701,7 +4458,7 @@ async function endDrawnMatch() {
   gameTimers.forEach(t => clearInterval(t)); gameTimers = [];
 }
 
-// ===== MATCHMAKING — REAL PLAYERS ONLY =====
+// ===== MATCHMAKING =====
 async function checkForLiveSession() {
   try {
     const { data } = await client.from('game_sessions').select('id, player1_id, player2_id, current_turn, created_at').eq('game_type', activeGame.type).eq('status', 'active').or(`player1_id.eq.${currentUser.id},player2_id.eq.${currentUser.id}`).order('created_at', { ascending: false }).limit(1).maybeSingle();
@@ -4725,7 +4482,7 @@ async function joinLiveSession(liveSession) {
 }
 function showNoOpponentFound() {
   matchmakingLock = false;
-  inQueue = false;      // ← fix
+  inQueue = false;
   const refAmt = document.getElementById('no-opp-refund');
   if (refAmt) refAmt.textContent = currentEntryFee;
   if (matchOverlay) matchOverlay.classList.add('hidden');
@@ -4777,42 +4534,35 @@ async function beginMatchmaking() {
     updateRing();
     if (!matched) { const liveSession = await checkForLiveSession(); if (liveSession) { matched = true; clearInterval(matchmakingInterval); matchmakingInterval = null; joinLiveSession(liveSession); return; } }
     try {
-// Fetch FP + IP once (cached after first call)
-const myFP = await getDeviceFingerprint();
-const myIP = await getClientIP();
+      const myFP = await getDeviceFingerprint();
+      const myIP = await getClientIP();
+      const { data: result, error } = await client.rpc('claim_opponent', {
+        p_game_type: activeGame.type,
+        p_entry_fee: currentEntryFee,
+        p_reward: currentReward,
+        p_fingerprint: myFP,
+        p_ip: myIP
+      });
+      if (error) throw error;
 
-const { data: result, error } = await client.rpc('claim_opponent', {
-  p_game_type: activeGame.type,
-  p_entry_fee: currentEntryFee,
-  p_reward: currentReward,
-  p_fingerprint: myFP,
-  p_ip: myIP
-});
-           if (error) throw error;
-
-      // ⛔ Blocked by anti-farm (server detected same device/IP/etc.)
       if (result && result.blocked) {
         matched = true;
         clearInterval(matchmakingInterval); matchmakingInterval = null;
-
         if (currentInviteId) {
           try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
           currentInviteId = null;
         }
         if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
-
         try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
-
         try {
           await persistWalletDelta(currentEntryFee);
           await recordTransaction('Stake Refunded — FairPlay block', 'credit', currentEntryFee);
           showWalletToast(currentEntryFee, 'credit', 'FairPlay block — refunded');
         } catch (e) {}
-
         const searchingView = document.getElementById('mm-searching-view');
-        const blockedView   = document.getElementById('mm-blocked-view');
-        const reasonEl      = document.getElementById('mm-blocked-reason');
-        const refundEl      = document.getElementById('mm-blocked-refund');
+        const blockedView = document.getElementById('mm-blocked-view');
+        const reasonEl = document.getElementById('mm-blocked-reason');
+        const refundEl = document.getElementById('mm-blocked-refund');
         if (searchingView) searchingView.style.display = 'none';
         if (reasonEl) reasonEl.textContent = result.reason || 'Due to suspicious similarity, we can\'t match you with this player. Try again — this is for FairPlay security.';
         if (refundEl) refundEl.textContent = '₹' + currentEntryFee + ' Refunded';
@@ -4821,7 +4571,7 @@ const { data: result, error } = await client.rpc('claim_opponent', {
         return;
       }
 
-           if (result && result.matched) {
+      if (result && result.matched) {
         matched = true;
         clearInterval(matchmakingInterval); matchmakingInterval = null;
         if (currentInviteId) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {} currentInviteId = null; }
@@ -4848,8 +4598,6 @@ const { data: result, error } = await client.rpc('claim_opponent', {
       try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
       if (currentInviteId) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {} currentInviteId = null; }
       if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
-      
-      // === NO BOTS. REFUND & SHOW MESSAGE ===
       await refundStake();
       showNoOpponentFound();
     }
@@ -4875,16 +4623,14 @@ document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
   beginMatchmaking();
 });
 
-// ===== NO OPPONENT MODAL CLOSE =====
 document.getElementById('no-opp-close-btn')?.addEventListener('click', () => {
   noOpponentOverlay?.classList.add('hidden');
   restoreScrollY();
 });
 
-// Blocked-match → Back to Lobby
 document.getElementById('mm-blocked-back-btn')?.addEventListener('click', () => {
   const searchingView = document.getElementById('mm-searching-view');
-  const blockedView   = document.getElementById('mm-blocked-view');
+  const blockedView = document.getElementById('mm-blocked-view');
   if (blockedView) blockedView.style.display = 'none';
   if (searchingView) searchingView.style.display = 'block';
   if (matchOverlay) matchOverlay.classList.add('hidden');
@@ -5066,7 +4812,7 @@ function initChatBot() {
   function showTyping(show) { if (chatTyping) chatTyping.classList.toggle('show', show); if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight; }
   function getAIResponse(userMessage) {
     const msg = userMessage.toLowerCase();
-    const responses = { 'game': 'We have 21 skill-based games including Tic-Tac-Toe, Connect 4, Nim Duel, Dots & Boxes, Memory Match, Word Scramble, Lights Out, Pattern Match, Tower Stack and more.', 'wallet': 'Your wallet shows your current balance. Add funds via UPI (min ₹1) and withdraw when you reach ₹150.', 'tournament': 'We run daily and weekly tournaments with free entry and prize pools up to ₹250.', 'refer': 'Refer a friend and both of you get ₹25.', 'withdraw': 'Withdrawals are processed within 7-8 hours to your UPI ID. Minimum ₹150. For urgent help, DM @skillclash.in_ on Instagram (60 min response).', 'fairplay': 'FairPlay is our anti-cheat system ensuring all matches are fair. We only match real players.', 'help': 'I am here to help. Ask me about games, wallet, tournaments, referrals, withdrawals.', 'instagram': 'You can reach us on Instagram @skillclash.in_ — average response time is 60 minutes for Top-Up and Withdrawal issues.', 'bonus': 'New users get a ₹25 welcome bonus credited on signup.', 'support': 'Instagram @skillclash.in_ is our fastest support channel — 60 min response.' };
+    const responses = { 'game': 'We have 21 skill-based games including Tic-Tac-Toe, Connect 4, Nim Duel, Dots & Boxes, Memory Match, Word Scramble, Lights Out, Pattern Match, Tower Stack and more.', 'wallet': 'Your wallet shows your current balance. Add funds via UPI (min ₹1) and withdraw when you reach ₹150.', 'tournament': 'We run daily and weekly tournaments with free entry and prize pools up to ₹250.', 'refer': 'Refer a friend and both of you get ₹25.', 'withdraw': 'Withdrawals are processed within 7-8 hours to your UPI ID. Minimum ₹150.', 'fairplay': 'FairPlay is our anti-cheat system ensuring all matches are fair. We only match real players.', 'help': 'I am here to help. Ask me about games, wallet, tournaments, referrals, withdrawals.', 'instagram': 'You can reach us on Instagram @skillclash.in_ — average response time is 60 minutes.', 'bonus': 'New users get a ₹25 welcome bonus credited on signup.', 'support': 'Instagram @skillclash.in_ is our fastest support channel — 60 min response.' };
     for (const [key, value] of Object.entries(responses)) if (msg.includes(key)) return value;
     const fallbacks = [`That's a great question. Could you tell me more?`, `I'm here to help. Ask me about games, wallet, or tournaments.`, `For more details, check the Help Center. I'm ${chatAgentName}, by the way.`, `Can you rephrase your question?`, `Great question. The SkillClash platform is designed to be intuitive.`];
     return fallbacks[Math.floor(Math.random() * fallbacks.length)];
@@ -5091,7 +4837,6 @@ function initChatBot() {
 async function checkWelcomeBonus() {
   const key = 'skillclash_welcome_shown_' + currentUser.id;
   if (localStorage.getItem(key) === 'true') return;
-  // Check if user was newly created (welcome bonus was applied)
   try {
     const { data: user } = await client.from('users').select('created_at').eq('id', currentUser.id).maybeSingle();
     if (user) {
@@ -5099,7 +4844,6 @@ async function checkWelcomeBonus() {
       const now = new Date();
       const minutesSince = (now - created) / 1000 / 60;
       if (minutesSince < 5) {
-        // Fresh signup — show bonus modal
         document.getElementById('welcome-bonus-overlay')?.classList.add('show');
         localStorage.setItem(key, 'true');
         document.getElementById('welcome-bonus-cta')?.addEventListener('click', () => {
@@ -5108,6 +4852,216 @@ async function checkWelcomeBonus() {
       }
     }
   } catch (e) {}
+}
+
+// ============================================================
+// NOTIFICATIONS SYSTEM
+// ============================================================
+let notificationsCache = [];
+let notificationsUnread = 0;
+let notifRealtimeChannel = null;
+
+async function loadNotifications() {
+  if (!currentUser) return;
+  try {
+    const { data, error } = await client
+      .from('notifications')
+      .select('id, title, body, type, is_read, created_at')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    notificationsCache = (data || []).map(n => ({
+      id: n.id, title: n.title || 'Notification', body: n.body || '',
+      type: n.type || 'info', is_read: !!n.is_read, created_at: n.created_at
+    }));
+    notificationsUnread = notificationsCache.filter(n => !n.is_read).length;
+    renderNotificationBadge();
+    renderNotifPanelList();
+    renderNotifViewList();
+  } catch (e) {
+    notificationsCache = [];
+    notificationsUnread = 0;
+    renderNotificationBadge();
+    renderNotifPanelList();
+    renderNotifViewList();
+  }
+}
+
+function renderNotificationBadge() {
+  const badge = document.getElementById('notification-count');
+  const bell = document.getElementById('notification-bell-btn');
+  if (!badge || !bell) return;
+  if (notificationsUnread > 0) {
+    badge.textContent = notificationsUnread > 99 ? '99+' : String(notificationsUnread);
+    badge.classList.remove('hidden');
+    bell.classList.add('has-unread');
+  } else {
+    badge.textContent = '0';
+    badge.classList.add('hidden');
+    bell.classList.remove('has-unread');
+  }
+  const mk = document.getElementById('notif-mark-all-btn');
+  if (mk) mk.disabled = (notificationsUnread === 0);
+}
+
+function notifIcon(type) {
+  switch ((type || '').toLowerCase()) {
+    case 'gift': case 'reward': return { cls: 'gift', icon: 'fa-gift' };
+    case 'check': case 'success': case 'win': return { cls: 'check', icon: 'fa-check' };
+    case 'alert': case 'warning': return { cls: 'alert', icon: 'fa-exclamation' };
+    case 'fire': case 'streak': return { cls: 'fire', icon: 'fa-fire' };
+    case 'promo': case 'offer': return { cls: 'promo', icon: 'fa-bullhorn' };
+    default: return { cls: '', icon: 'fa-bell' };
+  }
+}
+
+function renderNotifPanelList() {
+  const body = document.getElementById('notif-body');
+  if (!body) return;
+  if (notificationsCache.length === 0) {
+    body.innerHTML = `<div class="notif-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet.<br>We'll let you know when something happens.</p></div>`;
+    return;
+  }
+  body.innerHTML = notificationsCache.map(n => {
+    const ic = notifIcon(n.type);
+    const unreadCls = n.is_read ? '' : 'unread';
+    return `<div class="notif-item ${unreadCls}" data-notif-id="${escapeHtml(n.id)}">
+      <div class="notif-icon-circle ${ic.cls}"><i class="fas ${ic.icon}"></i></div>
+      <div class="notif-content">
+        <div class="notif-title">${escapeHtml(n.title)}</div>
+        ${n.body ? `<div class="notif-body-text">${escapeHtml(n.body)}</div>` : ''}
+        <div class="notif-time">${escapeHtml(formatISTRelative(n.created_at))}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderNotifViewList() {
+  const list = document.getElementById('notif-view-list');
+  if (!list) return;
+  if (notificationsCache.length === 0) {
+    list.innerHTML = `<div class="notif-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet.</p></div>`;
+    return;
+  }
+  list.innerHTML = notificationsCache.map(n => {
+    const ic = notifIcon(n.type);
+    const unreadCls = n.is_read ? '' : 'unread';
+    return `<div class="notif-view-item ${unreadCls}" data-notif-id="${escapeHtml(n.id)}">
+      <div class="notif-icon-circle ${ic.cls}"><i class="fas ${ic.icon}"></i></div>
+      <div class="notif-content">
+        <div class="notif-title">${escapeHtml(n.title)}</div>
+        ${n.body ? `<div class="notif-body-text">${escapeHtml(n.body)}</div>` : ''}
+        <div class="notif-time">${escapeHtml(formatIST(n.created_at))}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function markNotificationRead(id) {
+  if (!id) return;
+  const n = notificationsCache.find(x => x.id === id);
+  if (!n || n.is_read) return;
+  n.is_read = true;
+  notificationsUnread = Math.max(0, notificationsUnread - 1);
+  renderNotificationBadge();
+  renderNotifPanelList();
+  renderNotifViewList();
+  try { await client.from('notifications').update({ is_read: true }).eq('id', id).eq('user_id', currentUser.id); } catch (e) {}
+}
+
+async function markAllNotificationsRead() {
+  if (!currentUser) return;
+  if (notificationsUnread === 0) return;
+  notificationsCache.forEach(n => n.is_read = true);
+  notificationsUnread = 0;
+  renderNotificationBadge();
+  renderNotifPanelList();
+  renderNotifViewList();
+  try { await client.from('notifications').update({ is_read: true }).eq('user_id', currentUser.id).eq('is_read', false); } catch (e) {}
+}
+
+function openNotifPanel() {
+  const panel = document.getElementById('notif-panel');
+  const overlay = document.getElementById('notif-panel-overlay');
+  if (panel) panel.style.display = 'flex';
+  if (overlay) overlay.classList.add('show');
+  renderNotifPanelList();
+  const mk = document.getElementById('notif-mark-all-btn');
+  if (mk) mk.disabled = (notificationsUnread === 0);
+  loadNotifications();
+}
+function closeNotifPanel() {
+  const panel = document.getElementById('notif-panel');
+  const overlay = document.getElementById('notif-panel-overlay');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.classList.remove('show');
+}
+
+async function subscribeToNotificationsRealtime() {
+  if (!currentUser) return;
+  if (notifRealtimeChannel) {
+    try { await client.removeChannel(notifRealtimeChannel); } catch (e) {}
+    notifRealtimeChannel = null;
+  }
+  notifRealtimeChannel = client
+    .channel('notifs-' + currentUser.id)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'notifications',
+      filter: 'user_id=eq.' + currentUser.id
+    }, (payload) => {
+      const n = payload.new;
+      if (!n) return;
+      if (notificationsCache.some(x => x.id === n.id)) return;
+      notificationsCache.unshift({
+        id: n.id, title: n.title || 'Notification', body: n.body || '',
+        type: n.type || 'info', is_read: !!n.is_read, created_at: n.created_at
+      });
+      if (!n.is_read) notificationsUnread++;
+      renderNotificationBadge();
+      renderNotifPanelList();
+      renderNotifViewList();
+      try { showToast(n.title || 'New notification', 'credit'); } catch (e) {}
+    })
+    .on('postgres_changes', {
+      event: 'UPDATE', schema: 'public', table: 'notifications',
+      filter: 'user_id=eq.' + currentUser.id
+    }, (payload) => {
+      const n = payload.new;
+      if (!n) return;
+      const idx = notificationsCache.findIndex(x => x.id === n.id);
+      if (idx < 0) return;
+      const wasUnread = !notificationsCache[idx].is_read;
+      notificationsCache[idx].is_read = !!n.is_read;
+      if (wasUnread && n.is_read) notificationsUnread = Math.max(0, notificationsUnread - 1);
+      renderNotificationBadge();
+      renderNotifPanelList();
+      renderNotifViewList();
+    })
+    .subscribe();
+}
+
+function wireNotificationsUI() {
+  document.getElementById('notification-bell-btn')?.addEventListener('click', openNotifPanel);
+  document.getElementById('notif-close-btn')?.addEventListener('click', closeNotifPanel);
+  document.getElementById('notif-panel-overlay')?.addEventListener('click', closeNotifPanel);
+  document.getElementById('notif-mark-all-btn')?.addEventListener('click', markAllNotificationsRead);
+  document.getElementById('notif-view-mark-all')?.addEventListener('click', markAllNotificationsRead);
+  document.getElementById('notif-back-btn')?.addEventListener('click', () => switchView('view-profile'));
+  document.getElementById('menu-notifications-btn')?.addEventListener('click', () => {
+    switchView('view-notifications');
+    loadNotifications();
+  });
+  document.getElementById('notif-body')?.addEventListener('click', (e) => {
+    const item = e.target.closest('.notif-item');
+    if (!item) return;
+    markNotificationRead(item.dataset.notifId);
+  });
+  document.getElementById('notif-view-list')?.addEventListener('click', (e) => {
+    const item = e.target.closest('.notif-view-item');
+    if (!item) return;
+    markNotificationRead(item.dataset.notifId);
+  });
 }
 
 // ===== INIT =====
@@ -5129,9 +5083,9 @@ async function initDashboard() {
     await loadTransactions();
     await loadMatchHistory();
     await loadReferralInfo();
-       updateUI();
+    updateUI();
     renderGameCards();
-      startPresenceHeartbeat();
+    startPresenceHeartbeat();
     subscribeToWalletRealtime();
     subscribeToInvites();
     wireNotificationsUI();
@@ -5164,257 +5118,7 @@ window.addEventListener('beforeunload', (e) => {
   if (inQueue && currentUser) client.from('matchmaking_queue').delete().eq('user_id', currentUser.id).then(() => {}, () => {});
 });
 window.endDuel = endDuel;
-  // ============================================================
-// v18: NOTIFICATIONS SYSTEM
-// ============================================================
-let notificationsCache = [];
-let notificationsUnread = 0;
-let notifRealtimeChannel = null;
 
-// --- Load + render bell count + panel list + view list ---
-async function loadNotifications() {
-  if (!currentUser) return;
-  try {
-    const { data, error } = await client
-      .from('notifications')
-      .select('id, title, body, type, is_read, created_at')
-      .eq('user_id', currentUser.id)
-      .order('created_at', { ascending: false })
-      .limit(50);
-    if (error) throw error;
-    notificationsCache = (data || []).map(n => ({
-      id: n.id,
-      title: n.title || 'Notification',
-      body: n.body || '',
-      type: n.type || 'info',
-      is_read: !!n.is_read,
-      created_at: n.created_at
-    }));
-    notificationsUnread = notificationsCache.filter(n => !n.is_read).length;
-    renderNotificationBadge();
-    renderNotifPanelList();
-    renderNotifViewList();
-  } catch (e) {
-    // Table may not exist yet — silently ignore so app keeps working
-    notificationsCache = [];
-    notificationsUnread = 0;
-    renderNotificationBadge();
-    renderNotifPanelList();
-    renderNotifViewList();
-  }
-}
-
-// --- Badge on the bell ---
-function renderNotificationBadge() {
-  const badge = document.getElementById('notification-count');
-  const bell  = document.getElementById('notification-bell-btn');
-  if (!badge || !bell) return;
-  if (notificationsUnread > 0) {
-    badge.textContent = notificationsUnread > 99 ? '99+' : String(notificationsUnread);
-    badge.classList.remove('hidden');
-    bell.classList.add('has-unread');
-  } else {
-    badge.textContent = '0';
-    badge.classList.add('hidden');
-    bell.classList.remove('has-unread');
-  }
-}
-
-// --- icon + color class per notification type ---
-function notifIcon(type) {
-  switch ((type || '').toLowerCase()) {
-    case 'gift':
-    case 'reward':  return { cls: 'gift',  icon: 'fa-gift' };
-    case 'check':
-    case 'success':
-    case 'win':     return { cls: 'check', icon: 'fa-check' };
-    case 'alert':
-    case 'warning': return { cls: 'alert', icon: 'fa-exclamation' };
-    case 'fire':
-    case 'streak':  return { cls: 'fire',  icon: 'fa-fire' };
-    case 'promo':
-    case 'offer':   return { cls: 'promo', icon: 'fa-bullhorn' };
-    default:        return { cls: '',      icon: 'fa-bell' };
-  }
-}
-
-// --- Panel list (slide-in from bell) ---
-function renderNotifPanelList() {
-  const body = document.getElementById('notif-body');
-  if (!body) return;
-  if (notificationsCache.length === 0) {
-    body.innerHTML = `<div class="notif-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet.<br>We'll let you know when something happens.</p></div>`;
-    return;
-  }
-  body.innerHTML = notificationsCache.map(n => {
-    const ic = notifIcon(n.type);
-    const unreadCls = n.is_read ? '' : 'unread';
-    return `<div class="notif-item ${unreadCls}" data-notif-id="${escapeHtml(n.id)}">
-      <div class="notif-icon-circle ${ic.cls}"><i class="fas ${ic.icon}"></i></div>
-      <div class="notif-content">
-        <div class="notif-title">${escapeHtml(n.title)}</div>
-        ${n.body ? `<div class="notif-body-text">${escapeHtml(n.body)}</div>` : ''}
-        <div class="notif-time">${escapeHtml(formatISTRelative(n.created_at))}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// --- Full notifications view (from profile menu) ---
-function renderNotifViewList() {
-  const list = document.getElementById('notif-view-list');
-  if (!list) return;
-  if (notificationsCache.length === 0) {
-    list.innerHTML = `<div class="notif-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet.</p></div>`;
-    return;
-  }
-  list.innerHTML = notificationsCache.map(n => {
-    const ic = notifIcon(n.type);
-    const unreadCls = n.is_read ? '' : 'unread';
-    return `<div class="notif-view-item ${unreadCls}" data-notif-id="${escapeHtml(n.id)}">
-      <div class="notif-icon-circle ${ic.cls}"><i class="fas ${ic.icon}"></i></div>
-      <div class="notif-content">
-        <div class="notif-title">${escapeHtml(n.title)}</div>
-        ${n.body ? `<div class="notif-body-text">${escapeHtml(n.body)}</div>` : ''}
-        <div class="notif-time">${escapeHtml(formatIST(n.created_at))}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// --- Mark single as read ---
-async function markNotificationRead(id) {
-  if (!id) return;
-  const n = notificationsCache.find(x => x.id === id);
-  if (!n || n.is_read) return;
-  n.is_read = true;
-  notificationsUnread = Math.max(0, notificationsUnread - 1);
-  renderNotificationBadge();
-  renderNotifPanelList();
-  renderNotifViewList();
-  try {
-    await client.from('notifications').update({ is_read: true }).eq('id', id).eq('user_id', currentUser.id);
-  } catch (e) {}
-}
-
-// --- Mark all as read ---
-async function markAllNotificationsRead() {
-  if (!currentUser) return;
-  if (notificationsUnread === 0) return;
-  notificationsCache.forEach(n => n.is_read = true);
-  notificationsUnread = 0;
-  renderNotificationBadge();
-  renderNotifPanelList();
-  renderNotifViewList();
-  try {
-    await client.from('notifications').update({ is_read: true }).eq('user_id', currentUser.id).eq('is_read', false);
-  } catch (e) {}
-}
-
-// --- Panel open/close ---
-function openNotifPanel() {
-  const panel = document.getElementById('notif-panel');
-  const overlay = document.getElementById('notif-panel-overlay');
-  if (panel) panel.style.display = 'flex';
-  if (overlay) overlay.classList.add('show');
-  renderNotifPanelList();
-  // Refresh from server quietly
-  loadNotifications();
-}
-function closeNotifPanel() {
-  const panel = document.getElementById('notif-panel');
-  const overlay = document.getElementById('notif-panel-overlay');
-  if (panel) panel.style.display = 'none';
-  if (overlay) overlay.classList.remove('show');
-}
-
-// --- Realtime subscription ---
-async function subscribeToNotificationsRealtime() {
-  if (!currentUser) return;
-  if (notifRealtimeChannel) {
-    try { await client.removeChannel(notifRealtimeChannel); } catch (e) {}
-    notifRealtimeChannel = null;
-  }
-  notifRealtimeChannel = client
-    .channel('notifs-' + currentUser.id)
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'notifications',
-      filter: 'user_id=eq.' + currentUser.id
-    }, (payload) => {
-      const n = payload.new;
-      if (!n) return;
-      if (notificationsCache.some(x => x.id === n.id)) return;
-      notificationsCache.unshift({
-        id: n.id,
-        title: n.title || 'Notification',
-        body: n.body || '',
-        type: n.type || 'info',
-        is_read: !!n.is_read,
-        created_at: n.created_at
-      });
-      if (!n.is_read) notificationsUnread++;
-      renderNotificationBadge();
-      renderNotifPanelList();
-      renderNotifViewList();
-      // Small toast hint
-      try { showToast(n.title || 'New notification', 'credit'); } catch (e) {}
-    })
-    .on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'notifications',
-      filter: 'user_id=eq.' + currentUser.id
-    }, (payload) => {
-      const n = payload.new;
-      if (!n) return;
-      const idx = notificationsCache.findIndex(x => x.id === n.id);
-      if (idx < 0) return;
-      const wasUnread = !notificationsCache[idx].is_read;
-      notificationsCache[idx].is_read = !!n.is_read;
-      if (wasUnread && n.is_read) notificationsUnread = Math.max(0, notificationsUnread - 1);
-      renderNotificationBadge();
-      renderNotifPanelList();
-      renderNotifViewList();
-    })
-    .subscribe();
-}
-
-// --- Wire up all the buttons/listeners (run once at boot) ---
-function wireNotificationsUI() {
-  // Bell → open panel
-  document.getElementById('notification-bell-btn')?.addEventListener('click', openNotifPanel);
-  document.getElementById('notif-close-btn')?.addEventListener('click', closeNotifPanel);
-  document.getElementById('notif-panel-overlay')?.addEventListener('click', closeNotifPanel);
-
-  // Mark all read inside panel
-  document.getElementById('notif-mark-all-btn')?.addEventListener('click', markAllNotificationsRead);
-
-  // Mark all read inside full view
-  document.getElementById('notif-view-mark-all')?.addEventListener('click', markAllNotificationsRead);
-
-  // Back from notifications view → profile
-  document.getElementById('notif-back-btn')?.addEventListener('click', () => switchView('view-profile'));
-
-  // Profile menu → notifications view
-  document.getElementById('menu-notifications-btn')?.addEventListener('click', () => {
-    switchView('view-notifications');
-    loadNotifications();
-  });
-
-  // Click a notification (panel or view) → mark read
-  document.getElementById('notif-body')?.addEventListener('click', (e) => {
-    const item = e.target.closest('.notif-item');
-    if (!item) return;
-    markNotificationRead(item.dataset.notifId);
-  });
-  document.getElementById('notif-view-list')?.addEventListener('click', (e) => {
-    const item = e.target.closest('.notif-view-item');
-    if (!item) return;
-    markNotificationRead(item.dataset.notifId);
-  });
-}
 routeOnLoad();
 
 // ===== DEEP-LINK =====
@@ -5439,7 +5143,7 @@ routeOnLoad();
   }, 300);
 })();
 
-console.log('SkillClash v17 loaded — Real players only, all games live, ₹10 margin per match');
+console.log('SkillClash v18 loaded — Real players only, floating notifications popup');
 </script>
 </body>
 </html>
