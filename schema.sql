@@ -1,11 +1,12 @@
 -- ============================================================
--- SkillClash - MASTER SCHEMA v10.2 (₹-column safe + wallet realtime)
+-- SkillClash - MASTER SCHEMA v10.3 (with admin panel + withdrawals)
 -- ============================================================
--- v10.2 change (vs v10.1):
---   * Added `alter publication supabase_realtime add table public.wallet`
---     inside a safe DO block. This enables the frontend's realtime
---     wallet subscription so the balance auto-updates across devices
---     when credit/debit happens (top-up, match win, admin approval).
+-- Includes everything from v10.2 PLUS:
+--   * withdrawal_requests table
+--   * create_withdrawal_request RPC
+--   * get_my_withdrawals RPC
+--   * admin_dashboard view (simple, easy to read)
+--   * mark_withdrawal_paid RPC
 -- ============================================================
 
 
@@ -47,7 +48,7 @@ create policy "Users can insert their own profile"
 
 
 -- ------------------------------------------------------------
--- WALLET (canonical `balance`; legacy `₹` handled dynamically)
+-- WALLET
 -- ------------------------------------------------------------
 create table if not exists public.wallet (
   id uuid primary key default gen_random_uuid(),
@@ -116,32 +117,23 @@ create policy "Users can insert their own wallet"
 
 
 -- ============================================================
--- PART E — Enable realtime on wallet table
--- ============================================================
--- This allows the frontend's realtime subscription to receive
--- UPDATE events whenever wallet.balance changes (top-up,
--- match win/loss settlement, admin approval, refunds).
--- Without this, subscribeToWalletRealtime() will connect but
--- never receive any events.
+-- Wallet realtime
 -- ============================================================
 do $$
 begin
   begin
     alter publication supabase_realtime add table public.wallet;
   exception
-    when duplicate_object then null;   -- already added, safe to ignore
-    when undefined_object then null;   -- publication doesn't exist (older Supabase)
+    when duplicate_object then null;
+    when undefined_object then null;
   end;
 end $$;
 
--- Also ensure REPLICA IDENTITY is full so we get the full row
--- in the realtime payload (not just the primary key).
--- This is required for payload.new.balance to be present.
 alter table public.wallet replica identity full;
 
 
 -- ------------------------------------------------------------
--- SYNC TRIGGER: keep wallet.email / wallet.full_name in sync
+-- SYNC TRIGGER
 -- ------------------------------------------------------------
 create or replace function public.sync_wallet_from_users()
 returns trigger
@@ -151,9 +143,7 @@ set search_path = public
 as $$
 begin
   update public.wallet
-  set
-    email = new.email,
-    full_name = new.full_name
+  set email = new.email, full_name = new.full_name
   where user_id = new.id;
   return new;
 end;
@@ -177,20 +167,15 @@ create table if not exists public.matchmaking_queue (
 alter table public.matchmaking_queue enable row level security;
 
 drop policy if exists "Users can see the queue" on public.matchmaking_queue;
-create policy "Users can see the queue"
-  on public.matchmaking_queue for select using (true);
-
+create policy "Users can see the queue" on public.matchmaking_queue for select using (true);
 drop policy if exists "Users can join the queue as themselves" on public.matchmaking_queue;
-create policy "Users can join the queue as themselves"
-  on public.matchmaking_queue for insert with check (auth.uid() = user_id);
-
+create policy "Users can join the queue as themselves" on public.matchmaking_queue for insert with check (auth.uid() = user_id);
 drop policy if exists "Users can leave the queue" on public.matchmaking_queue;
-create policy "Users can leave the queue"
-  on public.matchmaking_queue for delete using (auth.uid() = user_id);
+create policy "Users can leave the queue" on public.matchmaking_queue for delete using (auth.uid() = user_id);
 
 
 -- ------------------------------------------------------------
--- MATCHES (legacy, kept for compatibility)
+-- MATCHES
 -- ------------------------------------------------------------
 create table if not exists public.matches (
   id uuid primary key default gen_random_uuid(),
@@ -205,25 +190,16 @@ create table if not exists public.matches (
 );
 
 alter table public.matches enable row level security;
-
 drop policy if exists "Players can view their own matches" on public.matches;
-create policy "Players can view their own matches"
-  on public.matches for select
-  using (auth.uid() = player1_id or auth.uid() = player2_id);
-
+create policy "Players can view their own matches" on public.matches for select using (auth.uid() = player1_id or auth.uid() = player2_id);
 drop policy if exists "Players can create a match they are part of" on public.matches;
-create policy "Players can create a match they are part of"
-  on public.matches for insert
-  with check (auth.uid() = player1_id or auth.uid() = player2_id);
-
+create policy "Players can create a match they are part of" on public.matches for insert with check (auth.uid() = player1_id or auth.uid() = player2_id);
 drop policy if exists "Players can update their own matches" on public.matches;
-create policy "Players can update their own matches"
-  on public.matches for update
-  using (auth.uid() = player1_id or auth.uid() = player2_id);
+create policy "Players can update their own matches" on public.matches for update using (auth.uid() = player1_id or auth.uid() = player2_id);
 
 
 -- ------------------------------------------------------------
--- TRANSACTIONS (ledger)
+-- TRANSACTIONS
 -- ------------------------------------------------------------
 create table if not exists public.transactions (
   id uuid primary key default gen_random_uuid(),
@@ -235,14 +211,10 @@ create table if not exists public.transactions (
 );
 
 alter table public.transactions enable row level security;
-
 drop policy if exists "Users can view their own transactions" on public.transactions;
-create policy "Users can view their own transactions"
-  on public.transactions for select using (auth.uid() = user_id);
-
+create policy "Users can view their own transactions" on public.transactions for select using (auth.uid() = user_id);
 drop policy if exists "Users can insert their own transactions" on public.transactions;
-create policy "Users can insert their own transactions"
-  on public.transactions for insert with check (auth.uid() = user_id);
+create policy "Users can insert their own transactions" on public.transactions for insert with check (auth.uid() = user_id);
 
 
 -- ------------------------------------------------------------
@@ -259,14 +231,10 @@ create table if not exists public.match_history (
 );
 
 alter table public.match_history enable row level security;
-
 drop policy if exists "Users can view their own match history" on public.match_history;
-create policy "Users can view their own match history"
-  on public.match_history for select using (auth.uid() = user_id);
-
+create policy "Users can view their own match history" on public.match_history for select using (auth.uid() = user_id);
 drop policy if exists "Users can insert their own match history" on public.match_history;
-create policy "Users can insert their own match history"
-  on public.match_history for insert with check (auth.uid() = user_id);
+create policy "Users can insert their own match history" on public.match_history for insert with check (auth.uid() = user_id);
 
 
 -- ------------------------------------------------------------
@@ -279,8 +247,7 @@ create table if not exists public.game_sessions (
   player2_id uuid references public.users (id) on delete cascade,
   state jsonb not null default '{}'::jsonb,
   current_turn text not null default 'player1',
-  status text not null default 'active'
-    check (status in ('active', 'completed', 'abandoned')),
+  status text not null default 'active' check (status in ('active', 'completed', 'abandoned')),
   winner_id uuid references public.users (id),
   entry_fee integer not null default 20,
   reward integer not null default 30,
@@ -293,31 +260,17 @@ alter table public.game_sessions add column if not exists abandoned_at timestamp
 alter table public.game_sessions add column if not exists settled_at timestamptz;
 alter table public.game_sessions add column if not exists settled_by uuid references public.users (id);
 
-create index if not exists game_sessions_players_idx
-  on public.game_sessions (player1_id, player2_id);
-
-create index if not exists game_sessions_status_idx
-  on public.game_sessions (status);
-
-create index if not exists game_sessions_game_type_status_idx
-  on public.game_sessions (game_type, status);
+create index if not exists game_sessions_players_idx on public.game_sessions (player1_id, player2_id);
+create index if not exists game_sessions_status_idx on public.game_sessions (status);
+create index if not exists game_sessions_game_type_status_idx on public.game_sessions (game_type, status);
 
 alter table public.game_sessions enable row level security;
-
 drop policy if exists "Players can view their game sessions" on public.game_sessions;
-create policy "Players can view their game sessions"
-  on public.game_sessions for select
-  using (auth.uid() = player1_id or auth.uid() = player2_id);
-
+create policy "Players can view their game sessions" on public.game_sessions for select using (auth.uid() = player1_id or auth.uid() = player2_id);
 drop policy if exists "Players can insert their game sessions" on public.game_sessions;
-create policy "Players can insert their game sessions"
-  on public.game_sessions for insert
-  with check (auth.uid() = player1_id or auth.uid() = player2_id);
-
+create policy "Players can insert their game sessions" on public.game_sessions for insert with check (auth.uid() = player1_id or auth.uid() = player2_id);
 drop policy if exists "Players can update their game sessions" on public.game_sessions;
-create policy "Players can update their game sessions"
-  on public.game_sessions for update
-  using (auth.uid() = player1_id or auth.uid() = player2_id);
+create policy "Players can update their game sessions" on public.game_sessions for update using (auth.uid() = player1_id or auth.uid() = player2_id);
 
 do $$
 begin
@@ -331,7 +284,7 @@ end $$;
 
 
 -- ------------------------------------------------------------
--- GAME EVENTS (audit trail)
+-- GAME EVENTS
 -- ------------------------------------------------------------
 create table if not exists public.game_events (
   id bigserial primary key,
@@ -342,30 +295,23 @@ create table if not exists public.game_events (
   created_at timestamptz not null default now()
 );
 
-create index if not exists game_events_session_idx
-  on public.game_events (session_id, created_at desc);
+create index if not exists game_events_session_idx on public.game_events (session_id, created_at desc);
 
 alter table public.game_events enable row level security;
-
 drop policy if exists "Players can view events for their sessions" on public.game_events;
-create policy "Players can view events for their sessions"
-  on public.game_events for select
-  using (
-    exists (
-      select 1 from public.game_sessions gs
-      where gs.id = game_events.session_id
-        and (gs.player1_id = auth.uid() or gs.player2_id = auth.uid())
-    )
-  );
-
+create policy "Players can view events for their sessions" on public.game_events for select using (
+  exists (
+    select 1 from public.game_sessions gs
+    where gs.id = game_events.session_id
+      and (gs.player1_id = auth.uid() or gs.player2_id = auth.uid())
+  )
+);
 drop policy if exists "Authenticated can insert events" on public.game_events;
-create policy "Authenticated can insert events"
-  on public.game_events for insert
-  with check (auth.role() = 'authenticated');
+create policy "Authenticated can insert events" on public.game_events for insert with check (auth.role() = 'authenticated');
 
 
 -- ------------------------------------------------------------
--- AUTO-PROVISION NEW USERS — ₹25 welcome bonus
+-- AUTO-PROVISION NEW USERS
 -- ------------------------------------------------------------
 create or replace function public.handle_new_user()
 returns trigger
@@ -377,16 +323,12 @@ declare
   v_has_rupee boolean;
 begin
   insert into public.users (id, email, full_name, avatar_url)
-  values (
-    new.id, new.email,
-    new.raw_user_meta_data ->> 'full_name',
-    new.raw_user_meta_data ->> 'avatar_url'
-  )
+  values (new.id, new.email, new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'avatar_url')
   on conflict (id) do nothing;
 
   select exists (
     select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
+    where table_schema='public' and table_name='wallet' and column_name='₹'
   ) into v_has_rupee;
 
   if v_has_rupee then
@@ -404,8 +346,7 @@ begin
   end if;
 
   insert into public.transactions (user_id, description, type, amount)
-  values (new.id, 'Welcome bonus', 'credit', 25)
-  on conflict do nothing;
+  values (new.id, 'Welcome bonus', 'credit', 25);
 
   return new;
 end;
@@ -472,17 +413,9 @@ begin
   returning id into v_session_id;
 
   insert into public.game_events (session_id, user_id, event_type, payload)
-  values (
-    v_session_id, v_me, 'match_created',
-    jsonb_build_object('opponent', v_opponent_id, 'game', p_game_type)
-  );
+  values (v_session_id, v_me, 'match_created', jsonb_build_object('opponent', v_opponent_id, 'game', p_game_type));
 
-  return json_build_object(
-    'matched', true,
-    'session_id', v_session_id,
-    'opponent_id', v_opponent_id,
-    'you_are', 'player2'
-  );
+  return json_build_object('matched', true, 'session_id', v_session_id, 'opponent_id', v_opponent_id, 'you_are', 'player2');
 end;
 $$;
 
@@ -505,60 +438,32 @@ declare
   v_bonus constant integer := 25;
   v_has_rupee boolean;
 begin
-  if v_me is null then
-    return json_build_object('success', false, 'message', 'Not authenticated.');
-  end if;
-
-  if p_code is null or length(trim(p_code)) = 0 then
-    return json_build_object('success', false, 'message', 'Please enter a code.');
-  end if;
+  if v_me is null then return json_build_object('success', false, 'message', 'Not authenticated.'); end if;
+  if p_code is null or length(trim(p_code)) = 0 then return json_build_object('success', false, 'message', 'Please enter a code.'); end if;
 
   select referred_by into v_already from public.users where id = v_me;
-  if v_already is not null then
-    return json_build_object('success', false, 'message', 'You already redeemed a referral code.');
-  end if;
+  if v_already is not null then return json_build_object('success', false, 'message', 'You already redeemed a referral code.'); end if;
 
   select id into v_referrer_id from public.users where referral_code = upper(trim(p_code));
-
-  if v_referrer_id is null then
-    return json_build_object('success', false, 'message', 'That referral code was not found.');
-  end if;
-
-  if v_referrer_id = v_me then
-    return json_build_object('success', false, 'message', 'You cannot use your own referral code.');
-  end if;
+  if v_referrer_id is null then return json_build_object('success', false, 'message', 'That referral code was not found.'); end if;
+  if v_referrer_id = v_me then return json_build_object('success', false, 'message', 'You cannot use your own referral code.'); end if;
 
   update public.users set referred_by = v_referrer_id where id = v_me;
 
-  select exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
-  ) into v_has_rupee;
+  select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
 
   if v_has_rupee then
-    update public.wallet
-      set balance = balance + v_bonus,
-          "₹" = "₹" + v_bonus,
-          updated_at = now()
-      where user_id = v_me;
-    update public.wallet
-      set balance = balance + v_bonus,
-          "₹" = "₹" + v_bonus,
-          updated_at = now()
-      where user_id = v_referrer_id;
+    update public.wallet set balance = balance + v_bonus, "₹" = "₹" + v_bonus, updated_at = now() where user_id = v_me;
+    update public.wallet set balance = balance + v_bonus, "₹" = "₹" + v_bonus, updated_at = now() where user_id = v_referrer_id;
   else
     update public.wallet set balance = balance + v_bonus, updated_at = now() where user_id = v_me;
     update public.wallet set balance = balance + v_bonus, updated_at = now() where user_id = v_referrer_id;
   end if;
 
-  insert into public.transactions (user_id, description, type, amount)
-  values (v_me, 'Referral bonus redeemed', 'credit', v_bonus);
+  insert into public.transactions (user_id, description, type, amount) values (v_me, 'Referral bonus redeemed', 'credit', v_bonus);
+  insert into public.transactions (user_id, description, type, amount) values (v_referrer_id, 'Referral bonus: friend joined', 'credit', v_bonus);
 
-  insert into public.transactions (user_id, description, type, amount)
-  values (v_referrer_id, 'Referral bonus: friend joined', 'credit', v_bonus);
-
-  return json_build_object('success', true,
-    'message', 'Referral applied! You received ₹' || v_bonus || '.');
+  return json_build_object('success', true, 'message', 'Referral applied! You received ₹' || v_bonus || '.');
 end;
 $$;
 
@@ -566,7 +471,7 @@ grant execute on function public.redeem_referral_code(text) to authenticated;
 
 
 -- ------------------------------------------------------------
--- PAYMENT REQUESTS & AUTO-APPROVAL
+-- PAYMENT REQUESTS
 -- ------------------------------------------------------------
 create table if not exists public.payment_requests (
   id uuid primary key default gen_random_uuid(),
@@ -580,18 +485,12 @@ create table if not exists public.payment_requests (
 );
 
 alter table public.payment_requests enable row level security;
-
 drop policy if exists "Users can view own payments" on public.payment_requests;
-create policy "Users can view own payments"
-  on public.payment_requests for select using (auth.uid() = user_id);
-
+create policy "Users can view own payments" on public.payment_requests for select using (auth.uid() = user_id);
 drop policy if exists "Users can submit payment" on public.payment_requests;
-create policy "Users can submit payment"
-  on public.payment_requests for insert with check (auth.uid() = user_id);
-
+create policy "Users can submit payment" on public.payment_requests for insert with check (auth.uid() = user_id);
 drop policy if exists "Users can update own payments" on public.payment_requests;
-create policy "Users can update own payments"
-  on public.payment_requests for update using (auth.uid() = user_id);
+create policy "Users can update own payments" on public.payment_requests for update using (auth.uid() = user_id);
 
 create or replace function public.process_payment_approval()
 returns trigger
@@ -603,22 +502,12 @@ declare
   v_has_rupee boolean;
 begin
   if new.status = 'approved' and old.status = 'pending' then
-    select exists (
-      select 1 from information_schema.columns
-      where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
-    ) into v_has_rupee;
+    select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
 
     if v_has_rupee then
-      update public.wallet
-      set balance = balance + new.tokens_to_credit,
-          "₹" = "₹" + new.tokens_to_credit,
-          updated_at = now()
-      where user_id = new.user_id;
+      update public.wallet set balance = balance + new.tokens_to_credit, "₹" = "₹" + new.tokens_to_credit, updated_at = now() where user_id = new.user_id;
     else
-      update public.wallet
-      set balance = balance + new.tokens_to_credit,
-          updated_at = now()
-      where user_id = new.user_id;
+      update public.wallet set balance = balance + new.tokens_to_credit, updated_at = now() where user_id = new.user_id;
     end if;
 
     insert into public.transactions (user_id, description, type, amount)
@@ -646,38 +535,24 @@ create table if not exists public.match_invites (
   game_name text not null,
   entry_fee integer not null default 20,
   reward integer not null default 30,
-  status text not null default 'open'
-    check (status in ('open', 'accepted', 'expired', 'cancelled')),
+  status text not null default 'open' check (status in ('open', 'accepted', 'expired', 'cancelled')),
   accepted_by uuid references public.users (id),
   created_at timestamptz not null default now(),
   expires_at timestamptz not null default (now() + interval '12 seconds')
 );
 
-alter table public.match_invites
-  alter column expires_at set default (now() + interval '12 seconds');
+alter table public.match_invites alter column expires_at set default (now() + interval '12 seconds');
 
-create index if not exists match_invites_open_idx
-  on public.match_invites (status, game_type, expires_at);
-
-create index if not exists match_invites_from_idx
-  on public.match_invites (from_user_id);
+create index if not exists match_invites_open_idx on public.match_invites (status, game_type, expires_at);
+create index if not exists match_invites_from_idx on public.match_invites (from_user_id);
 
 alter table public.match_invites enable row level security;
-
 drop policy if exists "Open invites are visible" on public.match_invites;
-create policy "Open invites are visible"
-  on public.match_invites for select
-  using (auth.role() = 'authenticated');
-
+create policy "Open invites are visible" on public.match_invites for select using (auth.role() = 'authenticated');
 drop policy if exists "Users can create their own invites" on public.match_invites;
-create policy "Users can create their own invites"
-  on public.match_invites for insert
-  with check (auth.uid() = from_user_id);
-
+create policy "Users can create their own invites" on public.match_invites for insert with check (auth.uid() = from_user_id);
 drop policy if exists "Users can update invites they created or accepted" on public.match_invites;
-create policy "Users can update invites they created or accepted"
-  on public.match_invites for update
-  using (auth.uid() = from_user_id or auth.uid() = accepted_by);
+create policy "Users can update invites they created or accepted" on public.match_invites for update using (auth.uid() = from_user_id or auth.uid() = accepted_by);
 
 do $$
 begin
@@ -700,10 +575,7 @@ security definer
 set search_path = public
 as $$
 begin
-  update public.match_invites
-  set status = 'expired'
-  where status = 'open'
-    and expires_at < now();
+  update public.match_invites set status = 'expired' where status = 'open' and expires_at < now();
 end;
 $$;
 
@@ -724,64 +596,42 @@ declare
   v_session_id uuid;
   v_me uuid := auth.uid();
 begin
-  if v_me is null then
-    return json_build_object('ok', false, 'reason', 'not_authenticated');
-  end if;
+  if v_me is null then return json_build_object('ok', false, 'reason', 'not_authenticated'); end if;
 
-  select * into v_invite from public.match_invites
-  where id = p_invite_id
-  for update;
+  select * into v_invite from public.match_invites where id = p_invite_id for update;
 
-  if v_invite is null then
-    return json_build_object('ok', false, 'reason', 'not_found');
-  end if;
-  if v_invite.status <> 'open' then
-    return json_build_object('ok', false, 'reason', 'already_taken');
-  end if;
+  if v_invite is null then return json_build_object('ok', false, 'reason', 'not_found'); end if;
+  if v_invite.status <> 'open' then return json_build_object('ok', false, 'reason', 'already_taken'); end if;
   if v_invite.expires_at < now() then
     update public.match_invites set status = 'expired' where id = p_invite_id;
     return json_build_object('ok', false, 'reason', 'expired');
   end if;
-  if v_invite.from_user_id = v_me then
-    return json_build_object('ok', false, 'reason', 'self');
-  end if;
+  if v_invite.from_user_id = v_me then return json_build_object('ok', false, 'reason', 'self'); end if;
 
-  update public.match_invites
-  set status = 'accepted', accepted_by = v_me
-  where id = p_invite_id;
+  update public.match_invites set status = 'accepted', accepted_by = v_me where id = p_invite_id;
 
   insert into public.game_sessions (
-    game_type, player1_id, player2_id, state, current_turn,
-    status, entry_fee, reward, stake_locked
+    game_type, player1_id, player2_id, state, current_turn, status, entry_fee, reward, stake_locked
   )
   values (
     v_invite.game_type, v_invite.from_user_id, v_me,
-    '{}'::jsonb, 'player1', 'active',
-    v_invite.entry_fee, v_invite.reward, true
+    '{}'::jsonb, 'player1', 'active', v_invite.entry_fee, v_invite.reward, true
   )
   returning id into v_session_id;
 
   insert into public.game_events (session_id, user_id, event_type, payload)
-  values (
-    v_session_id, v_me, 'invite_accepted',
-    jsonb_build_object('invite_id', p_invite_id, 'opponent', v_invite.from_user_id)
-  );
+  values (v_session_id, v_me, 'invite_accepted', jsonb_build_object('invite_id', p_invite_id, 'opponent', v_invite.from_user_id));
 
-  return json_build_object(
-    'ok', true,
-    'session_id', v_session_id,
-    'opponent_id', v_invite.from_user_id
-  );
+  return json_build_object('ok', true, 'session_id', v_session_id, 'opponent_id', v_invite.from_user_id);
 end;
 $$;
 
 grant execute on function public.accept_match_invite(uuid) to authenticated;
 
 
--- ============================================================
--- Settlement RPCs
--- ============================================================
-
+-- ------------------------------------------------------------
+-- END_SESSION_WITH_STATE
+-- ------------------------------------------------------------
 create or replace function public.end_session_with_state(
   p_session_id uuid,
   p_final_state jsonb default '{}'::jsonb,
@@ -800,101 +650,60 @@ declare
   v_reward integer;
   v_has_rupee boolean;
 begin
-  if v_me is null then
-    return json_build_object('ok', false, 'reason', 'not_authenticated');
-  end if;
+  if v_me is null then return json_build_object('ok', false, 'reason', 'not_authenticated'); end if;
 
-  select * into v_session from public.game_sessions
-  where id = p_session_id
-  for update;
-
-  if v_session is null then
-    return json_build_object('ok', false, 'reason', 'not_found');
-  end if;
+  select * into v_session from public.game_sessions where id = p_session_id for update;
+  if v_session is null then return json_build_object('ok', false, 'reason', 'not_found'); end if;
 
   v_is_player := (v_session.player1_id = v_me or v_session.player2_id = v_me);
-  if not v_is_player then
-    return json_build_object('ok', false, 'reason', 'not_a_player');
-  end if;
+  if not v_is_player then return json_build_object('ok', false, 'reason', 'not_a_player'); end if;
 
   if v_session.status <> 'active' then
-    return json_build_object('ok', true, 'already_settled', true,
-      'winner_id', v_session.winner_id, 'status', v_session.status);
+    return json_build_object('ok', true, 'already_settled', true, 'winner_id', v_session.winner_id, 'status', v_session.status);
   end if;
 
-  if p_winner_id is not null
-     and p_winner_id <> v_session.player1_id
-     and p_winner_id <> v_session.player2_id then
+  if p_winner_id is not null and p_winner_id <> v_session.player1_id and p_winner_id <> v_session.player2_id then
     p_winner_id := null;
   end if;
 
   update public.game_sessions
-  set
-    status = 'completed',
-    state = coalesce(p_final_state, state),
-    winner_id = p_winner_id,
-    settled_at = now(),
-    settled_by = v_me,
-    updated_at = now()
+  set status = 'completed', state = coalesce(p_final_state, state), winner_id = p_winner_id,
+      settled_at = now(), settled_by = v_me, updated_at = now()
   where id = p_session_id;
 
   v_entry := v_session.entry_fee;
   v_reward := v_session.reward;
 
-  select exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
-  ) into v_has_rupee;
+  select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
 
   if p_winner_id is not null then
     if v_has_rupee then
-      execute $sql$
-        update public.wallet
-        set balance = balance + $1, "₹" = "₹" + $1, updated_at = now()
-        where user_id = $2
-      $sql$ using v_reward, p_winner_id;
+      execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using v_reward, p_winner_id;
     else
-      update public.wallet
-      set balance = balance + v_reward, updated_at = now()
-      where user_id = p_winner_id;
+      update public.wallet set balance = balance + v_reward, updated_at = now() where user_id = p_winner_id;
     end if;
 
     insert into public.transactions (user_id, description, type, amount)
     values (p_winner_id, 'Duel Victory — ' || v_session.game_type, 'credit', v_reward);
 
     insert into public.match_history (user_id, game, opponent, result, reward)
-    select p_winner_id, v_session.game_type,
-           coalesce(u.full_name, 'Opponent'), 'VICTORY', v_reward
+    select p_winner_id, v_session.game_type, coalesce(u.full_name, 'Opponent'), 'VICTORY', v_reward
     from public.users u
-    where u.id = case
-      when v_session.player1_id = p_winner_id then v_session.player2_id
-      else v_session.player1_id
-    end;
+    where u.id = case when v_session.player1_id = p_winner_id then v_session.player2_id else v_session.player1_id end;
 
     insert into public.match_history (user_id, game, opponent, result, reward)
-    select case when v_session.player1_id = p_winner_id then v_session.player2_id
-                else v_session.player1_id end,
-           v_session.game_type,
-           coalesce(u.full_name, 'Opponent'),
-           'DEFEAT', -v_entry
-    from public.users u
-    where u.id = p_winner_id;
+    select case when v_session.player1_id = p_winner_id then v_session.player2_id else v_session.player1_id end,
+           v_session.game_type, coalesce(u.full_name, 'Opponent'), 'DEFEAT', -v_entry
+    from public.users u where u.id = p_winner_id;
   else
     if v_has_rupee then
-      execute $sql$
-        update public.wallet
-        set balance = balance + $1, "₹" = "₹" + $1, updated_at = now()
-        where user_id in ($2, $3)
-      $sql$ using v_entry, v_session.player1_id, v_session.player2_id;
+      execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id in ($2, $3) $sql$ using v_entry, v_session.player1_id, v_session.player2_id;
     else
-      update public.wallet
-      set balance = balance + v_entry, updated_at = now()
-      where user_id in (v_session.player1_id, v_session.player2_id);
+      update public.wallet set balance = balance + v_entry, updated_at = now() where user_id in (v_session.player1_id, v_session.player2_id);
     end if;
 
     insert into public.transactions (user_id, description, type, amount)
     values (v_session.player1_id, 'Draw refund — ' || v_session.game_type, 'credit', v_entry);
-
     insert into public.transactions (user_id, description, type, amount)
     values (v_session.player2_id, 'Draw refund — ' || v_session.game_type, 'credit', v_entry);
 
@@ -904,8 +713,7 @@ begin
   end if;
 
   insert into public.game_events (session_id, user_id, event_type, payload)
-  values (p_session_id, v_me, 'session_ended',
-    jsonb_build_object('winner_id', p_winner_id, 'settled_by', v_me));
+  values (p_session_id, v_me, 'session_ended', jsonb_build_object('winner_id', p_winner_id, 'settled_by', v_me));
 
   return json_build_object('ok', true, 'winner_id', p_winner_id, 'status', 'completed');
 end;
@@ -914,6 +722,9 @@ $$;
 grant execute on function public.end_session_with_state(uuid, jsonb, uuid) to authenticated;
 
 
+-- ------------------------------------------------------------
+-- ABANDON_SESSION
+-- ------------------------------------------------------------
 create or replace function public.abandon_session(p_session_id uuid)
 returns json
 language plpgsql
@@ -926,53 +737,27 @@ declare
   v_opponent uuid;
   v_has_rupee boolean;
 begin
-  if v_me is null then
-    return json_build_object('ok', false, 'reason', 'not_authenticated');
-  end if;
+  if v_me is null then return json_build_object('ok', false, 'reason', 'not_authenticated'); end if;
 
-  select * into v_session from public.game_sessions
-  where id = p_session_id for update;
+  select * into v_session from public.game_sessions where id = p_session_id for update;
+  if v_session is null then return json_build_object('ok', false, 'reason', 'not_found'); end if;
+  if v_me <> v_session.player1_id and v_me <> v_session.player2_id then return json_build_object('ok', false, 'reason', 'not_a_player'); end if;
+  if v_session.status <> 'active' then return json_build_object('ok', true, 'already_settled', true); end if;
 
-  if v_session is null then
-    return json_build_object('ok', false, 'reason', 'not_found');
-  end if;
-
-  if v_me <> v_session.player1_id and v_me <> v_session.player2_id then
-    return json_build_object('ok', false, 'reason', 'not_a_player');
-  end if;
-
-  if v_session.status <> 'active' then
-    return json_build_object('ok', true, 'already_settled', true);
-  end if;
-
-  v_opponent := case    when v_me = v_session.player1_id then v_session.player2_id
-    else v_session.player1_id
-  end;
+  v_opponent := case when v_me = v_session.player1_id then v_session.player2_id else v_session.player1_id end;
 
   update public.game_sessions
-  set status = 'abandoned',
-      winner_id = v_opponent,
-      abandoned_at = now(),
-      settled_at = now(),
-      settled_by = v_me,
-      updated_at = now()
+  set status = 'abandoned', winner_id = v_opponent, abandoned_at = now(),
+      settled_at = now(), settled_by = v_me, updated_at = now()
   where id = p_session_id;
 
-  select exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
-  ) into v_has_rupee;
+  select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
 
   if v_opponent is not null then
     if v_has_rupee then
-      execute $sql$
-        update public.wallet
-        set balance = balance + $1, "₹" = "₹" + $1, updated_at = now()
-        where user_id = $2
-      $sql$ using v_session.reward, v_opponent;
+      execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using v_session.reward, v_opponent;
     else
-      update public.wallet set balance = balance + v_session.reward, updated_at = now()
-      where user_id = v_opponent;
+      update public.wallet set balance = balance + v_session.reward, updated_at = now() where user_id = v_opponent;
     end if;
 
     insert into public.transactions (user_id, description, type, amount)
@@ -995,6 +780,9 @@ $$;
 grant execute on function public.abandon_session(uuid) to authenticated;
 
 
+-- ------------------------------------------------------------
+-- REFUND_STAKE_ON_NO_OPPONENT
+-- ------------------------------------------------------------
 create or replace function public.refund_stake_on_no_opponent(
   p_game_type text,
   p_entry_fee integer
@@ -1008,30 +796,19 @@ declare
   v_me uuid := auth.uid();
   v_has_rupee boolean;
 begin
-  if v_me is null then
-    return json_build_object('ok', false, 'reason', 'not_authenticated');
-  end if;
+  if v_me is null then return json_build_object('ok', false, 'reason', 'not_authenticated'); end if;
 
   delete from public.matchmaking_queue where user_id = v_me and game_type = p_game_type;
 
-  update public.match_invites
-  set status = 'cancelled'
+  update public.match_invites set status = 'cancelled'
   where from_user_id = v_me and game_type = p_game_type and status = 'open';
 
-  select exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'wallet' and column_name = '₹'
-  ) into v_has_rupee;
+  select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
 
   if v_has_rupee then
-    execute $sql$
-      update public.wallet
-      set balance = balance + $1, "₹" = "₹" + $1, updated_at = now()
-      where user_id = $2
-    $sql$ using p_entry_fee, v_me;
+    execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using p_entry_fee, v_me;
   else
-    update public.wallet set balance = balance + p_entry_fee, updated_at = now()
-    where user_id = v_me;
+    update public.wallet set balance = balance + p_entry_fee, updated_at = now() where user_id = v_me;
   end if;
 
   insert into public.transactions (user_id, description, type, amount)
@@ -1045,5 +822,335 @@ grant execute on function public.refund_stake_on_no_opponent(text, integer) to a
 
 
 -- ============================================================
--- END OF SCHEMA v10.2
+-- WITHDRAWAL REQUESTS + ADMIN PANEL (v10.3 additions)
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- WITHDRAWAL REQUESTS TABLE
+-- ------------------------------------------------------------
+create table if not exists public.withdrawal_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users (id) on delete cascade,
+
+  -- frozen snapshot at request time
+  full_name text,
+  email text,
+  avatar_url text,
+  referral_code text,
+  total_matches integer default 0,
+  win_rate integer default 0,
+  wallet_balance_at_request integer not null default 0,
+
+  -- request details
+  upi_id text not null,
+  amount integer not null check (amount > 0),
+  status text not null default 'pending'
+    check (status in ('pending', 'processing', 'paid', 'rejected')),
+  admin_note text,
+  requested_at timestamptz not null default now(),
+  reviewed_at timestamptz,
+  paid_at timestamptz
+);
+
+create index if not exists withdrawal_requests_status_idx
+  on public.withdrawal_requests (status, requested_at desc);
+create index if not exists withdrawal_requests_user_idx
+  on public.withdrawal_requests (user_id, requested_at desc);
+
+alter table public.withdrawal_requests enable row level security;
+
+drop policy if exists "Users can view their own withdrawals" on public.withdrawal_requests;
+create policy "Users can view their own withdrawals"
+  on public.withdrawal_requests for select using (auth.uid() = user_id);
+
+drop policy if exists "Users can create their own withdrawals" on public.withdrawal_requests;
+create policy "Users can create their own withdrawals"
+  on public.withdrawal_requests for insert with check (auth.uid() = user_id);
+
+do $$
+begin
+  begin
+    alter publication supabase_realtime add table public.withdrawal_requests;
+  exception
+    when duplicate_object then null;
+    when undefined_object then null;
+  end;
+end $$;
+
+alter table public.withdrawal_requests replica identity full;
+
+
+-- ------------------------------------------------------------
+-- RPC: create_withdrawal_request
+-- ------------------------------------------------------------
+create or replace function public.create_withdrawal_request(
+  p_upi_id text,
+  p_amount integer
+)
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_me uuid := auth.uid();
+  v_user public.users;
+  v_wallet public.wallet;
+  v_matches integer := 0;
+  v_wins integer := 0;
+  v_winrate integer := 0;
+  v_request_id uuid;
+  v_has_rupee boolean;
+begin
+  if v_me is null then
+    return json_build_object('ok', false, 'message', 'Not authenticated.');
+  end if;
+
+  if p_upi_id is null or length(trim(p_upi_id)) < 3 then
+    return json_build_object('ok', false, 'message', 'Please enter a valid UPI ID.');
+  end if;
+
+  if p_amount is null or p_amount < 150 then
+    return json_build_object('ok', false, 'message', 'Minimum withdrawal is ₹150.');
+  end if;
+
+  select * into v_user from public.users where id = v_me;
+  select * into v_wallet from public.wallet where user_id = v_me;
+
+  if v_wallet is null then
+    return json_build_object('ok', false, 'message', 'Wallet not found.');
+  end if;
+
+  if v_wallet.balance < p_amount then
+    return json_build_object('ok', false, 'message', 'Insufficient balance.');
+  end if;
+
+  select count(*) into v_matches from public.match_history where user_id = v_me;
+  select count(*) into v_wins from public.match_history where user_id = v_me and result = 'VICTORY';
+  if v_matches > 0 then
+    v_winrate := round((v_wins::numeric / v_matches::numeric) * 100);
+  end if;
+
+  insert into public.withdrawal_requests (
+    user_id, full_name, email, avatar_url, referral_code,
+    total_matches, win_rate, wallet_balance_at_request,
+    upi_id, amount, status
+  )
+  values (
+    v_me, v_user.full_name, v_user.email, v_user.avatar_url, v_user.referral_code,
+    v_matches, v_winrate, v_wallet.balance,
+    trim(p_upi_id), p_amount, 'pending'
+  )
+  returning id into v_request_id;
+
+  select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
+
+  if v_has_rupee then
+    execute $sql$ update public.wallet set balance = balance - $1, "₹" = "₹" - $1, updated_at = now() where user_id = $2 $sql$ using p_amount, v_me;
+  else
+    update public.wallet set balance = balance - p_amount, updated_at = now() where user_id = v_me;
+  end if;
+
+  insert into public.transactions (user_id, description, type, amount)
+  values (v_me, 'Withdrawal request — ₹' || p_amount || ' to ' || trim(p_upi_id), 'debit', p_amount);
+
+  return json_build_object('ok', true, 'request_id', v_request_id, 'message', 'Withdrawal request submitted. Will be processed within 7–8 hours.');
+end;
+$$;
+
+grant execute on function public.create_withdrawal_request(text, integer) to authenticated;
+
+
+-- ------------------------------------------------------------
+-- RPC: get_my_withdrawals
+-- ------------------------------------------------------------
+create or replace function public.get_my_withdrawals()
+returns table (
+  id uuid,
+  amount integer,
+  upi_id text,
+  status text,
+  requested_at timestamptz,
+  paid_at timestamptz,
+  admin_note text
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select id, amount, upi_id, status, requested_at, paid_at, admin_note
+  from public.withdrawal_requests
+  where user_id = auth.uid()
+  order by requested_at desc;
+$$;
+
+grant execute on function public.get_my_withdrawals() to authenticated;
+
+
+-- ============================================================
+-- ADMIN PANEL — Simple views for easy review
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- VIEW 1: admin_pending_withdrawals
+-- Every pending withdrawal with full user info + IST time.
+-- Just run:  select * from admin_pending_withdrawals;
+-- ------------------------------------------------------------
+create or replace view public.admin_pending_withdrawals as
+select
+  wr.id                               as request_id,
+  wr.full_name                        as name,
+  wr.email                            as email,
+  wr.referral_code                    as referral,
+  wr.upi_id                           as upi_id,
+  wr.amount                           as amount,
+  wr.total_matches                    as matches,
+  wr.win_rate                         as win_rate,
+  wr.wallet_balance_at_request        as wallet_at_request,
+  to_char(wr.requested_at at time zone 'Asia/Kolkata', 'DD Mon YYYY, HH12:MI AM') as requested_ist,
+  wr.status                           as status,
+  wr.user_id                          as user_id
+from public.withdrawal_requests wr
+where wr.status in ('pending', 'processing')
+order by wr.requested_at asc;
+
+grant select on public.admin_pending_withdrawals to authenticated;
+
+
+-- ------------------------------------------------------------
+-- VIEW 2: admin_withdrawal_history
+-- Complete history of every withdrawal (all statuses).
+-- Just run:  select * from admin_withdrawal_history;
+-- ------------------------------------------------------------
+create or replace view public.admin_withdrawal_history as
+select
+  wr.id                               as request_id,
+  wr.full_name                        as name,
+  wr.email                            as email,
+  wr.upi_id                           as upi_id,
+  wr.amount                           as amount,
+  wr.status                           as status,
+  to_char(wr.requested_at at time zone 'Asia/Kolkata', 'DD Mon YYYY, HH12:MI AM') as requested_ist,
+  to_char(wr.paid_at at time zone 'Asia/Kolkata', 'DD Mon YYYY, HH12:MI AM')      as paid_ist,
+  wr.admin_note                       as note
+from public.withdrawal_requests wr
+order by wr.requested_at desc;
+
+grant select on public.admin_withdrawal_history to authenticated;
+
+
+-- ------------------------------------------------------------
+-- VIEW 3: admin_users_overview
+-- Every user with wallet, matches, wins — no joins needed.
+-- Just run:  select * from admin_users_overview;
+-- ------------------------------------------------------------
+create or replace view public.admin_users_overview as
+select
+  u.id                                 as user_id,
+  u.full_name                          as name,
+  u.email                              as email,
+  u.referral_code                      as referral,
+  coalesce(w.balance, 0)               as wallet_balance,
+  coalesce((select count(*) from public.match_history mh where mh.user_id = u.id), 0)                                    as total_matches,
+  coalesce((select count(*) from public.match_history mh where mh.user_id = u.id and mh.result = 'VICTORY'), 0)          as total_wins,
+  coalesce((select count(*) from public.withdrawal_requests wr where wr.user_id = u.id and wr.status = 'pending'), 0)    as pending_withdrawals,
+  to_char(u.created_at at time zone 'Asia/Kolkata', 'DD Mon YYYY, HH12:MI AM') as joined_ist,
+  to_char(u.last_seen  at time zone 'Asia/Kolkata', 'DD Mon YYYY, HH12:MI AM') as last_seen_ist
+from public.users u
+left join public.wallet w on w.user_id = u.id
+order by u.created_at desc;
+
+grant select on public.admin_users_overview to authenticated;
+
+
+-- ------------------------------------------------------------
+-- RPC: mark_withdrawal_paid
+-- Called from Supabase Table Editor or an admin action.
+-- Usage:
+--   select mark_withdrawal_paid('UUID-HERE', 'Optional note');
+-- ------------------------------------------------------------
+create or replace function public.mark_withdrawal_paid(
+  p_request_id uuid,
+  p_admin_note text default null
+)
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_req public.withdrawal_requests;
+begin
+  select * into v_req from public.withdrawal_requests where id = p_request_id for update;
+  if v_req is null then
+    return json_build_object('ok', false, 'message', 'Request not found.');
+  end if;
+  if v_req.status = 'paid' then
+    return json_build_object('ok', true, 'already_paid', true);
+  end if;
+
+  update public.withdrawal_requests
+  set status = 'paid',
+      paid_at = now(),
+      reviewed_at = now(),
+      admin_note = coalesce(p_admin_note, admin_note)
+  where id = p_request_id;
+
+  return json_build_object('ok', true, 'message', 'Marked as paid.');
+end;
+$$;
+
+grant execute on function public.mark_withdrawal_paid(uuid, text) to authenticated;
+
+
+-- ------------------------------------------------------------
+-- RPC: mark_withdrawal_rejected
+-- ------------------------------------------------------------
+create or replace function public.mark_withdrawal_rejected(
+  p_request_id uuid,
+  p_admin_note text default null
+)
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_req public.withdrawal_requests;
+  v_has_rupee boolean;
+begin
+  select * into v_req from public.withdrawal_requests where id = p_request_id for update;
+  if v_req is null then
+    return json_build_object('ok', false, 'message', 'Request not found.');
+  end if;
+  if v_req.status <> 'pending' and v_req.status <> 'processing' then
+    return json_build_object('ok', false, 'message', 'Cannot reject — already ' || v_req.status);
+  end if;
+
+  -- refund the amount back into user's wallet
+  select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
+  if v_has_rupee then
+    execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using v_req.amount, v_req.user_id;
+  else
+    update public.wallet set balance = balance + v_req.amount, updated_at = now() where user_id = v_req.user_id;
+  end if;
+
+  insert into public.transactions (user_id, description, type, amount)
+  values (v_req.user_id, 'Withdrawal rejected — refunded ₹' || v_req.amount, 'credit', v_req.amount);
+
+  update public.withdrawal_requests
+  set status = 'rejected',
+      reviewed_at = now(),
+      admin_note = coalesce(p_admin_note, admin_note)
+  where id = p_request_id;
+
+  return json_build_object('ok', true, 'message', 'Rejected and refunded.');
+end;
+$$;
+
+grant execute on function public.mark_withdrawal_rejected(uuid, text) to authenticated;
+
+
+-- ============================================================
+-- END OF SCHEMA v10.3
 -- ============================================================
