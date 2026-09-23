@@ -1,14 +1,9 @@
 -- ============================================================
--- SkillClash - MASTER SCHEMA v11.0
+-- SkillClash - MASTER SCHEMA v12.1
 -- ============================================================
--- v11.0 changes vs v10.3:
---   * matchmaking_queue: added device_fp + last_ip columns
---   * claim_opponent: blocks same email + same username pattern
---     + same device + same IP + max 2 lifetime matches per pair
---   * NEW: notifications table with realtime + admin RPCs
---   * NEW RPC: send_notification (broadcast or targeted)
---   * NEW RPC: mark_notifications_read
---   * NEW: admin_notifications_view
+-- v12.1 changes vs v12.0:
+--   * Added DROP FUNCTION before creating claim_opponent (arg names changed)
+--   * Removed the "legacy overload" — frontend only calls the new signature
 -- ============================================================
 
 
@@ -120,7 +115,7 @@ create trigger on_user_profile_updated after update of email, full_name on publi
 
 
 -- ------------------------------------------------------------
--- MATCHMAKING QUEUE (with device fingerprint + IP)
+-- MATCHMAKING QUEUE
 -- ------------------------------------------------------------
 create table if not exists public.matchmaking_queue (
   user_id uuid primary key references public.users (id) on delete cascade,
@@ -261,6 +256,46 @@ drop policy if exists "Authenticated can insert events" on public.game_events;
 create policy "Authenticated can insert events" on public.game_events for insert with check (auth.role() = 'authenticated');
 
 
+-- ============================================================
+-- NOTIFICATIONS (declared early so handle_new_user can use it)
+-- ============================================================
+create table if not exists public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.users (id) on delete cascade,
+  title text not null,
+  body text,
+  type text not null default 'general',
+  icon text default 'bell',
+  is_read boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table public.notifications add column if not exists icon text default 'bell';
+
+create index if not exists notifications_user_idx on public.notifications (user_id, created_at desc);
+create index if not exists notifications_unread_idx on public.notifications (user_id, is_read) where is_read = false;
+
+alter table public.notifications enable row level security;
+
+drop policy if exists "Users view own notifications" on public.notifications;
+create policy "Users view own notifications"
+  on public.notifications for select
+  using (user_id = auth.uid() or user_id is null);
+
+drop policy if exists "Users update own notifications" on public.notifications;
+create policy "Users update own notifications"
+  on public.notifications for update
+  using (user_id = auth.uid());
+
+drop policy if exists "Users insert own notifications" on public.notifications;
+create policy "Users insert own notifications"
+  on public.notifications for insert
+  with check (user_id = auth.uid() or user_id is null);
+
+do $$ begin begin alter publication supabase_realtime add table public.notifications; exception when duplicate_object then null; when undefined_object then null; end; end $$;
+alter table public.notifications replica identity full;
+
+
 -- ------------------------------------------------------------
 -- AUTO-PROVISION NEW USERS (welcome bonus + welcome notification)
 -- ------------------------------------------------------------
@@ -285,10 +320,9 @@ begin
   insert into public.transactions (user_id, description, type, amount)
   values (new.id, 'Welcome bonus', 'credit', 25);
 
-  -- welcome notification (deferred until notifications table exists)
   begin
     insert into public.notifications (user_id, title, body, type, icon)
-    values (new.id, 'Welcome to SkillClash!', 'You received ₹25 welcome bonus. Play your first match now!', 'welcome', 'gift');
+    values (new.id, 'Welcome to SkillClash!', 'You received ₹25 welcome bonus. Play your first match now!', 'gift', 'gift');
   exception when undefined_table then null;
   end;
 
@@ -300,15 +334,19 @@ create trigger on_auth_user_created after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
 
--- ------------------------------------------------------------
--- CLAIM_OPPONENT (v11.0 — anti-farm hardened)
--- ------------------------------------------------------------
+-- ============================================================
+-- CLAIM_OPPONENT (v12.1 — drop old, create new)
+-- ============================================================
+
+-- Drop old signature (arg names changed from p_my_ip/p_my_device_fp → p_fingerprint/p_ip)
+drop function if exists public.claim_opponent(text, integer, integer, text, text);
+
 create or replace function public.claim_opponent(
   p_game_type text,
   p_entry_fee integer default 20,
   p_reward integer default 30,
-  p_my_ip text default null,
-  p_my_device_fp text default null
+  p_fingerprint text default null,
+  p_ip text default null
 )
 returns json language plpgsql security definer set search_path = public as $$
 declare
@@ -319,49 +357,36 @@ declare
   v_my_username text;
   v_opp_email text;
   v_opp_username text;
-  v_pair_lifetime integer;
+  v_opp_fp text;
+  v_opp_ip text;
+  v_recent_pair_count integer;
+  v_blocked_reason text := null;
 begin
   if v_me is null then
     return json_build_object('matched', false, 'reason', 'not_authenticated');
   end if;
 
-  -- my info
   select email, full_name into v_my_email, v_my_username from public.users where id = v_me;
   v_my_email := lower(coalesce(v_my_email, ''));
   v_my_username := lower(regexp_replace(coalesce(v_my_username, ''), '[^a-zA-Z0-9]', '', 'g'));
 
-  -- purge stale queue entries
   delete from public.matchmaking_queue mq
   using public.users u
   where mq.user_id = u.id
     and mq.game_type = p_game_type
     and u.last_seen < now() - interval '25 seconds';
 
-  -- find candidate: same game, online, not me, not same email, not same username, not same device, not same IP, and <2 lifetime matches
-  select mq.user_id into v_opponent_id
+  select mq.user_id,
+         lower(coalesce(u.email, '')),
+         lower(regexp_replace(coalesce(u.full_name, ''), '[^a-zA-Z0-9]', '', 'g')),
+         coalesce(mq.device_fp, ''),
+         coalesce(mq.last_ip, '')
+    into v_opponent_id, v_opp_email, v_opp_username, v_opp_fp, v_opp_ip
   from public.matchmaking_queue mq
   join public.users u on u.id = mq.user_id
   where mq.game_type = p_game_type
     and mq.user_id <> v_me
     and u.last_seen >= now() - interval '25 seconds'
-
-    -- email similarity
-    and lower(coalesce(u.email, '')) <> v_my_email
-    and lower(regexp_replace(coalesce(u.full_name, ''), '[^a-zA-Z0-9]', '', 'g')) <> v_my_username
-
-    -- device / IP
-    and (p_my_device_fp is null or mq.device_fp is null or mq.device_fp <> p_my_device_fp)
-    and (p_my_ip is null or mq.last_ip is null or mq.last_ip <> p_my_ip)
-
-    -- lifetime cap between this exact pair (max 2 matches)
-    and (
-      select count(*) from public.game_sessions gs
-      where gs.game_type = p_game_type
-        and (
-          (gs.player1_id = mq.user_id and gs.player2_id = v_me)
-          or (gs.player1_id = v_me and gs.player2_id = mq.user_id)
-        )
-    ) < 2
   order by mq.created_at asc
   for update of mq skip locked
   limit 1;
@@ -370,20 +395,39 @@ begin
     return json_build_object('matched', false);
   end if;
 
-  -- double check: same person but different email?
-  select email, full_name into v_opp_email, v_opp_username from public.users where id = v_opponent_id;
-  v_opp_email := lower(coalesce(v_opp_email, ''));
-  v_opp_username := lower(regexp_replace(coalesce(v_opp_username, ''), '[^a-zA-Z0-9]', '', 'g'));
-
-  -- if usernames share a strong prefix (>=5 chars), flag
-  if length(v_my_username) >= 5 and length(v_opp_username) >= 5 then
-    if substring(v_my_username from 1 for 5) = substring(v_opp_username from 1 for 5) then
-      -- silently exclude (same person, different email)
-      return json_build_object('matched', false, 'reason', 'similar_user_blocked');
+  -- anti-farm checks
+  if v_opp_email <> '' and v_opp_email = v_my_email then
+    v_blocked_reason := 'Same email address';
+  elsif v_my_username <> '' and length(v_my_username) >= 5
+        and length(v_opp_username) >= 5
+        and substring(v_my_username from 1 for 5) = substring(v_opp_username from 1 for 5) then
+    v_blocked_reason := 'Similar username pattern';
+  elsif p_fingerprint is not null and v_opp_fp <> '' and v_opp_fp = p_fingerprint then
+    v_blocked_reason := 'Same device fingerprint';
+  elsif p_ip is not null and v_opp_ip <> '' and v_opp_ip = p_ip then
+    v_blocked_reason := 'Same IP address';
+  else
+    select count(*) into v_recent_pair_count
+    from public.game_sessions gs
+    where gs.game_type = p_game_type
+      and gs.created_at > now() - interval '24 hours'
+      and (
+        (gs.player1_id = v_opponent_id and gs.player2_id = v_me)
+        or (gs.player1_id = v_me and gs.player2_id = v_opponent_id)
+      );
+    if v_recent_pair_count >= 2 then
+      v_blocked_reason := 'You recently played this opponent twice. Try again in a bit.';
     end if;
   end if;
 
-  -- create session
+  if v_blocked_reason is not null then
+    return json_build_object(
+      'matched', true,
+      'blocked', true,
+      'reason', v_blocked_reason
+    );
+  end if;
+
   delete from public.matchmaking_queue where user_id in (v_opponent_id, v_me);
 
   insert into public.game_sessions (
@@ -400,6 +444,7 @@ begin
 
   return json_build_object(
     'matched', true,
+    'blocked', false,
     'session_id', v_session_id,
     'opponent_id', v_opponent_id,
     'you_are', 'player2'
@@ -436,6 +481,15 @@ begin
   end if;
   insert into public.transactions (user_id, description, type, amount) values (v_me, 'Referral bonus redeemed', 'credit', v_bonus);
   insert into public.transactions (user_id, description, type, amount) values (v_referrer_id, 'Referral bonus: friend joined', 'credit', v_bonus);
+
+  begin
+    insert into public.notifications (user_id, title, body, type, icon)
+    values (v_me, 'Referral bonus applied', 'You received ₹' || v_bonus || ' for using a referral code.', 'reward', 'gift');
+    insert into public.notifications (user_id, title, body, type, icon)
+    values (v_referrer_id, 'Referral reward', 'A friend joined using your code. You received ₹' || v_bonus || '.', 'reward', 'gift');
+  exception when undefined_table then null;
+  end;
+
   return json_build_object('success', true, 'message', 'Referral applied! You received ₹' || v_bonus || '.');
 end; $$;
 
@@ -476,6 +530,13 @@ begin
     end if;
     insert into public.transactions (user_id, description, type, amount)
     values (new.user_id, 'Top-up: UTR ' || new.txn_id, 'credit', new.tokens_to_credit);
+
+    begin
+      insert into public.notifications (user_id, title, body, type, icon)
+      values (new.user_id, 'Wallet topped up', '₹' || new.tokens_to_credit || ' added to your wallet.', 'success', 'check');
+    exception when undefined_table then null;
+    end;
+
     new.reviewed_at = now();
   end if;
   return new;
@@ -545,7 +606,7 @@ grant execute on function public.accept_match_invite(uuid) to authenticated;
 
 
 -- ------------------------------------------------------------
--- SETTLEMENT RPCs (end_session_with_state, abandon_session, refund_stake_on_no_opponent)
+-- SETTLEMENT RPCs
 -- ------------------------------------------------------------
 create or replace function public.end_session_with_state(
   p_session_id uuid, p_final_state jsonb default '{}'::jsonb, p_winner_id uuid default null
@@ -554,6 +615,7 @@ returns json language plpgsql security definer set search_path = public as $$
 declare
   v_session public.game_sessions; v_me uuid := auth.uid(); v_is_player boolean;
   v_entry integer; v_reward integer; v_has_rupee boolean;
+  v_loser uuid;
 begin
   if v_me is null then return json_build_object('ok', false, 'reason', 'not_authenticated'); end if;
   select * into v_session from public.game_sessions where id = p_session_id for update;
@@ -578,13 +640,24 @@ begin
     end if;
     insert into public.transactions (user_id, description, type, amount)
     values (p_winner_id, 'Duel Victory — ' || v_session.game_type, 'credit', v_reward);
+
+    v_loser := case when v_session.player1_id = p_winner_id then v_session.player2_id else v_session.player1_id end;
+
     insert into public.match_history (user_id, game, opponent, result, reward)
     select p_winner_id, v_session.game_type, coalesce(u.full_name, 'Opponent'), 'VICTORY', v_reward
-    from public.users u where u.id = case when v_session.player1_id = p_winner_id then v_session.player2_id else v_session.player1_id end;
+    from public.users u where u.id = v_loser;
+
     insert into public.match_history (user_id, game, opponent, result, reward)
-    select case when v_session.player1_id = p_winner_id then v_session.player2_id else v_session.player1_id end,
-           v_session.game_type, coalesce(u.full_name, 'Opponent'), 'DEFEAT', -v_entry
+    select v_loser, v_session.game_type, coalesce(u.full_name, 'Opponent'), 'DEFEAT', -v_entry
     from public.users u where u.id = p_winner_id;
+
+    begin
+      insert into public.notifications (user_id, title, body, type, icon)
+      values (p_winner_id, 'You won ₹' || v_reward || '!', 'Victory in ' || v_session.game_type || '. Keep it up!', 'win', 'check');
+      insert into public.notifications (user_id, title, body, type, icon)
+      values (v_loser, 'Better luck next time', 'Defeat in ' || v_session.game_type || '. Try again!', 'loss', 'bell');
+    exception when undefined_table then null;
+    end;
   else
     if v_has_rupee then
       execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id in ($2, $3) $sql$ using v_entry, v_session.player1_id, v_session.player2_id;
@@ -771,44 +844,8 @@ grant execute on function public.mark_withdrawal_rejected(uuid, text) to authent
 
 
 -- ============================================================
--- NOTIFICATIONS (v11.0)
+-- NOTIFICATIONS RPCs
 -- ============================================================
-create table if not exists public.notifications (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references public.users (id) on delete cascade,
-  title text not null,
-  body text,
-  type text not null default 'general',
-  icon text default 'bell',
-  is_read boolean not null default false,
-  created_at timestamptz not null default now()
-);
-
-create index if not exists notifications_user_idx on public.notifications (user_id, created_at desc);
-create index if not exists notifications_unread_idx on public.notifications (user_id, is_read) where is_read = false;
-
-alter table public.notifications enable row level security;
-
-drop policy if exists "Users view own notifications" on public.notifications;
-create policy "Users view own notifications"
-  on public.notifications for select
-  using (user_id = auth.uid() or user_id is null);
-
-drop policy if exists "Users update own notifications" on public.notifications;
-create policy "Users update own notifications"
-  on public.notifications for update
-  using (user_id = auth.uid());
-
-drop policy if exists "Users insert own notifications" on public.notifications;
-create policy "Users insert own notifications"
-  on public.notifications for insert
-  with check (user_id = auth.uid() or user_id is null);
-
-do $$ begin begin alter publication supabase_realtime add table public.notifications; exception when duplicate_object then null; when undefined_object then null; end; end $$;
-alter table public.notifications replica identity full;
-
-
--- RPC: mark_notifications_read
 create or replace function public.mark_notifications_read(p_ids uuid[] default null)
 returns void language plpgsql security definer set search_path = public as $$
 begin
@@ -821,10 +858,6 @@ end; $$;
 grant execute on function public.mark_notifications_read(uuid[]) to authenticated;
 
 
--- RPC: send_notification (broadcast or targeted)
--- Usage:
---   SELECT send_notification('Title', 'Body', NULL);                    -- to ALL users
---   SELECT send_notification('Title', 'Body', 'USER-UUID-HERE');        -- to one user
 create or replace function public.send_notification(
   p_title text,
   p_body text default null,
@@ -853,6 +886,19 @@ begin
   return json_build_object('ok', true, 'sent', v_count);
 end; $$;
 grant execute on function public.send_notification(text, text, uuid, text, text) to authenticated;
+
+
+create or replace function public.admin_send_broadcast(
+  p_title text,
+  p_body text default null,
+  p_type text default 'promo',
+  p_icon text default 'bell'
+)
+returns json language plpgsql security definer set search_path = public as $$
+begin
+  return public.send_notification(p_title, p_body, null, p_type, p_icon);
+end; $$;
+grant execute on function public.admin_send_broadcast(text, text, text, text) to authenticated;
 
 
 -- ============================================================
@@ -913,5 +959,30 @@ grant select on public.admin_users_overview to authenticated;
 
 
 -- ============================================================
--- END OF SCHEMA v11.0
+-- AUTO-NOTIFICATION TRIGGER (match started)
+-- ============================================================
+create or replace function public.notify_match_started()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  begin
+    if new.player1_id is not null then
+      insert into public.notifications (user_id, title, body, type, icon)
+      values (new.player1_id, 'Match starting', 'Your ' || new.game_type || ' match has been created.', 'info', 'fire');
+    end if;
+    if new.player2_id is not null then
+      insert into public.notifications (user_id, title, body, type, icon)
+      values (new.player2_id, 'Match starting', 'Your ' || new.game_type || ' match has been created.', 'info', 'fire');
+    end if;
+  exception when undefined_table then null;
+  end;
+  return new;
+end; $$;
+
+drop trigger if exists on_game_session_created_notify on public.game_sessions;
+create trigger on_game_session_created_notify after insert on public.game_sessions
+  for each row execute procedure public.notify_match_started();
+
+
+-- ============================================================
+-- END OF SCHEMA v12.1
 -- ============================================================
