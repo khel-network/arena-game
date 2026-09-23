@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#1a1730" />
 <title>SkillClash · Admin Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +12,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ===== RESET ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 :root {
   --bg: #f4f5fa;
   --card: #ffffff;
@@ -26,20 +28,23 @@
   --sidebar: #1a1730;
   --sidebar-ink: #b8b4cf;
   --sidebar-active: #5b3df0;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
-body {
+html, body {
   font-family: 'Inter', -apple-system, sans-serif;
   background: var(--bg); color: var(--ink);
   -webkit-font-smoothing: antialiased; line-height: 1.5;
-  min-height: 100vh;
+  min-height: 100vh; overflow-x: hidden;
 }
+body.sidebar-open { overflow: hidden; }
 h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; font-weight: 700; letter-spacing: -0.01em; }
 button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 input, select, textarea { font: inherit; }
+img { max-width: 100%; display: block; }
 
 /* ===== AUTH SCREEN ===== */
 .auth-screen {
-  position: fixed; inset: 0; z-index: 100;
+  position: fixed; inset: 0; z-index: 5000;
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(135deg, #1a1730, #5b3df0);
   padding: 20px;
@@ -49,6 +54,7 @@ input, select, textarea { font: inherit; }
   padding: 40px 32px; max-width: 400px; width: 100%;
   text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.3);
 }
+@media (max-width: 480px) { .auth-card { padding: 32px 22px; } }
 .auth-logo {
   display: inline-flex; align-items: center; gap: 10px;
   font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.5rem;
@@ -67,21 +73,68 @@ input, select, textarea { font: inherit; }
   background: #fff; border: 1.5px solid #e0ddea;
   font-weight: 700; font-size: 0.9rem;
   display: flex; align-items: center; justify-content: center; gap: 10px;
-  transition: 0.2s;
+  transition: 0.2s; min-height: 50px;
 }
 .btn-google:hover { border-color: #5b3df0; transform: translateY(-1px); box-shadow: 0 10px 22px rgba(91,61,240,0.15); }
 .btn-google svg { width: 18px; height: 18px; }
 
 /* ===== LAYOUT ===== */
-.console { display: none; min-height: 100vh; grid-template-columns: 240px 1fr; }
+.console {
+  display: none;
+  min-height: 100vh;
+  grid-template-columns: 240px 1fr;
+}
 .console.active { display: grid; }
 
+/* ===== MOBILE TOPBAR ===== */
+.mobile-topbar {
+  display: none;
+  position: sticky; top: 0; z-index: 300;
+  background: #fff; border-bottom: 1px solid var(--line);
+  padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.mobile-topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.mobile-topbar button.menu-btn {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+  font-size: 1.05rem; flex-shrink: 0;
+  transition: 0.15s;
+}
+.mobile-topbar button.menu-btn:active { transform: scale(0.94); }
+.mobile-topbar .title {
+  font-weight: 800; font-size: 0.95rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mobile-topbar .live-total {
+  display: none;
+  background: linear-gradient(135deg, #e2555a, #f07075);
+  color: #fff; font-size: 0.65rem; font-weight: 800;
+  padding: 3px 9px; border-radius: 100px;
+  font-family: 'Poppins', sans-serif;
+  animation: badgePulse 1.8s ease-in-out infinite;
+}
+.mobile-topbar .live-total.show { display: inline-block; }
+
 /* ===== SIDEBAR ===== */
+.sidebar-backdrop {
+  display: none;
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(15,14,24,0.5);
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  opacity: 0; transition: opacity 0.25s ease;
+}
+.sidebar-backdrop.show { display: block; opacity: 1; }
+
 .sidebar {
   background: var(--sidebar); color: var(--sidebar-ink);
   padding: 20px 12px;
-  display: flex; flex-direction: column; gap: 4px;
+  padding-bottom: calc(20px + var(--safe-bottom));
+  display: flex; flex-direction: column; gap: 2px;
   position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .sidebar-brand {
   display: flex; align-items: center; gap: 10px;
@@ -90,34 +143,62 @@ input, select, textarea { font: inherit; }
   border-bottom: 1px solid rgba(255,255,255,0.08);
   margin-bottom: 14px;
 }
-.sidebar-brand svg { width: 22px; height: 22px; color: #a79cf5; }
+.sidebar-brand svg { width: 22px; height: 22px; color: #a79cf5; flex-shrink: 0; }
 .sidebar-brand .clash { color: #f0a742; }
+
 .sidebar-user {
   padding: 10px 12px; border-radius: 10px;
   background: rgba(255,255,255,0.04);
   margin-bottom: 14px; font-size: 0.75rem;
 }
-.sidebar-user strong { color: #fff; display: block; font-weight: 700; }
-.sidebar-user small { color: var(--sidebar-ink); opacity: 0.7; word-break: break-all; }
+.sidebar-user strong { color: #fff; display: block; font-weight: 700; margin-bottom: 2px; }
+.sidebar-user small { color: var(--sidebar-ink); opacity: 0.7; word-break: break-all; font-size: 0.68rem; }
+
 .sidebar-label {
   font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
   text-transform: uppercase; color: #6b6788;
   padding: 14px 12px 6px;
 }
+
 .sidebar-link {
   display: flex; align-items: center; gap: 12px;
-  padding: 10px 12px; border-radius: 8px;
+  padding: 11px 12px; border-radius: 8px;
   font-size: 0.83rem; font-weight: 600;
   color: var(--sidebar-ink);
   transition: 0.15s; cursor: pointer;
   width: 100%; text-align: left;
+  min-height: 44px;
 }
 .sidebar-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.sidebar-link:active { background: rgba(255,255,255,0.1); }
 .sidebar-link.active { background: var(--sidebar-active); color: #fff; }
-.sidebar-link i { width: 18px; text-align: center; font-size: 0.9rem; }
+.sidebar-link i { width: 18px; text-align: center; font-size: 0.9rem; flex-shrink: 0; }
+
+/* Sidebar badges */
+.sidebar-badge {
+  margin-left: auto;
+  background: linear-gradient(135deg, #e2555a, #f07075);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 100px;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(226,85,90,0.4);
+  display: none;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.3;
+}
+.sidebar-badge.show { display: inline-block; animation: badgePulse 1.8s ease-in-out infinite; }
+.sidebar-badge.green { background: linear-gradient(135deg, #16c46b, #22d47a); box-shadow: 0 2px 6px rgba(22,196,107,0.4); }
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
 
 /* ===== MAIN ===== */
-.main { padding: 24px 28px; max-width: 1400px; }
+.main { padding: 24px 28px; max-width: 1400px; width: 100%; min-width: 0; }
 .main-header {
   display: flex; justify-content: space-between; align-items: flex-end;
   margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
@@ -126,17 +207,20 @@ input, select, textarea { font: inherit; }
 .main-sub { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
 .main-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .btn-primary {
-  padding: 9px 16px; border-radius: 8px;
+  padding: 10px 16px; border-radius: 8px;
   background: var(--primary); color: #fff;
   font-weight: 700; font-size: 0.8rem;
   transition: 0.15s; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px;
 }
 .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-primary:active { transform: scale(0.98); }
 .btn-ghost {
-  padding: 9px 16px; border-radius: 8px;
+  padding: 10px 16px; border-radius: 8px;
   border: 1px solid var(--line); color: var(--ink);
   font-weight: 600; font-size: 0.8rem; background: #fff;
   transition: 0.15s; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px;
 }
 .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
 
@@ -145,7 +229,7 @@ input, select, textarea { font: inherit; }
 .view.active { display: block; animation: fadeIn 0.25s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-/* ===== STATS GRID ===== */
+/* ===== STATS ===== */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
@@ -166,6 +250,7 @@ input, select, textarea { font: inherit; }
 .stat-value {
   font-family: 'Poppins', sans-serif; font-size: 1.5rem;
   font-weight: 800; color: var(--ink); line-height: 1.1;
+  word-break: break-word;
 }
 .stat-hint { font-size: 0.68rem; color: var(--muted); margin-top: 4px; }
 .stat-value.green { color: var(--green); }
@@ -183,16 +268,16 @@ input, select, textarea { font: inherit; }
 .card-sub { color: var(--muted); font-size: 0.78rem; margin-bottom: 16px; }
 .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
 
-/* ===== FORM ===== */
+/* ===== FORMS ===== */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-grid .full { grid-column: 1 / -1; }
-@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
 .field input, .field select, .field textarea {
-  padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px;
-  background: #fafafc; font-size: 0.85rem; color: var(--ink);
+  padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px;
+  background: #fafafc; font-size: 0.88rem; color: var(--ink);
   outline: none; transition: 0.15s; width: 100%;
+  min-height: 44px;
 }
 .field input:focus, .field select:focus, .field textarea:focus {
   border-color: var(--primary); background: #fff;
@@ -202,8 +287,8 @@ input, select, textarea { font: inherit; }
 .field-hint { font-size: 0.68rem; color: var(--muted); }
 
 /* ===== TABLES ===== */
-.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -20px; padding: 0 20px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.78rem; min-width: 600px; }
 th {
   text-align: left; padding: 10px 12px; font-size: 0.65rem;
   font-weight: 700; color: var(--muted); text-transform: uppercase;
@@ -226,14 +311,14 @@ tr:hover td { background: #fafafc; }
 .badge.blue { background: rgba(91,61,240,0.12); color: var(--primary); }
 .badge.grey { background: rgba(107,106,124,0.1); color: var(--muted); }
 
-/* ===== ACTION BUTTONS ===== */
+/* ===== ACTION BTNS ===== */
 .action-btn {
-  padding: 5px 10px; border-radius: 6px;
-  font-size: 0.68rem; font-weight: 700;
+  padding: 7px 11px; border-radius: 6px;
+  font-size: 0.7rem; font-weight: 700;
   border: 1px solid var(--line); background: #fff;
   transition: 0.15s; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 4px;
-  white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap; min-height: 34px;
 }
 .action-btn:hover { border-color: var(--primary); color: var(--primary); }
 .action-btn.danger { color: var(--red); border-color: rgba(226,85,90,0.3); }
@@ -242,9 +327,15 @@ tr:hover td { background: #fafafc; }
 .action-btn.success:hover { background: var(--green); color: #fff; border-color: var(--green); }
 
 /* ===== TOASTS ===== */
-.toast-stack { position: fixed; top: 20px; right: 20px; z-index: 9000; display: flex; flex-direction: column; gap: 8px; max-width: 360px; pointer-events: none; }
+.toast-stack {
+  position: fixed; top: 20px; right: 20px;
+  padding-top: env(safe-area-inset-top, 0px);
+  z-index: 9000; display: flex; flex-direction: column; gap: 8px;
+  max-width: 360px; width: calc(100vw - 40px);
+  pointer-events: none;
+}
 .toast {
-  background: #fff; border-radius: 10px; padding: 12px 16px;
+  background: #fff; border-radius: 10px; padding: 13px 16px;
   box-shadow: 0 10px 30px rgba(20,15,50,0.15);
   border-left: 4px solid var(--green);
   font-size: 0.82rem; animation: slideIn 0.25s ease;
@@ -260,9 +351,9 @@ tr:hover td { background: #fafafc; }
 .loading i { font-size: 1.5rem; margin-bottom: 8px; animation: spin 1s linear infinite; display: block; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ===== 403 SCREEN ===== */
+/* ===== 403 ===== */
 .denied {
-  position: fixed; inset: 0; z-index: 200;
+  position: fixed; inset: 0; z-index: 5000;
   display: none; align-items: center; justify-content: center;
   background: #f5f6fb; padding: 20px;
 }
@@ -276,24 +367,55 @@ tr:hover td { background: #fafafc; }
 .denied h2 { font-size: 1.3rem; margin-bottom: 8px; }
 .denied p { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
 
-/* ===== MOBILE ===== */
-.mobile-topbar { display: none; }
+/* ===== LIVE FEED ITEM ===== */
+.live-item {
+  display: flex; gap: 12px;
+  padding: 12px; background: #fafafc;
+  border-radius: 8px; margin-bottom: 10px;
+  animation: slideIn 0.25s ease;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 900px) {
   .console.active { grid-template-columns: 1fr; }
-  .sidebar { position: fixed; left: -260px; width: 260px; z-index: 500; transition: left 0.3s; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
-  .sidebar.open { left: 0; }
-  .main { padding: 16px; }
-  .mobile-topbar {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; background: #fff;
-    border-bottom: 1px solid var(--line);
-    position: sticky; top: 0; z-index: 300;
+  .console.active { display: block; }
+  .sidebar {
+    position: fixed; left: 0; top: 0;
+    width: 280px; max-width: 85vw;
+    z-index: 500;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100vh; height: 100dvh;
+    box-shadow: 4px 0 30px rgba(0,0,0,0.25);
   }
-  .mobile-topbar button {
-    width: 36px; height: 36px; border-radius: 8px;
-    background: var(--bg); display: flex; align-items: center; justify-content: center;
+  .sidebar.open { transform: translateX(0); }
+  .mobile-topbar { display: flex; }
+  .main { padding: 16px; padding-bottom: calc(24px + var(--safe-bottom)); }
+  .main-header { margin-bottom: 18px; }
+  .main-title { font-size: 1.2rem; }
+  .main-actions { width: 100%; }
+  .main-actions input[type="text"] { flex: 1; min-width: 0 !important; }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
   }
-  .mobile-topbar .title { font-weight: 800; font-size: 0.95rem; }
+  .stat-card { padding: 14px; border-radius: 12px; }
+  .stat-value { font-size: 1.25rem; }
+  .stat-label { font-size: 0.6rem; }
+  .stat-hint { font-size: 0.62rem; }
+  .card { padding: 16px; border-radius: 12px; }
+  .table-wrap { margin: 0 -16px; padding: 0 16px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .toast-stack { top: auto; bottom: 20px; right: 12px; left: 12px; width: auto; max-width: none; }
+  .toast { animation: toastUp 0.25s ease; }
+  @keyframes toastUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+}
+
+@media (max-width: 400px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .main-title { font-size: 1.1rem; }
+  .action-btn { padding: 6px 9px; font-size: 0.65rem; }
 }
 </style>
 </head>
@@ -301,6 +423,9 @@ tr:hover td { background: #fafafc; }
 
 <!-- Toast stack -->
 <div id="toast-stack" class="toast-stack"></div>
+
+<!-- Mobile sidebar backdrop (tap to close) -->
+<div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
 <!-- ===== AUTH SCREEN ===== -->
 <div id="auth-screen" class="auth-screen">
@@ -342,15 +467,15 @@ tr:hover td { background: #fafafc; }
     </div>
 
     <div class="sidebar-label">Overview</div>
-    <button class="sidebar-link active" data-view="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
-    <button class="sidebar-link" data-view="live"><i class="fas fa-satellite-dish"></i> Live Feed</button>
+    <button class="sidebar-link active" data-view="dashboard"><i class="fas fa-chart-line"></i> Dashboard <span class="sidebar-badge" id="badge-dashboard"></span></button>
+    <button class="sidebar-link" data-view="live"><i class="fas fa-satellite-dish"></i> Live Feed <span class="sidebar-badge green" id="badge-live"></span></button>
 
     <div class="sidebar-label">Users</div>
-    <button class="sidebar-link" data-view="users"><i class="fas fa-users"></i> All Users</button>
+    <button class="sidebar-link" data-view="users"><i class="fas fa-users"></i> All Users <span class="sidebar-badge" id="badge-users"></span></button>
     <button class="sidebar-link" data-view="wallet"><i class="fas fa-wallet"></i> Wallet Tools</button>
 
     <div class="sidebar-label">Money</div>
-    <button class="sidebar-link" data-view="withdrawals"><i class="fas fa-hand-holding-usd"></i> Withdrawals</button>
+    <button class="sidebar-link" data-view="withdrawals"><i class="fas fa-hand-holding-usd"></i> Withdrawals <span class="sidebar-badge" id="badge-withdrawals"></span></button>
     <button class="sidebar-link" data-view="transactions"><i class="fas fa-receipt"></i> Transactions</button>
 
     <div class="sidebar-label">Engage</div>
@@ -366,11 +491,14 @@ tr:hover td { background: #fafafc; }
   <main class="main">
 
     <div class="mobile-topbar">
-      <button id="menu-toggle"><i class="fas fa-bars"></i></button>
-      <span class="title">SkillClash Admin</span>
+      <div class="mobile-topbar-left">
+        <button id="menu-toggle" class="menu-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+        <span class="title" id="mobile-title">Dashboard</span>
+      </div>
+      <span class="live-total" id="mobile-live-total">0</span>
     </div>
 
-    <!-- ===== DASHBOARD VIEW ===== -->
+    <!-- ===== DASHBOARD ===== -->
     <section id="view-dashboard" class="view active">
       <div class="main-header">
         <div>
@@ -388,7 +516,7 @@ tr:hover td { background: #fafafc; }
 
       <div class="card">
         <div class="card-header-row">
-          <div><h3>Recent Signups</h3><p class="card-sub">Latest 10 users who joined</p></div>
+          <div><h3>Recent Signups</h3><p class="card-sub" style="margin-bottom:0;">Latest 10 users</p></div>
           <button class="btn-ghost" onclick="switchView('users')">View all →</button>
         </div>
         <div class="table-wrap">
@@ -401,7 +529,7 @@ tr:hover td { background: #fafafc; }
 
       <div class="card">
         <div class="card-header-row">
-          <div><h3>Pending Withdrawals</h3><p class="card-sub">Requests awaiting approval</p></div>
+          <div><h3>Pending Withdrawals</h3><p class="card-sub" style="margin-bottom:0;">Awaiting approval</p></div>
           <button class="btn-ghost" onclick="switchView('withdrawals')">View all →</button>
         </div>
         <div class="table-wrap">
@@ -414,7 +542,7 @@ tr:hover td { background: #fafafc; }
 
       <div class="card">
         <div class="card-header-row">
-          <div><h3>Recent Transactions</h3><p class="card-sub">Latest 10 wallet events</p></div>
+          <div><h3>Recent Transactions</h3><p class="card-sub" style="margin-bottom:0;">Latest 10 wallet events</p></div>
           <button class="btn-ghost" onclick="switchView('transactions')">View all →</button>
         </div>
         <div class="table-wrap">
@@ -426,27 +554,27 @@ tr:hover td { background: #fafafc; }
       </div>
     </section>
 
-    <!-- ===== LIVE FEED VIEW ===== -->
+    <!-- ===== LIVE FEED ===== -->
     <section id="view-live" class="view">
       <div class="main-header">
         <div>
           <h1 class="main-title">Live Feed</h1>
-          <p class="main-sub">Everything happening right now — updates automatically</p>
+          <p class="main-sub">Everything happening right now</p>
         </div>
         <div class="main-actions">
-          <span id="live-dot" style="display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;font-weight:700;color:var(--green);">
-            <span style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite;"></span> LIVE
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;font-weight:700;color:var(--green);">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:badgePulse 1.6s infinite;"></span> LIVE
           </span>
         </div>
       </div>
       <div class="card">
-        <div id="live-feed" style="display:flex;flex-direction:column;gap:10px;max-height:70vh;overflow-y:auto;">
+        <div id="live-feed" style="max-height:70vh;overflow-y:auto;">
           <div class="table-empty">Waiting for events…</div>
         </div>
       </div>
     </section>
 
-    <!-- ===== USERS VIEW ===== -->
+    <!-- ===== USERS ===== -->
     <section id="view-users" class="view">
       <div class="main-header">
         <div>
@@ -454,8 +582,8 @@ tr:hover td { background: #fafafc; }
           <p class="main-sub" id="users-count">—</p>
         </div>
         <div class="main-actions">
-          <input type="text" id="users-search" placeholder="Search by name or email…" style="padding:9px 14px;border-radius:8px;border:1px solid var(--line);font-size:0.82rem;min-width:240px;outline:none;" />
-          <button class="btn-ghost" onclick="loadUsers()"><i class="fas fa-sync"></i> Refresh</button>
+          <input type="text" id="users-search" placeholder="Search name or email…" style="padding:10px 14px;border-radius:8px;border:1px solid var(--line);font-size:0.82rem;flex:1;min-width:180px;outline:none;min-height:40px;" />
+          <button class="btn-ghost" onclick="loadUsers()"><i class="fas fa-sync"></i></button>
         </div>
       </div>
       <div class="card">
@@ -468,22 +596,22 @@ tr:hover td { background: #fafafc; }
       </div>
     </section>
 
-    <!-- ===== WALLET TOOLS VIEW ===== -->
+    <!-- ===== WALLET TOOLS ===== -->
     <section id="view-wallet" class="view">
       <div class="main-header">
         <div>
           <h1 class="main-title">Wallet Tools</h1>
-          <p class="main-sub">Adjust any user's balance (adds a transaction log)</p>
+          <p class="main-sub">Adjust any user's balance</p>
         </div>
       </div>
       <div class="card">
         <h3>Adjust Balance</h3>
-        <p class="card-sub">Enter user UUID, positive number to credit, negative to debit</p>
+        <p class="card-sub">Positive to credit, negative to debit</p>
         <div class="form-grid">
           <div class="field full">
             <label>User UUID</label>
             <input type="text" id="adjust-user-id" placeholder="9cf948d5-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
-            <span class="field-hint">Paste the user's ID from the All Users table</span>
+            <span class="field-hint">Paste from All Users → Copy ID</span>
           </div>
           <div class="field">
             <label>Amount (₹)</label>
@@ -491,10 +619,10 @@ tr:hover td { background: #fafafc; }
           </div>
           <div class="field">
             <label>Reason (optional)</label>
-            <input type="text" id="adjust-reason" placeholder="e.g. Support refund" />
+            <input type="text" id="adjust-reason" placeholder="Support refund" />
           </div>
           <div class="field full">
-            <button class="btn-primary" onclick="doAdjustBalance()" style="width:100%;justify-content:center;padding:12px;">
+            <button class="btn-primary" onclick="doAdjustBalance()" style="width:100%;justify-content:center;padding:14px;">
               <i class="fas fa-check"></i> Apply Adjustment
             </button>
           </div>
@@ -502,7 +630,7 @@ tr:hover td { background: #fafafc; }
       </div>
     </section>
 
-    <!-- ===== WITHDRAWALS VIEW ===== -->
+    <!-- ===== WITHDRAWALS ===== -->
     <section id="view-withdrawals" class="view">
       <div class="main-header">
         <div>
@@ -523,12 +651,12 @@ tr:hover td { background: #fafafc; }
       </div>
     </section>
 
-    <!-- ===== TRANSACTIONS VIEW ===== -->
+    <!-- ===== TRANSACTIONS ===== -->
     <section id="view-transactions" class="view">
       <div class="main-header">
         <div>
           <h1 class="main-title">Transactions</h1>
-          <p class="main-sub">All wallet activity across the platform</p>
+          <p class="main-sub">All wallet activity</p>
         </div>
         <div class="main-actions">
           <button class="btn-ghost" onclick="loadTransactions()"><i class="fas fa-sync"></i> Refresh</button>
@@ -544,12 +672,12 @@ tr:hover td { background: #fafafc; }
       </div>
     </section>
 
-    <!-- ===== SEND NOTIFICATION VIEW ===== -->
+    <!-- ===== SEND NOTIFICATION ===== -->
     <section id="view-notify" class="view">
       <div class="main-header">
         <div>
           <h1 class="main-title">Send Notification</h1>
-          <p class="main-sub">Send to a single user by their UUID</p>
+          <p class="main-sub">Send to a single user</p>
         </div>
       </div>
       <div class="card">
@@ -557,15 +685,14 @@ tr:hover td { background: #fafafc; }
           <div class="field full">
             <label>Target User UUID *</label>
             <input type="text" id="notify-user-id" placeholder="9cf948d5-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
-            <span class="field-hint">Find it in the All Users table</span>
           </div>
           <div class="field full">
             <label>Title *</label>
-            <input type="text" id="notify-title" placeholder="e.g. Reward credited" maxlength="100" />
+            <input type="text" id="notify-title" placeholder="Reward credited" maxlength="100" />
           </div>
           <div class="field full">
             <label>Body</label>
-            <textarea id="notify-body" placeholder="e.g. ₹25 bonus added to your wallet." maxlength="300"></textarea>
+            <textarea id="notify-body" placeholder="₹25 bonus added to your wallet." maxlength="300"></textarea>
           </div>
           <div class="field">
             <label>Type</label>
@@ -590,7 +717,7 @@ tr:hover td { background: #fafafc; }
             </select>
           </div>
           <div class="field full">
-            <button class="btn-primary" onclick="doSendNotification()" style="width:100%;justify-content:center;padding:12px;">
+            <button class="btn-primary" onclick="doSendNotification()" style="width:100%;justify-content:center;padding:14px;">
               <i class="fas fa-paper-plane"></i> Send to User
             </button>
           </div>
@@ -598,12 +725,12 @@ tr:hover td { background: #fafafc; }
       </div>
     </section>
 
-    <!-- ===== BROADCAST VIEW ===== -->
+    <!-- ===== BROADCAST ===== -->
     <section id="view-broadcast" class="view">
       <div class="main-header">
         <div>
           <h1 class="main-title">Broadcast</h1>
-          <p class="main-sub">Send to <strong>every user</strong> on SkillClash</p>
+          <p class="main-sub">Send to <strong>every user</strong></p>
         </div>
       </div>
       <div class="card" style="border:1.5px solid var(--amber);background:linear-gradient(135deg,#fff8e1,#fff);">
@@ -611,7 +738,7 @@ tr:hover td { background: #fafafc; }
           <i class="fas fa-exclamation-triangle" style="color:var(--amber);font-size:1.4rem;margin-top:2px;"></i>
           <div>
             <h3 style="margin-bottom:4px;">Use responsibly</h3>
-            <p style="font-size:0.82rem;color:var(--muted);line-height:1.5;">Broadcasts go to every single user immediately. There is no undo. Consider limiting broadcasts to major announcements, offers, or platform updates.</p>
+            <p style="font-size:0.82rem;color:var(--muted);line-height:1.5;">Broadcasts go to every user immediately. There is no undo.</p>
           </div>
         </div>
       </div>
@@ -619,11 +746,11 @@ tr:hover td { background: #fafafc; }
         <div class="form-grid">
           <div class="field full">
             <label>Title *</label>
-            <input type="text" id="bcast-title" placeholder="e.g. Weekend Tournament live now!" maxlength="100" />
+            <input type="text" id="bcast-title" placeholder="Weekend Tournament live now!" maxlength="100" />
           </div>
           <div class="field full">
             <label>Body</label>
-            <textarea id="bcast-body" placeholder="e.g. ₹500 prize pool. Free entry. Join now!" maxlength="300"></textarea>
+            <textarea id="bcast-body" placeholder="₹500 prize pool. Free entry. Join now!" maxlength="300"></textarea>
           </div>
           <div class="field">
             <label>Type</label>
@@ -645,7 +772,7 @@ tr:hover td { background: #fafafc; }
             </select>
           </div>
           <div class="field full">
-            <button class="btn-primary" onclick="doBroadcast()" style="width:100%;justify-content:center;padding:12px;background:linear-gradient(135deg,#e2555a,#f07075);">
+            <button class="btn-primary" onclick="doBroadcast()" style="width:100%;justify-content:center;padding:14px;background:linear-gradient(135deg,#e2555a,#f07075);">
               <i class="fas fa-bullhorn"></i> Send to ALL Users
             </button>
           </div>
@@ -655,9 +782,10 @@ tr:hover td { background: #fafafc; }
 
   </main>
 </div>
+
 <script>
 // ============================================================
-// SKILLCLASH ADMIN CONSOLE v1.0
+// SKILLCLASH ADMIN CONSOLE v2.0
 // ============================================================
 
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
@@ -668,6 +796,14 @@ let currentAdmin = null;
 let liveFeedItems = [];
 let liveFeedChannel = null;
 let liveFeedEnabled = false;
+let sidebarChannels = [];
+let pageTitleInterval = null;
+
+const badgeState = {
+  withdrawals: 0,
+  newUsers: 0,
+  liveFeed: 0
+};
 
 // ===== TOASTS =====
 function toast(msg, type = 'success') {
@@ -723,17 +859,219 @@ function timeAgo(dateInput) {
   return formatIST(d);
 }
 
+// ===== MOBILE SIDEBAR CONTROL =====
+function openSidebar() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebar-backdrop');
+  if (!sb) return;
+  sb.classList.add('open');
+  if (bd) bd.classList.add('show');
+  document.body.classList.add('sidebar-open');
+}
+function closeSidebar() {
+  const sb = document.getElementById('sidebar');
+  const bd = document.getElementById('sidebar-backdrop');
+  if (!sb) return;
+  sb.classList.remove('open');
+  if (bd) bd.classList.remove('show');
+  document.body.classList.remove('sidebar-open');
+}
+window.openSidebar = openSidebar;
+window.closeSidebar = closeSidebar;
+
+// Tap backdrop → close
+document.getElementById('sidebar-backdrop')?.addEventListener('click', closeSidebar);
+
+// Menu button → toggle
+document.getElementById('menu-toggle')?.addEventListener('click', () => {
+  const sb = document.getElementById('sidebar');
+  if (sb?.classList.contains('open')) closeSidebar();
+  else openSidebar();
+});
+
+// Swipe left on sidebar → close
+(function attachSwipeClose() {
+  let startX = 0, startY = 0, tracking = false;
+  const sb = document.getElementById('sidebar');
+  if (!sb) return;
+  sb.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    tracking = true;
+  }, { passive: true });
+  sb.addEventListener('touchmove', (e) => {
+    if (!tracking) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = Math.abs(t.clientY - startY);
+    if (dy > 60) tracking = false;
+    if (dx < -50 && dy < 40) { closeSidebar(); tracking = false; }
+  }, { passive: true });
+  sb.addEventListener('touchend', () => { tracking = false; }, { passive: true });
+})();
+
+// ESC key → close sidebar
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeSidebar();
+});
+
+// Auto-close if window resizes to desktop
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 900) closeSidebar();
+});
+
+// ===== BADGE SYSTEM =====
+function setBadge(id, count, isGreen = false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (count > 0) {
+    el.textContent = count > 99 ? '99+' : String(count);
+    el.classList.add('show');
+    el.classList.toggle('green', isGreen);
+  } else {
+    el.classList.remove('show');
+    el.classList.remove('green');
+  }
+}
+
+function refreshAllBadges() {
+  setBadge('badge-withdrawals', badgeState.withdrawals);
+  setBadge('badge-users', badgeState.newUsers);
+  setBadge('badge-live', badgeState.liveFeed, true);
+  const total = badgeState.withdrawals + badgeState.newUsers + badgeState.liveFeed;
+  setBadge('badge-dashboard', total);
+
+  // Mobile topbar pill
+  const mobilePill = document.getElementById('mobile-live-total');
+  if (mobilePill) {
+    if (total > 0) {
+      mobilePill.textContent = total > 99 ? '99+' : String(total);
+      mobilePill.classList.add('show');
+    } else {
+      mobilePill.classList.remove('show');
+    }
+  }
+
+  // Tab title
+  document.title = total > 0 ? `(${total}) SkillClash Admin` : 'SkillClash · Admin Console';
+}
+
+async function loadBadgeCounts() {
+  // Withdrawals count
+  try {
+    const { data: wd } = await client.rpc('admin_get_pending_withdrawals');
+    badgeState.withdrawals = (wd || []).length;
+  } catch (e) { badgeState.withdrawals = 0; }
+
+  // New users in last hour
+  try {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count } = await client
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', oneHourAgo);
+    badgeState.newUsers = count || 0;
+  } catch (e) { badgeState.newUsers = 0; }
+
+  refreshAllBadges();
+}
+
+function startBadgeRealtime() {
+  // Cleanup previous
+  sidebarChannels.forEach(ch => { try { client.removeChannel(ch); } catch (e) {} });
+  sidebarChannels = [];
+
+  // Withdrawals
+  const wdChannel = client
+    .channel('badge-withdrawals-v2')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'withdrawal_requests' }, (payload) => {
+      badgeState.withdrawals++;
+      badgeState.liveFeed++;
+      refreshAllBadges();
+      toast('New withdrawal request', 'info');
+      playDing();
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'withdrawal_requests' }, () => {
+      loadBadgeCounts();
+    })
+    .subscribe();
+  sidebarChannels.push(wdChannel);
+
+  // New users
+  const userChannel = client
+    .channel('badge-users-v2')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'users' }, () => {
+      badgeState.newUsers++;
+      badgeState.liveFeed++;
+      refreshAllBadges();
+      toast('New user signed up', 'info');
+    })
+    .subscribe();
+  sidebarChannels.push(userChannel);
+
+  // Live feed ticks
+  const liveChannel = client
+    .channel('badge-live-v2')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, (payload) => {
+      badgeState.liveFeed++;
+      refreshAllBadges();
+      pushLiveItem({ kind: 'tx', ts: payload.new?.created_at || new Date(), text: `New transaction: ${payload.new?.description || ''}` });
+    })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_sessions' }, (payload) => {
+      badgeState.liveFeed++;
+      refreshAllBadges();
+      pushLiveItem({ kind: 'match', ts: payload.new?.created_at || new Date(), text: `New match: ${payload.new?.game_type || ''}` });
+    })
+    .subscribe();
+  sidebarChannels.push(liveChannel);
+}
+
+// ===== DING SOUND =====
+function playDing() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880;
+    o.type = 'sine';
+    g.gain.setValueAtTime(0.08, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    o.start(); o.stop(ctx.currentTime + 0.25);
+  } catch (e) {}
+}
+
 // ===== VIEW SWITCHER =====
 function switchView(id) {
+  // Update view visibility
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const view = document.getElementById('view-' + id);
   if (view) view.classList.add('active');
+
+  // Sidebar active
   document.querySelectorAll('.sidebar-link[data-view]').forEach(l => {
     l.classList.toggle('active', l.dataset.view === id);
   });
-  // Close mobile sidebar
-  document.getElementById('sidebar')?.classList.remove('open');
-  // Lazy-load data per view
+
+  // Mobile topbar title
+  const titleEl = document.getElementById('mobile-title');
+  if (titleEl) {
+    const el = document.querySelector(`.sidebar-link[data-view="${id}"]`);
+    titleEl.textContent = el ? el.textContent.trim().replace(/^\s+|\s+\d+$/g, '') : 'Admin';
+  }
+
+  // Clear relevant badge
+  if (id === 'withdrawals') badgeState.withdrawals = 0;
+  if (id === 'users') badgeState.newUsers = 0;
+  if (id === 'live') badgeState.liveFeed = 0;
+  if (id === 'dashboard') { badgeState.withdrawals = 0; badgeState.newUsers = 0; }
+  refreshAllBadges();
+
+  // Close sidebar (mobile)
+  closeSidebar();
+
+  // Lazy load
   if (id === 'users') loadUsers();
   else if (id === 'withdrawals') loadWithdrawals();
   else if (id === 'transactions') loadTransactions();
@@ -742,9 +1080,10 @@ function switchView(id) {
 }
 window.switchView = switchView;
 
-// ===== AUTH FLOW =====
+// ===== AUTH =====
 async function startAuthFlow() {
   const { data: { session } } = await client.auth.getSession();
+
   if (!session) {
     document.getElementById('auth-screen').style.display = 'flex';
     document.getElementById('console').classList.remove('active');
@@ -752,7 +1091,6 @@ async function startAuthFlow() {
     return;
   }
 
-  // Has session — check admin
   const { data: isAdmin, error } = await client.rpc('is_admin');
   if (error || !isAdmin) {
     document.getElementById('auth-screen').style.display = 'none';
@@ -762,7 +1100,6 @@ async function startAuthFlow() {
     return;
   }
 
-  // Welcome, admin
   currentAdmin = session.user;
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('denied-screen').classList.remove('active');
@@ -770,44 +1107,39 @@ async function startAuthFlow() {
 
   const meta = currentAdmin.user_metadata || {};
   const name = meta.full_name || meta.name || (currentAdmin.email || '').split('@')[0] || 'Admin';
-  document.getElementById('sb-name').textContent = name;
-  document.getElementById('sb-email').textContent = currentAdmin.email || '';
+  const sbName = document.getElementById('sb-name');
+  const sbEmail = document.getElementById('sb-email');
+  if (sbName) sbName.textContent = name;
+  if (sbEmail) sbEmail.textContent = currentAdmin.email || '';
 
   loadAll();
+  setTimeout(() => { loadBadgeCounts(); startBadgeRealtime(); }, 400);
 }
 
-// Google login button
 document.getElementById('google-login-btn')?.addEventListener('click', async () => {
   const redirectUrl = window.location.origin + window.location.pathname;
   await client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl } });
 });
 
-// Denied → back to site
 document.getElementById('denied-back-btn')?.addEventListener('click', () => {
   window.location.href = '/';
 });
 
-// Logout
 document.getElementById('logout-btn')?.addEventListener('click', async () => {
   if (liveFeedChannel) { try { await client.removeChannel(liveFeedChannel); } catch (e) {} }
+  sidebarChannels.forEach(ch => { try { client.removeChannel(ch); } catch (e) {} });
   await client.auth.signOut();
   window.location.reload();
 });
 
-// Refresh button
-document.getElementById('refresh-btn')?.addEventListener('click', () => loadAll());
+document.getElementById('refresh-btn')?.addEventListener('click', () => { loadAll(); loadBadgeCounts(); });
 
 // Sidebar links
 document.querySelectorAll('.sidebar-link[data-view]').forEach(btn => {
   btn.addEventListener('click', () => switchView(btn.dataset.view));
 });
 
-// Mobile menu toggle
-document.getElementById('menu-toggle')?.addEventListener('click', () => {
-  document.getElementById('sidebar')?.classList.toggle('open');
-});
-
-// ===== LOAD: STATS =====
+// ===== LOADERS =====
 async function loadStats() {
   const grid = document.getElementById('stats-grid');
   if (!grid) return;
@@ -816,34 +1148,18 @@ async function loadStats() {
     if (error) throw error;
     if (!data || data.ok === false) throw new Error(data?.message || 'Failed');
     grid.innerHTML = `
-      <div class="stat-card">
-        <div class="stat-label"><i class="fas fa-users"></i> Total Users</div>
-        <div class="stat-value">${Number(data.users || 0).toLocaleString('en-IN')}</div>
-        <div class="stat-hint">${Number(data.active_today || 0)} active in last 24h</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label"><i class="fas fa-coins"></i> Revenue Today</div>
-        <div class="stat-value green">${formatRupees(data.revenue_today)}</div>
-        <div class="stat-hint">From ${Number(data.matches_today || 0)} matches today</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label"><i class="fas fa-wallet"></i> Total Wallet</div>
-        <div class="stat-value">${formatRupees(data.total_balance)}</div>
-        <div class="stat-hint">Across all users</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label"><i class="fas fa-hand-holding-usd"></i> Pending Withdrawals</div>
-        <div class="stat-value ${data.pending_withdrawals > 0 ? 'amber' : ''}">${Number(data.pending_withdrawals || 0)}</div>
-        <div class="stat-hint">${formatRupees(data.pending_withdrawals_amount)} awaiting</div>
-      </div>
+      <div class="stat-card"><div class="stat-label"><i class="fas fa-users"></i> Total Users</div><div class="stat-value">${Number(data.users||0).toLocaleString('en-IN')}</div><div class="stat-hint">${Number(data.active_today||0)} active in last 24h</div></div>
+      <div class="stat-card"><div class="stat-label"><i class="fas fa-coins"></i> Revenue Today</div><div class="stat-value green">${formatRupees(data.revenue_today)}</div><div class="stat-hint">From ${Number(data.matches_today||0)} matches today</div></div>
+      <div class="stat-card"><div class="stat-label"><i class="fas fa-wallet"></i> Total Wallet</div><div class="stat-value">${formatRupees(data.total_balance)}</div><div class="stat-hint">Across all users</div></div>
+      <div class="stat-card"><div class="stat-label"><i class="fas fa-hand-holding-usd"></i> Pending Withdrawals</div><div class="stat-value ${data.pending_withdrawals>0?'amber':''}">${Number(data.pending_withdrawals||0)}</div><div class="stat-hint">${formatRupees(data.pending_withdrawals_amount)} awaiting</div></div>
     `;
-    document.getElementById('last-updated').textContent = 'Last updated: ' + timeAgo(new Date());
+    const lu = document.getElementById('last-updated');
+    if (lu) lu.textContent = 'Last updated: ' + timeAgo(new Date());
   } catch (e) {
-    grid.innerHTML = `<div class="stat-card"><div class="stat-label"><i class="fas fa-exclamation-triangle" style="color:var(--red);"></i> Error</div><div class="stat-value" style="font-size:0.9rem;">${escapeHtml(e.message || 'Failed to load stats')}</div></div>`;
+    grid.innerHTML = `<div class="stat-card"><div class="stat-label"><i class="fas fa-exclamation-triangle" style="color:var(--red);"></i> Error</div><div class="stat-value" style="font-size:0.9rem;">${escapeHtml(e.message||'Failed')}</div></div>`;
   }
 }
 
-// ===== LOAD: USERS =====
 async function loadUsers() {
   const tbody = document.getElementById('users-body');
   const countEl = document.getElementById('users-count');
@@ -860,19 +1176,18 @@ async function loadUsers() {
     if (countEl) countEl.textContent = data.length + ' users (latest 100)';
     tbody.innerHTML = data.map(u => `
       <tr data-user-id="${escapeHtml(u.id)}" data-name="${escapeHtml((u.full_name||'').toLowerCase())}" data-email="${escapeHtml((u.email||'').toLowerCase())}">
-        <td><strong>${escapeHtml(u.full_name || '—')}</strong></td>
-        <td>${escapeHtml(u.email || '—')}</td>
+        <td><strong>${escapeHtml(u.full_name||'—')}</strong></td>
+        <td>${escapeHtml(u.email||'—')}</td>
         <td>${formatRupees(u.balance)}</td>
-        <td>${u.total_matches || 0}</td>
-        <td>${u.total_wins || 0}</td>
+        <td>${u.total_matches||0}</td>
+        <td>${u.total_wins||0}</td>
         <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(u.last_seen))}</td>
         <td>
-          <button class="action-btn" onclick="copyUserId('${escapeHtml(u.id)}')"><i class="fas fa-copy"></i> Copy ID</button>
-          <button class="action-btn success" onclick="quickNotifyUser('${escapeHtml(u.id)}','${escapeHtml((u.full_name||'').replace(/'/g,''))}')"><i class="fas fa-bell"></i> Notify</button>
+          <button class="action-btn" onclick="copyUserId('${escapeHtml(u.id)}')"><i class="fas fa-copy"></i> ID</button>
+          <button class="action-btn success" onclick="quickNotifyUser('${escapeHtml(u.id)}','${escapeHtml((u.full_name||'').replace(/'/g,''))}')"><i class="fas fa-bell"></i></button>
         </td>
       </tr>
     `).join('');
-    // Wire search
     const search = document.getElementById('users-search');
     if (search && !search.dataset.wired) {
       search.dataset.wired = '1';
@@ -896,15 +1211,15 @@ function copyUserId(id) {
 window.copyUserId = copyUserId;
 
 function quickNotifyUser(id, name) {
-  document.getElementById('notify-user-id').value = id;
-  document.getElementById('notify-title').value = '';
-  document.getElementById('notify-body').value = '';
+  const el = document.getElementById('notify-user-id');
+  if (el) el.value = id;
+  const t = document.getElementById('notify-title'); if (t) t.value = '';
+  const b = document.getElementById('notify-body'); if (b) b.value = '';
   switchView('notify');
   toast('Ready to notify ' + name, 'info');
 }
 window.quickNotifyUser = quickNotifyUser;
 
-// ===== LOAD: WITHDRAWALS =====
 async function loadWithdrawals() {
   const tbody = document.getElementById('withdrawals-body');
   const countEl = document.getElementById('wd-count');
@@ -921,8 +1236,8 @@ async function loadWithdrawals() {
     if (countEl) countEl.textContent = data.length + ' pending';
     tbody.innerHTML = data.map(w => `
       <tr>
-        <td><strong>${escapeHtml(w.full_name || '—')}</strong><br><span style="font-size:0.7rem;color:var(--muted);">${escapeHtml(w.email || '')}</span></td>
-        <td>${escapeHtml(w.upi_id || '—')}</td>
+        <td><strong>${escapeHtml(w.full_name||'—')}</strong><br><span style="font-size:0.7rem;color:var(--muted);">${escapeHtml(w.email||'')}</span></td>
+        <td>${escapeHtml(w.upi_id||'—')}</td>
         <td><strong>${formatRupees(w.amount)}</strong></td>
         <td><span class="badge amber">${escapeHtml(w.status)}</span></td>
         <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(w.requested_at))}</td>
@@ -939,12 +1254,12 @@ async function loadWithdrawals() {
 window.loadWithdrawals = loadWithdrawals;
 
 async function markPaid(id) {
-  if (!confirm('Mark this withdrawal as PAID? This will send a confirmation notification to the user.')) return;
+  if (!confirm('Mark this withdrawal as PAID?')) return;
   try {
     const { data, error } = await client.rpc('mark_withdrawal_paid', { p_request_id: id });
     if (error) throw error;
-    if (data && data.ok) { toast('Marked as paid'); loadWithdrawals(); loadStats(); }
-    else toast(data?.message || 'Failed', 'error');
+    if (data && data.ok) { toast('Marked as paid'); loadWithdrawals(); loadStats(); loadBadgeCounts(); }
+    else toast(data?.message||'Failed', 'error');
   } catch (e) { toast(e.message, 'error'); }
 }
 window.markPaid = markPaid;
@@ -955,13 +1270,12 @@ async function rejectWd(id) {
   try {
     const { data, error } = await client.rpc('mark_withdrawal_rejected', { p_request_id: id, p_admin_note: note || null });
     if (error) throw error;
-    if (data && data.ok) { toast('Rejected & refunded'); loadWithdrawals(); loadStats(); }
-    else toast(data?.message || 'Failed', 'error');
+    if (data && data.ok) { toast('Rejected & refunded'); loadWithdrawals(); loadStats(); loadBadgeCounts(); }
+    else toast(data?.message||'Failed', 'error');
   } catch (e) { toast(e.message, 'error'); }
 }
 window.rejectWd = rejectWd;
 
-// ===== LOAD: TRANSACTIONS =====
 async function loadTransactions() {
   const tbody = document.getElementById('transactions-body');
   if (!tbody) return;
@@ -975,15 +1289,13 @@ async function loadTransactions() {
     }
     tbody.innerHTML = data.map(t => {
       const isCredit = t.type === 'credit';
-      return `
-        <tr>
-          <td>${escapeHtml(t.full_name || '—')}</td>
-          <td style="font-size:0.75rem;">${escapeHtml(t.description || '')}</td>
-          <td><span class="badge ${isCredit ? 'green' : 'red'}">${escapeHtml(t.type)}</span></td>
-          <td style="font-weight:700;color:${isCredit ? 'var(--green)' : 'var(--red)'};">${isCredit ? '+' : '-'}${formatRupees(t.amount)}</td>
-          <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(formatIST(t.created_at))}</td>
-        </tr>
-      `;
+      return `<tr>
+        <td>${escapeHtml(t.full_name||'—')}</td>
+        <td style="font-size:0.75rem;">${escapeHtml(t.description||'')}</td>
+        <td><span class="badge ${isCredit?'green':'red'}">${escapeHtml(t.type)}</span></td>
+        <td style="font-weight:700;color:${isCredit?'var(--green)':'var(--red)'};">${isCredit?'+':'-'}${formatRupees(t.amount)}</td>
+        <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(formatIST(t.created_at))}</td>
+      </tr>`;
     }).join('');
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
@@ -991,7 +1303,6 @@ async function loadTransactions() {
 }
 window.loadTransactions = loadTransactions;
 
-// ===== LOAD: RECENT (for dashboard) =====
 async function loadRecentUsers() {
   const tbody = document.getElementById('recent-users-body');
   if (!tbody) return;
@@ -1003,13 +1314,7 @@ async function loadRecentUsers() {
       return;
     }
     tbody.innerHTML = data.map(u => `
-      <tr>
-        <td><strong>${escapeHtml(u.full_name || '—')}</strong></td>
-        <td>${escapeHtml(u.email || '—')}</td>
-        <td>${formatRupees(u.balance)}</td>
-        <td>${u.total_matches || 0}</td>
-        <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(u.created_at))}</td>
-      </tr>
+      <tr><td><strong>${escapeHtml(u.full_name||'—')}</strong></td><td>${escapeHtml(u.email||'—')}</td><td>${formatRupees(u.balance)}</td><td>${u.total_matches||0}</td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(u.created_at))}</td></tr>
     `).join('');
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
@@ -1027,13 +1332,7 @@ async function loadRecentWithdrawals() {
       return;
     }
     tbody.innerHTML = data.slice(0, 5).map(w => `
-      <tr>
-        <td><strong>${escapeHtml(w.full_name || '—')}</strong></td>
-        <td>${escapeHtml(w.upi_id || '—')}</td>
-        <td><strong>${formatRupees(w.amount)}</strong></td>
-        <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(w.requested_at))}</td>
-        <td><button class="action-btn success" onclick="markPaid('${escapeHtml(w.id)}')"><i class="fas fa-check"></i> Paid</button></td>
-      </tr>
+      <tr><td><strong>${escapeHtml(w.full_name||'—')}</strong></td><td>${escapeHtml(w.upi_id||'—')}</td><td><strong>${formatRupees(w.amount)}</strong></td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(w.requested_at))}</td><td><button class="action-btn success" onclick="markPaid('${escapeHtml(w.id)}')"><i class="fas fa-check"></i> Paid</button></td></tr>
     `).join('');
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
@@ -1052,22 +1351,13 @@ async function loadRecentTx() {
     }
     tbody.innerHTML = data.map(t => {
       const isCredit = t.type === 'credit';
-      return `
-        <tr>
-          <td>${escapeHtml(t.full_name || '—')}</td>
-          <td style="font-size:0.75rem;">${escapeHtml(t.description || '')}</td>
-          <td><span class="badge ${isCredit ? 'green' : 'red'}">${escapeHtml(t.type)}</span></td>
-          <td style="font-weight:700;color:${isCredit ? 'var(--green)' : 'var(--red)'};">${isCredit ? '+' : '-'}${formatRupees(t.amount)}</td>
-          <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(t.created_at))}</td>
-        </tr>
-      `;
+      return `<tr><td>${escapeHtml(t.full_name||'—')}</td><td style="font-size:0.75rem;">${escapeHtml(t.description||'')}</td><td><span class="badge ${isCredit?'green':'red'}">${escapeHtml(t.type)}</span></td><td style="font-weight:700;color:${isCredit?'var(--green)':'var(--red)'};">${isCredit?'+':'-'}${formatRupees(t.amount)}</td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(t.created_at))}</td></tr>`;
     }).join('');
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
   }
 }
 
-// ===== MASTER LOAD =====
 async function loadAll() {
   await Promise.all([
     loadStats(),
@@ -1085,111 +1375,95 @@ async function doAdjustBalance() {
   const reason = document.getElementById('adjust-reason').value.trim();
   if (!userId) { toast('Enter a user UUID', 'error'); return; }
   if (isNaN(amount) || amount === 0) { toast('Amount must be non-zero', 'error'); return; }
-  if (!confirm(`Apply ${amount > 0 ? '+' : ''}₹${amount} to this user?\n\nReason: ${reason || 'Admin adjustment'}`)) return;
+  if (!confirm(`Apply ${amount>0?'+':''}₹${amount}?\n\nReason: ${reason||'Admin adjustment'}`)) return;
   try {
-    const { data, error } = await client.rpc('admin_adjust_balance', {
-      p_user_id: userId, p_delta: amount, p_reason: reason || null
-    });
+    const { data, error } = await client.rpc('admin_adjust_balance', { p_user_id: userId, p_delta: amount, p_reason: reason || null });
     if (error) throw error;
     if (data && data.ok) {
       toast(`Applied. New balance: ${formatRupees(data.new_balance)}`);
       document.getElementById('adjust-amount').value = '';
       document.getElementById('adjust-reason').value = '';
       loadAll();
-    } else {
-      toast(data?.message || 'Failed', 'error');
-    }
+    } else toast(data?.message||'Failed', 'error');
   } catch (e) { toast(e.message, 'error'); }
 }
 window.doAdjustBalance = doAdjustBalance;
 
-// ===== SEND NOTIFICATION (to one user) =====
+// ===== NOTIFICATIONS =====
 async function doSendNotification() {
   const userId = document.getElementById('notify-user-id').value.trim();
   const title = document.getElementById('notify-title').value.trim();
   const body = document.getElementById('notify-body').value.trim();
   const type = document.getElementById('notify-type').value;
   const icon = document.getElementById('notify-icon').value;
-  if (!userId) { toast('Enter the user UUID', 'error'); return; }
+  if (!userId) { toast('Enter user UUID', 'error'); return; }
   if (!title) { toast('Title is required', 'error'); return; }
   try {
-    const { data, error } = await client.rpc('send_notification', {
-      p_title: title, p_body: body || null, p_user_id: userId, p_type: type, p_icon: icon
-    });
+    const { data, error } = await client.rpc('send_notification', { p_title: title, p_body: body || null, p_user_id: userId, p_type: type, p_icon: icon });
     if (error) throw error;
     if (data && data.ok) {
-      toast(`Sent to ${data.sent} user${data.sent === 1 ? '' : 's'}`);
+      toast(`Sent to ${data.sent} user${data.sent===1?'':'s'}`);
       document.getElementById('notify-title').value = '';
       document.getElementById('notify-body').value = '';
-    } else {
-      toast(data?.message || 'Failed', 'error');
-    }
+    } else toast(data?.message||'Failed', 'error');
   } catch (e) { toast(e.message, 'error'); }
 }
 window.doSendNotification = doSendNotification;
 
-// ===== BROADCAST (to ALL users) =====
 async function doBroadcast() {
   const title = document.getElementById('bcast-title').value.trim();
   const body = document.getElementById('bcast-body').value.trim();
   const type = document.getElementById('bcast-type').value;
   const icon = document.getElementById('bcast-icon').value;
   if (!title) { toast('Title is required', 'error'); return; }
-  if (!confirm(`Broadcast to ALL USERS?\n\nTitle: ${title}\nBody: ${body || '(empty)'}\n\nThis cannot be undone.`)) return;
+  if (!confirm(`Broadcast to ALL USERS?\n\nTitle: ${title}\nBody: ${body||'(empty)'}\n\nCannot be undone.`)) return;
   try {
-    const { data, error } = await client.rpc('admin_send_broadcast', {
-      p_title: title, p_body: body || null, p_type: type, p_icon: icon
-    });
+    const { data, error } = await client.rpc('admin_send_broadcast', { p_title: title, p_body: body || null, p_type: type, p_icon: icon });
     if (error) throw error;
     if (data && data.ok) {
       toast(`Broadcast sent to ${data.sent} users`);
       document.getElementById('bcast-title').value = '';
       document.getElementById('bcast-body').value = '';
-    } else {
-      toast(data?.message || 'Failed', 'error');
-    }
+    } else toast(data?.message||'Failed', 'error');
   } catch (e) { toast(e.message, 'error'); }
 }
 window.doBroadcast = doBroadcast;
 
-// ===== LIVE FEED (realtime) =====
+// ===== LIVE FEED =====
 async function enableLiveFeed() {
-  if (liveFeedEnabled) return;
+  if (liveFeedEnabled) { renderLiveFeed(); return; }
   liveFeedEnabled = true;
 
-  // Initial batch
   try {
     const { data: tx } = await client.rpc('admin_get_recent_transactions', { p_limit: 20 });
     if (tx && tx.length) {
       liveFeedItems = tx.map(t => ({
         kind: 'tx',
         ts: t.created_at,
-        text: `${t.full_name || 'User'} — ${t.description || 'transaction'} (${t.type === 'credit' ? '+' : '-'}${formatRupees(t.amount)})`
+        text: `${t.full_name||'User'} — ${t.description||'transaction'} (${t.type==='credit'?'+':'-'}${formatRupees(t.amount)})`
       })).sort((a, b) => new Date(b.ts) - new Date(a.ts));
-      renderLiveFeed();
-    } else {
-      renderLiveFeed();
     }
-  } catch (e) { renderLiveFeed(); }
+  } catch (e) {}
+  renderLiveFeed();
 
-  // Realtime: watch new transactions
+  // Realtime is already wired in startBadgeRealtime — but push into live feed here too
   if (liveFeedChannel) { try { await client.removeChannel(liveFeedChannel); } catch (e) {} }
   liveFeedChannel = client
-    .channel('admin-live-feed')
+    .channel('live-feed-view')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, (payload) => {
       const t = payload.new;
       if (!t) return;
-      pushLiveItem({ kind: 'tx', ts: t.created_at, text: `New transaction: ${t.description} (${t.type === 'credit' ? '+' : '-'}${formatRupees(t.amount)})` });
+      pushLiveItem({ kind: 'tx', ts: t.created_at, text: `New transaction: ${t.description} (${t.type==='credit'?'+':'-'}${formatRupees(t.amount)})` });
     })
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'withdrawal_requests' }, (payload) => {
       const w = payload.new;
       if (!w) return;
-      pushLiveItem({ kind: 'wd', ts: w.requested_at, text: `New withdrawal request: ${formatRupees(w.amount)} to ${w.upi_id}` });
+      pushLiveItem({ kind: 'wd', ts: w.requested_at, text: `New withdrawal: ${formatRupees(w.amount)} to ${w.upi_id}` });
     })
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_sessions' }, (payload) => {
       const g = payload.new;
       if (!g) return;
-      pushLiveItem({ kind: 'match', ts: g.created_at, text: `New match started: ${g.game_type} (stake ₹${g.entry_fee})` });
+      pushLiveItem({ kind: 'match', ts: g.created_at, text: `New match: ${g.game_type} (₹${g.entry_fee})` });
     })
     .subscribe();
 }
@@ -1210,13 +1484,16 @@ function renderLiveFeed() {
   const colorMap = { tx: 'var(--primary)', wd: 'var(--amber)', match: 'var(--green)' };
   const iconMap = { tx: 'fa-receipt', wd: 'fa-hand-holding-usd', match: 'fa-gamepad' };
   feed.innerHTML = liveFeedItems.map(item => `
-    <div style="display:flex;gap:12px;padding:10px 12px;background:#fafafc;border-radius:8px;border-left:3px solid ${colorMap[item.kind] || 'var(--line)'};">
-      <i class="fas ${iconMap[item.kind] || 'fa-circle'}" style="color:${colorMap[item.kind] || 'var(--muted)'};margin-top:2px;"></i>
-      <div style="flex:1;font-size:0.82rem;">${escapeHtml(item.text)}</div>
-      <div style="font-size:0.7rem;color:var(--muted);white-space:nowrap;">${escapeHtml(timeAgo(item.ts))}</div>
+    <div class="live-item" style="border-left:3px solid ${colorMap[item.kind] || 'var(--line)'};">
+      <i class="fas ${iconMap[item.kind] || 'fa-circle'}" style="color:${colorMap[item.kind] || 'var(--muted)'};margin-top:2px;flex-shrink:0;"></i>
+      <div style="flex:1;font-size:0.82rem;min-width:0;">${escapeHtml(item.text)}</div>
+      <div style="font-size:0.7rem;color:var(--muted);white-space:nowrap;flex-shrink:0;">${escapeHtml(timeAgo(item.ts))}</div>
     </div>
   `).join('');
 }
+
+// Refresh counts every 90 seconds as safety
+setInterval(loadBadgeCounts, 90000);
 
 // ===== BOOT =====
 startAuthFlow();
