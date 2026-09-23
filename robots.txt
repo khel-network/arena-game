@@ -38,3 +38,6 @@ Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
+
+User-agent: *
+Disallow: /admin8595.html
