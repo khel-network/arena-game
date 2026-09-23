@@ -2005,7 +2005,6 @@ Payment not credited? DM <strong>@skillclash.in_</strong> on Instagram — resol
 
 </div>
 </div>
-</div>
 
 <!-- No Opponent Found Modal -->
 <div id="no-opponent-overlay" class="modal-overlay hidden">
@@ -2155,6 +2154,110 @@ const SEARCH_SECONDS = 12;
 const CASHOUT_MIN = 150;
 const INVITE_SECONDS = 8;
 const WELCOME_BONUS = 25;
+// ============================================================
+// v18: DEVICE FINGERPRINT + IP + IST TIME HELPERS
+// ============================================================
+
+// --- Simple stable device fingerprint (no external lib) ---
+async function getDeviceFingerprint() {
+  try {
+    const cached = localStorage.getItem('skillclash_fp');
+    if (cached) return cached;
+
+    const nav = window.navigator || {};
+    const scr = window.screen || {};
+    const parts = [
+      nav.userAgent || '',
+      nav.language || '',
+      (nav.languages || []).join(','),
+      nav.platform || '',
+      nav.hardwareConcurrency || '',
+      nav.deviceMemory || '',
+      scr.width || '', scr.height || '',
+      scr.colorDepth || '',
+      new Date().getTimezoneOffset(),
+      Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+    ];
+    const raw = parts.join('|');
+
+    // SHA-256 (fallback to simple hash if crypto unavailable)
+    let hash = '';
+    if (window.crypto && window.crypto.subtle) {
+      const buf = new TextEncoder().encode(raw);
+      const digest = await window.crypto.subtle.digest('SHA-256', buf);
+      hash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } else {
+      let h = 0;
+      for (let i = 0; i < raw.length; i++) { h = ((h << 5) - h) + raw.charCodeAt(i); h |= 0; }
+      hash = 'fb' + Math.abs(h).toString(16);
+    }
+    hash = hash.slice(0, 40);
+    localStorage.setItem('skillclash_fp', hash);
+    return hash;
+  } catch (e) {
+    return 'fp_unavailable';
+  }
+}
+
+// --- Cached IP (fetched once per session) ---
+let _cachedIP = null;
+async function getClientIP() {
+  if (_cachedIP) return _cachedIP;
+  try {
+    const cached = sessionStorage.getItem('skillclash_ip');
+    if (cached) { _cachedIP = cached; return cached; }
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 2500);
+    const res = await fetch('https://api.ipify.org?format=json', { signal: ctrl.signal });
+    clearTimeout(t);
+    const data = await res.json();
+    _cachedIP = data.ip || 'unknown';
+  } catch (e) {
+    _cachedIP = 'unknown';
+  }
+  try { sessionStorage.setItem('skillclash_ip', _cachedIP); } catch (e) {}
+  return _cachedIP;
+}
+
+// --- IST (Asia/Kolkata) time helpers ---
+function formatIST(dateInput, opts) {
+  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  if (isNaN(d.getTime())) return '—';
+  const options = Object.assign({
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: true
+  }, opts || {});
+  try {
+    return new Intl.DateTimeFormat('en-IN', options).format(d).replace(/,/g, '').replace(/\b(am|pm)\b/i, m => m.toUpperCase());
+  } catch (e) {
+    return d.toLocaleString('en-IN');
+  }
+}
+function formatISTTime(dateInput) {
+  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  if (isNaN(d.getTime())) return '—';
+  try {
+    return new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    }).format(d).replace(/\b(am|pm)\b/i, m => m.toUpperCase());
+  } catch (e) { return '—'; }
+}
+function formatISTRelative(dateInput) {
+  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  if (isNaN(d.getTime())) return '—';
+  const diff = Date.now() - d.getTime();
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return 'just now';
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + 'm ago';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + 'h ago';
+  const days = Math.floor(h / 24);
+  if (days < 7) return days + 'd ago';
+  return formatIST(d, { day: '2-digit', month: 'short' });
+}
 
 // ===== PRICING (Profit-focused: ₹10 margin per match) =====
 const GAME_PRICES = {
@@ -2525,11 +2628,19 @@ async function loadTransactions() {
   try {
     const { data, error } = await client.from('transactions').select('description,type,amount,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
     if (error) throw error;
-    transactions = (data || []).map(t => ({ desc: t.description, type: t.type, amount: t.amount, date: new Date(t.created_at).toLocaleString() }));
+transactions = (data || []).map(t => ({
+  desc: t.description,
+  type: t.type,
+  amount: t.amount,
+  date: formatIST(t.created_at, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
+}));
   } catch (e) { transactions = []; }
 }
 async function recordTransaction(desc, type, amount) {
-  transactions.unshift({ desc, type, amount, date: new Date().toLocaleString() });
+transactions.unshift({
+  desc, type, amount,
+  date: formatIST(new Date(), { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
+});
   updateUI();
   try { await client.from('transactions').insert({ user_id: currentUser.id, description: desc, type, amount }); } catch (e) {}
 }
@@ -2537,11 +2648,20 @@ async function loadMatchHistory() {
   try {
     const { data, error } = await client.from('match_history').select('game,opponent,result,reward,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
     if (error) throw error;
-    matchHistory = (data || []).map(m => ({ game: m.game, opponent: m.opponent, result: m.result, reward: m.reward, date: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }));
+matchHistory = (data || []).map(m => ({
+  game: m.game,
+  opponent: m.opponent,
+  result: m.result,
+  reward: m.reward,
+  date: formatIST(m.created_at, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
+}));
   } catch (e) { matchHistory = []; }
 }
 async function recordMatch(game, opponent, result, reward) {
-  matchHistory.unshift({ game, opponent, result, reward, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+matchHistory.unshift({
+  game, opponent, result, reward,
+  date: formatIST(new Date(), { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true })
+});
   updateUI();
   try { await client.from('match_history').insert({ user_id: currentUser.id, game, opponent, result, reward }); } catch (e) {}
 }
@@ -2560,22 +2680,46 @@ if (balanceEl) balanceEl.textContent = currentBalance.toLocaleString('en-IN');
   renderLedger(); renderMatchHistory(); renderTxModalList(); updateCashoutUI();
 }
 function renderLedger() {
-  const tbody = document.getElementById('ledger-body'); if (!tbody) return;
-  if (transactions.length === 0) { tbody.innerHTML = '<tr><td colspan="4">No transactions recorded</td></tr>'; return; }
+  const tbody = document.getElementById('ledger-body');
+  if (!tbody) return;
+  if (transactions.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#918fa3;">No transactions recorded</td></tr>';
+    return;
+  }
   tbody.innerHTML = transactions.map(tx => {
     const isCredit = tx.type === 'credit';
     const sign = isCredit ? '+' : '-';
     const color = isCredit ? '#16c46b' : '#e2555a';
-    return `<tr><td>${escapeHtml(tx.desc)}</td><td><span class="${isCredit ? 'badge-credit' : 'badge-debit'}">${tx.type.toUpperCase()}</span></td><td style="color:${color}">${sign}${formatRupees(tx.amount)}</td><td>${escapeHtml(tx.date)}</td></tr>`;
+    const cls = isCredit ? 'badge-credit' : 'badge-debit';
+    return `<tr>
+      <td class="desc-cell" title="${escapeHtml(tx.desc)}">${escapeHtml(tx.desc)}</td>
+      <td class="type-cell"><span class="${cls}">${tx.type.toUpperCase()}</span></td>
+      <td class="amt-cell" style="color:${color}">${sign}${formatRupees(tx.amount)}</td>
+      <td class="date-cell">${escapeHtml(tx.date)}</td>
+    </tr>`;
   }).join('');
 }
 function renderMatchHistory() {
-  const tbody = document.getElementById('matches-body'); if (!tbody) return;
-  if (matchHistory.length === 0) { tbody.innerHTML = '<tr><td colspan="5">No matches played yet.</td></tr>'; return; }
+  const tbody = document.getElementById('matches-body');
+  if (!tbody) return;
+  if (matchHistory.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#918fa3;">No matches played yet.</td></tr>';
+    return;
+  }
   tbody.innerHTML = matchHistory.map(m => {
-    const isWin = m.result === 'VICTORY';
-    const color = isWin ? '#16c46b' : '#e2555a';
-    return `<tr><td>${escapeHtml(m.game)}</td><td>${escapeHtml(m.opponent)}</td><td><span class="${isWin ? 'badge-credit' : 'badge-debit'}">${m.result}</span></td><td style="color:${color}">${m.reward >= 0 ? '+' : ''}${formatRupees(m.reward)}</td><td>${escapeHtml(m.date)}</td></tr>`;
+    const isWin  = m.result === 'VICTORY';
+    const isDraw = m.result === 'DRAW';
+    const cls    = isWin ? 'badge-credit' : isDraw ? 'badge-draw' : 'badge-debit';
+    const amtCls = isWin ? 'amount-credit' : isDraw ? 'amount-draw' : 'amount-debit';
+    const sign   = m.reward > 0 ? '+' : '';
+    const reward = isDraw ? '—' : sign + formatRupees(m.reward);
+    return `<tr>
+      <td class="game-cell" title="${escapeHtml(m.game)}">${escapeHtml(m.game)}</td>
+      <td class="opp-cell" title="${escapeHtml(m.opponent)}">${escapeHtml(m.opponent)}</td>
+      <td><span class="${cls}">${escapeHtml(m.result)}</span></td>
+      <td class="${amtCls}">${reward}</td>
+      <td class="time-cell">${escapeHtml(m.date)}</td>
+    </tr>`;
   }).join('');
 }
 function renderTxModalList() {
@@ -2616,6 +2760,9 @@ logoutConfirmBtn?.addEventListener('click', async () => {
   if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {} }
   if (inviteSubscription) { try { await inviteSubscription.unsubscribe(); } catch (e) {} }
   if (walletRealtimeChannel) { try { await client.removeChannel(walletRealtimeChannel); } catch (e) {} walletRealtimeChannel = null; }
+  if (notifRealtimeChannel) { try { await client.removeChannel(notifRealtimeChannel); } catch (e) {} notifRealtimeChannel = null; }
+notificationsCache = [];
+notificationsUnread = 0;
   if (inviteExpireTimer) clearTimeout(inviteExpireTimer);
   if (inviteExpireInterval) clearInterval(inviteExpireInterval);
   if (currentInviteId && currentUser) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('from_user_id', currentUser.id); } catch (e) {} }
@@ -4630,9 +4777,51 @@ async function beginMatchmaking() {
     updateRing();
     if (!matched) { const liveSession = await checkForLiveSession(); if (liveSession) { matched = true; clearInterval(matchmakingInterval); matchmakingInterval = null; joinLiveSession(liveSession); return; } }
     try {
-      const { data: result, error } = await client.rpc('claim_opponent', { p_game_type: activeGame.type, p_entry_fee: currentEntryFee, p_reward: currentReward });
-      if (error) throw error;
-      if (result && result.matched) {
+// Fetch FP + IP once (cached after first call)
+const myFP = await getDeviceFingerprint();
+const myIP = await getClientIP();
+
+const { data: result, error } = await client.rpc('claim_opponent', {
+  p_game_type: activeGame.type,
+  p_entry_fee: currentEntryFee,
+  p_reward: currentReward,
+  p_fingerprint: myFP,
+  p_ip: myIP
+});
+           if (error) throw error;
+
+      // ⛔ Blocked by anti-farm (server detected same device/IP/etc.)
+      if (result && result.blocked) {
+        matched = true;
+        clearInterval(matchmakingInterval); matchmakingInterval = null;
+
+        if (currentInviteId) {
+          try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
+          currentInviteId = null;
+        }
+        if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
+
+        try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
+
+        try {
+          await persistWalletDelta(currentEntryFee);
+          await recordTransaction('Stake Refunded — FairPlay block', 'credit', currentEntryFee);
+          showWalletToast(currentEntryFee, 'credit', 'FairPlay block — refunded');
+        } catch (e) {}
+
+        const searchingView = document.getElementById('mm-searching-view');
+        const blockedView   = document.getElementById('mm-blocked-view');
+        const reasonEl      = document.getElementById('mm-blocked-reason');
+        const refundEl      = document.getElementById('mm-blocked-refund');
+        if (searchingView) searchingView.style.display = 'none';
+        if (reasonEl) reasonEl.textContent = result.reason || 'Due to suspicious similarity, we can\'t match you with this player. Try again — this is for FairPlay security.';
+        if (refundEl) refundEl.textContent = '₹' + currentEntryFee + ' Refunded';
+        if (blockedView) blockedView.style.display = 'block';
+        matchmakingLock = false;
+        return;
+      }
+
+           if (result && result.matched) {
         matched = true;
         clearInterval(matchmakingInterval); matchmakingInterval = null;
         if (currentInviteId) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {} currentInviteId = null; }
@@ -4640,7 +4829,15 @@ async function beginMatchmaking() {
         const oppId = result.opponent_id;
         const { data: userData } = await client.from('users').select('full_name').eq('id', oppId).maybeSingle();
         if (matchStatus) matchStatus.textContent = 'Real player found. Starting match...';
-        setTimeout(() => { if (matchOverlay) matchOverlay.classList.add('hidden'); inQueue = false; matchmakingLock = false; launchArena({ name: userData?.full_name || 'Player', seed: oppId, isBot: false, id: oppId }, { session_id: result.session_id, you_are: result.you_are }); }, 700);
+        setTimeout(() => {
+          if (matchOverlay) matchOverlay.classList.add('hidden');
+          inQueue = false;
+          matchmakingLock = false;
+          launchArena(
+            { name: userData?.full_name || 'Player', seed: oppId, isBot: false, id: oppId },
+            { session_id: result.session_id, you_are: result.you_are }
+          );
+        }, 700);
         return;
       }
     } catch (e) { console.error('Matchmaking error:', e); }
@@ -4651,6 +4848,7 @@ async function beginMatchmaking() {
       try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
       if (currentInviteId) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {} currentInviteId = null; }
       if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
+      
       // === NO BOTS. REFUND & SHOW MESSAGE ===
       await refundStake();
       showNoOpponentFound();
@@ -4680,6 +4878,18 @@ document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
 // ===== NO OPPONENT MODAL CLOSE =====
 document.getElementById('no-opp-close-btn')?.addEventListener('click', () => {
   noOpponentOverlay?.classList.add('hidden');
+  restoreScrollY();
+});
+
+// Blocked-match → Back to Lobby
+document.getElementById('mm-blocked-back-btn')?.addEventListener('click', () => {
+  const searchingView = document.getElementById('mm-searching-view');
+  const blockedView   = document.getElementById('mm-blocked-view');
+  if (blockedView) blockedView.style.display = 'none';
+  if (searchingView) searchingView.style.display = 'block';
+  if (matchOverlay) matchOverlay.classList.add('hidden');
+  inQueue = false;
+  matchmakingLock = false;
   restoreScrollY();
 });
 
@@ -4921,9 +5131,12 @@ async function initDashboard() {
     await loadReferralInfo();
        updateUI();
     renderGameCards();
-    startPresenceHeartbeat();
-    subscribeToWalletRealtime();   // ← ADD THIS ONE LINE
+      startPresenceHeartbeat();
+    subscribeToWalletRealtime();
     subscribeToInvites();
+    wireNotificationsUI();
+    loadNotifications();
+    subscribeToNotificationsRealtime();
     document.getElementById('page-landing').style.display = 'none';
     document.getElementById('page-container').style.display = 'none';
     document.getElementById('app-auth-screen')?.classList.remove('active');
@@ -4951,6 +5164,257 @@ window.addEventListener('beforeunload', (e) => {
   if (inQueue && currentUser) client.from('matchmaking_queue').delete().eq('user_id', currentUser.id).then(() => {}, () => {});
 });
 window.endDuel = endDuel;
+  // ============================================================
+// v18: NOTIFICATIONS SYSTEM
+// ============================================================
+let notificationsCache = [];
+let notificationsUnread = 0;
+let notifRealtimeChannel = null;
+
+// --- Load + render bell count + panel list + view list ---
+async function loadNotifications() {
+  if (!currentUser) return;
+  try {
+    const { data, error } = await client
+      .from('notifications')
+      .select('id, title, body, type, is_read, created_at')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    notificationsCache = (data || []).map(n => ({
+      id: n.id,
+      title: n.title || 'Notification',
+      body: n.body || '',
+      type: n.type || 'info',
+      is_read: !!n.is_read,
+      created_at: n.created_at
+    }));
+    notificationsUnread = notificationsCache.filter(n => !n.is_read).length;
+    renderNotificationBadge();
+    renderNotifPanelList();
+    renderNotifViewList();
+  } catch (e) {
+    // Table may not exist yet — silently ignore so app keeps working
+    notificationsCache = [];
+    notificationsUnread = 0;
+    renderNotificationBadge();
+    renderNotifPanelList();
+    renderNotifViewList();
+  }
+}
+
+// --- Badge on the bell ---
+function renderNotificationBadge() {
+  const badge = document.getElementById('notification-count');
+  const bell  = document.getElementById('notification-bell-btn');
+  if (!badge || !bell) return;
+  if (notificationsUnread > 0) {
+    badge.textContent = notificationsUnread > 99 ? '99+' : String(notificationsUnread);
+    badge.classList.remove('hidden');
+    bell.classList.add('has-unread');
+  } else {
+    badge.textContent = '0';
+    badge.classList.add('hidden');
+    bell.classList.remove('has-unread');
+  }
+}
+
+// --- icon + color class per notification type ---
+function notifIcon(type) {
+  switch ((type || '').toLowerCase()) {
+    case 'gift':
+    case 'reward':  return { cls: 'gift',  icon: 'fa-gift' };
+    case 'check':
+    case 'success':
+    case 'win':     return { cls: 'check', icon: 'fa-check' };
+    case 'alert':
+    case 'warning': return { cls: 'alert', icon: 'fa-exclamation' };
+    case 'fire':
+    case 'streak':  return { cls: 'fire',  icon: 'fa-fire' };
+    case 'promo':
+    case 'offer':   return { cls: 'promo', icon: 'fa-bullhorn' };
+    default:        return { cls: '',      icon: 'fa-bell' };
+  }
+}
+
+// --- Panel list (slide-in from bell) ---
+function renderNotifPanelList() {
+  const body = document.getElementById('notif-body');
+  if (!body) return;
+  if (notificationsCache.length === 0) {
+    body.innerHTML = `<div class="notif-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet.<br>We'll let you know when something happens.</p></div>`;
+    return;
+  }
+  body.innerHTML = notificationsCache.map(n => {
+    const ic = notifIcon(n.type);
+    const unreadCls = n.is_read ? '' : 'unread';
+    return `<div class="notif-item ${unreadCls}" data-notif-id="${escapeHtml(n.id)}">
+      <div class="notif-icon-circle ${ic.cls}"><i class="fas ${ic.icon}"></i></div>
+      <div class="notif-content">
+        <div class="notif-title">${escapeHtml(n.title)}</div>
+        ${n.body ? `<div class="notif-body-text">${escapeHtml(n.body)}</div>` : ''}
+        <div class="notif-time">${escapeHtml(formatISTRelative(n.created_at))}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// --- Full notifications view (from profile menu) ---
+function renderNotifViewList() {
+  const list = document.getElementById('notif-view-list');
+  if (!list) return;
+  if (notificationsCache.length === 0) {
+    list.innerHTML = `<div class="notif-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet.</p></div>`;
+    return;
+  }
+  list.innerHTML = notificationsCache.map(n => {
+    const ic = notifIcon(n.type);
+    const unreadCls = n.is_read ? '' : 'unread';
+    return `<div class="notif-view-item ${unreadCls}" data-notif-id="${escapeHtml(n.id)}">
+      <div class="notif-icon-circle ${ic.cls}"><i class="fas ${ic.icon}"></i></div>
+      <div class="notif-content">
+        <div class="notif-title">${escapeHtml(n.title)}</div>
+        ${n.body ? `<div class="notif-body-text">${escapeHtml(n.body)}</div>` : ''}
+        <div class="notif-time">${escapeHtml(formatIST(n.created_at))}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// --- Mark single as read ---
+async function markNotificationRead(id) {
+  if (!id) return;
+  const n = notificationsCache.find(x => x.id === id);
+  if (!n || n.is_read) return;
+  n.is_read = true;
+  notificationsUnread = Math.max(0, notificationsUnread - 1);
+  renderNotificationBadge();
+  renderNotifPanelList();
+  renderNotifViewList();
+  try {
+    await client.from('notifications').update({ is_read: true }).eq('id', id).eq('user_id', currentUser.id);
+  } catch (e) {}
+}
+
+// --- Mark all as read ---
+async function markAllNotificationsRead() {
+  if (!currentUser) return;
+  if (notificationsUnread === 0) return;
+  notificationsCache.forEach(n => n.is_read = true);
+  notificationsUnread = 0;
+  renderNotificationBadge();
+  renderNotifPanelList();
+  renderNotifViewList();
+  try {
+    await client.from('notifications').update({ is_read: true }).eq('user_id', currentUser.id).eq('is_read', false);
+  } catch (e) {}
+}
+
+// --- Panel open/close ---
+function openNotifPanel() {
+  const panel = document.getElementById('notif-panel');
+  const overlay = document.getElementById('notif-panel-overlay');
+  if (panel) panel.style.display = 'flex';
+  if (overlay) overlay.classList.add('show');
+  renderNotifPanelList();
+  // Refresh from server quietly
+  loadNotifications();
+}
+function closeNotifPanel() {
+  const panel = document.getElementById('notif-panel');
+  const overlay = document.getElementById('notif-panel-overlay');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.classList.remove('show');
+}
+
+// --- Realtime subscription ---
+async function subscribeToNotificationsRealtime() {
+  if (!currentUser) return;
+  if (notifRealtimeChannel) {
+    try { await client.removeChannel(notifRealtimeChannel); } catch (e) {}
+    notifRealtimeChannel = null;
+  }
+  notifRealtimeChannel = client
+    .channel('notifs-' + currentUser.id)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'notifications',
+      filter: 'user_id=eq.' + currentUser.id
+    }, (payload) => {
+      const n = payload.new;
+      if (!n) return;
+      if (notificationsCache.some(x => x.id === n.id)) return;
+      notificationsCache.unshift({
+        id: n.id,
+        title: n.title || 'Notification',
+        body: n.body || '',
+        type: n.type || 'info',
+        is_read: !!n.is_read,
+        created_at: n.created_at
+      });
+      if (!n.is_read) notificationsUnread++;
+      renderNotificationBadge();
+      renderNotifPanelList();
+      renderNotifViewList();
+      // Small toast hint
+      try { showToast(n.title || 'New notification', 'credit'); } catch (e) {}
+    })
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'notifications',
+      filter: 'user_id=eq.' + currentUser.id
+    }, (payload) => {
+      const n = payload.new;
+      if (!n) return;
+      const idx = notificationsCache.findIndex(x => x.id === n.id);
+      if (idx < 0) return;
+      const wasUnread = !notificationsCache[idx].is_read;
+      notificationsCache[idx].is_read = !!n.is_read;
+      if (wasUnread && n.is_read) notificationsUnread = Math.max(0, notificationsUnread - 1);
+      renderNotificationBadge();
+      renderNotifPanelList();
+      renderNotifViewList();
+    })
+    .subscribe();
+}
+
+// --- Wire up all the buttons/listeners (run once at boot) ---
+function wireNotificationsUI() {
+  // Bell → open panel
+  document.getElementById('notification-bell-btn')?.addEventListener('click', openNotifPanel);
+  document.getElementById('notif-close-btn')?.addEventListener('click', closeNotifPanel);
+  document.getElementById('notif-panel-overlay')?.addEventListener('click', closeNotifPanel);
+
+  // Mark all read inside panel
+  document.getElementById('notif-mark-all-btn')?.addEventListener('click', markAllNotificationsRead);
+
+  // Mark all read inside full view
+  document.getElementById('notif-view-mark-all')?.addEventListener('click', markAllNotificationsRead);
+
+  // Back from notifications view → profile
+  document.getElementById('notif-back-btn')?.addEventListener('click', () => switchView('view-profile'));
+
+  // Profile menu → notifications view
+  document.getElementById('menu-notifications-btn')?.addEventListener('click', () => {
+    switchView('view-notifications');
+    loadNotifications();
+  });
+
+  // Click a notification (panel or view) → mark read
+  document.getElementById('notif-body')?.addEventListener('click', (e) => {
+    const item = e.target.closest('.notif-item');
+    if (!item) return;
+    markNotificationRead(item.dataset.notifId);
+  });
+  document.getElementById('notif-view-list')?.addEventListener('click', (e) => {
+    const item = e.target.closest('.notif-view-item');
+    if (!item) return;
+    markNotificationRead(item.dataset.notifId);
+  });
+}
 routeOnLoad();
 
 // ===== DEEP-LINK =====
