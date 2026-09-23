@@ -5021,7 +5021,6 @@ async function subscribeToNotificationsRealtime() {
       renderNotificationBadge();
       renderNotifPanelList();
       renderNotifViewList();
-      try { showToast(n.title || 'New notification', 'credit'); } catch (e) {}
     })
     .on('postgres_changes', {
       event: 'UPDATE', schema: 'public', table: 'notifications',
