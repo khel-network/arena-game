@@ -1,3 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>SkillClash · Admin Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #f4f5fa;
+  --card: #ffffff;
+  --ink: #161522;
+  --muted: #6b6a7c;
+  --line: #e8e6f0;
+  --primary: #5b3df0;
+  --primary-dark: #4a2fd0;
+  --green: #16c46b;
+  --red: #e2555a;
+  --amber: #f59e0b;
+  --sidebar: #1a1730;
+  --sidebar-ink: #b8b4cf;
+  --sidebar-active: #5b3df0;
+}
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg); color: var(--ink);
+  -webkit-font-smoothing: antialiased; line-height: 1.5;
+  min-height: 100vh;
+}
+h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; font-weight: 700; letter-spacing: -0.01em; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select, textarea { font: inherit; }
+
+/* ===== AUTH SCREEN ===== */
+.auth-screen {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #1a1730, #5b3df0);
+  padding: 20px;
+}
+.auth-card {
+  background: #fff; border-radius: 20px;
+  padding: 40px 32px; max-width: 400px; width: 100%;
+  text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+}
+.auth-logo {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.5rem;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, #161522 0%, #5b3df0 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.auth-logo svg { width: 28px; height: 28px; color: #5b3df0; }
+.auth-logo .clash {
+  background: linear-gradient(90deg, #5b3df0 0%, #f0a742 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.auth-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
+.btn-google {
+  width: 100%; padding: 14px 20px; border-radius: 12px;
+  background: #fff; border: 1.5px solid #e0ddea;
+  font-weight: 700; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: 0.2s;
+}
+.btn-google:hover { border-color: #5b3df0; transform: translateY(-1px); box-shadow: 0 10px 22px rgba(91,61,240,0.15); }
+.btn-google svg { width: 18px; height: 18px; }
+
+/* ===== LAYOUT ===== */
+.console { display: none; min-height: 100vh; grid-template-columns: 240px 1fr; }
+.console.active { display: grid; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  background: var(--sidebar); color: var(--sidebar-ink);
+  padding: 20px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.1rem;
+  color: #fff; padding: 8px 12px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 14px;
+}
+.sidebar-brand svg { width: 22px; height: 22px; color: #a79cf5; }
+.sidebar-brand .clash { color: #f0a742; }
+.sidebar-user {
+  padding: 10px 12px; border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  margin-bottom: 14px; font-size: 0.75rem;
+}
+.sidebar-user strong { color: #fff; display: block; font-weight: 700; }
+.sidebar-user small { color: var(--sidebar-ink); opacity: 0.7; word-break: break-all; }
+.sidebar-label {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #6b6788;
+  padding: 14px 12px 6px;
+}
+.sidebar-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 8px;
+  font-size: 0.83rem; font-weight: 600;
+  color: var(--sidebar-ink);
+  transition: 0.15s; cursor: pointer;
+  width: 100%; text-align: left;
+}
+.sidebar-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.sidebar-link.active { background: var(--sidebar-active); color: #fff; }
+.sidebar-link i { width: 18px; text-align: center; font-size: 0.9rem; }
+
+/* ===== MAIN ===== */
+.main { padding: 24px 28px; max-width: 1400px; }
+.main-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+}
+.main-title { font-size: 1.4rem; font-weight: 800; }
+.main-sub { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+.main-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-primary {
+  padding: 9px 16px; border-radius: 8px;
+  background: var(--primary); color: #fff;
+  font-weight: 700; font-size: 0.8rem;
+  transition: 0.15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-ghost {
+  padding: 9px 16px; border-radius: 8px;
+  border: 1px solid var(--line); color: var(--ink);
+  font-weight: 600; font-size: 0.8rem; background: #fff;
+  transition: 0.15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ===== VIEWS ===== */
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ===== STATS GRID ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px; margin-bottom: 22px;
+}
+.stat-card {
+  background: var(--card); border-radius: 14px;
+  padding: 18px; border: 1px solid var(--line);
+  box-shadow: 0 2px 6px rgba(20,15,50,0.03);
+}
+.stat-label {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--muted);
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 8px;
+}
+.stat-label i { color: var(--primary); }
+.stat-value {
+  font-family: 'Poppins', sans-serif; font-size: 1.5rem;
+  font-weight: 800; color: var(--ink); line-height: 1.1;
+}
+.stat-hint { font-size: 0.68rem; color: var(--muted); margin-top: 4px; }
+.stat-value.green { color: var(--green); }
+.stat-value.red { color: var(--red); }
+.stat-value.amber { color: var(--amber); }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--card); border-radius: 14px;
+  border: 1px solid var(--line); padding: 20px;
+  box-shadow: 0 2px 6px rgba(20,15,50,0.03);
+  margin-bottom: 16px;
+}
+.card h3 { font-size: 1rem; margin-bottom: 4px; }
+.card-sub { color: var(--muted); font-size: 0.78rem; margin-bottom: 16px; }
+.card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+
+/* ===== FORM ===== */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid .full { grid-column: 1 / -1; }
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.field input, .field select, .field textarea {
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px;
+  background: #fafafc; font-size: 0.85rem; color: var(--ink);
+  outline: none; transition: 0.15s; width: 100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--primary); background: #fff;
+  box-shadow: 0 0 0 3px rgba(91,61,240,0.1);
+}
+.field textarea { resize: vertical; min-height: 80px; font-family: 'Inter', sans-serif; }
+.field-hint { font-size: 0.68rem; color: var(--muted); }
+
+/* ===== TABLES ===== */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+th {
+  text-align: left; padding: 10px 12px; font-size: 0.65rem;
+  font-weight: 700; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.04em; border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+td { padding: 12px; border-bottom: 1px solid #f2f0f9; color: var(--ink); }
+tr:hover td { background: #fafafc; }
+.table-empty { text-align: center; color: var(--muted); padding: 40px 12px; font-size: 0.82rem; }
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 100px;
+  font-size: 0.65rem; font-weight: 700;
+  white-space: nowrap;
+}
+.badge.green { background: rgba(22,196,107,0.12); color: var(--green); }
+.badge.red { background: rgba(226,85,90,0.12); color: var(--red); }
+.badge.amber { background: rgba(245,158,11,0.12); color: var(--amber); }
+.badge.blue { background: rgba(91,61,240,0.12); color: var(--primary); }
+.badge.grey { background: rgba(107,106,124,0.1); color: var(--muted); }
+
+/* ===== ACTION BUTTONS ===== */
+.action-btn {
+  padding: 5px 10px; border-radius: 6px;
+  font-size: 0.68rem; font-weight: 700;
+  border: 1px solid var(--line); background: #fff;
+  transition: 0.15s; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+}
+.action-btn:hover { border-color: var(--primary); color: var(--primary); }
+.action-btn.danger { color: var(--red); border-color: rgba(226,85,90,0.3); }
+.action-btn.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
+.action-btn.success { color: var(--green); border-color: rgba(22,196,107,0.3); }
+.action-btn.success:hover { background: var(--green); color: #fff; border-color: var(--green); }
+
+/* ===== TOASTS ===== */
+.toast-stack { position: fixed; top: 20px; right: 20px; z-index: 9000; display: flex; flex-direction: column; gap: 8px; max-width: 360px; pointer-events: none; }
+.toast {
+  background: #fff; border-radius: 10px; padding: 12px 16px;
+  box-shadow: 0 10px 30px rgba(20,15,50,0.15);
+  border-left: 4px solid var(--green);
+  font-size: 0.82rem; animation: slideIn 0.25s ease;
+  display: flex; align-items: center; gap: 10px;
+  pointer-events: auto;
+}
+.toast.error { border-left-color: var(--red); }
+.toast.info { border-left-color: var(--primary); }
+@keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
+
+/* ===== LOADING ===== */
+.loading { text-align: center; padding: 40px; color: var(--muted); font-size: 0.82rem; }
+.loading i { font-size: 1.5rem; margin-bottom: 8px; animation: spin 1s linear infinite; display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== 403 SCREEN ===== */
+.denied {
+  position: fixed; inset: 0; z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  background: #f5f6fb; padding: 20px;
+}
+.denied.active { display: flex; }
+.denied-card {
+  background: #fff; border-radius: 20px; padding: 40px 32px;
+  max-width: 420px; width: 100%; text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+}
+.denied-icon { font-size: 3rem; color: var(--red); margin-bottom: 16px; }
+.denied h2 { font-size: 1.3rem; margin-bottom: 8px; }
+.denied p { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
+
+/* ===== MOBILE ===== */
+.mobile-topbar { display: none; }
+@media (max-width: 900px) {
+  .console.active { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; left: -260px; width: 260px; z-index: 500; transition: left 0.3s; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
+  .sidebar.open { left: 0; }
+  .main { padding: 16px; }
+  .mobile-topbar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; background: #fff;
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 300;
+  }
+  .mobile-topbar button {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--bg); display: flex; align-items: center; justify-content: center;
+  }
+  .mobile-topbar .title { font-weight: 800; font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Toast stack -->
+<div id="toast-stack" class="toast-stack"></div>
+
+<!-- ===== AUTH SCREEN ===== -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
+      Skill<span class="clash">Clash</span>
+    </div>
+    <p class="auth-sub">Admin Console · Authorized access only</p>
+    <button id="google-login-btn" class="btn-google">
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.5-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.5 0-14 4.2-17.7 11.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 35.6 26.9 37 24 37c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.9 40.7 16.4 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 35.9 45 30.5 45 24c0-1.4-.1-2.5-.4-3.5z"/></svg>
+      Continue with Google
+    </button>
+  </div>
+</div>
+
+<!-- ===== 403 DENIED ===== -->
+<div id="denied-screen" class="denied">
+  <div class="denied-card">
+    <div class="denied-icon"><i class="fas fa-shield-alt"></i></div>
+    <h2>Access Denied</h2>
+    <p>Your account is not authorized to access the admin console. You have been signed out.</p>
+    <button id="denied-back-btn" class="btn-primary">Go Back</button>
+  </div>
+</div>
+
+<!-- ===== CONSOLE ===== -->
+<div id="console" class="console">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
+      Skill<span class="clash">Clash</span>
+    </div>
+    <div class="sidebar-user">
+      <strong id="sb-name">—</strong>
+      <small id="sb-email">—</small>
+    </div>
+
+    <div class="sidebar-label">Overview</div>
+    <button class="sidebar-link active" data-view="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
+    <button class="sidebar-link" data-view="live"><i class="fas fa-satellite-dish"></i> Live Feed</button>
+
+    <div class="sidebar-label">Users</div>
+    <button class="sidebar-link" data-view="users"><i class="fas fa-users"></i> All Users</button>
+    <button class="sidebar-link" data-view="wallet"><i class="fas fa-wallet"></i> Wallet Tools</button>
+
+    <div class="sidebar-label">Money</div>
+    <button class="sidebar-link" data-view="withdrawals"><i class="fas fa-hand-holding-usd"></i> Withdrawals</button>
+    <button class="sidebar-link" data-view="transactions"><i class="fas fa-receipt"></i> Transactions</button>
+
+    <div class="sidebar-label">Engage</div>
+    <button class="sidebar-link" data-view="notify"><i class="fas fa-bell"></i> Send Notification</button>
+    <button class="sidebar-link" data-view="broadcast"><i class="fas fa-bullhorn"></i> Broadcast</button>
+
+    <div class="sidebar-label">System</div>
+    <button class="sidebar-link" id="refresh-btn"><i class="fas fa-sync"></i> Refresh Data</button>
+    <button class="sidebar-link" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="mobile-topbar">
+      <button id="menu-toggle"><i class="fas fa-bars"></i></button>
+      <span class="title">SkillClash Admin</span>
+    </div>
+
+    <!-- ===== DASHBOARD VIEW ===== -->
+    <section id="view-dashboard" class="view active">
+      <div class="main-header">
+        <div>
+          <h1 class="main-title">Dashboard</h1>
+          <p class="main-sub" id="last-updated">Loading…</p>
+        </div>
+        <div class="main-actions">
+          <button class="btn-ghost" onclick="loadAll()"><i class="fas fa-sync"></i> Refresh</button>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="loading"><i class="fas fa-circle-notch"></i>Loading stats…</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header-row">
+          <div><h3>Recent Signups</h3><p class="card-sub">Latest 10 users who joined</p></div>
+          <button class="btn-ghost" onclick="switchView('users')">View all →</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Matches</th><th>Joined</th></tr></thead>
+            <tbody id="recent-users-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header-row">
+          <div><h3>Pending Withdrawals</h3><p class="card-sub">Requests awaiting approval</p></div>
+          <button class="btn-ghost" onclick="switchView('withdrawals')">View all →</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User</th><th>UPI</th><th>Amount</th><th>Requested</th><th></th></tr></thead>
+            <tbody id="recent-withdrawals-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header-row">
+          <div><h3>Recent Transactions</h3><p class="card-sub">Latest 10 wallet events</p></div>
+          <button class="btn-ghost" onclick="switchView('transactions')">View all →</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User</th><th>Description</th><th>Type</th><th>Amount</th><th>When</th></tr></thead>
+            <tbody id="recent-tx-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== LIVE FEED VIEW ===== -->
+    <section id="view-live" class="view">
+      <div class="main-header">
+        <div>
+          <h1 class="main-title">Live Feed</h1>
+          <p class="main-sub">Everything happening right now — updates automatically</p>
+        </div>
+        <div class="main-actions">
+          <span id="live-dot" style="display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;font-weight:700;color:var(--green);">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite;"></span> LIVE
+          </span>
+        </div>
+      </div>
+      <div class="card">
+        <div id="live-feed" style="display:flex;flex-direction:column;gap:10px;max-height:70vh;overflow-y:auto;">
+          <div class="table-empty">Waiting for events…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== USERS VIEW ===== -->
+    <section id="view-users" class="view">
+      <div class="main-header">
+        <div>
+          <h1 class="main-title">All Users</h1>
+          <p class="main-sub" id="users-count">—</p>
+        </div>
+        <div class="main-actions">
+          <input type="text" id="users-search" placeholder="Search by name or email…" style="padding:9px 14px;border-radius:8px;border:1px solid var(--line);font-size:0.82rem;min-width:240px;outline:none;" />
+          <button class="btn-ghost" onclick="loadUsers()"><i class="fas fa-sync"></i> Refresh</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Matches</th><th>Wins</th><th>Last Seen</th><th>Actions</th></tr></thead>
+            <tbody id="users-body"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WALLET TOOLS VIEW ===== -->
+    <section id="view-wallet" class="view">
+      <div class="main-header">
+        <div>
+          <h1 class="main-title">Wallet Tools</h1>
+          <p class="main-sub">Adjust any user's balance (adds a transaction log)</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Adjust Balance</h3>
+        <p class="card-sub">Enter user UUID, positive number to credit, negative to debit</p>
+        <div class="form-grid">
+          <div class="field full">
+            <label>User UUID</label>
+            <input type="text" id="adjust-user-id" placeholder="9cf948d5-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+            <span class="field-hint">Paste the user's ID from the All Users table</span>
+          </div>
+          <div class="field">
+            <label>Amount (₹)</label>
+            <input type="number" id="adjust-amount" placeholder="50 or -50" />
+          </div>
+          <div class="field">
+            <label>Reason (optional)</label>
+            <input type="text" id="adjust-reason" placeholder="e.g. Support refund" />
+          </div>
+          <div class="field full">
+            <button class="btn-primary" onclick="doAdjustBalance()" style="width:100%;justify-content:center;padding:12px;">
+              <i class="fas fa-check"></i> Apply Adjustment
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WITHDRAWALS VIEW ===== -->
+    <section id="view-withdrawals" class="view">
+      <div class="main-header">
+        <div>
+          <h1 class="main-title">Withdrawals</h1>
+          <p class="main-sub" id="wd-count">—</p>
+        </div>
+        <div class="main-actions">
+          <button class="btn-ghost" onclick="loadWithdrawals()"><i class="fas fa-sync"></i> Refresh</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User</th><th>UPI ID</th><th>Amount</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead>
+            <tbody id="withdrawals-body"><tr><td colspan="6" class="table-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TRANSACTIONS VIEW ===== -->
+    <section id="view-transactions" class="view">
+      <div class="main-header">
+        <div>
+          <h1 class="main-title">Transactions</h1>
+          <p class="main-sub">All wallet activity across the platform</p>
+        </div>
+        <div class="main-actions">
+          <button class="btn-ghost" onclick="loadTransactions()"><i class="fas fa-sync"></i> Refresh</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User</th><th>Description</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead>
+            <tbody id="transactions-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SEND NOTIFICATION VIEW ===== -->
+    <section id="view-notify" class="view">
+      <div class="main-header">
+        <div>
+          <h1 class="main-title">Send Notification</h1>
+          <p class="main-sub">Send to a single user by their UUID</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Target User UUID *</label>
+            <input type="text" id="notify-user-id" placeholder="9cf948d5-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+            <span class="field-hint">Find it in the All Users table</span>
+          </div>
+          <div class="field full">
+            <label>Title *</label>
+            <input type="text" id="notify-title" placeholder="e.g. Reward credited" maxlength="100" />
+          </div>
+          <div class="field full">
+            <label>Body</label>
+            <textarea id="notify-body" placeholder="e.g. ₹25 bonus added to your wallet." maxlength="300"></textarea>
+          </div>
+          <div class="field">
+            <label>Type</label>
+            <select id="notify-type">
+              <option value="general">General</option>
+              <option value="info">Info</option>
+              <option value="gift">Gift / Reward</option>
+              <option value="success">Success</option>
+              <option value="alert">Alert</option>
+              <option value="promo">Promo</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Icon</label>
+            <select id="notify-icon">
+              <option value="bell">Bell</option>
+              <option value="gift">Gift</option>
+              <option value="check">Check</option>
+              <option value="alert">Alert</option>
+              <option value="fire">Fire</option>
+              <option value="bullhorn">Bullhorn</option>
+            </select>
+          </div>
+          <div class="field full">
+            <button class="btn-primary" onclick="doSendNotification()" style="width:100%;justify-content:center;padding:12px;">
+              <i class="fas fa-paper-plane"></i> Send to User
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== BROADCAST VIEW ===== -->
+    <section id="view-broadcast" class="view">
+      <div class="main-header">
+        <div>
+          <h1 class="main-title">Broadcast</h1>
+          <p class="main-sub">Send to <strong>every user</strong> on SkillClash</p>
+        </div>
+      </div>
+      <div class="card" style="border:1.5px solid var(--amber);background:linear-gradient(135deg,#fff8e1,#fff);">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <i class="fas fa-exclamation-triangle" style="color:var(--amber);font-size:1.4rem;margin-top:2px;"></i>
+          <div>
+            <h3 style="margin-bottom:4px;">Use responsibly</h3>
+            <p style="font-size:0.82rem;color:var(--muted);line-height:1.5;">Broadcasts go to every single user immediately. There is no undo. Consider limiting broadcasts to major announcements, offers, or platform updates.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Title *</label>
+            <input type="text" id="bcast-title" placeholder="e.g. Weekend Tournament live now!" maxlength="100" />
+          </div>
+          <div class="field full">
+            <label>Body</label>
+            <textarea id="bcast-body" placeholder="e.g. ₹500 prize pool. Free entry. Join now!" maxlength="300"></textarea>
+          </div>
+          <div class="field">
+            <label>Type</label>
+            <select id="bcast-type">
+              <option value="promo">Promo</option>
+              <option value="info">Info</option>
+              <option value="gift">Gift</option>
+              <option value="alert">Alert</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Icon</label>
+            <select id="bcast-icon">
+              <option value="bullhorn">Bullhorn</option>
+              <option value="bell">Bell</option>
+              <option value="gift">Gift</option>
+              <option value="fire">Fire</option>
+              <option value="alert">Alert</option>
+            </select>
+          </div>
+          <div class="field full">
+            <button class="btn-primary" onclick="doBroadcast()" style="width:100%;justify-content:center;padding:12px;background:linear-gradient(135deg,#e2555a,#f07075);">
+              <i class="fas fa-bullhorn"></i> Send to ALL Users
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
 <script>
 // ============================================================
 // SKILLCLASH ADMIN CONSOLE v1.0
