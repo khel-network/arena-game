@@ -1,0 +1,568 @@
+<script>
+// ============================================================
+// SKILLCLASH ADMIN CONSOLE v1.0
+// ============================================================
+
+const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_894UwPwZc0SF2MyCP9sztQ_6-s0AALZ";
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentAdmin = null;
+let liveFeedItems = [];
+let liveFeedChannel = null;
+let liveFeedEnabled = false;
+
+// ===== TOASTS =====
+function toast(msg, type = 'success') {
+  const stack = document.getElementById('toast-stack');
+  if (!stack) return;
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icon = type === 'error' ? 'fa-exclamation-circle'
+             : type === 'info' ? 'fa-info-circle'
+             : 'fa-check-circle';
+  t.innerHTML = `<i class="fas ${icon}" style="color:${type === 'error' ? '#e2555a' : type === 'info' ? '#5b3df0' : '#16c46b'};"></i><span>${escapeHtml(msg)}</span>`;
+  stack.appendChild(t);
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(30px)';
+    t.style.transition = '0.3s';
+    setTimeout(() => t.remove(), 300);
+  }, 3200);
+}
+
+// ===== HELPERS =====
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function formatRupees(n) {
+  if (n === null || n === undefined) return '₹0';
+  const v = Number(n) || 0;
+  return (v < 0 ? '-₹' : '₹') + Math.abs(v).toLocaleString('en-IN');
+}
+function formatIST(dateInput) {
+  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  if (isNaN(d.getTime())) return '—';
+  try {
+    return new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
+    }).format(d).replace(/\b(am|pm)\b/i, m => m.toUpperCase());
+  } catch (e) { return d.toLocaleString('en-IN'); }
+}
+function timeAgo(dateInput) {
+  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  if (isNaN(d.getTime())) return '—';
+  const diff = Date.now() - d.getTime();
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return 'just now';
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + 'm ago';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + 'h ago';
+  const days = Math.floor(h / 24);
+  if (days < 7) return days + 'd ago';
+  return formatIST(d);
+}
+
+// ===== VIEW SWITCHER =====
+function switchView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const view = document.getElementById('view-' + id);
+  if (view) view.classList.add('active');
+  document.querySelectorAll('.sidebar-link[data-view]').forEach(l => {
+    l.classList.toggle('active', l.dataset.view === id);
+  });
+  // Close mobile sidebar
+  document.getElementById('sidebar')?.classList.remove('open');
+  // Lazy-load data per view
+  if (id === 'users') loadUsers();
+  else if (id === 'withdrawals') loadWithdrawals();
+  else if (id === 'transactions') loadTransactions();
+  else if (id === 'live') enableLiveFeed();
+  else if (id === 'dashboard') loadAll();
+}
+window.switchView = switchView;
+
+// ===== AUTH FLOW =====
+async function startAuthFlow() {
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('console').classList.remove('active');
+    document.getElementById('denied-screen').classList.remove('active');
+    return;
+  }
+
+  // Has session — check admin
+  const { data: isAdmin, error } = await client.rpc('is_admin');
+  if (error || !isAdmin) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('console').classList.remove('active');
+    document.getElementById('denied-screen').classList.add('active');
+    await client.auth.signOut();
+    return;
+  }
+
+  // Welcome, admin
+  currentAdmin = session.user;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('denied-screen').classList.remove('active');
+  document.getElementById('console').classList.add('active');
+
+  const meta = currentAdmin.user_metadata || {};
+  const name = meta.full_name || meta.name || (currentAdmin.email || '').split('@')[0] || 'Admin';
+  document.getElementById('sb-name').textContent = name;
+  document.getElementById('sb-email').textContent = currentAdmin.email || '';
+
+  loadAll();
+}
+
+// Google login button
+document.getElementById('google-login-btn')?.addEventListener('click', async () => {
+  const redirectUrl = window.location.origin + window.location.pathname;
+  await client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl } });
+});
+
+// Denied → back to site
+document.getElementById('denied-back-btn')?.addEventListener('click', () => {
+  window.location.href = '/';
+});
+
+// Logout
+document.getElementById('logout-btn')?.addEventListener('click', async () => {
+  if (liveFeedChannel) { try { await client.removeChannel(liveFeedChannel); } catch (e) {} }
+  await client.auth.signOut();
+  window.location.reload();
+});
+
+// Refresh button
+document.getElementById('refresh-btn')?.addEventListener('click', () => loadAll());
+
+// Sidebar links
+document.querySelectorAll('.sidebar-link[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
+// Mobile menu toggle
+document.getElementById('menu-toggle')?.addEventListener('click', () => {
+  document.getElementById('sidebar')?.classList.toggle('open');
+});
+
+// ===== LOAD: STATS =====
+async function loadStats() {
+  const grid = document.getElementById('stats-grid');
+  if (!grid) return;
+  try {
+    const { data, error } = await client.rpc('admin_get_stats');
+    if (error) throw error;
+    if (!data || data.ok === false) throw new Error(data?.message || 'Failed');
+    grid.innerHTML = `
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-users"></i> Total Users</div>
+        <div class="stat-value">${Number(data.users || 0).toLocaleString('en-IN')}</div>
+        <div class="stat-hint">${Number(data.active_today || 0)} active in last 24h</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-coins"></i> Revenue Today</div>
+        <div class="stat-value green">${formatRupees(data.revenue_today)}</div>
+        <div class="stat-hint">From ${Number(data.matches_today || 0)} matches today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-wallet"></i> Total Wallet</div>
+        <div class="stat-value">${formatRupees(data.total_balance)}</div>
+        <div class="stat-hint">Across all users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-hand-holding-usd"></i> Pending Withdrawals</div>
+        <div class="stat-value ${data.pending_withdrawals > 0 ? 'amber' : ''}">${Number(data.pending_withdrawals || 0)}</div>
+        <div class="stat-hint">${formatRupees(data.pending_withdrawals_amount)} awaiting</div>
+      </div>
+    `;
+    document.getElementById('last-updated').textContent = 'Last updated: ' + timeAgo(new Date());
+  } catch (e) {
+    grid.innerHTML = `<div class="stat-card"><div class="stat-label"><i class="fas fa-exclamation-triangle" style="color:var(--red);"></i> Error</div><div class="stat-value" style="font-size:0.9rem;">${escapeHtml(e.message || 'Failed to load stats')}</div></div>`;
+  }
+}
+
+// ===== LOAD: USERS =====
+async function loadUsers() {
+  const tbody = document.getElementById('users-body');
+  const countEl = document.getElementById('users-count');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Loading…</td></tr>';
+  try {
+    const { data, error } = await client.rpc('admin_get_users', { p_limit: 100 });
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No users yet.</td></tr>';
+      if (countEl) countEl.textContent = '0 users';
+      return;
+    }
+    if (countEl) countEl.textContent = data.length + ' users (latest 100)';
+    tbody.innerHTML = data.map(u => `
+      <tr data-user-id="${escapeHtml(u.id)}" data-name="${escapeHtml((u.full_name||'').toLowerCase())}" data-email="${escapeHtml((u.email||'').toLowerCase())}">
+        <td><strong>${escapeHtml(u.full_name || '—')}</strong></td>
+        <td>${escapeHtml(u.email || '—')}</td>
+        <td>${formatRupees(u.balance)}</td>
+        <td>${u.total_matches || 0}</td>
+        <td>${u.total_wins || 0}</td>
+        <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(u.last_seen))}</td>
+        <td>
+          <button class="action-btn" onclick="copyUserId('${escapeHtml(u.id)}')"><i class="fas fa-copy"></i> Copy ID</button>
+          <button class="action-btn success" onclick="quickNotifyUser('${escapeHtml(u.id)}','${escapeHtml((u.full_name||'').replace(/'/g,''))}')"><i class="fas fa-bell"></i> Notify</button>
+        </td>
+      </tr>
+    `).join('');
+    // Wire search
+    const search = document.getElementById('users-search');
+    if (search && !search.dataset.wired) {
+      search.dataset.wired = '1';
+      search.addEventListener('input', () => {
+        const q = search.value.toLowerCase().trim();
+        document.querySelectorAll('#users-body tr[data-user-id]').forEach(tr => {
+          const match = !q || tr.dataset.name.includes(q) || tr.dataset.email.includes(q);
+          tr.style.display = match ? '' : 'none';
+        });
+      });
+    }
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+window.loadUsers = loadUsers;
+
+function copyUserId(id) {
+  navigator.clipboard.writeText(id).then(() => toast('User ID copied'), () => toast('Copy failed', 'error'));
+}
+window.copyUserId = copyUserId;
+
+function quickNotifyUser(id, name) {
+  document.getElementById('notify-user-id').value = id;
+  document.getElementById('notify-title').value = '';
+  document.getElementById('notify-body').value = '';
+  switchView('notify');
+  toast('Ready to notify ' + name, 'info');
+}
+window.quickNotifyUser = quickNotifyUser;
+
+// ===== LOAD: WITHDRAWALS =====
+async function loadWithdrawals() {
+  const tbody = document.getElementById('withdrawals-body');
+  const countEl = document.getElementById('wd-count');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Loading…</td></tr>';
+  try {
+    const { data, error } = await client.rpc('admin_get_pending_withdrawals');
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="table-empty">No pending withdrawals.</td></tr>';
+      if (countEl) countEl.textContent = 'All clear';
+      return;
+    }
+    if (countEl) countEl.textContent = data.length + ' pending';
+    tbody.innerHTML = data.map(w => `
+      <tr>
+        <td><strong>${escapeHtml(w.full_name || '—')}</strong><br><span style="font-size:0.7rem;color:var(--muted);">${escapeHtml(w.email || '')}</span></td>
+        <td>${escapeHtml(w.upi_id || '—')}</td>
+        <td><strong>${formatRupees(w.amount)}</strong></td>
+        <td><span class="badge amber">${escapeHtml(w.status)}</span></td>
+        <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(w.requested_at))}</td>
+        <td>
+          <button class="action-btn success" onclick="markPaid('${escapeHtml(w.id)}')"><i class="fas fa-check"></i> Paid</button>
+          <button class="action-btn danger" onclick="rejectWd('${escapeHtml(w.id)}')"><i class="fas fa-times"></i> Reject</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+window.loadWithdrawals = loadWithdrawals;
+
+async function markPaid(id) {
+  if (!confirm('Mark this withdrawal as PAID? This will send a confirmation notification to the user.')) return;
+  try {
+    const { data, error } = await client.rpc('mark_withdrawal_paid', { p_request_id: id });
+    if (error) throw error;
+    if (data && data.ok) { toast('Marked as paid'); loadWithdrawals(); loadStats(); }
+    else toast(data?.message || 'Failed', 'error');
+  } catch (e) { toast(e.message, 'error'); }
+}
+window.markPaid = markPaid;
+
+async function rejectWd(id) {
+  const note = prompt('Reason for rejection (optional):');
+  if (note === null) return;
+  try {
+    const { data, error } = await client.rpc('mark_withdrawal_rejected', { p_request_id: id, p_admin_note: note || null });
+    if (error) throw error;
+    if (data && data.ok) { toast('Rejected & refunded'); loadWithdrawals(); loadStats(); }
+    else toast(data?.message || 'Failed', 'error');
+  } catch (e) { toast(e.message, 'error'); }
+}
+window.rejectWd = rejectWd;
+
+// ===== LOAD: TRANSACTIONS =====
+async function loadTransactions() {
+  const tbody = document.getElementById('transactions-body');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Loading…</td></tr>';
+  try {
+    const { data, error } = await client.rpc('admin_get_recent_transactions', { p_limit: 100 });
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No transactions yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(t => {
+      const isCredit = t.type === 'credit';
+      return `
+        <tr>
+          <td>${escapeHtml(t.full_name || '—')}</td>
+          <td style="font-size:0.75rem;">${escapeHtml(t.description || '')}</td>
+          <td><span class="badge ${isCredit ? 'green' : 'red'}">${escapeHtml(t.type)}</span></td>
+          <td style="font-weight:700;color:${isCredit ? 'var(--green)' : 'var(--red)'};">${isCredit ? '+' : '-'}${formatRupees(t.amount)}</td>
+          <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(formatIST(t.created_at))}</td>
+        </tr>
+      `;
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+window.loadTransactions = loadTransactions;
+
+// ===== LOAD: RECENT (for dashboard) =====
+async function loadRecentUsers() {
+  const tbody = document.getElementById('recent-users-body');
+  if (!tbody) return;
+  try {
+    const { data, error } = await client.rpc('admin_get_users', { p_limit: 10 });
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No users yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(u => `
+      <tr>
+        <td><strong>${escapeHtml(u.full_name || '—')}</strong></td>
+        <td>${escapeHtml(u.email || '—')}</td>
+        <td>${formatRupees(u.balance)}</td>
+        <td>${u.total_matches || 0}</td>
+        <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(u.created_at))}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+
+async function loadRecentWithdrawals() {
+  const tbody = document.getElementById('recent-withdrawals-body');
+  if (!tbody) return;
+  try {
+    const { data, error } = await client.rpc('admin_get_pending_withdrawals');
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No pending withdrawals.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.slice(0, 5).map(w => `
+      <tr>
+        <td><strong>${escapeHtml(w.full_name || '—')}</strong></td>
+        <td>${escapeHtml(w.upi_id || '—')}</td>
+        <td><strong>${formatRupees(w.amount)}</strong></td>
+        <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(w.requested_at))}</td>
+        <td><button class="action-btn success" onclick="markPaid('${escapeHtml(w.id)}')"><i class="fas fa-check"></i> Paid</button></td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+
+async function loadRecentTx() {
+  const tbody = document.getElementById('recent-tx-body');
+  if (!tbody) return;
+  try {
+    const { data, error } = await client.rpc('admin_get_recent_transactions', { p_limit: 10 });
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No transactions yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(t => {
+      const isCredit = t.type === 'credit';
+      return `
+        <tr>
+          <td>${escapeHtml(t.full_name || '—')}</td>
+          <td style="font-size:0.75rem;">${escapeHtml(t.description || '')}</td>
+          <td><span class="badge ${isCredit ? 'green' : 'red'}">${escapeHtml(t.type)}</span></td>
+          <td style="font-weight:700;color:${isCredit ? 'var(--green)' : 'var(--red)'};">${isCredit ? '+' : '-'}${formatRupees(t.amount)}</td>
+          <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(t.created_at))}</td>
+        </tr>
+      `;
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+
+// ===== MASTER LOAD =====
+async function loadAll() {
+  await Promise.all([
+    loadStats(),
+    loadRecentUsers(),
+    loadRecentWithdrawals(),
+    loadRecentTx()
+  ]);
+}
+window.loadAll = loadAll;
+
+// ===== WALLET ADJUST =====
+async function doAdjustBalance() {
+  const userId = document.getElementById('adjust-user-id').value.trim();
+  const amount = parseInt(document.getElementById('adjust-amount').value);
+  const reason = document.getElementById('adjust-reason').value.trim();
+  if (!userId) { toast('Enter a user UUID', 'error'); return; }
+  if (isNaN(amount) || amount === 0) { toast('Amount must be non-zero', 'error'); return; }
+  if (!confirm(`Apply ${amount > 0 ? '+' : ''}₹${amount} to this user?\n\nReason: ${reason || 'Admin adjustment'}`)) return;
+  try {
+    const { data, error } = await client.rpc('admin_adjust_balance', {
+      p_user_id: userId, p_delta: amount, p_reason: reason || null
+    });
+    if (error) throw error;
+    if (data && data.ok) {
+      toast(`Applied. New balance: ${formatRupees(data.new_balance)}`);
+      document.getElementById('adjust-amount').value = '';
+      document.getElementById('adjust-reason').value = '';
+      loadAll();
+    } else {
+      toast(data?.message || 'Failed', 'error');
+    }
+  } catch (e) { toast(e.message, 'error'); }
+}
+window.doAdjustBalance = doAdjustBalance;
+
+// ===== SEND NOTIFICATION (to one user) =====
+async function doSendNotification() {
+  const userId = document.getElementById('notify-user-id').value.trim();
+  const title = document.getElementById('notify-title').value.trim();
+  const body = document.getElementById('notify-body').value.trim();
+  const type = document.getElementById('notify-type').value;
+  const icon = document.getElementById('notify-icon').value;
+  if (!userId) { toast('Enter the user UUID', 'error'); return; }
+  if (!title) { toast('Title is required', 'error'); return; }
+  try {
+    const { data, error } = await client.rpc('send_notification', {
+      p_title: title, p_body: body || null, p_user_id: userId, p_type: type, p_icon: icon
+    });
+    if (error) throw error;
+    if (data && data.ok) {
+      toast(`Sent to ${data.sent} user${data.sent === 1 ? '' : 's'}`);
+      document.getElementById('notify-title').value = '';
+      document.getElementById('notify-body').value = '';
+    } else {
+      toast(data?.message || 'Failed', 'error');
+    }
+  } catch (e) { toast(e.message, 'error'); }
+}
+window.doSendNotification = doSendNotification;
+
+// ===== BROADCAST (to ALL users) =====
+async function doBroadcast() {
+  const title = document.getElementById('bcast-title').value.trim();
+  const body = document.getElementById('bcast-body').value.trim();
+  const type = document.getElementById('bcast-type').value;
+  const icon = document.getElementById('bcast-icon').value;
+  if (!title) { toast('Title is required', 'error'); return; }
+  if (!confirm(`Broadcast to ALL USERS?\n\nTitle: ${title}\nBody: ${body || '(empty)'}\n\nThis cannot be undone.`)) return;
+  try {
+    const { data, error } = await client.rpc('admin_send_broadcast', {
+      p_title: title, p_body: body || null, p_type: type, p_icon: icon
+    });
+    if (error) throw error;
+    if (data && data.ok) {
+      toast(`Broadcast sent to ${data.sent} users`);
+      document.getElementById('bcast-title').value = '';
+      document.getElementById('bcast-body').value = '';
+    } else {
+      toast(data?.message || 'Failed', 'error');
+    }
+  } catch (e) { toast(e.message, 'error'); }
+}
+window.doBroadcast = doBroadcast;
+
+// ===== LIVE FEED (realtime) =====
+async function enableLiveFeed() {
+  if (liveFeedEnabled) return;
+  liveFeedEnabled = true;
+
+  // Initial batch
+  try {
+    const { data: tx } = await client.rpc('admin_get_recent_transactions', { p_limit: 20 });
+    if (tx && tx.length) {
+      liveFeedItems = tx.map(t => ({
+        kind: 'tx',
+        ts: t.created_at,
+        text: `${t.full_name || 'User'} — ${t.description || 'transaction'} (${t.type === 'credit' ? '+' : '-'}${formatRupees(t.amount)})`
+      })).sort((a, b) => new Date(b.ts) - new Date(a.ts));
+      renderLiveFeed();
+    } else {
+      renderLiveFeed();
+    }
+  } catch (e) { renderLiveFeed(); }
+
+  // Realtime: watch new transactions
+  if (liveFeedChannel) { try { await client.removeChannel(liveFeedChannel); } catch (e) {} }
+  liveFeedChannel = client
+    .channel('admin-live-feed')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, (payload) => {
+      const t = payload.new;
+      if (!t) return;
+      pushLiveItem({ kind: 'tx', ts: t.created_at, text: `New transaction: ${t.description} (${t.type === 'credit' ? '+' : '-'}${formatRupees(t.amount)})` });
+    })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'withdrawal_requests' }, (payload) => {
+      const w = payload.new;
+      if (!w) return;
+      pushLiveItem({ kind: 'wd', ts: w.requested_at, text: `New withdrawal request: ${formatRupees(w.amount)} to ${w.upi_id}` });
+    })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_sessions' }, (payload) => {
+      const g = payload.new;
+      if (!g) return;
+      pushLiveItem({ kind: 'match', ts: g.created_at, text: `New match started: ${g.game_type} (stake ₹${g.entry_fee})` });
+    })
+    .subscribe();
+}
+
+function pushLiveItem(item) {
+  liveFeedItems.unshift(item);
+  if (liveFeedItems.length > 100) liveFeedItems.length = 100;
+  renderLiveFeed();
+}
+
+function renderLiveFeed() {
+  const feed = document.getElementById('live-feed');
+  if (!feed) return;
+  if (liveFeedItems.length === 0) {
+    feed.innerHTML = '<div class="table-empty">Waiting for events…</div>';
+    return;
+  }
+  const colorMap = { tx: 'var(--primary)', wd: 'var(--amber)', match: 'var(--green)' };
+  const iconMap = { tx: 'fa-receipt', wd: 'fa-hand-holding-usd', match: 'fa-gamepad' };
+  feed.innerHTML = liveFeedItems.map(item => `
+    <div style="display:flex;gap:12px;padding:10px 12px;background:#fafafc;border-radius:8px;border-left:3px solid ${colorMap[item.kind] || 'var(--line)'};">
+      <i class="fas ${iconMap[item.kind] || 'fa-circle'}" style="color:${colorMap[item.kind] || 'var(--muted)'};margin-top:2px;"></i>
+      <div style="flex:1;font-size:0.82rem;">${escapeHtml(item.text)}</div>
+      <div style="font-size:0.7rem;color:var(--muted);white-space:nowrap;">${escapeHtml(timeAgo(item.ts))}</div>
+    </div>
+  `).join('');
+}
+
+// ===== BOOT =====
+startAuthFlow();
+</script>
+</body>
+</html>
