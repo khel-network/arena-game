@@ -12,422 +12,201 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-/* ===== RESET ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 :root {
-  --bg: #f4f5fa;
-  --card: #ffffff;
-  --ink: #161522;
-  --muted: #6b6a7c;
-  --line: #e8e6f0;
-  --primary: #5b3df0;
-  --primary-dark: #4a2fd0;
-  --green: #16c46b;
-  --red: #e2555a;
-  --amber: #f59e0b;
-  --sidebar: #1a1730;
-  --sidebar-ink: #b8b4cf;
-  --sidebar-active: #5b3df0;
+  --bg: #f4f5fa; --card: #fff; --ink: #161522; --muted: #6b6a7c; --line: #e8e6f0;
+  --primary: #5b3df0; --primary-dark: #4a2fd0;
+  --green: #16c46b; --red: #e2555a; --amber: #f59e0b;
+  --sidebar: #1a1730; --sidebar-ink: #b8b4cf; --sidebar-active: #5b3df0;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
-html, body {
-  font-family: 'Inter', -apple-system, sans-serif;
-  background: var(--bg); color: var(--ink);
-  -webkit-font-smoothing: antialiased; line-height: 1.5;
-  min-height: 100vh; overflow-x: hidden;
-}
+html, body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; line-height: 1.5; min-height: 100vh; overflow-x: hidden; }
 body.sidebar-open { overflow: hidden; }
 h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; font-weight: 700; letter-spacing: -0.01em; }
 button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 input, select, textarea { font: inherit; }
 img { max-width: 100%; display: block; }
 
-/* ===== AUTH SCREEN ===== */
-.auth-screen {
-  position: fixed; inset: 0; z-index: 5000;
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #1a1730, #5b3df0);
-  padding: 20px;
-}
-.auth-card {
-  background: #fff; border-radius: 20px;
-  padding: 40px 32px; max-width: 400px; width: 100%;
-  text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.3);
-}
+.auth-screen { position: fixed; inset: 0; z-index: 5000; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a1730, #5b3df0); padding: 20px; }
+.auth-card { background: #fff; border-radius: 20px; padding: 40px 32px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
 @media (max-width: 480px) { .auth-card { padding: 32px 22px; } }
-.auth-logo {
-  display: inline-flex; align-items: center; gap: 10px;
-  font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.5rem;
-  margin-bottom: 8px;
-  background: linear-gradient(90deg, #161522 0%, #5b3df0 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
+.auth-logo { display: inline-flex; align-items: center; gap: 10px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.5rem; margin-bottom: 8px; background: linear-gradient(90deg, #161522 0%, #5b3df0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .auth-logo svg { width: 28px; height: 28px; color: #5b3df0; }
-.auth-logo .clash {
-  background: linear-gradient(90deg, #5b3df0 0%, #f0a742 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
+.auth-logo .clash { background: linear-gradient(90deg, #5b3df0 0%, #f0a742 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .auth-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
-.btn-google {
-  width: 100%; padding: 14px 20px; border-radius: 12px;
-  background: #fff; border: 1.5px solid #e0ddea;
-  font-weight: 700; font-size: 0.9rem;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  transition: 0.2s; min-height: 50px;
-}
+.btn-google { width: 100%; padding: 14px 20px; border-radius: 12px; background: #fff; border: 1.5px solid #e0ddea; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; min-height: 50px; }
 .btn-google:hover { border-color: #5b3df0; transform: translateY(-1px); box-shadow: 0 10px 22px rgba(91,61,240,0.15); }
 .btn-google svg { width: 18px; height: 18px; }
 
-/* ===== LAYOUT ===== */
-.console {
-  display: none;
-  min-height: 100vh;
-  grid-template-columns: 240px 1fr;
-}
+.console { display: none; min-height: 100vh; grid-template-columns: 240px 1fr; }
 .console.active { display: grid; }
 
-/* ===== MOBILE TOPBAR ===== */
-.mobile-topbar {
-  display: none;
-  position: sticky; top: 0; z-index: 300;
-  background: #fff; border-bottom: 1px solid var(--line);
-  padding: 12px 16px;
-  padding-top: calc(12px + env(safe-area-inset-top, 0px));
-  align-items: center; justify-content: space-between;
-  gap: 12px;
-}
+.mobile-topbar { display: none; position: sticky; top: 0; z-index: 300; background: #fff; border-bottom: 1px solid var(--line); padding: 12px 16px; padding-top: calc(12px + env(safe-area-inset-top, 0px)); align-items: center; justify-content: space-between; gap: 12px; }
 .mobile-topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.mobile-topbar button.menu-btn {
-  width: 40px; height: 40px; border-radius: 10px;
-  background: var(--bg); display: flex; align-items: center; justify-content: center;
-  font-size: 1.05rem; flex-shrink: 0;
-  transition: 0.15s;
-}
+.mobile-topbar button.menu-btn { width: 40px; height: 40px; border-radius: 10px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0; transition: 0.15s; }
 .mobile-topbar button.menu-btn:active { transform: scale(0.94); }
-.mobile-topbar .title {
-  font-weight: 800; font-size: 0.95rem;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.mobile-topbar .live-total {
-  display: none;
-  background: linear-gradient(135deg, #e2555a, #f07075);
-  color: #fff; font-size: 0.65rem; font-weight: 800;
-  padding: 3px 9px; border-radius: 100px;
-  font-family: 'Poppins', sans-serif;
-  animation: badgePulse 1.8s ease-in-out infinite;
-}
+.mobile-topbar .title { font-weight: 800; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mobile-topbar .live-total { display: none; background: linear-gradient(135deg, #e2555a, #f07075); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 100px; font-family: 'Poppins', sans-serif; animation: badgePulse 1.8s ease-in-out infinite; }
 .mobile-topbar .live-total.show { display: inline-block; }
 
-/* ===== SIDEBAR ===== */
-.sidebar-backdrop {
-  display: none;
-  position: fixed; inset: 0; z-index: 400;
-  background: rgba(15,14,24,0.5);
-  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
-  opacity: 0; transition: opacity 0.25s ease;
-}
+.sidebar-backdrop { display: none; position: fixed; inset: 0; z-index: 400; background: rgba(15,14,24,0.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.25s ease; }
 .sidebar-backdrop.show { display: block; opacity: 1; }
 
-.sidebar {
-  background: var(--sidebar); color: var(--sidebar-ink);
-  padding: 20px 12px;
-  padding-bottom: calc(20px + var(--safe-bottom));
-  display: flex; flex-direction: column; gap: 2px;
-  position: sticky; top: 0; height: 100vh; overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.sidebar-brand {
-  display: flex; align-items: center; gap: 10px;
-  font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.1rem;
-  color: #fff; padding: 8px 12px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  margin-bottom: 14px;
-}
+.sidebar { background: var(--sidebar); color: var(--sidebar-ink); padding: 20px 12px; padding-bottom: calc(20px + var(--safe-bottom)); display: flex; flex-direction: column; gap: 2px; position: sticky; top: 0; height: 100vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.sidebar-brand { display: flex; align-items: center; gap: 10px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.1rem; color: #fff; padding: 8px 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 14px; }
 .sidebar-brand svg { width: 22px; height: 22px; color: #a79cf5; flex-shrink: 0; }
 .sidebar-brand .clash { color: #f0a742; }
-
-.sidebar-user {
-  padding: 10px 12px; border-radius: 10px;
-  background: rgba(255,255,255,0.04);
-  margin-bottom: 14px; font-size: 0.75rem;
-}
+.sidebar-user { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.04); margin-bottom: 14px; font-size: 0.75rem; }
 .sidebar-user strong { color: #fff; display: block; font-weight: 700; margin-bottom: 2px; }
 .sidebar-user small { color: var(--sidebar-ink); opacity: 0.7; word-break: break-all; font-size: 0.68rem; }
-
-.sidebar-label {
-  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: #6b6788;
-  padding: 14px 12px 6px;
-}
-
-.sidebar-link {
-  display: flex; align-items: center; gap: 12px;
-  padding: 11px 12px; border-radius: 8px;
-  font-size: 0.83rem; font-weight: 600;
-  color: var(--sidebar-ink);
-  transition: 0.15s; cursor: pointer;
-  width: 100%; text-align: left;
-  min-height: 44px;
-}
+.sidebar-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #6b6788; padding: 14px 12px 6px; }
+.sidebar-link { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 8px; font-size: 0.83rem; font-weight: 600; color: var(--sidebar-ink); transition: 0.15s; cursor: pointer; width: 100%; text-align: left; min-height: 44px; }
 .sidebar-link:hover { background: rgba(255,255,255,0.06); color: #fff; }
-.sidebar-link:active { background: rgba(255,255,255,0.1); }
 .sidebar-link.active { background: var(--sidebar-active); color: #fff; }
 .sidebar-link i { width: 18px; text-align: center; font-size: 0.9rem; flex-shrink: 0; }
-
-/* Sidebar badges */
-.sidebar-badge {
-  margin-left: auto;
-  background: linear-gradient(135deg, #e2555a, #f07075);
-  color: #fff;
-  font-size: 0.6rem;
-  font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 100px;
-  min-width: 20px;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(226,85,90,0.4);
-  display: none;
-  font-family: 'Poppins', sans-serif;
-  line-height: 1.3;
-}
+.sidebar-badge { margin-left: auto; background: linear-gradient(135deg, #e2555a, #f07075); color: #fff; font-size: 0.6rem; font-weight: 800; padding: 2px 7px; border-radius: 100px; min-width: 20px; text-align: center; box-shadow: 0 2px 6px rgba(226,85,90,0.4); display: none; font-family: 'Poppins', sans-serif; line-height: 1.3; }
 .sidebar-badge.show { display: inline-block; animation: badgePulse 1.8s ease-in-out infinite; }
-.sidebar-badge.green { background: linear-gradient(135deg, #16c46b, #22d47a); box-shadow: 0 2px 6px rgba(22,196,107,0.4); }
-@keyframes badgePulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
+.sidebar-badge.green { background: linear-gradient(135deg, #16c46b, #22d47a); }
+@keyframes badgePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
-/* ===== MAIN ===== */
 .main { padding: 24px 28px; max-width: 1400px; width: 100%; min-width: 0; }
-.main-header {
-  display: flex; justify-content: space-between; align-items: flex-end;
-  margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
-}
+.main-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
 .main-title { font-size: 1.4rem; font-weight: 800; }
 .main-sub { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
 .main-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.btn-primary {
-  padding: 10px 16px; border-radius: 8px;
-  background: var(--primary); color: #fff;
-  font-weight: 700; font-size: 0.8rem;
-  transition: 0.15s; display: inline-flex; align-items: center; gap: 6px;
-  min-height: 40px;
-}
+.btn-primary { padding: 10px 16px; border-radius: 8px; background: var(--primary); color: #fff; font-weight: 700; font-size: 0.8rem; transition: 0.15s; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
 .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
-.btn-primary:active { transform: scale(0.98); }
-.btn-ghost {
-  padding: 10px 16px; border-radius: 8px;
-  border: 1px solid var(--line); color: var(--ink);
-  font-weight: 600; font-size: 0.8rem; background: #fff;
-  transition: 0.15s; display: inline-flex; align-items: center; gap: 6px;
-  min-height: 40px;
-}
+.btn-ghost { padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line); color: var(--ink); font-weight: 600; font-size: 0.8rem; background: #fff; transition: 0.15s; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
 .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #c9494e; }
 
-/* ===== VIEWS ===== */
 .view { display: none; }
 .view.active { display: block; animation: fadeIn 0.25s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-/* ===== STATS ===== */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 14px; margin-bottom: 22px;
-}
-.stat-card {
-  background: var(--card); border-radius: 14px;
-  padding: 18px; border: 1px solid var(--line);
-  box-shadow: 0 2px 6px rgba(20,15,50,0.03);
-}
-.stat-label {
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em;
-  text-transform: uppercase; color: var(--muted);
-  display: flex; align-items: center; gap: 6px;
-  margin-bottom: 8px;
-}
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.stat-card { background: var(--card); border-radius: 14px; padding: 18px; border: 1px solid var(--line); box-shadow: 0 2px 6px rgba(20,15,50,0.03); }
+.stat-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
 .stat-label i { color: var(--primary); }
-.stat-value {
-  font-family: 'Poppins', sans-serif; font-size: 1.5rem;
-  font-weight: 800; color: var(--ink); line-height: 1.1;
-  word-break: break-word;
-}
+.stat-value { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--ink); line-height: 1.1; word-break: break-word; }
 .stat-hint { font-size: 0.68rem; color: var(--muted); margin-top: 4px; }
 .stat-value.green { color: var(--green); }
 .stat-value.red { color: var(--red); }
 .stat-value.amber { color: var(--amber); }
 
-/* ===== CARDS ===== */
-.card {
-  background: var(--card); border-radius: 14px;
-  border: 1px solid var(--line); padding: 20px;
-  box-shadow: 0 2px 6px rgba(20,15,50,0.03);
-  margin-bottom: 16px;
-}
+.card { background: var(--card); border-radius: 14px; border: 1px solid var(--line); padding: 20px; box-shadow: 0 2px 6px rgba(20,15,50,0.03); margin-bottom: 16px; }
 .card h3 { font-size: 1rem; margin-bottom: 4px; }
 .card-sub { color: var(--muted); font-size: 0.78rem; margin-bottom: 16px; }
 .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
 
-/* ===== FORMS ===== */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-grid .full { grid-column: 1 / -1; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.field input, .field select, .field textarea {
-  padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px;
-  background: #fafafc; font-size: 0.88rem; color: var(--ink);
-  outline: none; transition: 0.15s; width: 100%;
-  min-height: 44px;
-}
-.field input:focus, .field select:focus, .field textarea:focus {
-  border-color: var(--primary); background: #fff;
-  box-shadow: 0 0 0 3px rgba(91,61,240,0.1);
-}
+.field input, .field select, .field textarea { padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fafafc; font-size: 0.88rem; color: var(--ink); outline: none; transition: 0.15s; width: 100%; min-height: 44px; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(91,61,240,0.1); }
 .field textarea { resize: vertical; min-height: 80px; font-family: 'Inter', sans-serif; }
 .field-hint { font-size: 0.68rem; color: var(--muted); }
 
-/* ===== TABLES ===== */
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -20px; padding: 0 20px; }
 table { width: 100%; border-collapse: collapse; font-size: 0.78rem; min-width: 600px; }
-th {
-  text-align: left; padding: 10px 12px; font-size: 0.65rem;
-  font-weight: 700; color: var(--muted); text-transform: uppercase;
-  letter-spacing: 0.04em; border-bottom: 1px solid var(--line);
-  white-space: nowrap;
-}
+th { text-align: left; padding: 10px 12px; font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--line); white-space: nowrap; }
 td { padding: 12px; border-bottom: 1px solid #f2f0f9; color: var(--ink); }
 tr:hover td { background: #fafafc; }
 .table-empty { text-align: center; color: var(--muted); padding: 40px 12px; font-size: 0.82rem; }
 
-/* ===== BADGES ===== */
-.badge {
-  display: inline-block; padding: 2px 8px; border-radius: 100px;
-  font-size: 0.65rem; font-weight: 700;
-  white-space: nowrap;
-}
+.badge { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 0.65rem; font-weight: 700; white-space: nowrap; }
 .badge.green { background: rgba(22,196,107,0.12); color: var(--green); }
 .badge.red { background: rgba(226,85,90,0.12); color: var(--red); }
 .badge.amber { background: rgba(245,158,11,0.12); color: var(--amber); }
 .badge.blue { background: rgba(91,61,240,0.12); color: var(--primary); }
 .badge.grey { background: rgba(107,106,124,0.1); color: var(--muted); }
 
-/* ===== ACTION BTNS ===== */
-.action-btn {
-  padding: 7px 11px; border-radius: 6px;
-  font-size: 0.7rem; font-weight: 700;
-  border: 1px solid var(--line); background: #fff;
-  transition: 0.15s; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 5px;
-  white-space: nowrap; min-height: 34px;
-}
+.action-btn { padding: 7px 11px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; border: 1px solid var(--line); background: #fff; transition: 0.15s; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; min-height: 34px; }
 .action-btn:hover { border-color: var(--primary); color: var(--primary); }
 .action-btn.danger { color: var(--red); border-color: rgba(226,85,90,0.3); }
-.action-btn.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
+.action-btn.danger:hover { background: var(--red); color: #fff; }
 .action-btn.success { color: var(--green); border-color: rgba(22,196,107,0.3); }
-.action-btn.success:hover { background: var(--green); color: #fff; border-color: var(--green); }
+.action-btn.success:hover { background: var(--green); color: #fff; }
 
-/* ===== TOASTS ===== */
-.toast-stack {
-  position: fixed; top: 20px; right: 20px;
-  padding-top: env(safe-area-inset-top, 0px);
-  z-index: 9000; display: flex; flex-direction: column; gap: 8px;
-  max-width: 360px; width: calc(100vw - 40px);
-  pointer-events: none;
-}
-.toast {
-  background: #fff; border-radius: 10px; padding: 13px 16px;
-  box-shadow: 0 10px 30px rgba(20,15,50,0.15);
-  border-left: 4px solid var(--green);
-  font-size: 0.82rem; animation: slideIn 0.25s ease;
-  display: flex; align-items: center; gap: 10px;
-  pointer-events: auto;
-}
+.toast-stack { position: fixed; top: 20px; right: 20px; padding-top: env(safe-area-inset-top, 0px); z-index: 9000; display: flex; flex-direction: column; gap: 8px; max-width: 360px; width: calc(100vw - 40px); pointer-events: none; }
+.toast { background: #fff; border-radius: 10px; padding: 13px 16px; box-shadow: 0 10px 30px rgba(20,15,50,0.15); border-left: 4px solid var(--green); font-size: 0.82rem; animation: slideIn 0.25s ease; display: flex; align-items: center; gap: 10px; pointer-events: auto; }
 .toast.error { border-left-color: var(--red); }
 .toast.info { border-left-color: var(--primary); }
 @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
 
-/* ===== LOADING ===== */
-.loading { text-align: center; padding: 40px; color: var(--muted); font-size: 0.82rem; }
-.loading i { font-size: 1.5rem; margin-bottom: 8px; animation: spin 1s linear infinite; display: block; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ===== 403 ===== */
-.denied {
-  position: fixed; inset: 0; z-index: 5000;
-  display: none; align-items: center; justify-content: center;
-  background: #f5f6fb; padding: 20px;
-}
+.denied { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; background: #f5f6fb; padding: 20px; }
 .denied.active { display: flex; }
-.denied-card {
-  background: #fff; border-radius: 20px; padding: 40px 32px;
-  max-width: 420px; width: 100%; text-align: center;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-}
+.denied-card { background: #fff; border-radius: 20px; padding: 40px 32px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
 .denied-icon { font-size: 3rem; color: var(--red); margin-bottom: 16px; }
 .denied h2 { font-size: 1.3rem; margin-bottom: 8px; }
 .denied p { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
 
-/* ===== LIVE FEED ITEM ===== */
-.live-item {
-  display: flex; gap: 12px;
-  padding: 12px; background: #fafafc;
-  border-radius: 8px; margin-bottom: 10px;
-  animation: slideIn 0.25s ease;
-}
+/* TICKETS CHAT UI */
+.ticket-list { display: flex; flex-direction: column; gap: 10px; max-height: 70vh; overflow-y: auto; padding: 4px; }
+.ticket-row { padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; transition: 0.15s; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.ticket-row:hover { border-color: var(--primary); background: #faf9ff; }
+.ticket-row.unread { background: #faf9ff; border-color: #ddd6fe; }
+.ticket-row.unread::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primary); border-radius: 12px 0 0 12px; }
+.ticket-row { position: relative; }
+.ticket-meta { flex: 1; min-width: 0; }
+.ticket-subject { font-weight: 700; font-size: 0.88rem; margin-bottom: 3px; }
+.ticket-sub-detail { font-size: 0.72rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+.ticket-unread-badge { background: var(--red); color: #fff; font-size: 0.6rem; font-weight: 800; padding: 2px 7px; border-radius: 100px; min-width: 20px; text-align: center; }
 
-/* ===== MOBILE RESPONSIVE ===== */
+.chat-view { display: none; }
+.chat-view.active { display: block; }
+.chat-header-bar { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px 12px 0 0; background: #faf9ff; }
+.chat-header-bar button { width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; }
+.chat-header-bar .info { flex: 1; min-width: 0; }
+.chat-header-bar .info strong { display: block; font-size: 0.85rem; }
+.chat-header-bar .info small { font-size: 0.68rem; color: var(--muted); }
+.ticket-messages-view { border: 1px solid var(--line); border-top: none; border-radius: 0 0 12px 12px; background: #fff; max-height: 55vh; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.ticket-msg { display: flex; gap: 10px; max-width: 85%; }
+.ticket-msg.user-side { align-self: flex-end; flex-direction: row-reverse; }
+.ticket-msg .bubble { padding: 10px 14px; border-radius: 14px; font-size: 0.82rem; line-height: 1.5; background: #f4f5fa; border: 1px solid var(--line); }
+.ticket-msg.user-side .bubble { background: linear-gradient(135deg, var(--primary), #7c5cf5); color: #fff; border-color: transparent; }
+.ticket-msg .time { font-size: 0.6rem; opacity: 0.6; margin-top: 4px; display: block; }
+.ticket-reply-row { display: flex; gap: 8px; padding: 12px 0 0; }
+.ticket-reply-row textarea { flex: 1; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 0.85rem; resize: none; min-height: 60px; outline: none; }
+.ticket-reply-row textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,61,240,0.1); }
+.ticket-reply-row button { padding: 10px 20px; background: var(--primary); color: #fff; border-radius: 10px; font-weight: 700; font-size: 0.85rem; align-self: flex-end; min-height: 44px; }
+
+/* DAILY BONUS CONFIG */
+.config-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; background: #fff; }
+.config-row .label { flex: 1; }
+.config-row .label strong { display: block; font-size: 0.88rem; font-weight: 700; margin-bottom: 2px; }
+.config-row .label small { font-size: 0.7rem; color: var(--muted); }
+.switch { position: relative; width: 44px; height: 24px; background: #e0ddea; border-radius: 100px; transition: 0.2s; cursor: pointer; }
+.switch.on { background: var(--green); }
+.switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.switch.on::after { left: 22px; }
+
 @media (max-width: 900px) {
   .console.active { grid-template-columns: 1fr; }
   .console.active { display: block; }
-  .sidebar {
-    position: fixed; left: 0; top: 0;
-    width: 280px; max-width: 85vw;
-    z-index: 500;
-    transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    height: 100vh; height: 100dvh;
-    box-shadow: 4px 0 30px rgba(0,0,0,0.25);
-  }
+  .sidebar { position: fixed; left: 0; top: 0; width: 280px; max-width: 85vw; z-index: 500; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); height: 100vh; height: 100dvh; box-shadow: 4px 0 30px rgba(0,0,0,0.25); }
   .sidebar.open { transform: translateX(0); }
   .mobile-topbar { display: flex; }
   .main { padding: 16px; padding-bottom: calc(24px + var(--safe-bottom)); }
-  .main-header { margin-bottom: 18px; }
   .main-title { font-size: 1.2rem; }
-  .main-actions { width: 100%; }
-  .main-actions input[type="text"] { flex: 1; min-width: 0 !important; }
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-  .stat-card { padding: 14px; border-radius: 12px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-card { padding: 14px; }
   .stat-value { font-size: 1.25rem; }
-  .stat-label { font-size: 0.6rem; }
-  .stat-hint { font-size: 0.62rem; }
-  .card { padding: 16px; border-radius: 12px; }
+  .card { padding: 16px; }
   .table-wrap { margin: 0 -16px; padding: 0 16px; }
   .form-grid { grid-template-columns: 1fr; }
   .toast-stack { top: auto; bottom: 20px; right: 12px; left: 12px; width: auto; max-width: none; }
-  .toast { animation: toastUp 0.25s ease; }
-  @keyframes toastUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
-}
-
-@media (max-width: 400px) {
-  .stats-grid { grid-template-columns: 1fr; }
-  .main-title { font-size: 1.1rem; }
-  .action-btn { padding: 6px 9px; font-size: 0.65rem; }
 }
 </style>
 </head>
 <body>
 
-<!-- Toast stack -->
 <div id="toast-stack" class="toast-stack"></div>
-
-<!-- Mobile sidebar backdrop (tap to close) -->
 <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
-<!-- ===== AUTH SCREEN ===== -->
+<!-- AUTH -->
 <div id="auth-screen" class="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
@@ -442,20 +221,19 @@ tr:hover td { background: #fafafc; }
   </div>
 </div>
 
-<!-- ===== 403 DENIED ===== -->
+<!-- DENIED -->
 <div id="denied-screen" class="denied">
   <div class="denied-card">
     <div class="denied-icon"><i class="fas fa-shield-alt"></i></div>
     <h2>Access Denied</h2>
-    <p>Your account is not authorized to access the admin console. You have been signed out.</p>
+    <p>Your account is not authorized. You have been signed out.</p>
     <button id="denied-back-btn" class="btn-primary">Go Back</button>
   </div>
 </div>
 
-<!-- ===== CONSOLE ===== -->
+<!-- CONSOLE -->
 <div id="console" class="console">
 
-  <!-- Sidebar -->
   <aside id="sidebar" class="sidebar">
     <div class="sidebar-brand">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
@@ -478,305 +256,184 @@ tr:hover td { background: #fafafc; }
     <button class="sidebar-link" data-view="withdrawals"><i class="fas fa-hand-holding-usd"></i> Withdrawals <span class="sidebar-badge" id="badge-withdrawals"></span></button>
     <button class="sidebar-link" data-view="transactions"><i class="fas fa-receipt"></i> Transactions</button>
 
+    <div class="sidebar-label">Support</div>
+    <button class="sidebar-link" data-view="tickets"><i class="fas fa-headset"></i> Support Tickets <span class="sidebar-badge" id="badge-tickets"></span></button>
+
     <div class="sidebar-label">Engage</div>
     <button class="sidebar-link" data-view="notify"><i class="fas fa-bell"></i> Send Notification</button>
     <button class="sidebar-link" data-view="broadcast"><i class="fas fa-bullhorn"></i> Broadcast</button>
+    <button class="sidebar-link" data-view="dailybonus"><i class="fas fa-gift"></i> Daily Bonus</button>
 
     <div class="sidebar-label">System</div>
     <button class="sidebar-link" id="refresh-btn"><i class="fas fa-sync"></i> Refresh Data</button>
     <button class="sidebar-link" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
   </aside>
 
-  <!-- Main -->
   <main class="main">
-
     <div class="mobile-topbar">
       <div class="mobile-topbar-left">
-        <button id="menu-toggle" class="menu-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+        <button id="menu-toggle" class="menu-btn"><i class="fas fa-bars"></i></button>
         <span class="title" id="mobile-title">Dashboard</span>
       </div>
       <span class="live-total" id="mobile-live-total">0</span>
     </div>
 
-    <!-- ===== DASHBOARD ===== -->
+    <!-- DASHBOARD -->
     <section id="view-dashboard" class="view active">
       <div class="main-header">
-        <div>
-          <h1 class="main-title">Dashboard</h1>
-          <p class="main-sub" id="last-updated">Loading…</p>
-        </div>
-        <div class="main-actions">
-          <button class="btn-ghost" onclick="loadAll()"><i class="fas fa-sync"></i> Refresh</button>
-        </div>
+        <div><h1 class="main-title">Dashboard</h1><p class="main-sub" id="last-updated">Loading…</p></div>
+        <div class="main-actions"><button class="btn-ghost" onclick="loadAll()"><i class="fas fa-sync"></i> Refresh</button></div>
       </div>
-
-      <div class="stats-grid" id="stats-grid">
-        <div class="loading"><i class="fas fa-circle-notch"></i>Loading stats…</div>
-      </div>
-
+      <div class="stats-grid" id="stats-grid"><div class="loading">Loading stats…</div></div>
       <div class="card">
-        <div class="card-header-row">
-          <div><h3>Recent Signups</h3><p class="card-sub" style="margin-bottom:0;">Latest 10 users</p></div>
-          <button class="btn-ghost" onclick="switchView('users')">View all →</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Matches</th><th>Joined</th></tr></thead>
-            <tbody id="recent-users-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
-          </table>
-        </div>
+        <div class="card-header-row"><div><h3>Recent Signups</h3><p class="card-sub" style="margin-bottom:0;">Latest 10 users</p></div><button class="btn-ghost" onclick="switchView('users')">View all →</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Matches</th><th>Joined</th></tr></thead><tbody id="recent-users-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody></table></div>
       </div>
-
       <div class="card">
-        <div class="card-header-row">
-          <div><h3>Pending Withdrawals</h3><p class="card-sub" style="margin-bottom:0;">Awaiting approval</p></div>
-          <button class="btn-ghost" onclick="switchView('withdrawals')">View all →</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>User</th><th>UPI</th><th>Amount</th><th>Requested</th><th></th></tr></thead>
-            <tbody id="recent-withdrawals-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
-          </table>
-        </div>
+        <div class="card-header-row"><div><h3>Pending Withdrawals</h3><p class="card-sub" style="margin-bottom:0;">Awaiting approval</p></div><button class="btn-ghost" onclick="switchView('withdrawals')">View all →</button></div>
+        <div class="table-wrap"><table><thead><tr><th>User</th><th>UPI</th><th>Amount</th><th>Requested</th><th></th></tr></thead><tbody id="recent-withdrawals-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody></table></div>
       </div>
-
       <div class="card">
-        <div class="card-header-row">
-          <div><h3>Recent Transactions</h3><p class="card-sub" style="margin-bottom:0;">Latest 10 wallet events</p></div>
-          <button class="btn-ghost" onclick="switchView('transactions')">View all →</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>User</th><th>Description</th><th>Type</th><th>Amount</th><th>When</th></tr></thead>
-            <tbody id="recent-tx-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
-          </table>
-        </div>
+        <div class="card-header-row"><div><h3>Recent Transactions</h3><p class="card-sub" style="margin-bottom:0;">Latest 10 wallet events</p></div><button class="btn-ghost" onclick="switchView('transactions')">View all →</button></div>
+        <div class="table-wrap"><table><thead><tr><th>User</th><th>Description</th><th>Type</th><th>Amount</th><th>When</th></tr></thead><tbody id="recent-tx-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody></table></div>
       </div>
     </section>
 
-    <!-- ===== LIVE FEED ===== -->
+    <!-- LIVE -->
     <section id="view-live" class="view">
-      <div class="main-header">
-        <div>
-          <h1 class="main-title">Live Feed</h1>
-          <p class="main-sub">Everything happening right now</p>
-        </div>
-        <div class="main-actions">
-          <span style="display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;font-weight:700;color:var(--green);">
-            <span style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:badgePulse 1.6s infinite;"></span> LIVE
-          </span>
-        </div>
+      <div class="main-header"><div><h1 class="main-title">Live Feed</h1><p class="main-sub">Everything happening right now</p></div>
+        <div class="main-actions"><span style="display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;font-weight:700;color:var(--green);"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:badgePulse 1.6s infinite;"></span> LIVE</span></div>
       </div>
-      <div class="card">
-        <div id="live-feed" style="max-height:70vh;overflow-y:auto;">
-          <div class="table-empty">Waiting for events…</div>
-        </div>
-      </div>
+      <div class="card"><div id="live-feed" style="max-height:70vh;overflow-y:auto;"><div class="table-empty">Waiting for events…</div></div></div>
     </section>
 
-    <!-- ===== USERS ===== -->
+    <!-- USERS -->
     <section id="view-users" class="view">
-      <div class="main-header">
-        <div>
-          <h1 class="main-title">All Users</h1>
-          <p class="main-sub" id="users-count">—</p>
-        </div>
+      <div class="main-header"><div><h1 class="main-title">All Users</h1><p class="main-sub" id="users-count">—</p></div>
         <div class="main-actions">
           <input type="text" id="users-search" placeholder="Search name or email…" style="padding:10px 14px;border-radius:8px;border:1px solid var(--line);font-size:0.82rem;flex:1;min-width:180px;outline:none;min-height:40px;" />
           <button class="btn-ghost" onclick="loadUsers()"><i class="fas fa-sync"></i></button>
         </div>
       </div>
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Matches</th><th>Wins</th><th>Last Seen</th><th>Actions</th></tr></thead>
-            <tbody id="users-body"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
+      <div class="card"><div class="table-wrap"><table>
+        <thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Matches</th><th>Wins</th><th>Last Seen</th><th>Actions</th></tr></thead>
+        <tbody id="users-body"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
+      </table></div></div>
     </section>
 
-    <!-- ===== WALLET TOOLS ===== -->
+    <!-- WALLET TOOLS -->
     <section id="view-wallet" class="view">
-      <div class="main-header">
-        <div>
-          <h1 class="main-title">Wallet Tools</h1>
-          <p class="main-sub">Adjust any user's balance</p>
-        </div>
-      </div>
+      <div class="main-header"><div><h1 class="main-title">Wallet Tools</h1><p class="main-sub">Adjust any user's balance</p></div></div>
       <div class="card">
-        <h3>Adjust Balance</h3>
-        <p class="card-sub">Positive to credit, negative to debit</p>
+        <h3>Adjust Balance</h3><p class="card-sub">Positive to credit, negative to debit</p>
         <div class="form-grid">
-          <div class="field full">
-            <label>User UUID</label>
-            <input type="text" id="adjust-user-id" placeholder="9cf948d5-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
-            <span class="field-hint">Paste from All Users → Copy ID</span>
-          </div>
-          <div class="field">
-            <label>Amount (₹)</label>
-            <input type="number" id="adjust-amount" placeholder="50 or -50" />
-          </div>
-          <div class="field">
-            <label>Reason (optional)</label>
-            <input type="text" id="adjust-reason" placeholder="Support refund" />
-          </div>
-          <div class="field full">
-            <button class="btn-primary" onclick="doAdjustBalance()" style="width:100%;justify-content:center;padding:14px;">
-              <i class="fas fa-check"></i> Apply Adjustment
-            </button>
-          </div>
+          <div class="field full"><label>User UUID</label><input type="text" id="adjust-user-id" placeholder="UUID" /><span class="field-hint">Copy from All Users</span></div>
+          <div class="field"><label>Amount (₹)</label><input type="number" id="adjust-amount" placeholder="50 or -50" /></div>
+          <div class="field"><label>Reason</label><input type="text" id="adjust-reason" placeholder="Support refund" /></div>
+          <div class="field full"><button class="btn-primary" onclick="doAdjustBalance()" style="width:100%;justify-content:center;padding:14px;"><i class="fas fa-check"></i> Apply</button></div>
         </div>
       </div>
     </section>
 
-    <!-- ===== WITHDRAWALS ===== -->
+    <!-- WITHDRAWALS -->
     <section id="view-withdrawals" class="view">
-      <div class="main-header">
-        <div>
-          <h1 class="main-title">Withdrawals</h1>
-          <p class="main-sub" id="wd-count">—</p>
-        </div>
-        <div class="main-actions">
-          <button class="btn-ghost" onclick="loadWithdrawals()"><i class="fas fa-sync"></i> Refresh</button>
-        </div>
+      <div class="main-header"><div><h1 class="main-title">Withdrawals</h1><p class="main-sub" id="wd-count">—</p></div>
+        <div class="main-actions"><button class="btn-ghost" onclick="loadWithdrawals()"><i class="fas fa-sync"></i> Refresh</button></div>
       </div>
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>User</th><th>UPI ID</th><th>Amount</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead>
-            <tbody id="withdrawals-body"><tr><td colspan="6" class="table-empty">Loading…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
+      <div class="card"><div class="table-wrap"><table>
+        <thead><tr><th>User</th><th>UPI</th><th>Amount</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead>
+        <tbody id="withdrawals-body"><tr><td colspan="6" class="table-empty">Loading…</td></tr></tbody>
+      </table></div></div>
     </section>
 
-    <!-- ===== TRANSACTIONS ===== -->
+    <!-- TRANSACTIONS -->
     <section id="view-transactions" class="view">
-      <div class="main-header">
-        <div>
-          <h1 class="main-title">Transactions</h1>
-          <p class="main-sub">All wallet activity</p>
-        </div>
-        <div class="main-actions">
-          <button class="btn-ghost" onclick="loadTransactions()"><i class="fas fa-sync"></i> Refresh</button>
-        </div>
+      <div class="main-header"><div><h1 class="main-title">Transactions</h1><p class="main-sub">All wallet activity</p></div>
+        <div class="main-actions"><button class="btn-ghost" onclick="loadTransactions()"><i class="fas fa-sync"></i> Refresh</button></div>
       </div>
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>User</th><th>Description</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead>
-            <tbody id="transactions-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
-          </table>
+      <div class="card"><div class="table-wrap"><table>
+        <thead><tr><th>User</th><th>Description</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead>
+        <tbody id="transactions-body"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
+      </table></div></div>
+    </section>
+
+    <!-- SUPPORT TICKETS -->
+    <section id="view-tickets" class="view">
+      <div class="main-header"><div><h1 class="main-title">Support Tickets</h1><p class="main-sub" id="tickets-count">—</p></div>
+        <div class="main-actions"><button class="btn-ghost" onclick="loadTickets()"><i class="fas fa-sync"></i> Refresh</button></div>
+      </div>
+
+      <div id="tickets-list-wrap" class="card">
+        <div id="tickets-list" class="ticket-list"><div class="table-empty">Loading…</div></div>
+      </div>
+
+      <div id="tickets-chat-wrap" class="card chat-view">
+        <div class="chat-header-bar">
+          <button onclick="backToTicketsList()"><i class="fas fa-arrow-left"></i></button>
+          <div class="info">
+            <strong id="ticket-chat-subject">—</strong>
+            <small id="ticket-chat-user">—</small>
+          </div>
+          <span class="badge blue" id="ticket-chat-status">open</span>
+        </div>
+        <div id="ticket-messages-view" class="ticket-messages-view"></div>
+        <div class="ticket-reply-row">
+          <textarea id="ticket-reply-input" placeholder="Type your reply…"></textarea>
+          <button onclick="sendTicketReply()"><i class="fas fa-paper-plane"></i> Send</button>
         </div>
       </div>
     </section>
 
-    <!-- ===== SEND NOTIFICATION ===== -->
+    <!-- NOTIFY -->
     <section id="view-notify" class="view">
-      <div class="main-header">
-        <div>
-          <h1 class="main-title">Send Notification</h1>
-          <p class="main-sub">Send to a single user</p>
-        </div>
-      </div>
-      <div class="card">
-        <div class="form-grid">
-          <div class="field full">
-            <label>Target User UUID *</label>
-            <input type="text" id="notify-user-id" placeholder="9cf948d5-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
-          </div>
-          <div class="field full">
-            <label>Title *</label>
-            <input type="text" id="notify-title" placeholder="Reward credited" maxlength="100" />
-          </div>
-          <div class="field full">
-            <label>Body</label>
-            <textarea id="notify-body" placeholder="₹25 bonus added to your wallet." maxlength="300"></textarea>
-          </div>
-          <div class="field">
-            <label>Type</label>
-            <select id="notify-type">
-              <option value="general">General</option>
-              <option value="info">Info</option>
-              <option value="gift">Gift / Reward</option>
-              <option value="success">Success</option>
-              <option value="alert">Alert</option>
-              <option value="promo">Promo</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Icon</label>
-            <select id="notify-icon">
-              <option value="bell">Bell</option>
-              <option value="gift">Gift</option>
-              <option value="check">Check</option>
-              <option value="alert">Alert</option>
-              <option value="fire">Fire</option>
-              <option value="bullhorn">Bullhorn</option>
-            </select>
-          </div>
-          <div class="field full">
-            <button class="btn-primary" onclick="doSendNotification()" style="width:100%;justify-content:center;padding:14px;">
-              <i class="fas fa-paper-plane"></i> Send to User
-            </button>
-          </div>
-        </div>
-      </div>
+      <div class="main-header"><div><h1 class="main-title">Send Notification</h1><p class="main-sub">To a single user</p></div></div>
+      <div class="card"><div class="form-grid">
+        <div class="field full"><label>User UUID *</label><input type="text" id="notify-user-id" placeholder="UUID" /></div>
+        <div class="field full"><label>Title *</label><input type="text" id="notify-title" placeholder="Reward credited" maxlength="100" /></div>
+        <div class="field full"><label>Body</label><textarea id="notify-body" placeholder="₹25 bonus added." maxlength="300"></textarea></div>
+        <div class="field"><label>Type</label><select id="notify-type"><option value="general">General</option><option value="info">Info</option><option value="gift">Gift</option><option value="success">Success</option><option value="alert">Alert</option><option value="promo">Promo</option></select></div>
+        <div class="field"><label>Icon</label><select id="notify-icon"><option value="bell">Bell</option><option value="gift">Gift</option><option value="check">Check</option><option value="alert">Alert</option><option value="fire">Fire</option><option value="bullhorn">Bullhorn</option></select></div>
+        <div class="field full"><button class="btn-primary" onclick="doSendNotification()" style="width:100%;justify-content:center;padding:14px;"><i class="fas fa-paper-plane"></i> Send</button></div>
+      </div></div>
     </section>
 
-    <!-- ===== BROADCAST ===== -->
+    <!-- BROADCAST -->
     <section id="view-broadcast" class="view">
-      <div class="main-header">
-        <div>
-          <h1 class="main-title">Broadcast</h1>
-          <p class="main-sub">Send to <strong>every user</strong></p>
+      <div class="main-header"><div><h1 class="main-title">Broadcast</h1><p class="main-sub">To <strong>every user</strong></p></div></div>
+      <div class="card" style="border:1.5px solid var(--amber);background:linear-gradient(135deg,#fff8e1,#fff);">
+        <div style="display:flex;gap:12px;align-items:flex-start;"><i class="fas fa-exclamation-triangle" style="color:var(--amber);font-size:1.4rem;margin-top:2px;"></i>
+          <div><h3 style="margin-bottom:4px;">Use responsibly</h3><p style="font-size:0.82rem;color:var(--muted);line-height:1.5;">Broadcasts go to every user immediately. No undo.</p></div>
         </div>
       </div>
-      <div class="card" style="border:1.5px solid var(--amber);background:linear-gradient(135deg,#fff8e1,#fff);">
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <i class="fas fa-exclamation-triangle" style="color:var(--amber);font-size:1.4rem;margin-top:2px;"></i>
-          <div>
-            <h3 style="margin-bottom:4px;">Use responsibly</h3>
-            <p style="font-size:0.82rem;color:var(--muted);line-height:1.5;">Broadcasts go to every user immediately. There is no undo.</p>
-          </div>
-        </div>
+      <div class="card"><div class="form-grid">
+        <div class="field full"><label>Title *</label><input type="text" id="bcast-title" placeholder="Weekend Tournament live!" maxlength="100" /></div>
+        <div class="field full"><label>Body</label><textarea id="bcast-body" placeholder="₹500 prize pool. Free entry!" maxlength="300"></textarea></div>
+        <div class="field"><label>Type</label><select id="bcast-type"><option value="promo">Promo</option><option value="info">Info</option><option value="gift">Gift</option><option value="alert">Alert</option></select></div>
+        <div class="field"><label>Icon</label><select id="bcast-icon"><option value="bullhorn">Bullhorn</option><option value="bell">Bell</option><option value="gift">Gift</option><option value="fire">Fire</option><option value="alert">Alert</option></select></div>
+        <div class="field full"><button class="btn-primary" onclick="doBroadcast()" style="width:100%;justify-content:center;padding:14px;background:linear-gradient(135deg,#e2555a,#f07075);"><i class="fas fa-bullhorn"></i> Send to ALL Users</button></div>
+      </div></div>
+    </section>
+
+    <!-- DAILY BONUS -->
+    <section id="view-dailybonus" class="view">
+      <div class="main-header"><div><h1 class="main-title">Daily Login Bonus</h1><p class="main-sub">Streak-based rewards</p></div></div>
+      <div class="card">
+        <h3>Current Configuration</h3><p class="card-sub">Hardcoded streak amounts (edit SQL to change)</p>
+        <div class="config-row"><div class="label"><strong>Day 1</strong><small>Base reward</small></div><span class="badge green">₹5</span></div>
+        <div class="config-row"><div class="label"><strong>Day 2</strong><small>Streak continues</small></div><span class="badge green">₹6</span></div>
+        <div class="config-row"><div class="label"><strong>Day 3</strong><small>Streak continues</small></div><span class="badge green">₹7</span></div>
+        <div class="config-row"><div class="label"><strong>Day 4</strong><small>Streak continues</small></div><span class="badge green">₹8</span></div>
+        <div class="config-row"><div class="label"><strong>Day 5</strong><small>Halfway</small></div><span class="badge green">₹10</span></div>
+        <div class="config-row"><div class="label"><strong>Day 6</strong><small>Almost there</small></div><span class="badge green">₹12</span></div>
+        <div class="config-row"><div class="label"><strong>Day 7</strong><small>Weekly jackpot</small></div><span class="badge amber">₹25</span></div>
+        <p style="font-size:0.75rem;color:var(--muted);margin-top:12px;line-height:1.6;">To change amounts, edit the <code>claim_daily_bonus()</code> function in Supabase SQL Editor.</p>
       </div>
       <div class="card">
-        <div class="form-grid">
-          <div class="field full">
-            <label>Title *</label>
-            <input type="text" id="bcast-title" placeholder="Weekend Tournament live now!" maxlength="100" />
-          </div>
-          <div class="field full">
-            <label>Body</label>
-            <textarea id="bcast-body" placeholder="₹500 prize pool. Free entry. Join now!" maxlength="300"></textarea>
-          </div>
-          <div class="field">
-            <label>Type</label>
-            <select id="bcast-type">
-              <option value="promo">Promo</option>
-              <option value="info">Info</option>
-              <option value="gift">Gift</option>
-              <option value="alert">Alert</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Icon</label>
-            <select id="bcast-icon">
-              <option value="bullhorn">Bullhorn</option>
-              <option value="bell">Bell</option>
-              <option value="gift">Gift</option>
-              <option value="fire">Fire</option>
-              <option value="alert">Alert</option>
-            </select>
-          </div>
-          <div class="field full">
-            <button class="btn-primary" onclick="doBroadcast()" style="width:100%;justify-content:center;padding:14px;background:linear-gradient(135deg,#e2555a,#f07075);">
-              <i class="fas fa-bullhorn"></i> Send to ALL Users
-            </button>
-          </div>
-        </div>
+        <h3>Today's Claims</h3><p class="card-sub">Users who claimed today</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>User</th><th>Day</th><th>Amount</th><th>Time</th></tr></thead>
+          <tbody id="daily-claims-body"><tr><td colspan="4" class="table-empty">Loading…</td></tr></tbody>
+        </table></div>
       </div>
     </section>
 
@@ -787,7 +444,6 @@ tr:hover td { background: #fafafc; }
 // ============================================================
 // SKILLCLASH ADMIN CONSOLE v2.0
 // ============================================================
-
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_894UwPwZc0SF2MyCP9sztQ_6-s0AALZ";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -797,382 +453,153 @@ let liveFeedItems = [];
 let liveFeedChannel = null;
 let liveFeedEnabled = false;
 let sidebarChannels = [];
-let pageTitleInterval = null;
+let currentTicketId = null;
+let currentTicketChannel = null;
+const badgeState = { withdrawals: 0, newUsers: 0, liveFeed: 0, tickets: 0 };
 
-const badgeState = {
-  withdrawals: 0,
-  newUsers: 0,
-  liveFeed: 0
-};
-
-// ===== TOASTS =====
 function toast(msg, type = 'success') {
   const stack = document.getElementById('toast-stack');
   if (!stack) return;
   const t = document.createElement('div');
   t.className = `toast ${type}`;
-  const icon = type === 'error' ? 'fa-exclamation-circle'
-             : type === 'info' ? 'fa-info-circle'
-             : 'fa-check-circle';
+  const icon = type === 'error' ? 'fa-exclamation-circle' : type === 'info' ? 'fa-info-circle' : 'fa-check-circle';
   t.innerHTML = `<i class="fas ${icon}" style="color:${type === 'error' ? '#e2555a' : type === 'info' ? '#5b3df0' : '#16c46b'};"></i><span>${escapeHtml(msg)}</span>`;
   stack.appendChild(t);
-  setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(30px)';
-    t.style.transition = '0.3s';
-    setTimeout(() => t.remove(), 300);
-  }, 3200);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = '0.3s'; setTimeout(() => t.remove(), 300); }, 3200);
 }
 
-// ===== HELPERS =====
 function escapeHtml(s) {
   if (s === null || s === undefined) return '';
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
-function formatRupees(n) {
-  if (n === null || n === undefined) return '₹0';
-  const v = Number(n) || 0;
-  return (v < 0 ? '-₹' : '₹') + Math.abs(v).toLocaleString('en-IN');
-}
+function formatRupees(n) { const v = Number(n) || 0; return (v < 0 ? '-₹' : '₹') + Math.abs(v).toLocaleString('en-IN'); }
 function formatIST(dateInput) {
-  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
-  if (isNaN(d.getTime())) return '—';
-  try {
-    return new Intl.DateTimeFormat('en-IN', {
-      timeZone: 'Asia/Kolkata',
-      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
-    }).format(d).replace(/\b(am|pm)\b/i, m => m.toUpperCase());
-  } catch (e) { return d.toLocaleString('en-IN'); }
+  const d = new Date(dateInput); if (isNaN(d.getTime())) return '—';
+  try { return new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true }).format(d).replace(/\b(am|pm)\b/i, m => m.toUpperCase()); }
+  catch (e) { return d.toLocaleString('en-IN'); }
 }
 function timeAgo(dateInput) {
-  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
-  if (isNaN(d.getTime())) return '—';
-  const diff = Date.now() - d.getTime();
-  const s = Math.floor(diff / 1000);
+  const d = new Date(dateInput); if (isNaN(d.getTime())) return '—';
+  const s = Math.floor((Date.now() - d.getTime()) / 1000);
   if (s < 60) return 'just now';
-  const m = Math.floor(s / 60);
-  if (m < 60) return m + 'm ago';
-  const h = Math.floor(m / 60);
-  if (h < 24) return h + 'h ago';
-  const days = Math.floor(h / 24);
-  if (days < 7) return days + 'd ago';
+  const m = Math.floor(s / 60); if (m < 60) return m + 'm ago';
+  const h = Math.floor(m / 60); if (h < 24) return h + 'h ago';
+  const days = Math.floor(h / 24); if (days < 7) return days + 'd ago';
   return formatIST(d);
 }
 
-// ===== MOBILE SIDEBAR CONTROL =====
-function openSidebar() {
-  const sb = document.getElementById('sidebar');
-  const bd = document.getElementById('sidebar-backdrop');
-  if (!sb) return;
-  sb.classList.add('open');
-  if (bd) bd.classList.add('show');
-  document.body.classList.add('sidebar-open');
-}
-function closeSidebar() {
-  const sb = document.getElementById('sidebar');
-  const bd = document.getElementById('sidebar-backdrop');
-  if (!sb) return;
-  sb.classList.remove('open');
-  if (bd) bd.classList.remove('show');
-  document.body.classList.remove('sidebar-open');
-}
-window.openSidebar = openSidebar;
-window.closeSidebar = closeSidebar;
-
-// Tap backdrop → close
+// Mobile sidebar
+function openSidebar() { document.getElementById('sidebar')?.classList.add('open'); document.getElementById('sidebar-backdrop')?.classList.add('show'); document.body.classList.add('sidebar-open'); }
+function closeSidebar() { document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-backdrop')?.classList.remove('show'); document.body.classList.remove('sidebar-open'); }
 document.getElementById('sidebar-backdrop')?.addEventListener('click', closeSidebar);
+document.getElementById('menu-toggle')?.addEventListener('click', () => { const s = document.getElementById('sidebar'); if (s?.classList.contains('open')) closeSidebar(); else openSidebar(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
+window.addEventListener('resize', () => { if (window.innerWidth > 900) closeSidebar(); });
 
-// Menu button → toggle
-document.getElementById('menu-toggle')?.addEventListener('click', () => {
-  const sb = document.getElementById('sidebar');
-  if (sb?.classList.contains('open')) closeSidebar();
-  else openSidebar();
-});
-
-// Swipe left on sidebar → close
-(function attachSwipeClose() {
-  let startX = 0, startY = 0, tracking = false;
-  const sb = document.getElementById('sidebar');
-  if (!sb) return;
-  sb.addEventListener('touchstart', (e) => {
-    const t = e.touches[0];
-    startX = t.clientX;
-    startY = t.clientY;
-    tracking = true;
-  }, { passive: true });
-  sb.addEventListener('touchmove', (e) => {
-    if (!tracking) return;
-    const t = e.touches[0];
-    const dx = t.clientX - startX;
-    const dy = Math.abs(t.clientY - startY);
-    if (dy > 60) tracking = false;
-    if (dx < -50 && dy < 40) { closeSidebar(); tracking = false; }
-  }, { passive: true });
-  sb.addEventListener('touchend', () => { tracking = false; }, { passive: true });
-})();
-
-// ESC key → close sidebar
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeSidebar();
-});
-
-// Auto-close if window resizes to desktop
-window.addEventListener('resize', () => {
-  if (window.innerWidth > 900) closeSidebar();
-});
-
-// ===== BADGE SYSTEM =====
+// Badges
 function setBadge(id, count, isGreen = false) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (count > 0) {
-    el.textContent = count > 99 ? '99+' : String(count);
-    el.classList.add('show');
-    el.classList.toggle('green', isGreen);
-  } else {
-    el.classList.remove('show');
-    el.classList.remove('green');
-  }
+  const el = document.getElementById(id); if (!el) return;
+  if (count > 0) { el.textContent = count > 99 ? '99+' : String(count); el.classList.add('show'); el.classList.toggle('green', isGreen); }
+  else { el.classList.remove('show'); el.classList.remove('green'); }
 }
-
 function refreshAllBadges() {
   setBadge('badge-withdrawals', badgeState.withdrawals);
   setBadge('badge-users', badgeState.newUsers);
   setBadge('badge-live', badgeState.liveFeed, true);
-  const total = badgeState.withdrawals + badgeState.newUsers + badgeState.liveFeed;
+  setBadge('badge-tickets', badgeState.tickets);
+  const total = badgeState.withdrawals + badgeState.newUsers + badgeState.liveFeed + badgeState.tickets;
   setBadge('badge-dashboard', total);
-
-  // Mobile topbar pill
-  const mobilePill = document.getElementById('mobile-live-total');
-  if (mobilePill) {
-    if (total > 0) {
-      mobilePill.textContent = total > 99 ? '99+' : String(total);
-      mobilePill.classList.add('show');
-    } else {
-      mobilePill.classList.remove('show');
-    }
-  }
-
-  // Tab title
+  const mp = document.getElementById('mobile-live-total');
+  if (mp) { if (total > 0) { mp.textContent = total > 99 ? '99+' : String(total); mp.classList.add('show'); } else mp.classList.remove('show'); }
   document.title = total > 0 ? `(${total}) SkillClash Admin` : 'SkillClash · Admin Console';
 }
-
 async function loadBadgeCounts() {
-  // Withdrawals count
-  try {
-    const { data: wd } = await client.rpc('admin_get_pending_withdrawals');
-    badgeState.withdrawals = (wd || []).length;
-  } catch (e) { badgeState.withdrawals = 0; }
-
-  // New users in last hour
-  try {
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count } = await client
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', oneHourAgo);
-    badgeState.newUsers = count || 0;
-  } catch (e) { badgeState.newUsers = 0; }
-
+  try { const { data: wd } = await client.rpc('admin_get_pending_withdrawals'); badgeState.withdrawals = (wd || []).length; } catch (e) { badgeState.withdrawals = 0; }
+  try { const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString(); const { count } = await client.from('users').select('*', { count: 'exact', head: true }).gte('created_at', oneHourAgo); badgeState.newUsers = count || 0; } catch (e) { badgeState.newUsers = 0; }
+  try { const { count } = await client.from('support_tickets').select('*', { count: 'exact', head: true }).in('status', ['open', 'answered']); badgeState.tickets = count || 0; } catch (e) { badgeState.tickets = 0; }
   refreshAllBadges();
 }
-
 function startBadgeRealtime() {
-  // Cleanup previous
   sidebarChannels.forEach(ch => { try { client.removeChannel(ch); } catch (e) {} });
   sidebarChannels = [];
-
-  // Withdrawals
-  const wdChannel = client
-    .channel('badge-withdrawals-v2')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'withdrawal_requests' }, (payload) => {
-      badgeState.withdrawals++;
-      badgeState.liveFeed++;
-      refreshAllBadges();
-      toast('New withdrawal request', 'info');
-      playDing();
-    })
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'withdrawal_requests' }, () => {
-      loadBadgeCounts();
-    })
-    .subscribe();
-  sidebarChannels.push(wdChannel);
-
-  // New users
-  const userChannel = client
-    .channel('badge-users-v2')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'users' }, () => {
-      badgeState.newUsers++;
-      badgeState.liveFeed++;
-      refreshAllBadges();
-      toast('New user signed up', 'info');
-    })
-    .subscribe();
-  sidebarChannels.push(userChannel);
-
-  // Live feed ticks
-  const liveChannel = client
-    .channel('badge-live-v2')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, (payload) => {
-      badgeState.liveFeed++;
-      refreshAllBadges();
-      pushLiveItem({ kind: 'tx', ts: payload.new?.created_at || new Date(), text: `New transaction: ${payload.new?.description || ''}` });
-    })
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_sessions' }, (payload) => {
-      badgeState.liveFeed++;
-      refreshAllBadges();
-      pushLiveItem({ kind: 'match', ts: payload.new?.created_at || new Date(), text: `New match: ${payload.new?.game_type || ''}` });
-    })
-    .subscribe();
-  sidebarChannels.push(liveChannel);
+  sidebarChannels.push(client.channel('b-wd').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'withdrawal_requests' }, () => { badgeState.withdrawals++; badgeState.liveFeed++; refreshAllBadges(); toast('New withdrawal request', 'info'); playDing(); }).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'withdrawal_requests' }, () => loadBadgeCounts()).subscribe());
+  sidebarChannels.push(client.channel('b-users').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'users' }, () => { badgeState.newUsers++; badgeState.liveFeed++; refreshAllBadges(); toast('New user signed up', 'info'); }).subscribe());
+  sidebarChannels.push(client.channel('b-tickets').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_tickets' }, () => { badgeState.tickets++; badgeState.liveFeed++; refreshAllBadges(); toast('New support ticket', 'info'); }).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'support_tickets' }, () => loadBadgeCounts()).subscribe());
+  sidebarChannels.push(client.channel('b-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, (p) => { badgeState.liveFeed++; refreshAllBadges(); pushLiveItem({ kind: 'tx', ts: p.new?.created_at || new Date(), text: `New transaction: ${p.new?.description || ''}` }); }).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_sessions' }, (p) => { badgeState.liveFeed++; refreshAllBadges(); pushLiveItem({ kind: 'match', ts: p.new?.created_at || new Date(), text: `New match: ${p.new?.game_type || ''}` }); }).subscribe());
 }
-
-// ===== DING SOUND =====
 function playDing() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.frequency.value = 880;
-    o.type = 'sine';
-    g.gain.setValueAtTime(0.08, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-    o.start(); o.stop(ctx.currentTime + 0.25);
-  } catch (e) {}
+  try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 880; o.type = 'sine'; g.gain.setValueAtTime(0.06, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22); o.start(); o.stop(ctx.currentTime + 0.22); } catch (e) {}
 }
 
-// ===== VIEW SWITCHER =====
 function switchView(id) {
-  // Update view visibility
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const view = document.getElementById('view-' + id);
-  if (view) view.classList.add('active');
-
-  // Sidebar active
-  document.querySelectorAll('.sidebar-link[data-view]').forEach(l => {
-    l.classList.toggle('active', l.dataset.view === id);
-  });
-
-  // Mobile topbar title
+  document.getElementById('view-' + id)?.classList.add('active');
+  document.querySelectorAll('.sidebar-link[data-view]').forEach(l => l.classList.toggle('active', l.dataset.view === id));
   const titleEl = document.getElementById('mobile-title');
-  if (titleEl) {
-    const el = document.querySelector(`.sidebar-link[data-view="${id}"]`);
-    titleEl.textContent = el ? el.textContent.trim().replace(/^\s+|\s+\d+$/g, '') : 'Admin';
-  }
-
-  // Clear relevant badge
+  if (titleEl) { const el = document.querySelector(`.sidebar-link[data-view="${id}"]`); titleEl.textContent = el ? el.textContent.trim().replace(/\s+\d+$/, '') : 'Admin'; }
   if (id === 'withdrawals') badgeState.withdrawals = 0;
   if (id === 'users') badgeState.newUsers = 0;
   if (id === 'live') badgeState.liveFeed = 0;
+  if (id === 'tickets') badgeState.tickets = 0;
   if (id === 'dashboard') { badgeState.withdrawals = 0; badgeState.newUsers = 0; }
   refreshAllBadges();
-
-  // Close sidebar (mobile)
   closeSidebar();
-
-  // Lazy load
   if (id === 'users') loadUsers();
   else if (id === 'withdrawals') loadWithdrawals();
   else if (id === 'transactions') loadTransactions();
   else if (id === 'live') enableLiveFeed();
   else if (id === 'dashboard') loadAll();
+  else if (id === 'tickets') loadTickets();
+  else if (id === 'dailybonus') loadDailyClaims();
 }
 window.switchView = switchView;
 
-// ===== AUTH =====
 async function startAuthFlow() {
   const { data: { session } } = await client.auth.getSession();
-
-  if (!session) {
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.getElementById('console').classList.remove('active');
-    document.getElementById('denied-screen').classList.remove('active');
-    return;
-  }
-
+  if (!session) { document.getElementById('auth-screen').style.display = 'flex'; document.getElementById('console').classList.remove('active'); document.getElementById('denied-screen').classList.remove('active'); return; }
   const { data: isAdmin, error } = await client.rpc('is_admin');
-  if (error || !isAdmin) {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('console').classList.remove('active');
-    document.getElementById('denied-screen').classList.add('active');
-    await client.auth.signOut();
-    return;
-  }
-
+  if (error || !isAdmin) { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('console').classList.remove('active'); document.getElementById('denied-screen').classList.add('active'); await client.auth.signOut(); return; }
   currentAdmin = session.user;
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('denied-screen').classList.remove('active');
   document.getElementById('console').classList.add('active');
-
   const meta = currentAdmin.user_metadata || {};
   const name = meta.full_name || meta.name || (currentAdmin.email || '').split('@')[0] || 'Admin';
-  const sbName = document.getElementById('sb-name');
-  const sbEmail = document.getElementById('sb-email');
-  if (sbName) sbName.textContent = name;
-  if (sbEmail) sbEmail.textContent = currentAdmin.email || '';
-
+  document.getElementById('sb-name').textContent = name;
+  document.getElementById('sb-email').textContent = currentAdmin.email || '';
   loadAll();
   setTimeout(() => { loadBadgeCounts(); startBadgeRealtime(); }, 400);
 }
 
-document.getElementById('google-login-btn')?.addEventListener('click', async () => {
-  const redirectUrl = window.location.origin + window.location.pathname;
-  await client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl } });
-});
-
-document.getElementById('denied-back-btn')?.addEventListener('click', () => {
-  window.location.href = '/';
-});
-
-document.getElementById('logout-btn')?.addEventListener('click', async () => {
-  if (liveFeedChannel) { try { await client.removeChannel(liveFeedChannel); } catch (e) {} }
-  sidebarChannels.forEach(ch => { try { client.removeChannel(ch); } catch (e) {} });
-  await client.auth.signOut();
-  window.location.reload();
-});
-
+document.getElementById('google-login-btn')?.addEventListener('click', async () => { const r = window.location.origin + window.location.pathname; await client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: r } }); });
+document.getElementById('denied-back-btn')?.addEventListener('click', () => { window.location.href = '/'; });
+document.getElementById('logout-btn')?.addEventListener('click', async () => { if (liveFeedChannel) { try { await client.removeChannel(liveFeedChannel); } catch (e) {} } sidebarChannels.forEach(ch => { try { client.removeChannel(ch); } catch (e) {} }); if (currentTicketChannel) { try { await client.removeChannel(currentTicketChannel); } catch (e) {} } await client.auth.signOut(); window.location.reload(); });
 document.getElementById('refresh-btn')?.addEventListener('click', () => { loadAll(); loadBadgeCounts(); });
+document.querySelectorAll('.sidebar-link[data-view]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
 
-// Sidebar links
-document.querySelectorAll('.sidebar-link[data-view]').forEach(btn => {
-  btn.addEventListener('click', () => switchView(btn.dataset.view));
-});
-
-// ===== LOADERS =====
+// Stats
 async function loadStats() {
-  const grid = document.getElementById('stats-grid');
-  if (!grid) return;
+  const grid = document.getElementById('stats-grid'); if (!grid) return;
   try {
     const { data, error } = await client.rpc('admin_get_stats');
     if (error) throw error;
     if (!data || data.ok === false) throw new Error(data?.message || 'Failed');
     grid.innerHTML = `
-      <div class="stat-card"><div class="stat-label"><i class="fas fa-users"></i> Total Users</div><div class="stat-value">${Number(data.users||0).toLocaleString('en-IN')}</div><div class="stat-hint">${Number(data.active_today||0)} active in last 24h</div></div>
-      <div class="stat-card"><div class="stat-label"><i class="fas fa-coins"></i> Revenue Today</div><div class="stat-value green">${formatRupees(data.revenue_today)}</div><div class="stat-hint">From ${Number(data.matches_today||0)} matches today</div></div>
-      <div class="stat-card"><div class="stat-label"><i class="fas fa-wallet"></i> Total Wallet</div><div class="stat-value">${formatRupees(data.total_balance)}</div><div class="stat-hint">Across all users</div></div>
-      <div class="stat-card"><div class="stat-label"><i class="fas fa-hand-holding-usd"></i> Pending Withdrawals</div><div class="stat-value ${data.pending_withdrawals>0?'amber':''}">${Number(data.pending_withdrawals||0)}</div><div class="stat-hint">${formatRupees(data.pending_withdrawals_amount)} awaiting</div></div>
+      <div class="stat-card"><div class="stat-label"><i class="fas fa-users"></i> Total Users</div><div class="stat-value">${Number(data.users||0).toLocaleString('en-IN')}</div><div class="stat-hint">${Number(data.active_today||0)} active 24h</div></div>
+      <div class="stat-card"><div class="stat-label"><i class="fas fa-coins"></i> Revenue Today</div><div class="stat-value green">${formatRupees(data.revenue_today)}</div><div class="stat-hint">From ${Number(data.matches_today||0)} matches</div></div>
+      <div class="stat-card"><div class="stat-label"><i class="fas fa-wallet"></i> Total Wallet</div><div class="stat-value">${formatRupees(data.total_balance)}</div><div class="stat-hint">All users</div></div>
+      <div class="stat-card"><div class="stat-label"><i class="fas fa-hand-holding-usd"></i> Pending WD</div><div class="stat-value ${data.pending_withdrawals>0?'amber':''}">${Number(data.pending_withdrawals||0)}</div><div class="stat-hint">${formatRupees(data.pending_withdrawals_amount)}</div></div>
     `;
-    const lu = document.getElementById('last-updated');
-    if (lu) lu.textContent = 'Last updated: ' + timeAgo(new Date());
-  } catch (e) {
-    grid.innerHTML = `<div class="stat-card"><div class="stat-label"><i class="fas fa-exclamation-triangle" style="color:var(--red);"></i> Error</div><div class="stat-value" style="font-size:0.9rem;">${escapeHtml(e.message||'Failed')}</div></div>`;
-  }
+    document.getElementById('last-updated').textContent = 'Last updated: ' + timeAgo(new Date());
+  } catch (e) { grid.innerHTML = `<div class="stat-card"><div class="stat-label"><i class="fas fa-exclamation-triangle" style="color:var(--red);"></i> Error</div><div class="stat-value" style="font-size:0.9rem;">${escapeHtml(e.message||'Failed')}</div></div>`; }
 }
 
 async function loadUsers() {
-  const tbody = document.getElementById('users-body');
-  const countEl = document.getElementById('users-count');
-  if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Loading…</td></tr>';
+  const tbody = document.getElementById('users-body'); const countEl = document.getElementById('users-count');
+  if (!tbody) return; tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Loading…</td></tr>';
   try {
-    const { data, error } = await client.rpc('admin_get_users', { p_limit: 100 });
-    if (error) throw error;
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No users yet.</td></tr>';
-      if (countEl) countEl.textContent = '0 users';
-      return;
-    }
+    const { data, error } = await client.rpc('admin_get_users', { p_limit: 100 }); if (error) throw error;
+    if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No users yet.</td></tr>'; if (countEl) countEl.textContent = '0 users'; return; }
     if (countEl) countEl.textContent = data.length + ' users (latest 100)';
     tbody.innerHTML = data.map(u => `
       <tr data-user-id="${escapeHtml(u.id)}" data-name="${escapeHtml((u.full_name||'').toLowerCase())}" data-email="${escapeHtml((u.email||'').toLowerCase())}">
@@ -1189,50 +616,21 @@ async function loadUsers() {
       </tr>
     `).join('');
     const search = document.getElementById('users-search');
-    if (search && !search.dataset.wired) {
-      search.dataset.wired = '1';
-      search.addEventListener('input', () => {
-        const q = search.value.toLowerCase().trim();
-        document.querySelectorAll('#users-body tr[data-user-id]').forEach(tr => {
-          const match = !q || tr.dataset.name.includes(q) || tr.dataset.email.includes(q);
-          tr.style.display = match ? '' : 'none';
-        });
-      });
-    }
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
-  }
+    if (search && !search.dataset.wired) { search.dataset.wired = '1'; search.addEventListener('input', () => { const q = search.value.toLowerCase().trim(); document.querySelectorAll('#users-body tr[data-user-id]').forEach(tr => { const match = !q || tr.dataset.name.includes(q) || tr.dataset.email.includes(q); tr.style.display = match ? '' : 'none'; }); }); }
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`; }
 }
 window.loadUsers = loadUsers;
-
-function copyUserId(id) {
-  navigator.clipboard.writeText(id).then(() => toast('User ID copied'), () => toast('Copy failed', 'error'));
-}
+function copyUserId(id) { navigator.clipboard.writeText(id).then(() => toast('User ID copied'), () => toast('Copy failed', 'error')); }
 window.copyUserId = copyUserId;
-
-function quickNotifyUser(id, name) {
-  const el = document.getElementById('notify-user-id');
-  if (el) el.value = id;
-  const t = document.getElementById('notify-title'); if (t) t.value = '';
-  const b = document.getElementById('notify-body'); if (b) b.value = '';
-  switchView('notify');
-  toast('Ready to notify ' + name, 'info');
-}
+function quickNotifyUser(id, name) { document.getElementById('notify-user-id').value = id; document.getElementById('notify-title').value = ''; document.getElementById('notify-body').value = ''; switchView('notify'); toast('Ready to notify ' + name, 'info'); }
 window.quickNotifyUser = quickNotifyUser;
 
 async function loadWithdrawals() {
-  const tbody = document.getElementById('withdrawals-body');
-  const countEl = document.getElementById('wd-count');
-  if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Loading…</td></tr>';
+  const tbody = document.getElementById('withdrawals-body'); const countEl = document.getElementById('wd-count');
+  if (!tbody) return; tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Loading…</td></tr>';
   try {
-    const { data, error } = await client.rpc('admin_get_pending_withdrawals');
-    if (error) throw error;
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="table-empty">No pending withdrawals.</td></tr>';
-      if (countEl) countEl.textContent = 'All clear';
-      return;
-    }
+    const { data, error } = await client.rpc('admin_get_pending_withdrawals'); if (error) throw error;
+    if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="table-empty">No pending.</td></tr>'; if (countEl) countEl.textContent = 'All clear'; return; }
     if (countEl) countEl.textContent = data.length + ' pending';
     tbody.innerHTML = data.map(w => `
       <tr>
@@ -1247,256 +645,187 @@ async function loadWithdrawals() {
         </td>
       </tr>
     `).join('');
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
-  }
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`; }
 }
 window.loadWithdrawals = loadWithdrawals;
-
-async function markPaid(id) {
-  if (!confirm('Mark this withdrawal as PAID?')) return;
-  try {
-    const { data, error } = await client.rpc('mark_withdrawal_paid', { p_request_id: id });
-    if (error) throw error;
-    if (data && data.ok) { toast('Marked as paid'); loadWithdrawals(); loadStats(); loadBadgeCounts(); }
-    else toast(data?.message||'Failed', 'error');
-  } catch (e) { toast(e.message, 'error'); }
-}
+async function markPaid(id) { if (!confirm('Mark this withdrawal as PAID?')) return; try { const { data, error } = await client.rpc('mark_withdrawal_paid', { p_request_id: id }); if (error) throw error; if (data && data.ok) { toast('Marked as paid'); loadWithdrawals(); loadStats(); loadBadgeCounts(); } else toast(data?.message||'Failed', 'error'); } catch (e) { toast(e.message, 'error'); } }
 window.markPaid = markPaid;
-
-async function rejectWd(id) {
-  const note = prompt('Reason for rejection (optional):');
-  if (note === null) return;
-  try {
-    const { data, error } = await client.rpc('mark_withdrawal_rejected', { p_request_id: id, p_admin_note: note || null });
-    if (error) throw error;
-    if (data && data.ok) { toast('Rejected & refunded'); loadWithdrawals(); loadStats(); loadBadgeCounts(); }
-    else toast(data?.message||'Failed', 'error');
-  } catch (e) { toast(e.message, 'error'); }
-}
+async function rejectWd(id) { const note = prompt('Reason (optional):'); if (note === null) return; try { const { data, error } = await client.rpc('mark_withdrawal_rejected', { p_request_id: id, p_admin_note: note || null }); if (error) throw error; if (data && data.ok) { toast('Rejected & refunded'); loadWithdrawals(); loadStats(); loadBadgeCounts(); } else toast(data?.message||'Failed', 'error'); } catch (e) { toast(e.message, 'error'); } }
 window.rejectWd = rejectWd;
 
 async function loadTransactions() {
-  const tbody = document.getElementById('transactions-body');
-  if (!tbody) return;
+  const tbody = document.getElementById('transactions-body'); if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Loading…</td></tr>';
   try {
-    const { data, error } = await client.rpc('admin_get_recent_transactions', { p_limit: 100 });
-    if (error) throw error;
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No transactions yet.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.map(t => {
-      const isCredit = t.type === 'credit';
-      return `<tr>
-        <td>${escapeHtml(t.full_name||'—')}</td>
-        <td style="font-size:0.75rem;">${escapeHtml(t.description||'')}</td>
-        <td><span class="badge ${isCredit?'green':'red'}">${escapeHtml(t.type)}</span></td>
-        <td style="font-weight:700;color:${isCredit?'var(--green)':'var(--red)'};">${isCredit?'+':'-'}${formatRupees(t.amount)}</td>
-        <td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(formatIST(t.created_at))}</td>
-      </tr>`;
-    }).join('');
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
-  }
+    const { data, error } = await client.rpc('admin_get_recent_transactions', { p_limit: 100 }); if (error) throw error;
+    if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No transactions.</td></tr>'; return; }
+    tbody.innerHTML = data.map(t => { const c = t.type === 'credit'; return `<tr><td>${escapeHtml(t.full_name||'—')}</td><td style="font-size:0.75rem;">${escapeHtml(t.description||'')}</td><td><span class="badge ${c?'green':'red'}">${escapeHtml(t.type)}</span></td><td style="font-weight:700;color:${c?'var(--green)':'var(--red)'};">${c?'+':'-'}${formatRupees(t.amount)}</td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(formatIST(t.created_at))}</td></tr>`; }).join('');
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`; }
 }
 window.loadTransactions = loadTransactions;
 
-async function loadRecentUsers() {
-  const tbody = document.getElementById('recent-users-body');
-  if (!tbody) return;
-  try {
-    const { data, error } = await client.rpc('admin_get_users', { p_limit: 10 });
-    if (error) throw error;
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No users yet.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.map(u => `
-      <tr><td><strong>${escapeHtml(u.full_name||'—')}</strong></td><td>${escapeHtml(u.email||'—')}</td><td>${formatRupees(u.balance)}</td><td>${u.total_matches||0}</td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(u.created_at))}</td></tr>
-    `).join('');
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
-  }
-}
+async function loadRecentUsers() { const tbody = document.getElementById('recent-users-body'); if (!tbody) return; try { const { data } = await client.rpc('admin_get_users', { p_limit: 10 }); if (!data?.length) { tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No users.</td></tr>'; return; } tbody.innerHTML = data.map(u => `<tr><td><strong>${escapeHtml(u.full_name||'—')}</strong></td><td>${escapeHtml(u.email||'—')}</td><td>${formatRupees(u.balance)}</td><td>${u.total_matches||0}</td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(u.created_at))}</td></tr>`).join(''); } catch (e) { tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error</td></tr>`; } }
+async function loadRecentWithdrawals() { const tbody = document.getElementById('recent-withdrawals-body'); if (!tbody) return; try { const { data } = await client.rpc('admin_get_pending_withdrawals'); if (!data?.length) { tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No pending.</td></tr>'; return; } tbody.innerHTML = data.slice(0, 5).map(w => `<tr><td><strong>${escapeHtml(w.full_name||'—')}</strong></td><td>${escapeHtml(w.upi_id||'—')}</td><td><strong>${formatRupees(w.amount)}</strong></td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(w.requested_at))}</td><td><button class="action-btn success" onclick="markPaid('${escapeHtml(w.id)}')"><i class="fas fa-check"></i> Paid</button></td></tr>`).join(''); } catch (e) { tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error</td></tr>`; } }
+async function loadRecentTx() { const tbody = document.getElementById('recent-tx-body'); if (!tbody) return; try { const { data } = await client.rpc('admin_get_recent_transactions', { p_limit: 10 }); if (!data?.length) { tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No transactions.</td></tr>'; return; } tbody.innerHTML = data.map(t => { const c = t.type === 'credit'; return `<tr><td>${escapeHtml(t.full_name||'—')}</td><td style="font-size:0.75rem;">${escapeHtml(t.description||'')}</td><td><span class="badge ${c?'green':'red'}">${escapeHtml(t.type)}</span></td><td style="font-weight:700;color:${c?'var(--green)':'var(--red)'};">${c?'+':'-'}${formatRupees(t.amount)}</td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(t.created_at))}</td></tr>`; }).join(''); } catch (e) { tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error</td></tr>`; } }
 
-async function loadRecentWithdrawals() {
-  const tbody = document.getElementById('recent-withdrawals-body');
-  if (!tbody) return;
+async function loadDailyClaims() {
+  const tbody = document.getElementById('daily-claims-body'); if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="4" class="table-empty">Loading…</td></tr>';
   try {
-    const { data, error } = await client.rpc('admin_get_pending_withdrawals');
+    const today = new Date().toISOString().slice(0, 10);
+    const { data, error } = await client.from('daily_bonus_claims').select('user_id, amount, streak_day, created_at').eq('claim_date', today).order('created_at', { ascending: false }).limit(100);
     if (error) throw error;
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No pending withdrawals.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.slice(0, 5).map(w => `
-      <tr><td><strong>${escapeHtml(w.full_name||'—')}</strong></td><td>${escapeHtml(w.upi_id||'—')}</td><td><strong>${formatRupees(w.amount)}</strong></td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(w.requested_at))}</td><td><button class="action-btn success" onclick="markPaid('${escapeHtml(w.id)}')"><i class="fas fa-check"></i> Paid</button></td></tr>
-    `).join('');
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
-  }
+    if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="table-empty">No claims today.</td></tr>'; return; }
+    const userIds = [...new Set(data.map(c => c.user_id))];
+    const { data: users } = await client.from('users').select('id, full_name, email').in('id', userIds);
+    const map = {}; (users || []).forEach(u => { map[u.id] = u; });
+    tbody.innerHTML = data.map(c => `<tr><td><strong>${escapeHtml(map[c.user_id]?.full_name || '—')}</strong><br><span style="font-size:0.68rem;color:var(--muted);">${escapeHtml(map[c.user_id]?.email||'')}</span></td><td>Day ${c.streak_day}</td><td>${formatRupees(c.amount)}</td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(c.created_at))}</td></tr>`).join('');
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="4" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`; }
 }
+window.loadDailyClaims = loadDailyClaims;
 
-async function loadRecentTx() {
-  const tbody = document.getElementById('recent-tx-body');
-  if (!tbody) return;
-  try {
-    const { data, error } = await client.rpc('admin_get_recent_transactions', { p_limit: 10 });
-    if (error) throw error;
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No transactions yet.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.map(t => {
-      const isCredit = t.type === 'credit';
-      return `<tr><td>${escapeHtml(t.full_name||'—')}</td><td style="font-size:0.75rem;">${escapeHtml(t.description||'')}</td><td><span class="badge ${isCredit?'green':'red'}">${escapeHtml(t.type)}</span></td><td style="font-weight:700;color:${isCredit?'var(--green)':'var(--red)'};">${isCredit?'+':'-'}${formatRupees(t.amount)}</td><td style="color:var(--muted);font-size:0.72rem;">${escapeHtml(timeAgo(t.created_at))}</td></tr>`;
-    }).join('');
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Error: ${escapeHtml(e.message)}</td></tr>`;
-  }
-}
-
-async function loadAll() {
-  await Promise.all([
-    loadStats(),
-    loadRecentUsers(),
-    loadRecentWithdrawals(),
-    loadRecentTx()
-  ]);
-}
+async function loadAll() { await Promise.all([loadStats(), loadRecentUsers(), loadRecentWithdrawals(), loadRecentTx()]); }
 window.loadAll = loadAll;
 
-// ===== WALLET ADJUST =====
+// Wallet adjust
 async function doAdjustBalance() {
   const userId = document.getElementById('adjust-user-id').value.trim();
   const amount = parseInt(document.getElementById('adjust-amount').value);
   const reason = document.getElementById('adjust-reason').value.trim();
-  if (!userId) { toast('Enter a user UUID', 'error'); return; }
-  if (isNaN(amount) || amount === 0) { toast('Amount must be non-zero', 'error'); return; }
-  if (!confirm(`Apply ${amount>0?'+':''}₹${amount}?\n\nReason: ${reason||'Admin adjustment'}`)) return;
-  try {
-    const { data, error } = await client.rpc('admin_adjust_balance', { p_user_id: userId, p_delta: amount, p_reason: reason || null });
-    if (error) throw error;
-    if (data && data.ok) {
-      toast(`Applied. New balance: ${formatRupees(data.new_balance)}`);
-      document.getElementById('adjust-amount').value = '';
-      document.getElementById('adjust-reason').value = '';
-      loadAll();
-    } else toast(data?.message||'Failed', 'error');
-  } catch (e) { toast(e.message, 'error'); }
+  if (!userId) return toast('Enter UUID', 'error');
+  if (isNaN(amount) || amount === 0) return toast('Amount must be non-zero', 'error');
+  if (!confirm(`Apply ${amount>0?'+':''}₹${amount}?\n\nReason: ${reason||'Admin'}`)) return;
+  try { const { data, error } = await client.rpc('admin_adjust_balance', { p_user_id: userId, p_delta: amount, p_reason: reason || null }); if (error) throw error; if (data && data.ok) { toast(`Applied. New balance: ${formatRupees(data.new_balance)}`); document.getElementById('adjust-amount').value = ''; document.getElementById('adjust-reason').value = ''; loadAll(); } else toast(data?.message||'Failed', 'error'); } catch (e) { toast(e.message, 'error'); }
 }
 window.doAdjustBalance = doAdjustBalance;
 
-// ===== NOTIFICATIONS =====
+// Notifications
 async function doSendNotification() {
   const userId = document.getElementById('notify-user-id').value.trim();
   const title = document.getElementById('notify-title').value.trim();
   const body = document.getElementById('notify-body').value.trim();
   const type = document.getElementById('notify-type').value;
   const icon = document.getElementById('notify-icon').value;
-  if (!userId) { toast('Enter user UUID', 'error'); return; }
-  if (!title) { toast('Title is required', 'error'); return; }
-  try {
-    const { data, error } = await client.rpc('send_notification', { p_title: title, p_body: body || null, p_user_id: userId, p_type: type, p_icon: icon });
-    if (error) throw error;
-    if (data && data.ok) {
-      toast(`Sent to ${data.sent} user${data.sent===1?'':'s'}`);
-      document.getElementById('notify-title').value = '';
-      document.getElementById('notify-body').value = '';
-    } else toast(data?.message||'Failed', 'error');
-  } catch (e) { toast(e.message, 'error'); }
+  if (!userId) return toast('Enter user UUID', 'error');
+  if (!title) return toast('Title required', 'error');
+  try { const { data, error } = await client.rpc('send_notification', { p_title: title, p_body: body || null, p_user_id: userId, p_type: type, p_icon: icon }); if (error) throw error; if (data && data.ok) { toast(`Sent to ${data.sent} user`); document.getElementById('notify-title').value = ''; document.getElementById('notify-body').value = ''; } else toast(data?.message||'Failed', 'error'); } catch (e) { toast(e.message, 'error'); }
 }
 window.doSendNotification = doSendNotification;
-
 async function doBroadcast() {
   const title = document.getElementById('bcast-title').value.trim();
   const body = document.getElementById('bcast-body').value.trim();
   const type = document.getElementById('bcast-type').value;
   const icon = document.getElementById('bcast-icon').value;
-  if (!title) { toast('Title is required', 'error'); return; }
-  if (!confirm(`Broadcast to ALL USERS?\n\nTitle: ${title}\nBody: ${body||'(empty)'}\n\nCannot be undone.`)) return;
-  try {
-    const { data, error } = await client.rpc('admin_send_broadcast', { p_title: title, p_body: body || null, p_type: type, p_icon: icon });
-    if (error) throw error;
-    if (data && data.ok) {
-      toast(`Broadcast sent to ${data.sent} users`);
-      document.getElementById('bcast-title').value = '';
-      document.getElementById('bcast-body').value = '';
-    } else toast(data?.message||'Failed', 'error');
-  } catch (e) { toast(e.message, 'error'); }
+  if (!title) return toast('Title required', 'error');
+  if (!confirm(`Broadcast to ALL USERS?\n\n${title}\n${body||''}`)) return;
+  try { const { data, error } = await client.rpc('admin_send_broadcast', { p_title: title, p_body: body || null, p_type: type, p_icon: icon }); if (error) throw error; if (data && data.ok) { toast(`Broadcast to ${data.sent} users`); document.getElementById('bcast-title').value = ''; document.getElementById('bcast-body').value = ''; } else toast(data?.message||'Failed', 'error'); } catch (e) { toast(e.message, 'error'); }
 }
 window.doBroadcast = doBroadcast;
 
-// ===== LIVE FEED =====
+// Live feed
 async function enableLiveFeed() {
   if (liveFeedEnabled) { renderLiveFeed(); return; }
   liveFeedEnabled = true;
-
-  try {
-    const { data: tx } = await client.rpc('admin_get_recent_transactions', { p_limit: 20 });
-    if (tx && tx.length) {
-      liveFeedItems = tx.map(t => ({
-        kind: 'tx',
-        ts: t.created_at,
-        text: `${t.full_name||'User'} — ${t.description||'transaction'} (${t.type==='credit'?'+':'-'}${formatRupees(t.amount)})`
-      })).sort((a, b) => new Date(b.ts) - new Date(a.ts));
-    }
-  } catch (e) {}
+  try { const { data: tx } = await client.rpc('admin_get_recent_transactions', { p_limit: 20 }); if (tx?.length) { liveFeedItems = tx.map(t => ({ kind: 'tx', ts: t.created_at, text: `${t.full_name||'User'} — ${t.description||'transaction'} (${t.type==='credit'?'+':'-'}${formatRupees(t.amount)})` })).sort((a,b)=>new Date(b.ts)-new Date(a.ts)); } } catch (e) {}
   renderLiveFeed();
-
-  // Realtime is already wired in startBadgeRealtime — but push into live feed here too
   if (liveFeedChannel) { try { await client.removeChannel(liveFeedChannel); } catch (e) {} }
-  liveFeedChannel = client
-    .channel('live-feed-view')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, (payload) => {
-      const t = payload.new;
-      if (!t) return;
-      pushLiveItem({ kind: 'tx', ts: t.created_at, text: `New transaction: ${t.description} (${t.type==='credit'?'+':'-'}${formatRupees(t.amount)})` });
-    })
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'withdrawal_requests' }, (payload) => {
-      const w = payload.new;
-      if (!w) return;
-      pushLiveItem({ kind: 'wd', ts: w.requested_at, text: `New withdrawal: ${formatRupees(w.amount)} to ${w.upi_id}` });
-    })
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_sessions' }, (payload) => {
-      const g = payload.new;
-      if (!g) return;
-      pushLiveItem({ kind: 'match', ts: g.created_at, text: `New match: ${g.game_type} (₹${g.entry_fee})` });
-    })
-    .subscribe();
+  liveFeedChannel = client.channel('lf').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, (p) => pushLiveItem({ kind: 'tx', ts: p.new?.created_at || new Date(), text: `New transaction: ${p.new?.description || ''}` })).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'withdrawal_requests' }, (p) => pushLiveItem({ kind: 'wd', ts: p.new?.requested_at || new Date(), text: `New withdrawal: ${formatRupees(p.new?.amount)} to ${p.new?.upi_id}` })).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_sessions' }, (p) => pushLiveItem({ kind: 'match', ts: p.new?.created_at || new Date(), text: `New match: ${p.new?.game_type} (₹${p.new?.entry_fee})` })).subscribe();
 }
-
-function pushLiveItem(item) {
-  liveFeedItems.unshift(item);
-  if (liveFeedItems.length > 100) liveFeedItems.length = 100;
-  renderLiveFeed();
-}
-
+function pushLiveItem(item) { liveFeedItems.unshift(item); if (liveFeedItems.length > 100) liveFeedItems.length = 100; renderLiveFeed(); }
 function renderLiveFeed() {
-  const feed = document.getElementById('live-feed');
-  if (!feed) return;
-  if (liveFeedItems.length === 0) {
-    feed.innerHTML = '<div class="table-empty">Waiting for events…</div>';
-    return;
-  }
-  const colorMap = { tx: 'var(--primary)', wd: 'var(--amber)', match: 'var(--green)' };
-  const iconMap = { tx: 'fa-receipt', wd: 'fa-hand-holding-usd', match: 'fa-gamepad' };
-  feed.innerHTML = liveFeedItems.map(item => `
-    <div class="live-item" style="border-left:3px solid ${colorMap[item.kind] || 'var(--line)'};">
-      <i class="fas ${iconMap[item.kind] || 'fa-circle'}" style="color:${colorMap[item.kind] || 'var(--muted)'};margin-top:2px;flex-shrink:0;"></i>
-      <div style="flex:1;font-size:0.82rem;min-width:0;">${escapeHtml(item.text)}</div>
-      <div style="font-size:0.7rem;color:var(--muted);white-space:nowrap;flex-shrink:0;">${escapeHtml(timeAgo(item.ts))}</div>
-    </div>
-  `).join('');
+  const feed = document.getElementById('live-feed'); if (!feed) return;
+  if (liveFeedItems.length === 0) { feed.innerHTML = '<div class="table-empty">Waiting for events…</div>'; return; }
+  const cm = { tx: 'var(--primary)', wd: 'var(--amber)', match: 'var(--green)' };
+  const im = { tx: 'fa-receipt', wd: 'fa-hand-holding-usd', match: 'fa-gamepad' };
+  feed.innerHTML = liveFeedItems.map(item => `<div style="display:flex;gap:12px;padding:12px;background:#fafafc;border-radius:8px;margin-bottom:10px;border-left:3px solid ${cm[item.kind] || 'var(--line)'};"><i class="fas ${im[item.kind] || 'fa-circle'}" style="color:${cm[item.kind] || 'var(--muted)'};margin-top:2px;flex-shrink:0;"></i><div style="flex:1;font-size:0.82rem;min-width:0;">${escapeHtml(item.text)}</div><div style="font-size:0.7rem;color:var(--muted);white-space:nowrap;flex-shrink:0;">${escapeHtml(timeAgo(item.ts))}</div></div>`).join('');
 }
 
-// Refresh counts every 90 seconds as safety
-setInterval(loadBadgeCounts, 90000);
+// ===== SUPPORT TICKETS =====
+async function loadTickets() {
+  const list = document.getElementById('tickets-list'); const countEl = document.getElementById('tickets-count');
+  if (!list) return;
+  list.innerHTML = '<div class="table-empty">Loading…</div>';
+  document.getElementById('tickets-list-wrap').style.display = 'block';
+  document.getElementById('tickets-chat-wrap').classList.remove('active');
+  try {
+    const { data, error } = await client.rpc('admin_list_tickets', { p_limit: 50 });
+    if (error) throw error;
+    if (!data || data.length === 0) { list.innerHTML = '<div class="table-empty">No tickets yet.</div>'; if (countEl) countEl.textContent = '0 tickets'; return; }
+    if (countEl) countEl.textContent = data.length + ' tickets';
+    list.innerHTML = data.map(t => `
+      <div class="ticket-row ${t.unread_count > 0 ? 'unread' : ''}" onclick="openTicket('${escapeHtml(t.id)}','${escapeHtml(t.subject).replace(/'/g,'')}','${escapeHtml(t.full_name||'User').replace(/'/g,'')}','${escapeHtml(t.status)}')">
+        <div class="ticket-meta">
+          <div class="ticket-subject">${escapeHtml(t.subject)}</div>
+          <div class="ticket-sub-detail">
+            <span><i class="fas fa-user"></i> ${escapeHtml(t.full_name||'—')}</span>
+            <span><i class="fas fa-tag"></i> ${escapeHtml(t.category)}</span>
+            <span class="badge ${t.status==='open'?'amber':t.status==='answered'?'blue':'green'}">${escapeHtml(t.status)}</span>
+            <span>${escapeHtml(timeAgo(t.last_message_at))}</span>
+          </div>
+        </div>
+        ${t.unread_count > 0 ? `<div class="ticket-unread-badge">${t.unread_count}</div>` : ''}
+      </div>
+    `).join('');
+  } catch (e) { list.innerHTML = `<div class="table-empty">Error: ${escapeHtml(e.message)}</div>`; }
+}
+window.loadTickets = loadTickets;
 
-// ===== BOOT =====
+async function openTicket(id, subject, userName, status) {
+  currentTicketId = id;
+  document.getElementById('tickets-list-wrap').style.display = 'none';
+  document.getElementById('tickets-chat-wrap').classList.add('active');
+  document.getElementById('ticket-chat-subject').textContent = subject;
+  document.getElementById('ticket-chat-user').textContent = userName;
+  document.getElementById('ticket-chat-status').textContent = status;
+  await client.rpc('mark_ticket_read', { p_ticket_id: id });
+  await loadTicketMessages();
+  if (currentTicketChannel) { try { await client.removeChannel(currentTicketChannel); } catch (e) {} }
+  currentTicketChannel = client.channel('tk-' + id).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_messages', filter: 'ticket_id=eq.' + id }, () => loadTicketMessages()).subscribe();
+  badgeState.tickets = Math.max(0, badgeState.tickets - 1);
+  refreshAllBadges();
+}
+window.openTicket = openTicket;
+
+async function loadTicketMessages() {
+  const view = document.getElementById('ticket-messages-view'); if (!view || !currentTicketId) return;
+  try {
+    const { data, error } = await client.from('ticket_messages').select('*').eq('ticket_id', currentTicketId).order('created_at', { ascending: true });
+    if (error) throw error;
+    if (!data?.length) { view.innerHTML = '<div class="table-empty">No messages.</div>'; return; }
+    view.innerHTML = data.map(m => {
+      const isUser = m.sender_role === 'user';
+      return `<div class="ticket-msg ${isUser ? '' : 'user-side'}"><div class="bubble"><div>${escapeHtml(m.body).replace(/\n/g,'<br>')}</div><span class="time">${escapeHtml(formatIST(m.created_at))} · ${isUser ? 'User' : 'Admin'}</span></div></div>`;
+    }).join('');
+    view.scrollTop = view.scrollHeight;
+  } catch (e) { view.innerHTML = `<div class="table-empty">Error: ${escapeHtml(e.message)}</div>`; }
+}
+
+async function sendTicketReply() {
+  if (!currentTicketId) return;
+  const input = document.getElementById('ticket-reply-input');
+  const body = (input?.value || '').trim();
+  if (!body) return;
+  try {
+    const { data, error } = await client.rpc('admin_reply_ticket', { p_ticket_id: currentTicketId, p_body: body });
+    if (error) throw error;
+    if (data && data.ok) { input.value = ''; await loadTicketMessages(); toast('Reply sent'); }
+    else toast(data?.message || 'Failed', 'error');
+  } catch (e) { toast(e.message, 'error'); }
+}
+window.sendTicketReply = sendTicketReply;
+
+function backToTicketsList() {
+  currentTicketId = null;
+  if (currentTicketChannel) { try { client.removeChannel(currentTicketChannel); } catch (e) {} currentTicketChannel = null; }
+  document.getElementById('tickets-list-wrap').style.display = 'block';
+  document.getElementById('tickets-chat-wrap').classList.remove('active');
+  loadTickets();
+}
+window.backToTicketsList = backToTicketsList;
+
+// Boot
 startAuthFlow();
+setInterval(loadBadgeCounts, 90000);
 </script>
 </body>
 </html>
