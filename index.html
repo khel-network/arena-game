@@ -376,12 +376,20 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .notif-panel-overlay {
   position: fixed;
   inset: 0;
-  background: transparent;
+  background: rgba(22, 21, 34, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: none;
   z-index: 1500;
 }
-.app-wrap .notif-panel-overlay.show { display: block; }
-
+.app-wrap .notif-panel-overlay.show {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 .app-wrap .notif-panel {
   position: fixed;
   top: 66px;
