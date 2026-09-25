@@ -4988,8 +4988,8 @@ function renderNotifPanelList() {
     return `<div class="notif-item ${unreadCls}" data-notif-id="${escapeHtml(n.id)}">
       <div class="notif-icon-circle ${ic.cls}"><i class="fas ${ic.icon}"></i></div>
       <div class="notif-content">
-        <div class="notif-title">${escapeHtml(n.title)}</div>
-        ${n.body ? `<div class="notif-body-text">${escapeHtml(n.body)}</div>` : ''}
+       <div class="notif-title">${escapeHtml(stripEmoji(n.title))}</div>
+       ${n.body ? `<div class="notif-body-text">${escapeHtml(stripEmoji(n.body))}</div>` : ''}
         <div class="notif-time">${escapeHtml(formatISTRelative(n.created_at))}</div>
       </div>
     </div>`;
@@ -5009,8 +5009,8 @@ function renderNotifViewList() {
     return `<div class="notif-view-item ${unreadCls}" data-notif-id="${escapeHtml(n.id)}">
       <div class="notif-icon-circle ${ic.cls}"><i class="fas ${ic.icon}"></i></div>
       <div class="notif-content">
-        <div class="notif-title">${escapeHtml(n.title)}</div>
-        ${n.body ? `<div class="notif-body-text">${escapeHtml(n.body)}</div>` : ''}
+       <div class="notif-title">${escapeHtml(stripEmoji(n.title))}</div>
+    ${n.body ? `<div class="notif-body-text">${escapeHtml(stripEmoji(n.body))}</div>` : ''}
         <div class="notif-time">${escapeHtml(formatIST(n.created_at))}</div>
       </div>
     </div>`;
@@ -5045,6 +5045,7 @@ function openNotifPanel() {
   const overlay = document.getElementById('notif-panel-overlay');
   if (panel) panel.style.display = 'flex';
   if (overlay) overlay.classList.add('show');
+  document.body.classList.add('notif-open');
   renderNotifPanelList();
   const mk = document.getElementById('notif-mark-all-btn');
   if (mk) mk.disabled = (notificationsUnread === 0);
@@ -5055,6 +5056,7 @@ function closeNotifPanel() {
   const overlay = document.getElementById('notif-panel-overlay');
   if (panel) panel.style.display = 'none';
   if (overlay) overlay.classList.remove('show');
+  document.body.classList.remove('notif-open');
 }
 
 async function subscribeToNotificationsRealtime() {
