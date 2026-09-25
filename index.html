@@ -1125,7 +1125,71 @@ body.in-app .site-footer { display: none !important; }
 .welcome-bonus-card .welcome-bonus-cta { width: 100%; padding: 14px; border-radius: 14px; background: linear-gradient(135deg, #5b3df0, #7c5cf5); color: #fff; font-weight: 700; font-size: 1rem; border: none; cursor: pointer; box-shadow: 0 10px 26px rgba(91,61,240,0.3); transition: 0.2s; }
 .welcome-bonus-card .welcome-bonus-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(91,61,240,0.4); }
 .welcome-bonus-card .welcome-bonus-note { font-size: 0.7rem; color: #918fa3; margin-top: 12px; }
-</style>
+
+/* ===== Notifications popup: smaller + no-scroll page behind ===== */
+body.notif-open { overflow: hidden !important; }
+body.notif-open html { overflow: hidden !important; }
+
+.app-wrap .notif-panel {
+  width: 240px;
+  max-width: calc(100vw - 24px);
+  max-height: 320px;
+}
+.app-wrap .notif-header {
+  padding: 10px 12px 8px;
+}
+.app-wrap .notif-header h3 {
+  font-size: 0.82rem;
+}
+.app-wrap .notif-close-btn {
+  width: 22px;
+  height: 22px;
+  font-size: 0.8rem;
+}
+.app-wrap .notif-item {
+  gap: 9px;
+  padding: 9px 12px;
+}
+.app-wrap .notif-icon-circle {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  font-size: 0.72rem;
+}
+.app-wrap .notif-title {
+  font-size: 0.72rem;
+  margin-bottom: 2px;
+}
+.app-wrap .notif-body-text {
+  font-size: 0.64rem;
+  margin-bottom: 3px;
+}
+.app-wrap .notif-time {
+  font-size: 0.55rem;
+}
+.app-wrap .notif-footer {
+  padding: 8px 12px;
+}
+.app-wrap .notif-mark-all-link {
+  font-size: 0.68rem;
+}
+.app-wrap .notif-empty {
+  padding: 30px 16px;
+}
+.app-wrap .notif-empty i {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+.app-wrap .notif-empty p {
+  font-size: 0.72rem;
+}
+@media (max-width:640px) {
+  .app-wrap .notif-panel {
+    width: 220px;
+    max-height: 300px;
+  }
+}
+</style></style>
 </head>
 <body>
 
