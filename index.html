@@ -4684,13 +4684,14 @@ async function endDuel(won, analysisText) {
   if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {} gameRealtimeSubscription = null; }
   activeGameSessionId = null;
   activeGameSession = null;
-  let reward = -currentEntryFee;
-  if (won) {
-    try { await persistWalletDelta(currentReward); await recordTransaction('Duel Victory — ' + activeGame.name, 'credit', currentReward); reward = currentReward; showWalletToast(currentReward, 'credit', 'Won ' + activeGame.name); } catch (e) {}
-  } else {
-    showWalletToast(currentEntryFee, 'debit', 'Lost ' + activeGame.name);
-  }
+   // Payouts + transactions are handled by the end_session_with_state RPC.
+  // We only record local match history here; wallet realtime will fire the toast.
+  const reward = won ? currentReward : -currentEntryFee;
+
   await recordMatch(activeGame.name, activeOpponent.name, won ? 'VICTORY' : 'DEFEAT', reward);
+
+  // Re-sync wallet + transactions from DB (RPC already wrote them).
+  try { await loadWallet(); await loadTransactions(); } catch (e) {}
   updateUI();
   const stage = document.getElementById('arena-stage');
   if (stage) {
@@ -4720,7 +4721,9 @@ async function endDrawnMatch() {
   if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch (e) {} gameRealtimeSubscription = null; }
   activeGameSessionId = null;
   activeGameSession = null;
-  try { await persistWalletDelta(currentEntryFee); await recordTransaction('Stake Refunded — ' + activeGame.name, 'credit', currentEntryFee); await recordMatch(activeGame.name, activeOpponent.name, 'DRAW', 0); showWalletToast(currentEntryFee, 'credit', 'Draw refund — ' + activeGame.name); } catch (e) {}
+  // RPC handles the refund + transaction row.
+  await recordMatch(activeGame.name, activeOpponent.name, 'DRAW', 0);
+  try { await loadWallet(); await loadTransactions(); } catch (e) {}
   updateUI();
   const stage = document.getElementById('arena-stage');
   if (stage) {
@@ -4839,10 +4842,15 @@ async function beginMatchmaking() {
         }
         if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
         try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
+               // RPC already refunded the blocked player's stake.
+        try { await loadWallet(); await loadTransactions(); } catch (e) {}
+        // Also: broadcast to the OTHER player so their screen shows the same error.
         try {
-          await persistWalletDelta(currentEntryFee);
-          await recordTransaction('Stake Refunded — FairPlay block', 'credit', currentEntryFee);
-          showWalletToast(currentEntryFee, 'credit', 'FairPlay block — refunded');
+          await client.from('fairplay_blocks').insert({
+            user_a: result.other_user_id || null,
+            user_b: currentUser.id,
+            reason: result.reason || 'Same device or network detected'
+          });
         } catch (e) {}
         const searchingView = document.getElementById('mm-searching-view');
         const blockedView = document.getElementById('mm-blocked-view');
@@ -4915,13 +4923,24 @@ document.getElementById('no-opp-close-btn')?.addEventListener('click', () => {
 
 document.getElementById('mm-blocked-back-btn')?.addEventListener('click', () => {
   const searchingView = document.getElementById('mm-searching-view');
-  const blockedView = document.getElementById('mm-blocked-view');
+  const blockedView   = document.getElementById('mm-blocked-view');
   if (blockedView) blockedView.style.display = 'none';
   if (searchingView) searchingView.style.display = 'block';
-  if (matchOverlay) matchOverlay.classList.add('hidden');
+
+  matchOverlay.classList.add('hidden');
+  unlockBodyScroll();
+
+  if (currentBalance < currentEntryFee) {
+    showToast('Insufficient balance. Need ' + formatRupees(currentEntryFee), 'error');
+    inQueue = false;
+    matchmakingLock = false;
+    restoreScrollY();
+    return;
+  }
   inQueue = false;
   matchmakingLock = false;
-  restoreScrollY();
+  // Immediately try again — user does NOT go back to dashboard
+  beginMatchmaking();
 });
 
 cancelMatchBtn?.addEventListener('click', async () => {
@@ -4934,7 +4953,10 @@ cancelMatchBtn?.addEventListener('click', async () => {
     await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
     if (currentInviteId) { try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {} currentInviteId = null; }
     if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
+    // Server-side cancel RPC should refund. If yours doesn't exist yet,
+    // keep the two lines below and DO NOT also refund in any RPC.
     try { await persistWalletDelta(currentEntryFee); await recordTransaction('Stake Refunded — ' + activeGame.name, 'credit', currentEntryFee); showWalletToast(currentEntryFee, 'credit', 'Match cancelled — refund'); } catch (e) {}
+    try { await loadWallet(); await loadTransactions(); } catch (e) {}
     updateUI();
   }
   restoreScrollY();
@@ -5001,6 +5023,70 @@ function startPresenceHeartbeat() {
   document.addEventListener('visibilitychange', () => { if (isTabActive()) touchPresence(); });
   window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
 }
+  // ===== FAIRPLAY BLOCKS (realtime) =====
+let fairplayChannel = null;
+
+async function subscribeToFairplayBlocks() {
+  if (!currentUser) return;
+  if (fairplayChannel) { try { await client.removeChannel(fairplayChannel); } catch(e){} }
+  fairplayChannel = client
+    .channel('fairplay-' + currentUser.id)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'fairplay_blocks',
+      filter: `user_a=eq.${currentUser.id}`
+    }, (payload) => handleFairplayBlock(payload.new))
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'fairplay_blocks',
+      filter: `user_b=eq.${currentUser.id}`
+    }, (payload) => handleFairplayBlock(payload.new))
+    .subscribe();
+}
+
+async function handleFairplayBlock(row) {
+  // Already in an active match → forfeit + return to lobby with the error
+  if (isGameActive && activeGameSessionId) {
+    try {
+      await client.from('game_sessions')
+        .update({ status: 'abandoned', updated_at: new Date().toISOString() })
+        .eq('id', activeGameSessionId);
+    } catch(e){}
+    isGameActive = false;
+    activeGameSessionId = null;
+    if (gameRealtimeSubscription) { try { await gameRealtimeSubscription.unsubscribe(); } catch(e){} gameRealtimeSubscription = null; }
+    arenaOverlay.classList.add('hidden');
+    unlockBodyScroll();
+  }
+
+  // Still searching → cancel the queue
+  if (inQueue) {
+    if (matchmakingInterval) { clearInterval(matchmakingInterval); matchmakingInterval = null; }
+    inQueue = false;
+  }
+
+  matchmakingLock = false;
+  showFairplayBlockedModal(row?.reason || 'Same device or network detected. FairPlay blocked this match.');
+  try { await loadWallet(); await loadTransactions(); } catch(e){}
+  updateUI();
+}
+
+function showFairplayBlockedModal(reason) {
+  const searchingView = document.getElementById('mm-searching-view');
+  const blockedView   = document.getElementById('mm-blocked-view');
+  const reasonEl      = document.getElementById('mm-blocked-reason');
+  const refundEl      = document.getElementById('mm-blocked-refund');
+
+  if (searchingView) searchingView.style.display = 'none';
+  if (reasonEl) reasonEl.textContent = reason;
+  if (refundEl) refundEl.textContent = '₹' + currentEntryFee + ' Refunded';
+  if (blockedView) blockedView.style.display = 'block';
+
+  matchOverlay.classList.remove('hidden');
+  lockBodyScroll();
+  restoreScrollY();
+
+  const btn = document.getElementById('mm-blocked-back-btn');
+  if (btn) btn.textContent = 'Try Again';
+}
 async function subscribeToInvites() {
   if (inviteSubscription) { try { await inviteSubscription.unsubscribe(); } catch (e) {} inviteSubscription = null; }
   const channel = client.channel('match-invites-feed');
@@ -5037,8 +5123,22 @@ async function joinInvite(inv, popupEl) {
   saveScrollY();
   try { await persistWalletDelta(-inv.entry_fee); await recordTransaction('Stake — ' + inv.game_name, 'debit', inv.entry_fee); showWalletToast(inv.entry_fee, 'debit', 'Stake — ' + inv.game_name); } catch (e) { showToast('Could not process entry stake.', 'error'); popupEl.remove(); return; }
   try {
-    const { data, error } = await client.rpc('accept_match_invite', { p_invite_id: inv.id });
+     const myFP = await getDeviceFingerprint();
+    const myIP = await getClientIP();
+    const { data, error } = await client.rpc('accept_match_invite', {
+      p_invite_id: inv.id,
+      p_fingerprint: myFP,
+      p_ip: myIP
+    });
     if (error) throw error;
+    if (data && data.blocked) {
+      await persistWalletDelta(inv.entry_fee);
+      await recordTransaction('Stake Refunded — FairPlay block', 'credit', inv.entry_fee);
+      showWalletToast(inv.entry_fee, 'credit', 'FairPlay block — refunded');
+      popupEl.remove();
+      showFairplayBlockedModal(data.reason || 'Same device or network as the host. FairPlay blocked this match.');
+      return;
+    }
     if (!data || !data.ok) {
       await persistWalletDelta(inv.entry_fee);
       await recordTransaction('Stake Refunded — invite unavailable', 'credit', inv.entry_fee);
@@ -5387,6 +5487,13 @@ async function initDashboard() {
     if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '—';
     await loadUserName();
     await recordTermsAcceptance();
+    try {
+      const fp = await getDeviceFingerprint();
+      const ip = await getClientIP();
+      await client.from('users').update({
+        device_fingerprint: fp, last_ip: ip
+      }).eq('id', currentUser.id);
+    } catch(e){}
     await loadWallet();
     await loadTransactions();
     await loadMatchHistory();
@@ -5396,6 +5503,7 @@ async function initDashboard() {
     startPresenceHeartbeat();
     subscribeToWalletRealtime();
     subscribeToInvites();
+    subscribeToFairplayBlocks();    
     wireNotificationsUI();
     loadNotifications();
     subscribeToNotificationsRealtime();
