@@ -1189,7 +1189,7 @@ body.notif-open html { overflow: hidden !important; }
     max-height: 300px;
   }
 }
-</style></style>
+</style>
 </head>
 <body>
 
@@ -2163,6 +2163,17 @@ function escapeHtml(str) {
 function sanitizeName(str) {
   if (!str) return 'Player';
   return String(str).replace(/[<>&"'\/\\]/g, '').trim().slice(0, 20) || 'Player';
+}
+function stripEmoji(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
+    .replace(/[\u{1F000}-\u{1F2FF}]/gu, '')
+    .replace(/[\u{2600}-\u{27BF}]/gu, '')
+    .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '')
+    .replace(/[\u{FE0F}\u{200D}\u{20E3}]/gu, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }
 
 // ===== APP MODE =====
