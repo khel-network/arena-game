@@ -4956,6 +4956,7 @@ cancelMatchBtn?.addEventListener('click', async () => {
     // Server-side cancel RPC should refund. If yours doesn't exist yet,
     // keep the two lines below and DO NOT also refund in any RPC.
     try { await persistWalletDelta(currentEntryFee); await recordTransaction('Stake Refunded — ' + activeGame.name, 'credit', currentEntryFee); showWalletToast(currentEntryFee, 'credit', 'Match cancelled — refund'); } catch (e) {}
+    updateUI();
     try { await loadWallet(); await loadTransactions(); } catch (e) {}
     updateUI();
   }
