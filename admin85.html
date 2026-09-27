@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex, nofollow" />
 <meta name="theme-color" content="#1a1730" />
 <title>SkillClash · Admin Console</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231a1730'/%3E%3Cpath d='M35 8 L19 34 L32 34 L29 56 L45 30 L32 30 Z' fill='%235b3df0'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -145,14 +146,13 @@ tr:hover td { background: #fafafc; }
 
 /* TICKETS CHAT UI */
 .ticket-list { display: flex; flex-direction: column; gap: 10px; max-height: 70vh; overflow-y: auto; padding: 4px; }
-.ticket-row { padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; transition: 0.15s; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.ticket-row { position: relative; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; transition: 0.15s; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .ticket-row:hover { border-color: var(--primary); background: #faf9ff; }
 .ticket-row.unread { background: #faf9ff; border-color: #ddd6fe; }
 .ticket-row.unread::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primary); border-radius: 12px 0 0 12px; }
-.ticket-row { position: relative; }
 .ticket-meta { flex: 1; min-width: 0; }
 .ticket-subject { font-weight: 700; font-size: 0.88rem; margin-bottom: 3px; }
-.ticket-sub-detail { font-size: 0.72rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+.ticket-sub-detail { font-size: 0.72rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .ticket-unread-badge { background: var(--red); color: #fff; font-size: 0.6rem; font-weight: 800; padding: 2px 7px; border-radius: 100px; min-width: 20px; text-align: center; }
 
 .chat-view { display: none; }
@@ -160,7 +160,7 @@ tr:hover td { background: #fafafc; }
 .chat-header-bar { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px 12px 0 0; background: #faf9ff; }
 .chat-header-bar button { width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; }
 .chat-header-bar .info { flex: 1; min-width: 0; }
-.chat-header-bar .info strong { display: block; font-size: 0.85rem; }
+.chat-header-bar .info strong { display: block; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chat-header-bar .info small { font-size: 0.68rem; color: var(--muted); }
 .ticket-messages-view { border: 1px solid var(--line); border-top: none; border-radius: 0 0 12px 12px; background: #fff; max-height: 55vh; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .ticket-msg { display: flex; gap: 10px; max-width: 85%; }
@@ -173,6 +173,19 @@ tr:hover td { background: #fafafc; }
 .ticket-reply-row textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,61,240,0.1); }
 .ticket-reply-row button { padding: 10px 20px; background: var(--primary); color: #fff; border-radius: 10px; font-weight: 700; font-size: 0.85rem; align-self: flex-end; min-height: 44px; }
 
+/* NOTIFICATION TEMPLATES */
+.template-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.template-chip { padding: 8px 14px; border: 1px solid var(--line); border-radius: 100px; background: #fff; font-size: 0.78rem; font-weight: 600; color: var(--ink); cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; }
+.template-chip i { font-size: 0.75rem; color: var(--primary); }
+.template-chip:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+.template-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 4px 12px rgba(91,61,240,0.25); }
+.template-chip.active i { color: #fff; }
+.template-group-title { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
+.template-group-title:first-child { margin-top: 0; }
+.template-preview { background: #fafafc; border: 1px dashed var(--line); border-radius: 12px; padding: 14px; margin-top: 14px; }
+.template-preview-title { font-weight: 800; font-size: 0.88rem; margin-bottom: 4px; color: var(--ink); }
+.template-preview-body { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+
 /* DAILY BONUS CONFIG */
 .config-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; background: #fff; }
 .config-row .label { flex: 1; }
@@ -184,8 +197,7 @@ tr:hover td { background: #fafafc; }
 .switch.on::after { left: 22px; }
 
 @media (max-width: 900px) {
-  .console.active { grid-template-columns: 1fr; }
-  .console.active { display: block; }
+  .console.active { grid-template-columns: 1fr; display: block; }
   .sidebar { position: fixed; left: 0; top: 0; width: 280px; max-width: 85vw; z-index: 500; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); height: 100vh; height: 100dvh; box-shadow: 4px 0 30px rgba(0,0,0,0.25); }
   .sidebar.open { transform: translateX(0); }
   .mobile-topbar { display: flex; }
@@ -383,18 +395,55 @@ tr:hover td { background: #fafafc; }
         </div>
       </div>
     </section>
-
-    <!-- NOTIFY -->
+        <!-- NOTIFY -->
     <section id="view-notify" class="view">
-      <div class="main-header"><div><h1 class="main-title">Send Notification</h1><p class="main-sub">To a single user</p></div></div>
-      <div class="card"><div class="form-grid">
-        <div class="field full"><label>User UUID *</label><input type="text" id="notify-user-id" placeholder="UUID" /></div>
-        <div class="field full"><label>Title *</label><input type="text" id="notify-title" placeholder="Reward credited" maxlength="100" /></div>
-        <div class="field full"><label>Body</label><textarea id="notify-body" placeholder="₹25 bonus added." maxlength="300"></textarea></div>
-        <div class="field"><label>Type</label><select id="notify-type"><option value="general">General</option><option value="info">Info</option><option value="gift">Gift</option><option value="success">Success</option><option value="alert">Alert</option><option value="promo">Promo</option></select></div>
-        <div class="field"><label>Icon</label><select id="notify-icon"><option value="bell">Bell</option><option value="gift">Gift</option><option value="check">Check</option><option value="alert">Alert</option><option value="fire">Fire</option><option value="bullhorn">Bullhorn</option></select></div>
-        <div class="field full"><button class="btn-primary" onclick="doSendNotification()" style="width:100%;justify-content:center;padding:14px;"><i class="fas fa-paper-plane"></i> Send</button></div>
-      </div></div>
+      <div class="main-header">
+        <div><h1 class="main-title">Send Notification</h1><p class="main-sub">Pick a template or write a custom message</p></div>
+      </div>
+
+      <div class="card">
+        <h3>Choose a template</h3>
+        <p class="card-sub">Tap a template to auto-fill Title, Body, Type & Icon below</p>
+
+        <div class="template-group-title">Welcome &amp; onboarding</div>
+        <div class="template-picker" id="tpl-group-welcome"></div>
+
+        <div class="template-group-title">Rewards &amp; bonuses</div>
+        <div class="template-picker" id="tpl-group-rewards"></div>
+
+        <div class="template-group-title">Match results</div>
+        <div class="template-picker" id="tpl-group-matches"></div>
+
+        <div class="template-group-title">Payments</div>
+        <div class="template-picker" id="tpl-group-payments"></div>
+
+        <div class="template-group-title">Issues &amp; warnings</div>
+        <div class="template-picker" id="tpl-group-issues"></div>
+
+        <div class="template-group-title">Engagement</div>
+        <div class="template-picker" id="tpl-group-engagement"></div>
+
+        <div class="template-group-title">Other</div>
+        <div class="template-picker" id="tpl-group-other"></div>
+
+        <div class="template-preview" id="template-preview" style="display:none;">
+          <div class="template-preview-title" id="template-preview-title">—</div>
+          <div class="template-preview-body" id="template-preview-body">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Message details</h3>
+        <p class="card-sub">Fields auto-fill from the selected template — edit freely before sending</p>
+        <div class="form-grid">
+          <div class="field full"><label>User UUID *</label><input type="text" id="notify-user-id" placeholder="UUID" /></div>
+          <div class="field full"><label>Title *</label><input type="text" id="notify-title" placeholder="Reward credited" maxlength="100" /></div>
+          <div class="field full"><label>Body</label><textarea id="notify-body" placeholder="₹25 bonus added." maxlength="300"></textarea></div>
+          <div class="field"><label>Type</label><select id="notify-type"><option value="general">General</option><option value="info">Info</option><option value="gift">Gift</option><option value="success">Success</option><option value="alert">Alert</option><option value="promo">Promo</option></select></div>
+          <div class="field"><label>Icon</label><select id="notify-icon"><option value="bell">Bell</option><option value="gift">Gift</option><option value="check">Check</option><option value="alert">Alert</option><option value="fire">Fire</option><option value="bullhorn">Bullhorn</option></select></div>
+          <div class="field full"><button class="btn-primary" onclick="doSendNotification()" style="width:100%;justify-content:center;padding:14px;"><i class="fas fa-paper-plane"></i> Send</button></div>
+        </div>
+      </div>
     </section>
 
     <!-- BROADCAST -->
@@ -442,7 +491,7 @@ tr:hover td { background: #fafafc; }
 
 <script>
 // ============================================================
-// SKILLCLASH ADMIN CONSOLE v2.0
+// SKILLCLASH ADMIN CONSOLE v2.1 (with notification templates)
 // ============================================================
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_894UwPwZc0SF2MyCP9sztQ_6-s0AALZ";
@@ -488,7 +537,7 @@ function timeAgo(dateInput) {
   return formatIST(d);
 }
 
-// Mobile sidebar
+// ===== Mobile sidebar =====
 function openSidebar() { document.getElementById('sidebar')?.classList.add('open'); document.getElementById('sidebar-backdrop')?.classList.add('show'); document.body.classList.add('sidebar-open'); }
 function closeSidebar() { document.getElementById('sidebar')?.classList.remove('open'); document.getElementById('sidebar-backdrop')?.classList.remove('show'); document.body.classList.remove('sidebar-open'); }
 document.getElementById('sidebar-backdrop')?.addEventListener('click', closeSidebar);
@@ -496,7 +545,7 @@ document.getElementById('menu-toggle')?.addEventListener('click', () => { const 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
 window.addEventListener('resize', () => { if (window.innerWidth > 900) closeSidebar(); });
 
-// Badges
+// ===== Badges =====
 function setBadge(id, count, isGreen = false) {
   const el = document.getElementById(id); if (!el) return;
   if (count > 0) { el.textContent = count > 99 ? '99+' : String(count); el.classList.add('show'); el.classList.toggle('green', isGreen); }
@@ -577,7 +626,7 @@ document.getElementById('logout-btn')?.addEventListener('click', async () => { i
 document.getElementById('refresh-btn')?.addEventListener('click', () => { loadAll(); loadBadgeCounts(); });
 document.querySelectorAll('.sidebar-link[data-view]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
 
-// Stats
+// ===== Stats =====
 async function loadStats() {
   const grid = document.getElementById('stats-grid'); if (!grid) return;
   try {
@@ -687,7 +736,7 @@ window.loadDailyClaims = loadDailyClaims;
 async function loadAll() { await Promise.all([loadStats(), loadRecentUsers(), loadRecentWithdrawals(), loadRecentTx()]); }
 window.loadAll = loadAll;
 
-// Wallet adjust
+// ===== Wallet adjust =====
 async function doAdjustBalance() {
   const userId = document.getElementById('adjust-user-id').value.trim();
   const amount = parseInt(document.getElementById('adjust-amount').value);
@@ -699,7 +748,128 @@ async function doAdjustBalance() {
 }
 window.doAdjustBalance = doAdjustBalance;
 
-// Notifications
+// ============================================================
+// NOTIFICATION TEMPLATES
+// ============================================================
+const NOTIFY_TEMPLATES = {
+  welcome: [
+    { id: 'welcome_new', label: 'Welcome', icon: 'gift', title: 'Welcome to SkillClash!', body: 'You received ₹25 welcome bonus. Play your first match now!', type: 'gift' },
+    { id: 'welcome_first_match', label: 'First Match Ready', icon: 'fire', title: 'Your first match awaits!', body: '₹25 is already in your wallet. Pick a game and challenge a real player now.', type: 'info' },
+    { id: 'welcome_tips', label: 'Getting Started', icon: 'bell', title: 'Quick tips to win', body: 'Win streaks boost your rewards. Check the leaderboard to see where you stand.', type: 'info' }
+  ],
+  rewards: [
+    { id: 'daily_bonus', label: 'Daily Bonus', icon: 'gift', title: 'Your daily bonus is ready', body: 'Log in now to claim today\'s reward and keep your streak alive!', type: 'gift' },
+    { id: 'streak_bonus', label: 'Streak Reward', icon: 'fire', title: 'Streak milestone unlocked', body: 'You hit a new streak milestone. Bigger rewards await — keep playing!', type: 'gift' },
+    { id: 'reward_credited', label: 'Reward Credited', icon: 'check', title: 'Reward credited', body: 'A reward has been added to your wallet. Check your balance now.', type: 'success' },
+    { id: 'bonus_offer', label: 'Bonus Offer', icon: 'bullhorn', title: 'Limited-time bonus!', body: 'Top up your wallet today and get extra tokens. Offer valid for a short time.', type: 'promo' }
+  ],
+  matches: [
+    { id: 'match_win', label: 'Victory', icon: 'check', title: 'You won!', body: 'Victory in your last match. Keep climbing the leaderboard!', type: 'success' },
+    { id: 'match_loss', label: 'Better Luck', icon: 'alert', title: 'Better luck next time', body: 'You lost your last match. Rematch now and win it back!', type: 'alert' },
+    { id: 'match_draw', label: 'Draw', icon: 'bell', title: 'Match ended in a draw', body: 'Your stake has been refunded. Try another match to win!', type: 'info' },
+    { id: 'big_win', label: 'Big Win', icon: 'fire', title: 'Big win!', body: 'You just won big. Check your wallet — the reward is already credited.', type: 'success' }
+  ],
+  payments: [
+    { id: 'topup_success', label: 'Top-up Success', icon: 'check', title: 'Wallet topped up', body: 'Your wallet has been credited. Play now and win more!', type: 'success' },
+    { id: 'wd_processing', label: 'Withdrawal Processing', icon: 'bell', title: 'Withdrawal in progress', body: 'Your withdrawal request is being processed. It will be paid within 7–8 hours.', type: 'info' },
+    { id: 'wd_paid', label: 'Withdrawal Paid', icon: 'check', title: 'Withdrawal paid', body: 'Your withdrawal has been successfully paid to your UPI ID.', type: 'success' },
+    { id: 'wd_rejected', label: 'Withdrawal Rejected', icon: 'alert', title: 'Withdrawal rejected', body: 'Your withdrawal could not be processed. The amount has been refunded to your wallet.', type: 'alert' },
+    { id: 'payment_failed', label: 'Payment Failed', icon: 'alert', title: 'Payment failed', body: 'Your last payment did not go through. Please try again or contact support.', type: 'alert' }
+  ],
+  issues: [
+    { id: 'fairplay_warning', label: 'FairPlay Warning', icon: 'alert', title: 'FairPlay warning', body: 'Unusual activity was detected on your account. Play fairly to avoid suspension.', type: 'alert' },
+    { id: 'suspension', label: 'Account Suspended', icon: 'alert', title: 'Account suspended', body: 'Your account has been suspended for violating FairPlay rules. Contact support if you believe this is a mistake.', type: 'alert' },
+    { id: 'maintenance', label: 'Maintenance Notice', icon: 'bell', title: 'Scheduled maintenance', body: 'SkillClash will be briefly unavailable for scheduled maintenance. Thanks for your patience.', type: 'info' },
+    { id: 'bug_fix', label: 'Bug Fixed', icon: 'check', title: 'Issue resolved', body: 'The issue you reported has been fixed. Thanks for helping us improve SkillClash.', type: 'success' }
+  ],
+  engagement: [
+    { id: 'comeback', label: 'We Miss You', icon: 'fire', title: 'We miss you!', body: 'Your opponents are climbing the leaderboard. Jump back in and reclaim your spot.', type: 'promo' },
+    { id: 'tournament', label: 'Tournament Live', icon: 'fire', title: 'Tournament live now', body: 'A new tournament just started with a big prize pool. Free to join — jump in!', type: 'promo' },
+    { id: 'refer_reminder', label: 'Refer & Earn', icon: 'gift', title: 'Invite friends, earn ₹25', body: 'Every friend who joins with your referral code gives you ₹25. No limit!', type: 'promo' },
+    { id: 'leaderboard', label: 'Leaderboard Update', icon: 'bell', title: 'You moved up the leaderboard!', body: 'Great progress. Keep playing to reach the top and unlock bigger rewards.', type: 'info' },
+    { id: 'new_game', label: 'New Game', icon: 'bullhorn', title: 'New game added!', body: 'A brand new skill game just launched on SkillClash. Try it and win rewards.', type: 'promo' }
+  ],
+  other: [
+    { id: 'custom', label: 'Custom Message', icon: 'bell', title: '', body: '', type: 'general' },
+    { id: 'thanks', label: 'Thank You', icon: 'check', title: 'Thank you!', body: 'Thanks for being part of SkillClash. We appreciate you.', type: 'info' },
+    { id: 'feedback', label: 'Feedback Request', icon: 'bell', title: 'How are we doing?', body: 'We\'d love your feedback. Reply to this notification with your thoughts.', type: 'info' }
+  ]
+};
+
+function initNotifyTemplates() {
+  const groups = {
+    welcome: 'tpl-group-welcome',
+    rewards: 'tpl-group-rewards',
+    matches: 'tpl-group-matches',
+    payments: 'tpl-group-payments',
+    issues: 'tpl-group-issues',
+    engagement: 'tpl-group-engagement',
+    other: 'tpl-group-other'
+  };
+  const iconMap = {
+    check: 'check-circle',
+    alert: 'exclamation-circle',
+    fire: 'fire',
+    gift: 'gift',
+    bullhorn: 'bullhorn',
+    bell: 'bell'
+  };
+  Object.entries(groups).forEach(([groupKey, containerId]) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = NOTIFY_TEMPLATES[groupKey].map(t => `
+      <button type="button" class="template-chip" data-template-id="${t.id}" data-group="${groupKey}">
+        <i class="fas fa-${iconMap[t.icon] || 'bell'}"></i>
+        ${escapeHtml(t.label)}
+      </button>
+    `).join('');
+    container.querySelectorAll('.template-chip').forEach(chip => {
+      chip.addEventListener('click', () => applyTemplate(chip.dataset.templateId, chip));
+    });
+  });
+}
+
+function applyTemplate(templateId, chipEl) {
+  let found = null;
+  Object.values(NOTIFY_TEMPLATES).forEach(arr => {
+    const t = arr.find(x => x.id === templateId);
+    if (t) found = t;
+  });
+  if (!found) return;
+
+  document.querySelectorAll('.template-chip').forEach(c => c.classList.remove('active'));
+  if (chipEl) chipEl.classList.add('active');
+
+  const preview = document.getElementById('template-preview');
+  const previewTitle = document.getElementById('template-preview-title');
+  const previewBody = document.getElementById('template-preview-body');
+
+  if (found.id === 'custom') {
+    document.getElementById('notify-title').value = '';
+    document.getElementById('notify-body').value = '';
+    document.getElementById('notify-type').value = 'general';
+    document.getElementById('notify-icon').value = 'bell';
+    if (preview) preview.style.display = 'none';
+    document.getElementById('notify-title').focus();
+    toast('Custom mode — type your own message', 'info');
+    return;
+  }
+
+  document.getElementById('notify-title').value = found.title;
+  document.getElementById('notify-body').value = found.body;
+  document.getElementById('notify-type').value = found.type;
+  document.getElementById('notify-icon').value = found.icon;
+
+  if (preview && previewTitle && previewBody) {
+    previewTitle.textContent = found.title;
+    previewBody.textContent = found.body;
+    preview.style.display = 'block';
+  }
+  toast('Template applied: ' + found.label, 'info');
+}
+window.applyTemplate = applyTemplate;
+
+// ===== Send Notification =====
 async function doSendNotification() {
   const userId = document.getElementById('notify-user-id').value.trim();
   const title = document.getElementById('notify-title').value.trim();
@@ -708,9 +878,10 @@ async function doSendNotification() {
   const icon = document.getElementById('notify-icon').value;
   if (!userId) return toast('Enter user UUID', 'error');
   if (!title) return toast('Title required', 'error');
-  try { const { data, error } = await client.rpc('send_notification', { p_title: title, p_body: body || null, p_user_id: userId, p_type: type, p_icon: icon }); if (error) throw error; if (data && data.ok) { toast(`Sent to ${data.sent} user`); document.getElementById('notify-title').value = ''; document.getElementById('notify-body').value = ''; } else toast(data?.message||'Failed', 'error'); } catch (e) { toast(e.message, 'error'); }
+  try { const { data, error } = await client.rpc('send_notification', { p_title: title, p_body: body || null, p_user_id: userId, p_type: type, p_icon: icon }); if (error) throw error; if (data && data.ok) { toast(`Sent to ${data.sent} user`); document.getElementById('notify-title').value = ''; document.getElementById('notify-body').value = ''; document.querySelectorAll('.template-chip').forEach(c => c.classList.remove('active')); const preview = document.getElementById('template-preview'); if (preview) preview.style.display = 'none'; } else toast(data?.message||'Failed', 'error'); } catch (e) { toast(e.message, 'error'); }
 }
 window.doSendNotification = doSendNotification;
+
 async function doBroadcast() {
   const title = document.getElementById('bcast-title').value.trim();
   const body = document.getElementById('bcast-body').value.trim();
@@ -722,7 +893,7 @@ async function doBroadcast() {
 }
 window.doBroadcast = doBroadcast;
 
-// Live feed
+// ===== Live feed =====
 async function enableLiveFeed() {
   if (liveFeedEnabled) { renderLiveFeed(); return; }
   liveFeedEnabled = true;
@@ -823,7 +994,8 @@ function backToTicketsList() {
 }
 window.backToTicketsList = backToTicketsList;
 
-// Boot
+// ===== Boot =====
+initNotifyTemplates();
 startAuthFlow();
 setInterval(loadBadgeCounts, 90000);
 </script>
