@@ -5706,6 +5706,9 @@ async function initDashboard() {
     registerServiceWorker().then(() => {
       setTimeout(maybePromptForPush, 2000);
     });
+    registerServiceWorker().then(() => {
+      setTimeout(maybePromptForPush, 2000);
+    });
     loadNotifications();
     subscribeToNotificationsRealtime();
     document.getElementById('page-landing').style.display = 'none';
