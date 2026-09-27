@@ -5126,12 +5126,19 @@ async function markAllNotificationsRead() {
   try { await client.from('notifications').update({ is_read: true }).eq('user_id', currentUser.id).eq('is_read', false); } catch (e) {}
 }
 
+let _notifScrollY = 0;
 function openNotifPanel() {
   const panel = document.getElementById('notif-panel');
   const overlay = document.getElementById('notif-panel-overlay');
   if (panel) panel.style.display = 'flex';
   if (overlay) overlay.classList.add('show');
+
+  // Lock scroll (iOS-safe): remember scroll position, then pin the body
+  _notifScrollY = window.scrollY || window.pageYOffset || 0;
+  document.documentElement.classList.add('notif-open');
   document.body.classList.add('notif-open');
+  document.body.style.top = '-' + _notifScrollY + 'px';
+
   renderNotifPanelList();
   const mk = document.getElementById('notif-mark-all-btn');
   if (mk) mk.disabled = (notificationsUnread === 0);
@@ -5142,7 +5149,12 @@ function closeNotifPanel() {
   const overlay = document.getElementById('notif-panel-overlay');
   if (panel) panel.style.display = 'none';
   if (overlay) overlay.classList.remove('show');
+
+  // Unlock scroll and restore position
+  document.documentElement.classList.remove('notif-open');
   document.body.classList.remove('notif-open');
+  document.body.style.top = '';
+  window.scrollTo(0, _notifScrollY);
 }
 
 async function subscribeToNotificationsRealtime() {
