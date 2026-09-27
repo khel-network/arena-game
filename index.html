@@ -1366,8 +1366,8 @@ body.notif-open {
 <button id="menu-toggle-btn" class="menu-toggle" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
 </div>
 </nav>
-<div class="mobile-menu" id="mobile-menu"><div class="mobile-menu-inner"><a href="#modes">Games</a><a href="#challenges">Tournaments</a><a href="#how-it-works">How It Works</a><a href="#faq">FAQ</a><a onclick="showPage('help')">Help</a></div></div>
-
+<div class="mobile-menu" id="mobile-menu"><div class="mobile-menu-inner"><a onclick="document.getElementById('modes')?.scrollIntoView({behavior:'smooth'});return false;">Games</a><a onclick="document.getElementById('challenges')?.scrollIntoView({behavior:'smooth'});return false;">Tournaments</a><a onclick="document.getElementById('how-it-works')?.scrollIntoView({behavior:'smooth'});return false;">How It Works</a><a onclick="document.getElementById('faq')?.scrollIntoView({behavior:'smooth'});return false;">FAQ</a><a onclick="showPage('help')">Help</a></div></div>
+  
 <section class="hero-wrap">
 <div class="hero-left reveal">
 <div class="hero-badge"><span class="dot"></span> Live · India's 1vs1 Skill Game Arena</div>
@@ -1587,10 +1587,10 @@ body.notif-open {
 <div class="footer-cols">
 <div class="footer-col">
 <h5>Platform</h5>
-<a href="#modes">Games</a>
-<a href="#challenges">Tournaments</a>
-<a href="#how-it-works">How It Works</a>
-<a href="#faq">FAQ</a>
+<a onclick="document.getElementById('modes')?.scrollIntoView({behavior:'smooth'});return false;">Games</a>
+<a onclick="document.getElementById('challenges')?.scrollIntoView({behavior:'smooth'});return false;">Tournaments</a>
+<a onclick="document.getElementById('how-it-works')?.scrollIntoView({behavior:'smooth'});return false;">How It Works</a>
+<a onclick="document.getElementById('faq')?.scrollIntoView({behavior:'smooth'});return false;">FAQ</a>
 </div>
 <div class="footer-col">
 <h5>Support</h5>
@@ -5753,8 +5753,16 @@ window.addEventListener('pagehide', () => {
 });
 window.endDuel = endDuel;
 
-routeOnLoad();
+// Clean up any stray '#' or empty hash left in the URL
+function stripHashFromUrl() {
+  if (window.location.hash === '#' || window.location.hash === '#/') {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+}
+stripHashFromUrl();
+window.addEventListener('load', stripHashFromUrl);
 
+routeOnLoad();
 // ===== DEEP-LINK =====
 (function handleGameParam() {
   const params = new URLSearchParams(window.location.search);
