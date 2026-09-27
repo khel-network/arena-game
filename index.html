@@ -4817,11 +4817,39 @@ async function beginMatchmaking() {
       inviteExpireTimer = setTimeout(async () => { try { await client.from('match_invites').update({ status: 'expired' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {} }, INVITE_SECONDS * 1000);
     }
   } catch (e) {}
-  let matched = false;
+   let matched = false;
   let searchTime = 0;
   if (matchmakingInterval) clearInterval(matchmakingInterval);
+
+  // If the tab loses focus (user switches away), abort matchmaking and refund.
+  const cancelOnBlur = async () => {
+    if (!inQueue || matched) return;
+    matched = true;
+    if (matchmakingInterval) { clearInterval(matchmakingInterval); matchmakingInterval = null; }
+    inQueue = false;
+    matchmakingLock = false;
+    try {
+      await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+      if (currentInviteId) {
+        try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch (e) {}
+        currentInviteId = null;
+      }
+      if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
+      await persistWalletDelta(currentEntryFee);
+      await recordTransaction('Stake Refunded — ' + activeGame.name, 'credit', currentEntryFee);
+      showWalletToast(currentEntryFee, 'credit', 'Match cancelled');
+      if (matchOverlay) matchOverlay.classList.add('hidden');
+      updateUI();
+    } catch (e) {}
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && inQueue && !matched) cancelOnBlur();
+  }, { once: true });
+
   matchmakingInterval = setInterval(async () => {
     if (matched) return;
+    // Safety: if tab hidden, don't continue
+    if (document.hidden) return;
     searchTime++;
     remaining = Math.max(0, TOTAL - searchTime);
     updateRing();
@@ -5549,7 +5577,21 @@ async function routeOnLoad() {
 }
 window.addEventListener('beforeunload', (e) => {
   if (isGameActive) { e.preventDefault(); e.returnValue = 'You are currently in a game. Are you sure you want to leave?'; return e.returnValue; }
-  if (inQueue && currentUser) client.from('matchmaking_queue').delete().eq('user_id', currentUser.id).then(() => {}, () => {});
+  if (inQueue && currentUser) {
+    try {
+      client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+      client.from('match_invites').update({ status: 'cancelled' }).eq('from_user_id', currentUser.id).eq('status', 'open');
+    } catch (err) {}
+  }
+});
+// Also on pagehide (mobile Safari, bfcache)
+window.addEventListener('pagehide', () => {
+  if (inQueue && currentUser) {
+    try {
+      client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+      client.from('match_invites').update({ status: 'cancelled' }).eq('from_user_id', currentUser.id).eq('status', 'open');
+    } catch (err) {}
+  }
 });
 window.endDuel = endDuel;
 
