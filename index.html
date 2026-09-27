@@ -2182,8 +2182,8 @@ Your ₹<span id="no-opp-refund">20</span> entry has been refunded.
 const SUPABASE_URL = "https://sqldalrqohvhayfmbice.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_894UwPwZc0SF2MyCP9sztQ_6-s0AALZ";
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 const ZAPUPI_API_KEY = 'zapce570e671e2f07f3bc9837566a44ec4c';
+const VAPID_PUBLIC_KEY = 'BPBvBaFUaFQQjV0_dAEVJyMnyjQMWLfmxsHSzXgjXeEf011bwy2-hgY7EMRWvorFXdnj8GXT8vpYWVvaNH-xCAQ';
 const SEARCH_SECONDS = 12;
 const CASHOUT_MIN = 150;
 const INVITE_SECONDS = 8;
@@ -5516,7 +5516,137 @@ async function subscribeToNotificationsRealtime() {
     })
     .subscribe();
 }
+// ============================================================
+// WEB PUSH SUBSCRIPTION HELPERS
+// ============================================================
 
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return null;
+  try {
+    const registration = await navigator.serviceWorker.register('/service-worker.js');
+    return registration;
+  } catch (e) {
+    console.warn('SW registration failed:', e);
+    return null;
+  }
+}
+
+async function isPushEnabled() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+  if (Notification.permission !== 'granted') return false;
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  return !!sub;
+}
+
+async function subscribeToPushNotifications() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    showToast('Push notifications not supported on this browser', 'error');
+    return false;
+  }
+
+  if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === 'PASTE_YOUR_VAPID_PUBLIC_KEY_HERE') {
+    showToast('Push not configured yet — VAPID key missing', 'error');
+    return false;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      showToast('Notifications blocked. Enable them in browser settings.', 'error');
+      return false;
+    }
+
+    const reg = await navigator.serviceWorker.ready;
+    let subscription = await reg.pushManager.getSubscription();
+
+    if (!subscription) {
+      subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+
+    const p256dhKey = subscription.getKey('p256dh');
+    const authKey = subscription.getKey('auth');
+
+    const subJson = {
+      user_id: currentUser.id,
+      endpoint: subscription.endpoint,
+      p256dh: p256dhKey ? btoa(String.fromCharCode(...new Uint8Array(p256dhKey))) : null,
+      auth: authKey ? btoa(String.fromCharCode(...new Uint8Array(authKey))) : null,
+      user_agent: navigator.userAgent
+    };
+
+    const { error } = await client
+      .from('push_subscriptions')
+      .upsert(subJson, { onConflict: 'user_id,endpoint' });
+
+    if (error) {
+      console.error('Failed to save push subscription:', error);
+      showToast('Could not save subscription. Try again.', 'error');
+      return false;
+    }
+
+    showToast('Push notifications enabled', 'credit');
+    return true;
+  } catch (e) {
+    console.error('Push subscription failed:', e);
+    showToast('Push setup failed: ' + (e.message || 'unknown'), 'error');
+    return false;
+  }
+}
+
+async function unsubscribeFromPushNotifications() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const subscription = await reg.pushManager.getSubscription();
+    if (!subscription) {
+      showToast('Not subscribed', 'error');
+      return;
+    }
+    const endpoint = subscription.endpoint;
+    await subscription.unsubscribe();
+    await client.from('push_subscriptions').delete()
+      .eq('user_id', currentUser.id)
+      .eq('endpoint', endpoint);
+    showToast('Push notifications disabled', 'credit');
+  } catch (e) {
+    console.error('Unsubscribe failed:', e);
+    showToast('Could not disable push', 'error');
+  }
+}
+
+async function maybePromptForPush() {
+  if (!currentUser) return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') return;
+  if (Notification.permission === 'denied') return;
+
+  if (sessionStorage.getItem('skillclash_push_prompted') === '1') return;
+  sessionStorage.setItem('skillclash_push_prompted', '1');
+
+  await new Promise((r) => setTimeout(r, 4000));
+  if (document.hidden) return;
+
+  try {
+    await subscribeToPushNotifications();
+  } catch (e) {
+    // silent — user dismissed
+  }
+}
 function wireNotificationsUI() {
   document.getElementById('notification-bell-btn')?.addEventListener('click', openNotifPanel);
   document.getElementById('notif-close-btn')?.addEventListener('click', closeNotifPanel);
@@ -5573,6 +5703,9 @@ async function initDashboard() {
     subscribeToInvites();
     subscribeToFairplayBlocks();    
     wireNotificationsUI();
+    registerServiceWorker().then(() => {
+      setTimeout(maybePromptForPush, 2000);
+    });
     loadNotifications();
     subscribeToNotificationsRealtime();
     document.getElementById('page-landing').style.display = 'none';
