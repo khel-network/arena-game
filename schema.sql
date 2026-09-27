@@ -421,19 +421,23 @@ begin
   v_my_username := lower(regexp_replace(coalesce(v_my_username, ''), '[^a-zA-Z0-9]', '', 'g'));
 
   -- purge stale queue entries
+   -- Purge rows that are stale by EITHER last_seen OR queue age
   delete from public.matchmaking_queue mq
   using public.users u
   where mq.user_id = u.id
     and mq.game_type = p_game_type
-    and u.last_seen < now() - interval '25 seconds';
-
+    and (
+      u.last_seen < now() - interval '25 seconds'
+      or mq.created_at < now() - interval '30 seconds'
+    );
   -- iterate candidates, block if needed, else match
-  for v_candidate in
-    select mq.user_id, mq.device_fp, mq.last_ip
+   for v_candidate in
+    select mq.user_id, mq.device_fp, mq.last_ip, mq.created_at as queued_at
     from public.matchmaking_queue mq
     join public.users u on u.id = mq.user_id
     where mq.game_type = p_game_type
       and mq.user_id <> v_me
+      and mq.created_at >= now() - interval '30 seconds'     -- only recently QUEUED
       and u.last_seen >= now() - interval '25 seconds'
     order by mq.created_at asc
     for update of mq skip locked
@@ -494,7 +498,25 @@ begin
   end loop;
 
   -- all candidates blocked → refund the caller, log block, notify other side
-  if v_blocked_opp is not null and v_blocked_reason is not null then
+   if v_blocked_opp is not null and v_blocked_reason is not null then
+
+    -- Idempotency: if we already refunded this user for the same game in the last 20s, skip.
+    if exists (
+      select 1 from public.transactions
+      where user_id = v_me
+        and type = 'credit'
+        and description = 'Stake Refunded — FairPlay block'
+        and created_at > now() - interval '20 seconds'
+    ) then
+      -- Also remove caller + blocked opponent from queue so they don't loop
+      delete from public.matchmaking_queue where user_id in (v_me, v_blocked_opp);
+      return json_build_object(
+        'matched', true, 'blocked', true, 'already_refunded', true,
+        'reason', v_blocked_reason,
+        'other_user_id', v_blocked_opp
+      );
+    end if;
+
     -- refund the caller's stake (they paid it before calling us)
     select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
     if v_has_rupee then
@@ -736,6 +758,23 @@ begin
   end if;
 
   if v_blocked_reason is not null then
+
+    -- Idempotency: skip refund if we already refunded this user in the last 20s
+    if exists (
+      select 1 from public.transactions
+      where user_id = v_me
+        and type = 'credit'
+        and description = 'Stake Refunded — FairPlay block'
+        and created_at > now() - interval '20 seconds'
+    ) then
+      update public.match_invites set status = 'cancelled' where id = p_invite_id;
+      return json_build_object(
+        'ok', false, 'blocked', true, 'already_refunded', true,
+        'reason', v_blocked_reason,
+        'other_user_id', v_invite.from_user_id
+      );
+    end if;
+
     -- refund the joiner's stake
     select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
     if v_has_rupee then
