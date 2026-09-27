@@ -527,7 +527,7 @@ begin
 
     begin
       insert into public.transactions (user_id, description, type, amount)
-      values (v_me, 'Stake Refunded — FairPlay block', 'credit', p_entry_fee);
+      values (v_me, 'Stake Refunded — FairPlay block (queue)', 'credit', p_entry_fee);
     exception when undefined_table then null;
     end;
 
@@ -785,7 +785,7 @@ begin
 
     begin
       insert into public.transactions (user_id, description, type, amount)
-      values (v_me, 'Stake Refunded — FairPlay block', 'credit', v_invite.entry_fee);
+      values (v_me, 'Stake Refunded — FairPlay block (invite)', 'credit', v_invite.entry_fee);
     exception when undefined_table then null;
     end;
 
