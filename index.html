@@ -1206,13 +1206,10 @@ body.notif-open {
   align-items: flex-start !important;
   justify-content: flex-end !important;
   padding: 0 !important;
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  pointer-events: none;
-}
-#transaction-modal:not(.hidden) {
-  pointer-events: auto;
+  background: rgba(22, 21, 34, 0.35) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  animation: fadeIn 0.2s ease;
 }
 #transaction-modal .modal-card {
   position: fixed;
@@ -1280,11 +1277,12 @@ body.notif-open {
 }
 #transaction-modal .tx-item {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   padding: 9px 12px;
   border-bottom: 1px solid #f5f4fa;
-  gap: 3px;
+  gap: 10px;
   text-align: left;
 }
 #transaction-modal .tx-item:last-child {
@@ -1295,24 +1293,30 @@ body.notif-open {
   font-weight: 700;
   color: #161522;
   line-height: 1.3;
-  margin: 0;
-  width: 100%;
+  margin: 0 0 2px 0;
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
 }
-#transaction-modal .tx-item .amount {
-  font-size: 0.78rem;
-  font-weight: 800;
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  line-height: 1.2;
-}
-#transaction-modal .tx-item .amount.credit { color: #16c46b; }
-#transaction-modal .tx-item .amount.debit { color: #e2555a; }
 #transaction-modal .tx-item .date {
   font-size: 0.58rem;
   color: #918fa3;
-  margin: 0;
   line-height: 1.2;
+  margin: 0;
+  display: block;
 }
+#transaction-modal .tx-item .amount {
+  font-size: 0.82rem;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.2;
+  margin: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
+}
+#transaction-modal .tx-item .amount.credit { color: #16c46b; }
+#transaction-modal .tx-item .amount.debit { color: #e2555a; }
 #transaction-modal .modal-card p {
   font-size: 0.72rem;
   padding: 24px 16px !important;
@@ -2738,9 +2742,11 @@ function renderTxModalList() {
     const isCredit = tx.type === 'credit';
     const sign = isCredit ? '+' : '-';
     return `<div class="tx-item">
-      <span class="desc">${escapeHtml(stripEmoji(tx.desc))}</span>
+      <div style="flex:1;min-width:0;">
+        <div class="desc">${escapeHtml(stripEmoji(tx.desc))}</div>
+        <span class="date">${escapeHtml(tx.date)}</span>
+      </div>
       <span class="amount ${isCredit ? 'credit' : 'debit'}">${sign}${formatRupees(tx.amount)}</span>
-      <span class="date">${escapeHtml(tx.date)}</span>
     </div>`;
   }).join('');
 }
