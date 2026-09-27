@@ -1624,5 +1624,182 @@ end; $$;
 grant execute on function public.get_public_profile(uuid) to authenticated, anon;
 
 -- ============================================================
--- END OF SCHEMA v15.0
+-- 28. INACTIVE USER RE-ENGAGEMENT (daily, templated, wallet-aware)
+-- ============================================================
+-- Goals:
+--   * Send once per day per user via pg_cron
+--   * Random template from a pool of 15 for freshness
+--   * Include user's actual wallet balance where relevant
+--   * Only target users who are 2-7 days inactive
+--   * 24h cooldown per user, even if cron fires more than once
+-- ============================================================
+
+-- 28.1 Cooldown tracking table
+create table if not exists public.reengagement_log (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users(id) on delete cascade,
+  template_key text not null,
+  body_rendered text,
+  sent_at timestamptz not null default now()
+);
+
+create index if not exists reengagement_log_user_idx on public.reengagement_log (user_id, sent_at desc);
+create index if not exists reengagement_log_sent_idx on public.reengagement_log (sent_at desc);
+
+alter table public.reengagement_log enable row level security;
+
+drop policy if exists "Users see own reengagement log" on public.reengagement_log;
+create policy "Users see own reengagement log" on public.reengagement_log
+  for select using (auth.uid() = user_id);
+
+-- 28.2 Template pool
+create table if not exists public.reengagement_templates (
+  id uuid primary key default gen_random_uuid(),
+  template_key text not null unique,
+  title text not null,
+  -- {name} = first name, {amount} = wallet balance, {n} = number of games they've played
+  body text not null,
+  type text not null default 'promo',
+  icon text not null default 'bell',
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+alter table public.reengagement_templates enable row level security;
+
+drop policy if exists "Templates readable by authenticated" on public.reengagement_templates;
+create policy "Templates readable by authenticated" on public.reengagement_templates
+  for select using (auth.role() = 'authenticated');
+
+-- Seed 15 templates (idempotent — safe to re-run)
+insert into public.reengagement_templates (template_key, title, body, type, icon) values
+  ('comeback_1',  'We miss you, {name}! 🎮',      'You have ₹{amount} in your wallet. Jump back in and double it today.', 'promo', 'fire'),
+  ('comeback_2',  'Your arena is waiting 🔥',      '₹{amount} is sitting idle in your SkillClash wallet. Win a match and grow it.', 'promo', 'fire'),
+  ('comeback_3',  '₹{amount} ready to play 💰',    'Real players are online right now. Use your balance and climb the leaderboard.', 'gift', 'gift'),
+  ('comeback_4',  'A quick match, {name}? ⚡',     'You still have ₹{amount} in your wallet. One win could change your day.', 'promo', 'bell'),
+  ('comeback_5',  'New tournaments are live 🏆',  'Check what''s new. Your ₹{amount} balance is ready whenever you are.', 'fire', 'fire'),
+  ('comeback_6',  'Streak reset? Let''s go 🔥',    'Your wallet shows ₹{amount}. Keep your streak alive with one quick match.', 'fire', 'fire'),
+  ('comeback_7',  'Someone just beat your score 👀', '₹{amount} says you can do better. Come prove it.', 'alert', 'alert'),
+  ('comeback_8',  'Daily bonus might expire ⏰',   'Claim it before it resets. Wallet balance: ₹{amount}.', 'gift', 'gift'),
+  ('comeback_9',  'Your rivals are climbing 📈',   'Don''t let them catch up. ₹{amount} in your pocket — use it.', 'promo', 'bell'),
+  ('comeback_10', 'You''ve been gone too long 👋', '₹{amount} has been waiting. Come back and put it to work.', 'promo', 'bell'),
+  ('comeback_11', 'Level up today 🚀',             'Your balance is ₹{amount}. One match away from your next rank.', 'fire', 'fire'),
+  ('comeback_12', 'The leaderboard updated 🏅',    'See where you stand. Wallet balance: ₹{amount}.', 'promo', 'fire'),
+  ('comeback_13', 'Match waiting, {name} ⚔️',      '₹{amount} ready to play. Real players, real stakes.', 'fire', 'fire'),
+  ('comeback_14', 'Small stake, big win 💰',       'Start with the ₹{amount} you have and take home more.', 'gift', 'gift'),
+  ('comeback_15', 'We saved your spot 🎯',          '₹{amount} in your wallet — your next win is one tap away.', 'promo', 'bell')
+on conflict (template_key) do update set
+  title = excluded.title,
+  body = excluded.body,
+  type = excluded.type,
+  icon = excluded.icon,
+  is_active = excluded.is_active;
+
+-- 28.3 RPC: run the daily re-engagement sweep
+create or replace function public.send_daily_reengagement()
+returns json language plpgsql security definer set search_path = public as $$
+declare
+  v_target record;
+  v_template record;
+  v_first_name text;
+  v_wallet integer;
+  v_games integer;
+  v_rendered_title text;
+  v_rendered_body text;
+  v_sent integer := 0;
+  v_skipped integer := 0;
+begin
+  -- Iterate users who are 2-7 days inactive and not re-engaged in the last 24h
+  for v_target in
+    select u.id as user_id, u.full_name, u.email
+    from public.users u
+    where u.last_seen < now() - interval '2 days'
+      and u.last_seen > now() - interval '7 days'
+      and not exists (
+        select 1 from public.reengagement_log rl
+        where rl.user_id = u.id
+          and rl.sent_at > now() - interval '24 hours'
+      )
+    order by u.last_seen asc
+    limit 5000
+  loop
+    -- Get wallet balance (fallback 0)
+    select coalesce(balance, 0) into v_wallet
+    from public.wallet where user_id = v_target.user_id;
+    v_wallet := coalesce(v_wallet, 0);
+
+    -- Get match count (fallback 0)
+    select count(*) into v_games
+    from public.match_history where user_id = v_target.user_id;
+
+    -- Extract a nice first name
+    v_first_name := nullif(trim(coalesce(split_part(coalesce(v_target.full_name, v_target.email, 'Player'), ' ', 1), 'Player')), '');
+    if v_first_name is null or length(v_first_name) < 1 then
+      v_first_name := 'Player';
+    end if;
+
+    -- Pick a random active template
+    select * into v_template
+    from public.reengagement_templates
+    where is_active = true
+    order by random()
+    limit 1;
+
+    if v_template is null then
+      v_skipped := v_skipped + 1;
+      continue;
+    end if;
+
+    -- Render placeholders
+    v_rendered_title := replace(replace(replace(v_template.title, '{name}', v_first_name), '{amount}', v_wallet::text), '{n}', v_games::text);
+    v_rendered_body  := replace(replace(replace(v_template.body,  '{name}', v_first_name), '{amount}', v_wallet::text), '{n}', v_games::text);
+
+    -- Insert notification
+    insert into public.notifications (user_id, title, body, type, icon)
+    values (v_target.user_id, v_rendered_title, v_rendered_body, v_template.type, v_template.icon);
+
+    -- Log for cooldown
+    insert into public.reengagement_log (user_id, template_key, body_rendered)
+    values (v_target.user_id, v_template.template_key, v_rendered_body);
+
+    v_sent := v_sent + 1;
+  end loop;
+
+  return json_build_object('ok', true, 'sent', v_sent, 'skipped', v_skipped);
+end; $$;
+
+grant execute on function public.send_daily_reengagement() to authenticated;
+
+-- 28.4 Schedule via pg_cron — daily at 7:00 PM IST (13:30 UTC)
+do $$
+begin
+  begin
+    create extension if not exists pg_cron;
+  exception when others then
+    raise notice 'pg_cron could not be created — enable it manually in Supabase → Database → Extensions';
+  end;
+
+  begin
+    -- Remove any previous version of this job so re-running this SQL is safe
+    perform cron.unschedule('daily-reengagement')
+    where exists (select 1 from cron.job where jobname = 'daily-reengagement');
+  exception when undefined_table then
+    null;
+  when undefined_function then
+    null;
+  end;
+
+  begin
+    perform cron.schedule(
+      'daily-reengagement',
+      '30 13 * * *',
+      $cron$ select public.send_daily_reengagement(); $cron$
+    );
+  exception when others then
+    raise notice 'Could not schedule daily-reengagement — check pg_cron is enabled';
+  end;
+end $$;
+
+-- ============================================================
+-- END OF SCHEMA v15.0 — Section 28
 -- ============================================================
