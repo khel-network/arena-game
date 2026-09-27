@@ -7,8 +7,8 @@
    - Never caches Supabase / ZapUPI / auth / CDN dynamic
    ============================================================ */
 
-const APP_CACHE = 'skillclash-app-v13';
-const RUNTIME_CACHE = 'skillclash-runtime-v13';
+const APP_CACHE = 'skillclash-app-v14';
+const RUNTIME_CACHE = 'skillclash-runtime-v14';
 
 const APP_SHELL = [
   '/',
@@ -130,4 +130,64 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+});
+
+// ============================================================
+// PUSH NOTIFICATIONS (added for phone alerts)
+// ============================================================
+
+// Fired when the server pushes a notification via Web Push
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: 'SkillClash', body: event.data ? event.data.text() : '' };
+  }
+
+  const title = data.title || 'SkillClash';
+  const options = {
+    body: data.body || 'You have a new notification',
+    icon: data.icon || '/icon-192.png',
+    badge: data.badge || '/icon-192.png',
+    image: data.image || undefined,
+    tag: data.tag || 'skillclash-default',
+    renotify: true,
+    requireInteraction: false,
+    data: {
+      url: data.url || '/',
+      extra: data.extra || null
+    }
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Fired when the user taps the notification
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If the app is already open, focus it and navigate
+      for (const client of clientList) {
+        if ('focus' in client) {
+          client.focus();
+          if ('navigate' in client) client.navigate(targetUrl);
+          return;
+        }
+      }
+      // Otherwise, open a new window
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+
+// Fired when the browser rotates the subscription (rare, but must handle)
+self.addEventListener('pushsubscriptionchange', (event) => {
+  console.log('[SW] Push subscription changed — client will re-sync on next load.');
 });
