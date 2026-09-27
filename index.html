@@ -4877,14 +4877,6 @@ async function beginMatchmaking() {
         try { await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id); } catch (e) {}
                // RPC already refunded the blocked player's stake.
         try { await loadWallet(); await loadTransactions(); } catch (e) {}
-        // Also: broadcast to the OTHER player so their screen shows the same error.
-        try {
-          await client.from('fairplay_blocks').insert({
-            user_a: result.other_user_id || null,
-            user_b: currentUser.id,
-            reason: result.reason || 'Same device or network detected'
-          });
-        } catch (e) {}
         const searchingView = document.getElementById('mm-searching-view');
         const blockedView = document.getElementById('mm-blocked-view');
         const reasonEl = document.getElementById('mm-blocked-reason');
