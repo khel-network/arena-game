@@ -5095,18 +5095,48 @@ async function handleFairplayBlock(row) {
     unlockBodyScroll();
   }
 
-  // Still searching → cancel the queue
-  if (inQueue) {
-    if (matchmakingInterval) { clearInterval(matchmakingInterval); matchmakingInterval = null; }
-    inQueue = false;
-  }
-
+  // If we were still searching (or had just started), cancel the loop AND
+  // refund our own stake, because the OTHER device's RPC only refunded THEM.
+  const wasSearching = inQueue || matchmakingLock;
+  if (matchmakingInterval) { clearInterval(matchmakingInterval); matchmakingInterval = null; }
+  inQueue = false;
   matchmakingLock = false;
+
+  try {
+    // Remove ourselves from the queue
+    await client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
+
+    // Cancel our pending invite
+    if (currentInviteId) {
+      try { await client.from('match_invites').update({ status: 'cancelled' }).eq('id', currentInviteId).eq('status', 'open'); } catch(e){}
+      currentInviteId = null;
+    }
+    if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
+
+    // Refund our own stake — but only if we haven't already been refunded
+    // for a FairPlay block in the last 20 seconds (idempotency guard).
+    if (wasSearching) {
+      const { data: recent } = await client
+        .from('transactions')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('type', 'credit')
+        .ilike('description', 'Stake Refunded — FairPlay%')
+        .gte('created_at', new Date(Date.now() - 20000).toISOString())
+        .limit(1);
+
+      if (!recent || recent.length === 0) {
+        await persistWalletDelta(currentEntryFee);
+        await recordTransaction('Stake Refunded — FairPlay block', 'credit', currentEntryFee);
+        showWalletToast(currentEntryFee, 'credit', 'FairPlay block — refunded');
+      }
+    }
+  } catch(e) { console.error('handleFairplayBlock refund failed', e); }
+
   showFairplayBlockedModal(row?.reason || 'Same device or network detected. FairPlay blocked this match.');
   try { await loadWallet(); await loadTransactions(); } catch(e){}
   updateUI();
 }
-
 function showFairplayBlockedModal(reason) {
   const searchingView = document.getElementById('mm-searching-view');
   const blockedView   = document.getElementById('mm-blocked-view');
