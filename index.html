@@ -5132,9 +5132,9 @@ async function joinInvite(inv, popupEl) {
       p_ip: myIP
     });
     if (error) throw error;
-    if (data && data.blocked) {
-      await persistWalletDelta(inv.entry_fee);
-      await recordTransaction('Stake Refunded — FairPlay block', 'credit', inv.entry_fee);
+       if (data && data.blocked) {
+      // RPC already refunded server-side. Just refresh the UI.
+      try { await loadWallet(); await loadTransactions(); } catch (e) {}
       showWalletToast(inv.entry_fee, 'credit', 'FairPlay block — refunded');
       popupEl.remove();
       showFairplayBlockedModal(data.reason || 'Same device or network as the host. FairPlay blocked this match.');
