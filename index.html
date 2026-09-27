@@ -2026,14 +2026,15 @@ Payment not credited? DM <strong>@skillclash.in_</strong> on Instagram — resol
     </div>
   </div>
 
-  <div id="mm-blocked-view" style="display:none;">
+  <div id="mm-blocked-view" style="display:none;position:relative;">
+    <button id="mm-blocked-close-btn" aria-label="Close" title="Close" style="position:absolute;top:-6px;right:-6px;width:32px;height:32px;border-radius:50%;background:#fff;border:1px solid #eee9f7;color:#5c5a6e;font-size:1.1rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.05);z-index:5;transition:all 0.2s;">&times;</button>
     <div class="match-blocked-box">
       <div class="blocked-icon"><i class="fas fa-user-slash"></i></div>
       <h4>Can't Connect You With This Player</h4>
       <p id="mm-blocked-reason">Due to suspicious similarity, we can't match you with this player. Try again — this is for FairPlay security.</p>
       <span class="blocked-refund" id="mm-blocked-refund">₹20 Refunded</span>
     </div>
-    <button id="mm-blocked-back-btn" class="btn-primary" style="width:100%;padding:12px;border-radius:12px;font-weight:700;">Back to Lobby</button>
+    <button id="mm-blocked-back-btn" style="width:100%;padding:12px;border-radius:12px;font-weight:700;background:transparent;border:1.5px solid #5b3df0;color:#5b3df0;cursor:pointer;transition:all 0.2s;">Try Again</button>
   </div>
 
 </div>
@@ -4790,6 +4791,11 @@ async function beginMatchmaking() {
   if (matchStatus) matchStatus.textContent = 'Searching for real players only...';
   const mmStake = document.getElementById('mm-entry-stake');
   if (mmStake) mmStake.textContent = '₹' + currentEntryFee;
+  // Reset inner views so a previous blocked/searching state doesn't leak
+  const _searchingView = document.getElementById('mm-searching-view');
+  const _blockedView   = document.getElementById('mm-blocked-view');
+  if (_searchingView) _searchingView.style.display = 'block';
+  if (_blockedView)   _blockedView.style.display = 'none';
   if (matchOverlay) matchOverlay.classList.remove('hidden');
   const TOTAL = SEARCH_SECONDS;
   let remaining = TOTAL;
@@ -4921,6 +4927,18 @@ document.getElementById('no-opp-close-btn')?.addEventListener('click', () => {
   restoreScrollY();
 });
 
+  document.getElementById('mm-blocked-close-btn')?.addEventListener('click', () => {
+  // Close popup and return user to the dashboard cleanly
+  const searchingView = document.getElementById('mm-searching-view');
+  const blockedView   = document.getElementById('mm-blocked-view');
+  if (blockedView) blockedView.style.display = 'none';
+  if (searchingView) searchingView.style.display = 'block'; // reset for next open
+  if (matchOverlay) matchOverlay.classList.add('hidden');
+  unlockBodyScroll();
+  inQueue = false;
+  matchmakingLock = false;
+  restoreScrollY();
+});
 document.getElementById('mm-blocked-back-btn')?.addEventListener('click', () => {
   const searchingView = document.getElementById('mm-searching-view');
   const blockedView   = document.getElementById('mm-blocked-view');
