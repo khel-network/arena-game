@@ -5556,10 +5556,10 @@ async function subscribeToPushNotifications() {
     return false;
   }
 
-  if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === 'BPBvBaFUaFQQjV0_dAEVJyMnyjQMWLfmxsHSzXgjXeEf011bwy2-hgY7EMRWvorFXdnj8GXT8vpYWVvaNH-xCAQ') {
-    showToast('Push not configured yet — VAPID key missing', 'error');
-    return false;
-  }
+if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === 'PASTE_YOUR_VAPID_PUBLIC_KEY_HERE') {
+  showToast('Push not configured yet — VAPID key missing', 'error');
+  return false;
+}
 
   try {
     const permission = await Notification.requestPermission();
@@ -5703,9 +5703,6 @@ async function initDashboard() {
     subscribeToInvites();
     subscribeToFairplayBlocks();    
     wireNotificationsUI();
-    registerServiceWorker().then(() => {
-      setTimeout(maybePromptForPush, 2000);
-    });
     registerServiceWorker().then(() => {
       setTimeout(maybePromptForPush, 2000);
     });
