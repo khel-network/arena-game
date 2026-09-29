@@ -259,8 +259,9 @@ tr:hover td { background: #fafafc; }
     <button class="sidebar-link active" data-view="dashboard"><i class="fas fa-chart-line"></i> Dashboard <span class="sidebar-badge" id="badge-dashboard"></span></button>
     <button class="sidebar-link" data-view="live"><i class="fas fa-satellite-dish"></i> Live Feed <span class="sidebar-badge green" id="badge-live"></span></button>
 
-    <div class="sidebar-label">Users</div>
+     <div class="sidebar-label">Users</div>
     <button class="sidebar-link" data-view="users"><i class="fas fa-users"></i> All Users <span class="sidebar-badge" id="badge-users"></span></button>
+    <button class="sidebar-link" data-view="investigate"><i class="fas fa-user-secret"></i> Investigate User</button>
     <button class="sidebar-link" data-view="wallet"><i class="fas fa-wallet"></i> Wallet Tools</button>
 
     <div class="sidebar-label">Money</div>
@@ -332,6 +333,32 @@ tr:hover td { background: #fafafc; }
       </table></div></div>
     </section>
 
+        <!-- INVESTIGATE USER -->
+    <section id="view-investigate" class="view">
+      <div class="main-header">
+        <div>
+          <h1 class="main-title">Investigate User</h1>
+          <p class="main-sub">Enter an email or UUID to see the full account report</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Email or User UUID</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input type="text" id="investigate-query" placeholder="user@example.com or 9cf948d5-..." style="flex:1;min-width:200px;" />
+              <button class="btn-primary" onclick="runInvestigation()" style="white-space:nowrap;">
+                <i class="fas fa-search"></i> Investigate
+              </button>
+            </div>
+            <span class="field-hint">Paste any email or user ID from All Users</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="investigate-result"></div>
+    </section>
     <!-- WALLET TOOLS -->
     <section id="view-wallet" class="view">
       <div class="main-header"><div><h1 class="main-title">Wallet Tools</h1><p class="main-sub">Adjust any user's balance</p></div></div>
@@ -734,7 +761,156 @@ window.loadDailyClaims = loadDailyClaims;
 
 async function loadAll() { await Promise.all([loadStats(), loadRecentUsers(), loadRecentWithdrawals(), loadRecentTx()]); }
 window.loadAll = loadAll;
+// ============================================================
+// INVESTIGATE USER
+// ============================================================
+async function runInvestigation() {
+  const q = document.getElementById('investigate-query')?.value.trim();
+  const out = document.getElementById('investigate-result');
+  if (!q) { toast('Enter email or UUID', 'error'); return; }
+  out.innerHTML = '<div class="card"><div class="table-empty">Investigating…</div></div>';
 
+  try {
+    const { data, error } = await client.rpc('admin_investigate_user', { p_query: q });
+    if (error) throw error;
+    if (!data || data.ok === false) {
+      out.innerHTML = `<div class="card"><div class="table-empty">${escapeHtml(data?.message || 'Not found')}</div></div>`;
+      return;
+    }
+
+    const p = data.profile || {};
+    const m = data.money || {};
+    const match = data.matches || {};
+    const s = data.sessions || {};
+    const w = data.withdrawals || {};
+    const fp = data.fairplay || {};
+    const sus = data.suspicion || {};
+    const score = Number(sus.score || 0);
+    const level = sus.level || 'clean';
+
+    const scoreColor =
+      level === 'high' ? 'var(--red)'
+      : level === 'medium' ? 'var(--amber)'
+      : level === 'low' ? 'var(--amber)'
+      : 'var(--green)';
+
+    const scoreLabel =
+      level === 'high' ? 'HIGH RISK'
+      : level === 'medium' ? 'SUSPICIOUS'
+      : level === 'low' ? 'MILD FLAGS'
+      : 'CLEAN';
+
+    const flagsHtml = (sus.flags && sus.flags.length)
+      ? sus.flags.map(f => {
+          const c = f.level === 'critical' ? 'var(--red)' : 'var(--amber)';
+          const icon = f.level === 'critical' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle';
+          return `<div style="display:flex;gap:10px;padding:12px 14px;border-radius:10px;background:#fafafc;border-left:3px solid ${c};margin-bottom:8px;">
+            <i class="fas ${icon}" style="color:${c};margin-top:2px;flex-shrink:0;"></i>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:0.85rem;">${escapeHtml(f.title)}</div>
+              <div style="font-size:0.75rem;color:var(--muted);line-height:1.5;margin-top:2px;">${escapeHtml(f.detail)}</div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<div style="padding:12px;background:#f0fdf4;border-radius:10px;color:var(--green);font-size:0.82rem;font-weight:600;"><i class="fas fa-check-circle"></i> No suspicious patterns detected. Account looks clean.</div>';
+
+    const activity = data.activity || [];
+    const activityHtml = activity.map(a => {
+      const cMap = { stake: 'var(--primary)', refund: 'var(--amber)', match: 'var(--green)', withdrawal: 'var(--red)' };
+      const iMap = { stake: 'fa-circle-dot', refund: 'fa-undo', match: 'fa-gamepad', withdrawal: 'fa-hand-holding-usd' };
+      const c = cMap[a.kind] || 'var(--muted)';
+      const i = iMap[a.kind] || 'fa-circle';
+      const amt = (a.type === 'credit' || a.kind === 'refund')
+        ? `<span style="color:var(--green);font-weight:700;">+₹${Math.abs(a.amount || 0)}</span>`
+        : (a.type === 'debit' || a.kind === 'stake' || a.kind === 'withdrawal')
+        ? `<span style="color:var(--red);font-weight:700;">-₹${Math.abs(a.amount || 0)}</span>`
+        : `<span style="color:var(--muted);">₹${Math.abs(a.amount || 0)}</span>`;
+      return `<div style="display:flex;gap:10px;padding:8px 10px;border-bottom:1px solid #f5f4fa;font-size:0.75rem;align-items:center;">
+        <i class="fas ${i}" style="color:${c};width:14px;flex-shrink:0;"></i>
+        <div style="flex:1;min-width:0;">${escapeHtml(a.label || '')}</div>
+        <div style="flex-shrink:0;">${amt}</div>
+        <div style="font-size:0.65rem;color:var(--muted);white-space:nowrap;flex-shrink:0;">${escapeHtml(timeAgo(a.created_at))}</div>
+      </div>`;
+    }).join('') || '<div class="table-empty">No activity.</div>';
+
+    out.innerHTML = `
+      <div class="card" style="border-left:4px solid ${scoreColor};">
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+          <img src="${escapeHtml(p.avatar_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(p.full_name || 'User'))}" style="width:56px;height:56px;border-radius:50%;border:2px solid var(--line);" />
+          <div style="flex:1;min-width:200px;">
+            <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.1rem;">${escapeHtml(p.full_name || '—')}</div>
+            <div style="font-size:0.78rem;color:var(--muted);word-break:break-all;">${escapeHtml(p.email || '—')}</div>
+            <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">
+              <i class="fas fa-clock"></i> Joined ${escapeHtml(formatIST(p.created_at))} · Last seen ${escapeHtml(timeAgo(p.last_seen))}
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:'Poppins',sans-serif;font-size:2rem;font-weight:900;color:${scoreColor};line-height:1;">${score}</div>
+            <div style="font-size:0.6rem;font-weight:800;color:${scoreColor};letter-spacing:0.05em;margin-top:2px;">${scoreLabel}</div>
+          </div>
+          <div style="min-width:120px;">
+            <button class="action-btn" onclick="copyUserId('${escapeHtml(p.id)}')" style="width:100%;justify-content:center;margin-bottom:6px;"><i class="fas fa-copy"></i> Copy UUID</button>
+            <button class="action-btn success" onclick="quickNotifyUser('${escapeHtml(p.id)}','${escapeHtml((p.full_name||'').replace(/'/g,''))}')" style="width:100%;justify-content:center;"><i class="fas fa-bell"></i> Notify</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label"><i class="fas fa-wallet"></i> Wallet Balance</div><div class="stat-value">${formatRupees(p.wallet_balance)}</div><div class="stat-hint">${formatRupees(m.total_credits)} credits · ${formatRupees(m.total_debits)} debits</div></div>
+        <div class="stat-card"><div class="stat-label"><i class="fas fa-circle-dot"></i> Stakes</div><div class="stat-value">${m.stake_count || 0}</div><div class="stat-hint">Total ₹${m.stake_sum || 0}</div></div>
+        <div class="stat-card"><div class="stat-label"><i class="fas fa-undo"></i> Refunds</div><div class="stat-value" style="color:${m.refund_ratio > 1.5 ? 'var(--red)' : m.refund_ratio > 1.2 ? 'var(--amber)' : 'var(--ink)'};">${m.refund_count || 0}</div><div class="stat-hint">Ratio ${m.refund_ratio || 0} · ₹${m.refund_sum || 0} back</div></div>
+        <div class="stat-card"><div class="stat-label"><i class="fas fa-gamepad"></i> Matches</div><div class="stat-value">${match.total || 0}</div><div class="stat-hint">${match.wins || 0}W / ${match.losses || 0}L / ${match.draws || 0}D · ${match.win_rate || 0}%</div></div>
+        <div class="stat-card"><div class="stat-label"><i class="fas fa-shield-alt"></i> FairPlay Blocks</div><div class="stat-value" style="color:${(fp.blocks_against || 0) >= 3 ? 'var(--red)' : 'var(--ink)'};">${fp.blocks_against || 0}</div><div class="stat-hint">Caused ${fp.blocks_caused || 0}</div></div>
+        <div class="stat-card"><div class="stat-label"><i class="fas fa-hand-holding-usd"></i> Withdrawals</div><div class="stat-value">${w.total || 0}</div><div class="stat-hint">${w.paid || 0} paid · ${w.pending || 0} pending · ${w.rejected || 0} rejected</div></div>
+        <div class="stat-card"><div class="stat-label"><i class="fas fa-tasks"></i> Sessions</div><div class="stat-value">${s.total || 0}</div><div class="stat-hint">${s.completed || 0} completed · ${s.abandoned || 0} abandoned</div></div>
+        <div class="stat-card"><div class="stat-label"><i class="fas fa-hourglass-half"></i> Refunds (recent)</div><div class="stat-value" style="color:${(m.refunds_1h || 0) >= 5 ? 'var(--red)' : (m.refunds_24h || 0) >= 10 ? 'var(--amber)' : 'var(--ink)'};">${m.refunds_1h || 0}</div><div class="stat-hint">Last 1h · ${m.refunds_24h || 0} in 24h</div></div>
+      </div>
+
+      <div class="card">
+        <h3>Suspicious Pattern Detection</h3>
+        <p class="card-sub">Auto-flagged issues based on activity</p>
+        ${flagsHtml}
+      </div>
+
+      <div class="card">
+        <h3>Technical Fingerprint</h3>
+        <p class="card-sub">Used for FairPlay matching</p>
+        <div class="form-grid">
+          <div class="field">
+            <label>Device Fingerprint</label>
+            <div style="font-size:0.72rem;font-family:monospace;padding:8px 10px;background:#fafafc;border-radius:8px;border:1px solid var(--line);word-break:break-all;">${escapeHtml(p.device_fingerprint || '—')}</div>
+          </div>
+          <div class="field">
+            <label>Last IP Address</label>
+            <div style="font-size:0.72rem;font-family:monospace;padding:8px 10px;background:#fafafc;border-radius:8px;border:1px solid var(--line);word-break:break-all;">${escapeHtml(p.last_ip || '—')}</div>
+          </div>
+          <div class="field">
+            <label>Referral Code</label>
+            <div style="font-size:0.72rem;font-family:monospace;padding:8px 10px;background:#fafafc;border-radius:8px;border:1px solid var(--line);">${escapeHtml(p.referral_code || '—')}</div>
+          </div>
+          <div class="field">
+            <label>Referred By</label>
+            <div style="font-size:0.72rem;font-family:monospace;padding:8px 10px;background:#fafafc;border-radius:8px;border:1px solid var(--line);word-break:break-all;">${escapeHtml(p.referred_by || '—')}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Activity Timeline</h3>
+        <p class="card-sub">Last 30 events: stakes, refunds, matches, withdrawals</p>
+        <div style="max-height:500px;overflow-y:auto;">${activityHtml}</div>
+      </div>
+    `;
+  } catch (e) {
+    out.innerHTML = `<div class="card"><div class="table-empty">Error: ${escapeHtml(e.message)}</div></div>`;
+  }
+}
+window.runInvestigation = runInvestigation;
+
+// Enter key triggers investigation
+document.getElementById('investigate-query')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') runInvestigation();
+});
 // ===== Wallet adjust =====
 async function doAdjustBalance() {
   const userId = document.getElementById('adjust-user-id').value.trim();
