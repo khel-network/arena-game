@@ -4670,11 +4670,17 @@ function runDice(opponent, live) {
 // ===== END DUEL =====
 async function refundStake() {
   try {
-    await persistWalletDelta(currentEntryFee);
-    await recordTransaction('Stake Refunded — ' + (activeGame?.name || 'Match'), 'credit', currentEntryFee);
-    showWalletToast(currentEntryFee, 'credit', 'Refund');
+    const { data } = await client.rpc('refund_my_pending_stake', {
+      p_game_type: activeGame?.type || null,
+      p_reason: 'Refund'
+    });
+    if (data && data.refunded) {
+      showWalletToast(data.refunded, 'credit', 'Refund');
+    }
+    await loadWallet();
+    await loadTransactions();
     updateUI();
-  } catch (e) {}
+  } catch (e) { console.error('refundStake failed', e); }
 }
 
 async function endDuel(won, analysisText) {
@@ -4835,9 +4841,10 @@ async function beginMatchmaking() {
         currentInviteId = null;
       }
       if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
-      await persistWalletDelta(currentEntryFee);
-      await recordTransaction('Stake Refunded — ' + activeGame.name, 'credit', currentEntryFee);
-      showWalletToast(currentEntryFee, 'credit', 'Match cancelled');
+     await client.rpc('refund_my_pending_stake', {
+  p_game_type: activeGame.type,
+  p_reason: 'Match cancelled (tab blur)'
+});
       if (matchOverlay) matchOverlay.classList.add('hidden');
       updateUI();
     } catch (e) {}
@@ -4992,7 +4999,13 @@ cancelMatchBtn?.addEventListener('click', async () => {
     if (inviteExpireTimer) { clearTimeout(inviteExpireTimer); inviteExpireTimer = null; }
     // Server-side cancel RPC should refund. If yours doesn't exist yet,
     // keep the two lines below and DO NOT also refund in any RPC.
-    try { await persistWalletDelta(currentEntryFee); await recordTransaction('Stake Refunded — ' + activeGame.name, 'credit', currentEntryFee); showWalletToast(currentEntryFee, 'credit', 'Match cancelled — refund'); } catch (e) {}
+try {
+  await client.rpc('refund_my_pending_stake', {
+    p_game_type: activeGame.type,
+    p_reason: 'Match cancelled'
+  });
+  showWalletToast(currentEntryFee, 'credit', 'Match cancelled — refund');
+} catch (e) {}
     updateUI();
     try { await loadWallet(); await loadTransactions(); } catch (e) {}
     updateUI();
@@ -5115,22 +5128,17 @@ async function handleFairplayBlock(row) {
 
     // Refund our own stake — but only if we haven't already been refunded
     // for a FairPlay block in the last 20 seconds (idempotency guard).
-    if (wasSearching) {
-      const { data: recent } = await client
-        .from('transactions')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .eq('type', 'credit')
-        .ilike('description', 'Stake Refunded — FairPlay%')
-        .gte('created_at', new Date(Date.now() - 20000).toISOString())
-        .limit(1);
-
-      if (!recent || recent.length === 0) {
-        await persistWalletDelta(currentEntryFee);
-        await recordTransaction('Stake Refunded — FairPlay block', 'credit', currentEntryFee);
-        showWalletToast(currentEntryFee, 'credit', 'FairPlay block — refunded');
-      }
+  if (wasSearching) {
+  try {
+    const { data } = await client.rpc('refund_my_pending_stake', {
+      p_game_type: activeGame?.type || null,
+      p_reason: 'FairPlay block'
+    });
+    if (data && data.refunded) {
+      showWalletToast(data.refunded, 'credit', 'FairPlay block — refunded');
     }
+  } catch (e) {}
+}
   } catch(e) { console.error('handleFairplayBlock refund failed', e); }
 
   showFairplayBlockedModal(row?.reason || 'Same device or network detected. FairPlay blocked this match.');
@@ -5734,6 +5742,7 @@ window.addEventListener('beforeunload', (e) => {
   if (isGameActive) { e.preventDefault(); e.returnValue = 'You are currently in a game. Are you sure you want to leave?'; return e.returnValue; }
   if (inQueue && currentUser) {
     try {
+      client.rpc('refund_my_pending_stake', { p_game_type: activeGame?.type || null, p_reason: 'Tab closed' });
       client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
       client.from('match_invites').update({ status: 'cancelled' }).eq('from_user_id', currentUser.id).eq('status', 'open');
     } catch (err) {}
@@ -5743,6 +5752,7 @@ window.addEventListener('beforeunload', (e) => {
 window.addEventListener('pagehide', () => {
   if (inQueue && currentUser) {
     try {
+      client.rpc('refund_my_pending_stake', { p_game_type: activeGame?.type || null, p_reason: 'Tab closed' });
       client.from('matchmaking_queue').delete().eq('user_id', currentUser.id);
       client.from('match_invites').update({ status: 'cancelled' }).eq('from_user_id', currentUser.id).eq('status', 'open');
     } catch (err) {}
