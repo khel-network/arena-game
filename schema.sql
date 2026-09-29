@@ -1,15 +1,12 @@
 -- ============================================================
--- SkillClash MASTER SCHEMA v15.0
--- Base: v14.0 + FairPlay two-device support
+-- SkillClash MASTER SCHEMA v15.1
+-- Base: v15.0 + pending_stakes table + safer refund guard
 --
--- v15.0 changes:
---   * users: added device_fingerprint, last_ip columns
---   * new table: fairplay_blocks (with RLS + realtime)
---   * claim_opponent: refunds on block, logs to fairplay_blocks,
---     returns other_user_id in block response
---   * accept_match_invite: now accepts p_fingerprint, p_ip,
---     checks them, refunds on block, logs to fairplay_blocks
---   * everything else unchanged from v14.0
+-- v15.1 changes:
+--   * Added pending_stakes table (was missing — refunds were broken)
+--   * log_stake_debit trigger stores 'unknown' game_type so refund
+--     matching works regardless of display name
+--   * Everything else unchanged
 -- ============================================================
 
 -- ============================================================
@@ -28,7 +25,6 @@ alter table public.users add column if not exists referral_code text;
 alter table public.users add column if not exists referred_by uuid references public.users (id);
 alter table public.users add column if not exists terms_accepted_at timestamptz;
 alter table public.users add column if not exists age_confirmed boolean not null default false;
--- v15
 alter table public.users add column if not exists device_fingerprint text;
 alter table public.users add column if not exists last_ip text;
 
@@ -47,7 +43,7 @@ drop policy if exists "Users can insert their own profile" on public.users;
 create policy "Users can insert their own profile" on public.users for insert with check (auth.uid() = id);
 
 -- ============================================================
--- 1b. FAIRPLAY BLOCKS (v15 — new)
+-- 1b. FAIRPLAY BLOCKS
 -- ============================================================
 create table if not exists public.fairplay_blocks (
   id uuid primary key default gen_random_uuid(),
@@ -72,6 +68,31 @@ create policy "insert own block" on public.fairplay_blocks
 
 do $$ begin begin alter publication supabase_realtime add table public.fairplay_blocks; exception when duplicate_object then null; when undefined_object then null; end; end $$;
 alter table public.fairplay_blocks replica identity full;
+
+-- ============================================================
+-- 1c. PENDING STAKES  (v15.1 — NEW, needed for refund guard)
+-- ============================================================
+create table if not exists public.pending_stakes (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users(id) on delete cascade,
+  game_type text not null default 'unknown',
+  entry_fee integer not null check (entry_fee > 0),
+  status text not null default 'pending' check (status in ('pending','refunded','consumed')),
+  refund_reason text,
+  session_id uuid references public.game_sessions(id) on delete set null,
+  created_at timestamptz not null default now(),
+  refunded_at timestamptz,
+  consumed_at timestamptz
+);
+
+create index if not exists pending_stakes_user_status_idx on public.pending_stakes (user_id, status);
+create index if not exists pending_stakes_status_idx on public.pending_stakes (status, created_at desc);
+
+alter table public.pending_stakes enable row level security;
+
+drop policy if exists "Users see own pending stakes" on public.pending_stakes;
+create policy "Users see own pending stakes" on public.pending_stakes
+  for select using (auth.uid() = user_id);
 
 -- ============================================================
 -- 2. WALLET
@@ -384,7 +405,7 @@ after insert on auth.users for each row
 execute procedure public.handle_new_user();
 
 -- ============================================================
--- 12. CLAIM_OPPONENT (v15 — refunds on block, logs fairplay_blocks)
+-- 12. CLAIM_OPPONENT
 -- ============================================================
 drop function if exists public.claim_opponent(text, integer, integer, text, text);
 
@@ -420,8 +441,6 @@ begin
   v_my_email := lower(coalesce(v_my_email, ''));
   v_my_username := lower(regexp_replace(coalesce(v_my_username, ''), '[^a-zA-Z0-9]', '', 'g'));
 
-  -- purge stale queue entries
-   -- Purge rows that are stale by EITHER last_seen OR queue age
   delete from public.matchmaking_queue mq
   using public.users u
   where mq.user_id = u.id
@@ -430,14 +449,14 @@ begin
       u.last_seen < now() - interval '25 seconds'
       or mq.created_at < now() - interval '30 seconds'
     );
-  -- iterate candidates, block if needed, else match
-   for v_candidate in
+
+  for v_candidate in
     select mq.user_id, mq.device_fp, mq.last_ip, mq.created_at as queued_at
     from public.matchmaking_queue mq
     join public.users u on u.id = mq.user_id
     where mq.game_type = p_game_type
       and mq.user_id <> v_me
-      and mq.created_at >= now() - interval '30 seconds'     -- only recently QUEUED
+      and mq.created_at >= now() - interval '30 seconds'
       and u.last_seen >= now() - interval '25 seconds'
     order by mq.created_at asc
     for update of mq skip locked
@@ -492,23 +511,19 @@ begin
         'you_are', 'player2'
       );
     else
-      -- remember the blocked candidate for reporting
       v_blocked_opp := v_opponent_id;
     end if;
   end loop;
 
-  -- all candidates blocked → refund the caller, log block, notify other side
-   if v_blocked_opp is not null and v_blocked_reason is not null then
+  if v_blocked_opp is not null and v_blocked_reason is not null then
 
-    -- Idempotency: if we already refunded this user for the same game in the last 20s, skip.
     if exists (
       select 1 from public.transactions
       where user_id = v_me
         and type = 'credit'
-        and description = 'Stake Refunded — FairPlay block'
+        and description ilike 'Stake Refunded%'
         and created_at > now() - interval '20 seconds'
     ) then
-      -- Also remove caller + blocked opponent from queue so they don't loop
       delete from public.matchmaking_queue where user_id in (v_me, v_blocked_opp);
       return json_build_object(
         'matched', true, 'blocked', true, 'already_refunded', true,
@@ -517,7 +532,6 @@ begin
       );
     end if;
 
-    -- refund the caller's stake (they paid it before calling us)
     select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
     if v_has_rupee then
       execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using p_entry_fee, v_me;
@@ -531,17 +545,14 @@ begin
     exception when undefined_table then null;
     end;
 
-    -- remove caller from queue
     delete from public.matchmaking_queue where user_id = v_me;
 
-    -- log the block so the OTHER device gets the realtime popup
     begin
       insert into public.fairplay_blocks (user_a, user_b, reason)
       values (v_blocked_opp, v_me, v_blocked_reason);
     exception when undefined_table then null;
     end;
 
-    -- notify the blocked opponent
     begin
       insert into public.notifications (user_id, title, body, type, icon)
       values (v_blocked_opp, '⚠️ Match blocked for FairPlay',
@@ -704,7 +715,6 @@ end; $$;
 
 grant execute on function public.expire_old_invites() to authenticated;
 
--- v15: accept_match_invite now takes p_fingerprint + p_ip, checks, refunds, logs
 drop function if exists public.accept_match_invite(uuid);
 
 create or replace function public.accept_match_invite(
@@ -733,7 +743,6 @@ begin
   if v_invite.expires_at < now() then update public.match_invites set status = 'expired' where id = p_invite_id; return json_build_object('ok', false, 'reason', 'expired'); end if;
   if v_invite.from_user_id = v_me then return json_build_object('ok', false, 'reason', 'self'); end if;
 
-  -- FairPlay check between me and the inviter
   select lower(coalesce(email,'')),
          lower(regexp_replace(coalesce(full_name,''), '[^a-zA-Z0-9]', '', 'g')),
          coalesce(device_fingerprint,''),
@@ -759,12 +768,11 @@ begin
 
   if v_blocked_reason is not null then
 
-    -- Idempotency: skip refund if we already refunded this user in the last 20s
     if exists (
       select 1 from public.transactions
       where user_id = v_me
         and type = 'credit'
-        and description = 'Stake Refunded — FairPlay block'
+        and description ilike 'Stake Refunded%'
         and created_at > now() - interval '20 seconds'
     ) then
       update public.match_invites set status = 'cancelled' where id = p_invite_id;
@@ -775,7 +783,6 @@ begin
       );
     end if;
 
-    -- refund the joiner's stake
     select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
     if v_has_rupee then
       execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using v_invite.entry_fee, v_me;
@@ -791,7 +798,6 @@ begin
 
     update public.match_invites set status = 'cancelled' where id = p_invite_id;
 
-    -- log block for realtime popup on the other device
     begin
       insert into public.fairplay_blocks (user_a, user_b, reason)
       values (v_invite.from_user_id, v_me, v_blocked_reason);
@@ -885,6 +891,13 @@ begin
            (v_session.player2_id, v_session.game_type, 'Opponent', 'DRAW', 0);
   end if;
 
+  -- Mark both players' pending stakes as consumed
+  update public.pending_stakes
+    set status = 'consumed', session_id = p_session_id, consumed_at = now()
+    where user_id in (v_session.player1_id, v_session.player2_id)
+      and game_type = v_session.game_type
+      and status = 'pending';
+
   insert into public.game_events (session_id, user_id, event_type, payload)
   values (p_session_id, v_me, 'session_ended', jsonb_build_object('winner_id', p_winner_id, 'settled_by', v_me));
 
@@ -924,6 +937,12 @@ begin
 
   insert into public.match_history (user_id, game, opponent, result, reward)
   values (v_me, v_session.game_type, 'Opponent', 'DEFEAT', -v_session.entry_fee);
+
+  update public.pending_stakes
+    set status = 'consumed', session_id = p_session_id, consumed_at = now()
+    where user_id in (v_session.player1_id, v_session.player2_id)
+      and game_type = v_session.game_type
+      and status = 'pending';
 
   insert into public.game_events (session_id, user_id, event_type, payload)
   values (p_session_id, v_me, 'session_abandoned', jsonb_build_object('opponent', v_opponent));
@@ -1514,7 +1533,7 @@ end; $$;
 grant execute on function public.unlock_achievement(text) to authenticated;
 
 -- ============================================================
--- 25. PUSH SUBSCRIPTIONS (stub)
+-- 25. PUSH SUBSCRIPTIONS
 -- ============================================================
 create table if not exists public.push_subscriptions (
   id uuid primary key default gen_random_uuid(),
@@ -1624,17 +1643,8 @@ end; $$;
 grant execute on function public.get_public_profile(uuid) to authenticated, anon;
 
 -- ============================================================
--- 28. INACTIVE USER RE-ENGAGEMENT (daily, templated, wallet-aware)
+-- 28. INACTIVE USER RE-ENGAGEMENT
 -- ============================================================
--- Goals:
---   * Send once per day per user via pg_cron
---   * Random template from a pool of 15 for freshness
---   * Include user's actual wallet balance where relevant
---   * Only target users who are 2-7 days inactive
---   * 24h cooldown per user, even if cron fires more than once
--- ============================================================
-
--- 28.1 Cooldown tracking table
 create table if not exists public.reengagement_log (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.users(id) on delete cascade,
@@ -1652,12 +1662,10 @@ drop policy if exists "Users see own reengagement log" on public.reengagement_lo
 create policy "Users see own reengagement log" on public.reengagement_log
   for select using (auth.uid() = user_id);
 
--- 28.2 Template pool
 create table if not exists public.reengagement_templates (
   id uuid primary key default gen_random_uuid(),
   template_key text not null unique,
   title text not null,
-  -- {name} = first name, {amount} = wallet balance, {n} = number of games they've played
   body text not null,
   type text not null default 'promo',
   icon text not null default 'bell',
@@ -1671,7 +1679,6 @@ drop policy if exists "Templates readable by authenticated" on public.reengageme
 create policy "Templates readable by authenticated" on public.reengagement_templates
   for select using (auth.role() = 'authenticated');
 
--- Seed 15 templates (idempotent — safe to re-run)
 insert into public.reengagement_templates (template_key, title, body, type, icon) values
   ('comeback_1',  'We miss you, {name}! 🎮',      'You have ₹{amount} in your wallet. Jump back in and double it today.', 'promo', 'fire'),
   ('comeback_2',  'Your arena is waiting 🔥',      '₹{amount} is sitting idle in your SkillClash wallet. Win a match and grow it.', 'promo', 'fire'),
@@ -1695,7 +1702,6 @@ on conflict (template_key) do update set
   icon = excluded.icon,
   is_active = excluded.is_active;
 
--- 28.3 RPC: run the daily re-engagement sweep
 create or replace function public.send_daily_reengagement()
 returns json language plpgsql security definer set search_path = public as $$
 declare
@@ -1709,7 +1715,6 @@ declare
   v_sent integer := 0;
   v_skipped integer := 0;
 begin
-  -- Iterate users who are 2-7 days inactive and not re-engaged in the last 24h
   for v_target in
     select u.id as user_id, u.full_name, u.email
     from public.users u
@@ -1723,22 +1728,18 @@ begin
     order by u.last_seen asc
     limit 5000
   loop
-    -- Get wallet balance (fallback 0)
     select coalesce(balance, 0) into v_wallet
     from public.wallet where user_id = v_target.user_id;
     v_wallet := coalesce(v_wallet, 0);
 
-    -- Get match count (fallback 0)
     select count(*) into v_games
     from public.match_history where user_id = v_target.user_id;
 
-    -- Extract a nice first name
     v_first_name := nullif(trim(coalesce(split_part(coalesce(v_target.full_name, v_target.email, 'Player'), ' ', 1), 'Player')), '');
     if v_first_name is null or length(v_first_name) < 1 then
       v_first_name := 'Player';
     end if;
 
-    -- Pick a random active template
     select * into v_template
     from public.reengagement_templates
     where is_active = true
@@ -1750,15 +1751,12 @@ begin
       continue;
     end if;
 
-    -- Render placeholders
     v_rendered_title := replace(replace(replace(v_template.title, '{name}', v_first_name), '{amount}', v_wallet::text), '{n}', v_games::text);
     v_rendered_body  := replace(replace(replace(v_template.body,  '{name}', v_first_name), '{amount}', v_wallet::text), '{n}', v_games::text);
 
-    -- Insert notification
     insert into public.notifications (user_id, title, body, type, icon)
     values (v_target.user_id, v_rendered_title, v_rendered_body, v_template.type, v_template.icon);
 
-    -- Log for cooldown
     insert into public.reengagement_log (user_id, template_key, body_rendered)
     values (v_target.user_id, v_template.template_key, v_rendered_body);
 
@@ -1770,7 +1768,6 @@ end; $$;
 
 grant execute on function public.send_daily_reengagement() to authenticated;
 
--- 28.4 Schedule via pg_cron — daily at 7:00 PM IST (13:30 UTC)
 do $$
 begin
   begin
@@ -1780,13 +1777,9 @@ begin
   end;
 
   begin
-    -- Remove any previous version of this job so re-running this SQL is safe
-    perform cron.unschedule('daily-reengagement')
-    where exists (select 1 from cron.job where jobname = 'daily-reengagement');
-  exception when undefined_table then
-    null;
-  when undefined_function then
-    null;
+    perform cron.unschedule('daily-reengagement');
+  exception
+    when others then null;
   end;
 
   begin
@@ -1801,5 +1794,71 @@ begin
 end $$;
 
 -- ============================================================
--- END OF SCHEMA v15.0 — Section 28
+-- 30. REFUND SAFETY — pending_stakes + guarded refund
+-- ============================================================
+-- (pending_stakes table was created in section 1c above)
+
+create or replace function public.log_stake_debit()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if new.type = 'debit' and (new.description ilike 'Stake — %' or new.description ilike 'Stake - %') then
+    insert into public.pending_stakes (user_id, game_type, entry_fee, status)
+    values (
+      new.user_id,
+      'unknown',                -- store unknown so refund RPC matches regardless of display name
+      abs(new.amount),
+      'pending'
+    );
+  end if;
+  return new;
+end; $$;
+
+drop trigger if exists trg_log_stake_debit on public.transactions;
+create trigger trg_log_stake_debit
+after insert on public.transactions
+for each row
+execute procedure public.log_stake_debit();
+
+create or replace function public.refund_my_pending_stake(
+  p_game_type text,
+  p_reason text default 'Refund'
+) returns json language plpgsql security definer set search_path = public as $$
+declare
+  v_me uuid := auth.uid();
+  v_stake public.pending_stakes;
+begin
+  if v_me is null then
+    return json_build_object('ok', false, 'reason', 'not_authenticated');
+  end if;
+
+  select * into v_stake
+  from public.pending_stakes
+  where user_id = v_me
+    and status = 'pending'
+  order by created_at desc
+  limit 1
+  for update;
+
+  if v_stake is null then
+    return json_build_object('ok', true, 'nothing_to_refund', true);
+  end if;
+
+  update public.wallet
+    set balance = balance + v_stake.entry_fee, updated_at = now()
+    where user_id = v_me;
+
+  insert into public.transactions (user_id, description, type, amount)
+  values (v_me, 'Stake Refunded — ' || coalesce(p_reason, 'Refund'), 'credit', v_stake.entry_fee);
+
+  update public.pending_stakes
+    set status = 'refunded', refund_reason = p_reason, refunded_at = now()
+    where id = v_stake.id;
+
+  return json_build_object('ok', true, 'refunded', v_stake.entry_fee);
+end; $$;
+
+grant execute on function public.refund_my_pending_stake(text, text) to authenticated;
+
+-- ============================================================
+-- END OF SCHEMA v15.1
 -- ============================================================
