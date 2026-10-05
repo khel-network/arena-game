@@ -1,12 +1,15 @@
 -- ============================================================
--- SkillClash MASTER SCHEMA v15.1
--- Base: v15.0 + pending_stakes table + safer refund guard
+-- SkillClash MASTER SCHEMA v15.2
+-- Base: v15.1 + real_earnings separation + refund abuse guards
 --
--- v15.1 changes:
---   * Added pending_stakes table (was missing — refunds were broken)
---   * log_stake_debit trigger stores 'unknown' game_type so refund
---     matching works regardless of display name
---   * Everything else unchanged
+-- v15.2 changes:
+--   * Added wallet.real_earnings column (withdrawable = wins + referrals only)
+--   * end_session_with_state increments real_earnings on victory
+--   * refund_my_pending_stake: hourly/daily rate limits + auto-flag on abuse
+--   * create_withdrawal_request: checks real_earnings, blocks duplicate pending
+--   * redeem_referral_code: blocks self-referral via fingerprint/IP
+--   * claim_opponent / accept_match_invite: refund path does NOT touch real_earnings
+--   * Initialized real_earnings from existing VICTORY match history
 -- ============================================================
 
 -- ============================================================
@@ -70,7 +73,7 @@ do $$ begin begin alter publication supabase_realtime add table public.fairplay_
 alter table public.fairplay_blocks replica identity full;
 
 -- ============================================================
--- 1c. PENDING STAKES  (v15.1 — NEW, needed for refund guard)
+-- 1c. PENDING STAKES
 -- ============================================================
 create table if not exists public.pending_stakes (
   id uuid primary key default gen_random_uuid(),
@@ -95,7 +98,7 @@ create policy "Users see own pending stakes" on public.pending_stakes
   for select using (auth.uid() = user_id);
 
 -- ============================================================
--- 2. WALLET
+-- 2. WALLET (v15.2: added real_earnings)
 -- ============================================================
 create table if not exists public.wallet (
   id uuid primary key default gen_random_uuid(),
@@ -108,6 +111,9 @@ alter table public.wallet add column if not exists balance integer;
 alter table public.wallet add column if not exists email text;
 alter table public.wallet add column if not exists full_name text;
 alter table public.wallet add column if not exists first_login_at timestamptz not null default now();
+
+-- v15.2 NEW COLUMN
+alter table public.wallet add column if not exists real_earnings integer not null default 0;
 
 do $$
 declare v_has_rupee boolean;
@@ -132,6 +138,17 @@ set
   first_login_at = coalesce(w.first_login_at, w.updated_at, now())
 from public.users u
 where w.user_id = u.id and (w.email is null or w.full_name is null);
+
+-- v15.2 backfill: real_earnings = sum of VICTORY rewards
+update public.wallet w
+set real_earnings = coalesce((
+  select sum(mh.reward)
+  from public.match_history mh
+  where mh.user_id = w.user_id and mh.result = 'VICTORY'
+), 0)
+where real_earnings = 0;
+
+create index if not exists wallet_real_earnings_idx on public.wallet (user_id, real_earnings);
 
 alter table public.wallet enable row level security;
 
@@ -365,7 +382,7 @@ do $$ begin begin alter publication supabase_realtime add table public.notificat
 alter table public.notifications replica identity full;
 
 -- ============================================================
--- 11. AUTO-PROVISION NEW USERS
+-- 11. AUTO-PROVISION NEW USERS (v15.2: real_earnings stays 0)
 -- ============================================================
 create or replace function public.handle_new_user() returns trigger language plpgsql security definer
 set search_path = public as $$
@@ -377,13 +394,14 @@ begin
 
   select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
 
+  -- real_earnings stays at 0 — welcome bonus is NOT withdrawable
   if v_has_rupee then
-    execute $sql$ insert into public.wallet (user_id, balance, "₹", email, full_name, first_login_at)
-      values ($1, 25, 25, $2, $3, now()) on conflict (user_id) do nothing $sql$
+    execute $sql$ insert into public.wallet (user_id, balance, "₹", real_earnings, email, full_name, first_login_at)
+      values ($1, 25, 25, 0, $2, $3, now()) on conflict (user_id) do nothing $sql$
     using new.id, new.email, new.raw_user_meta_data ->> 'full_name';
   else
-    execute $sql$ insert into public.wallet (user_id, balance, email, full_name, first_login_at)
-      values ($1, 25, $2, $3, now()) on conflict (user_id) do nothing $sql$
+    execute $sql$ insert into public.wallet (user_id, balance, real_earnings, email, full_name, first_login_at)
+      values ($1, 25, 0, $2, $3, now()) on conflict (user_id) do nothing $sql$
     using new.id, new.email, new.raw_user_meta_data ->> 'full_name';
   end if;
 
@@ -405,7 +423,7 @@ after insert on auth.users for each row
 execute procedure public.handle_new_user();
 
 -- ============================================================
--- 12. CLAIM_OPPONENT
+-- 12. CLAIM_OPPONENT (v15.2: refunds don't touch real_earnings)
 -- ============================================================
 drop function if exists public.claim_opponent(text, integer, integer, text, text);
 
@@ -532,6 +550,7 @@ begin
       );
     end if;
 
+    -- ✅ v15.2: refund goes to balance only, NOT real_earnings
     select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
     if v_has_rupee then
       execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using p_entry_fee, v_me;
@@ -574,13 +593,20 @@ end; $$;
 grant execute on function public.claim_opponent(text, integer, integer, text, text) to authenticated;
 
 -- ============================================================
--- 13. REDEEM_REFERRAL_CODE
+-- 13. REDEEM_REFERRAL_CODE (v15.2: self-referral block + real_earnings)
 -- ============================================================
 create or replace function public.redeem_referral_code(p_code text) returns json language plpgsql security definer
 set search_path = public as $$
 declare
-  v_referrer_id uuid; v_me uuid := auth.uid(); v_already uuid;
-  v_bonus constant integer := 25; v_has_rupee boolean;
+  v_referrer_id uuid;
+  v_me uuid := auth.uid();
+  v_already uuid;
+  v_bonus constant integer := 25;
+  v_has_rupee boolean;
+  v_my_fp text;
+  v_my_ip text;
+  v_ref_fp text;
+  v_ref_ip text;
 begin
   if v_me is null then return json_build_object('success', false, 'message', 'Not authenticated.'); end if;
   if p_code is null or length(trim(p_code)) = 0 then return json_build_object('success', false, 'message', 'Please enter a code.'); end if;
@@ -590,15 +616,34 @@ begin
   if v_referrer_id is null then return json_build_object('success', false, 'message', 'That referral code was not found.'); end if;
   if v_referrer_id = v_me then return json_build_object('success', false, 'message', 'You cannot use your own referral code.'); end if;
 
+  -- v15.2: block self-referral via fingerprint/IP
+  select device_fingerprint, last_ip into v_my_fp, v_my_ip
+    from public.users where id = v_me;
+  select device_fingerprint, last_ip into v_ref_fp, v_ref_ip
+    from public.users where id = v_referrer_id;
+
+  if v_my_fp is not null and v_ref_fp is not null and v_my_fp = v_ref_fp then
+    return json_build_object('success', false, 'message', 'Referral blocked: same device detected.');
+  end if;
+  if v_my_ip is not null and v_ref_ip is not null
+     and v_my_ip = v_ref_ip and v_my_ip <> 'unknown' then
+    return json_build_object('success', false, 'message', 'Referral blocked: same network detected.');
+  end if;
+
   update public.users set referred_by = v_referrer_id where id = v_me;
 
+  -- v15.2: referral bonus DOES increment real_earnings (it's legit withdrawable)
   select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
   if v_has_rupee then
-    update public.wallet set balance = balance + v_bonus, "₹" = "₹" + v_bonus, updated_at = now() where user_id = v_me;
-    update public.wallet set balance = balance + v_bonus, "₹" = "₹" + v_bonus, updated_at = now() where user_id = v_referrer_id;
+    update public.wallet set balance = balance + v_bonus, "₹" = "₹" + v_bonus,
+      real_earnings = real_earnings + v_bonus, updated_at = now() where user_id = v_me;
+    update public.wallet set balance = balance + v_bonus, "₹" = "₹" + v_bonus,
+      real_earnings = real_earnings + v_bonus, updated_at = now() where user_id = v_referrer_id;
   else
-    update public.wallet set balance = balance + v_bonus, updated_at = now() where user_id = v_me;
-    update public.wallet set balance = balance + v_bonus, updated_at = now() where user_id = v_referrer_id;
+    update public.wallet set balance = balance + v_bonus,
+      real_earnings = real_earnings + v_bonus, updated_at = now() where user_id = v_me;
+    update public.wallet set balance = balance + v_bonus,
+      real_earnings = real_earnings + v_bonus, updated_at = now() where user_id = v_referrer_id;
   end if;
 
   insert into public.transactions (user_id, description, type, amount) values (v_me, 'Referral bonus redeemed', 'credit', v_bonus);
@@ -647,6 +692,7 @@ set search_path = public as $$
 declare v_has_rupee boolean;
 begin
   if new.status = 'approved' and old.status = 'pending' then
+    -- v15.2: top-ups go to balance only (not withdrawable until played)
     select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
     if v_has_rupee then
       update public.wallet set balance = balance + new.tokens_to_credit, "₹" = "₹" + new.tokens_to_credit, updated_at = now() where user_id = new.user_id;
@@ -783,6 +829,7 @@ begin
       );
     end if;
 
+    -- ✅ v15.2: refund to balance only
     select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
     if v_has_rupee then
       execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using v_invite.entry_fee, v_me;
@@ -826,7 +873,7 @@ end; $$;
 grant execute on function public.accept_match_invite(uuid, text, text) to authenticated;
 
 -- ============================================================
--- 16. SETTLEMENT RPCs
+-- 16. SETTLEMENT RPCs (v15.2: real_earnings on victory only)
 -- ============================================================
 create or replace function public.end_session_with_state(
   p_session_id uuid,
@@ -858,11 +905,21 @@ begin
   select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
 
   if p_winner_id is not null then
+    -- ✅ v15.2: winner gets balance + real_earnings
     if v_has_rupee then
-      execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using v_reward, p_winner_id;
+      execute $sql$ update public.wallet
+        set balance = balance + $1, "₹" = "₹" + $1,
+            real_earnings = real_earnings + $1,
+            updated_at = now()
+        where user_id = $2 $sql$ using v_reward, p_winner_id;
     else
-      update public.wallet set balance = balance + v_reward, updated_at = now() where user_id = p_winner_id;
+      update public.wallet
+        set balance = balance + v_reward,
+            real_earnings = real_earnings + v_reward,
+            updated_at = now()
+        where user_id = p_winner_id;
     end if;
+
     insert into public.transactions (user_id, description, type, amount)
     values (p_winner_id, 'Duel Victory — ' || v_session.game_type, 'credit', v_reward);
 
@@ -877,6 +934,7 @@ begin
     from public.users u where u.id = p_winner_id;
 
   else
+    -- ⚠️ Draw refund — balance only, NOT real_earnings
     if v_has_rupee then
       execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id in ($2, $3) $sql$ using v_entry, v_session.player1_id, v_session.player2_id;
     else
@@ -891,7 +949,6 @@ begin
            (v_session.player2_id, v_session.game_type, 'Opponent', 'DRAW', 0);
   end if;
 
-  -- Mark both players' pending stakes as consumed
   update public.pending_stakes
     set status = 'consumed', session_id = p_session_id, consumed_at = now()
     where user_id in (v_session.player1_id, v_session.player2_id)
@@ -924,10 +981,18 @@ begin
   select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
 
   if v_opponent is not null then
+    -- ✅ v15.2: opponent who wins by abandon gets real_earnings
     if v_has_rupee then
-      execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using v_session.reward, v_opponent;
+      execute $sql$ update public.wallet
+        set balance = balance + $1, "₹" = "₹" + $1,
+            real_earnings = real_earnings + $1, updated_at = now()
+        where user_id = $2 $sql$ using v_session.reward, v_opponent;
     else
-      update public.wallet set balance = balance + v_session.reward, updated_at = now() where user_id = v_opponent;
+      update public.wallet
+        set balance = balance + v_session.reward,
+            real_earnings = real_earnings + v_session.reward,
+            updated_at = now()
+        where user_id = v_opponent;
     end if;
     insert into public.transactions (user_id, description, type, amount)
     values (v_opponent, 'Opponent abandoned — ' || v_session.game_type, 'credit', v_session.reward);
@@ -960,6 +1025,7 @@ begin
   delete from public.matchmaking_queue where user_id = v_me and game_type = p_game_type;
   update public.match_invites set status = 'cancelled' where from_user_id = v_me and game_type = p_game_type and status = 'open';
 
+  -- v15.2: refund to balance only
   select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
   if v_has_rupee then
     execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using p_entry_fee, v_me;
@@ -976,7 +1042,7 @@ end; $$;
 grant execute on function public.refund_stake_on_no_opponent(text, integer) to authenticated;
 
 -- ============================================================
--- 17. WITHDRAWAL REQUESTS
+-- 17. WITHDRAWAL REQUESTS (v15.2: real_earnings check + dup guard)
 -- ============================================================
 create table if not exists public.withdrawal_requests (
   id uuid primary key default gen_random_uuid(),
@@ -1014,18 +1080,43 @@ alter table public.withdrawal_requests replica identity full;
 create or replace function public.create_withdrawal_request(p_upi_id text, p_amount integer) returns json language plpgsql security definer
 set search_path = public as $$
 declare
-  v_me uuid := auth.uid(); v_user public.users; v_wallet public.wallet;
-  v_matches integer := 0; v_wins integer := 0; v_winrate integer := 0;
-  v_request_id uuid; v_has_rupee boolean;
+  v_me uuid := auth.uid();
+  v_user public.users;
+  v_wallet public.wallet;
+  v_matches integer := 0;
+  v_wins integer := 0;
+  v_winrate integer := 0;
+  v_request_id uuid;
+  v_has_rupee boolean;
+  v_pending_withdrawals integer;
 begin
   if v_me is null then return json_build_object('ok', false, 'message', 'Not authenticated.'); end if;
   if p_upi_id is null or length(trim(p_upi_id)) < 3 then return json_build_object('ok', false, 'message', 'Please enter a valid UPI ID.'); end if;
   if p_amount is null or p_amount < 150 then return json_build_object('ok', false, 'message', 'Minimum withdrawal is ₹150.'); end if;
 
+  -- v15.2: block duplicate pending withdrawals
+  select count(*) into v_pending_withdrawals
+  from public.withdrawal_requests
+  where user_id = v_me and status in ('pending', 'processing');
+  if v_pending_withdrawals > 0 then
+    return json_build_object('ok', false, 'message', 'You already have a pending withdrawal. Please wait.');
+  end if;
+
   select * into v_user from public.users where id = v_me;
   select * into v_wallet from public.wallet where user_id = v_me;
   if v_wallet is null then return json_build_object('ok', false, 'message', 'Wallet not found.'); end if;
-  if v_wallet.balance < p_amount then return json_build_object('ok', false, 'message', 'Insufficient balance.'); end if;
+
+  if v_wallet.balance < p_amount then return json_build_object('ok', false, 'message', 'Insufficient wallet balance.'); end if;
+
+  -- ✅ v15.2: real_earnings check
+  if coalesce(v_wallet.real_earnings, 0) < p_amount then
+    return json_build_object(
+      'ok', false,
+      'message',
+      'Withdrawable amount is ₹' || coalesce(v_wallet.real_earnings, 0) ||
+      ' (from match wins and referrals). Refund credits are not withdrawable. Win more matches to unlock.'
+    );
+  end if;
 
   select count(*) into v_matches from public.match_history where user_id = v_me;
   select count(*) into v_wins from public.match_history where user_id = v_me and result = 'VICTORY';
@@ -1035,11 +1126,20 @@ begin
   values (v_me, v_user.full_name, v_user.email, v_user.avatar_url, v_user.referral_code, v_matches, v_winrate, v_wallet.balance, trim(p_upi_id), p_amount, 'pending')
   returning id into v_request_id;
 
+  -- v15.2: deduct from both balance and real_earnings
   select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
   if v_has_rupee then
-    execute $sql$ update public.wallet set balance = balance - $1, "₹" = "₹" - $1, updated_at = now() where user_id = $2 $sql$ using p_amount, v_me;
+    execute $sql$ update public.wallet
+      set balance = balance - $1, "₹" = "₹" - $1,
+          real_earnings = greatest(0, real_earnings - $1),
+          updated_at = now()
+      where user_id = $2 $sql$ using p_amount, v_me;
   else
-    update public.wallet set balance = balance - p_amount, updated_at = now() where user_id = v_me;
+    update public.wallet
+      set balance = balance - p_amount,
+          real_earnings = greatest(0, real_earnings - p_amount),
+          updated_at = now()
+      where user_id = v_me;
   end if;
 
   insert into public.transactions (user_id, description, type, amount)
@@ -1085,11 +1185,19 @@ begin
   if v_req is null then return json_build_object('ok', false, 'message', 'Request not found.'); end if;
   if v_req.status <> 'pending' and v_req.status <> 'processing' then return json_build_object('ok', false, 'message', 'Cannot reject — already ' || v_req.status); end if;
 
+  -- v15.2: restore real_earnings on rejection (it was deducted at request time)
   select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
   if v_has_rupee then
-    execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using v_req.amount, v_req.user_id;
+    execute $sql$ update public.wallet
+      set balance = balance + $1, "₹" = "₹" + $1,
+          real_earnings = real_earnings + $1, updated_at = now()
+      where user_id = $2 $sql$ using v_req.amount, v_req.user_id;
   else
-    update public.wallet set balance = balance + v_req.amount, updated_at = now() where user_id = v_req.user_id;
+    update public.wallet
+      set balance = balance + v_req.amount,
+          real_earnings = real_earnings + v_req.amount,
+          updated_at = now()
+      where user_id = v_req.user_id;
   end if;
 
   insert into public.transactions (user_id, description, type, amount)
@@ -1158,7 +1266,7 @@ end; $$;
 grant execute on function public.admin_send_broadcast(text, text, text, text) to authenticated;
 
 -- ============================================================
--- 19. ADMIN VIEWS
+-- 19. ADMIN VIEWS (v15.2: added real_earnings)
 -- ============================================================
 create or replace view public.admin_pending_withdrawals as
 select
@@ -1190,6 +1298,8 @@ create or replace view public.admin_users_overview as
 select
   u.id as user_id, u.full_name as name, u.email as email, u.referral_code as referral,
   coalesce(w.balance, 0) as wallet_balance,
+  coalesce(w.real_earnings, 0) as real_earnings,
+  (coalesce(w.balance, 0) - coalesce(w.real_earnings, 0)) as non_withdrawable,
   coalesce((select count(*) from public.match_history mh where mh.user_id = u.id), 0) as total_matches,
   coalesce((select count(*) from public.match_history mh where mh.user_id = u.id and mh.result = 'VICTORY'), 0) as total_wins,
   coalesce((select count(*) from public.withdrawal_requests wr where wr.user_id = u.id and wr.status = 'pending'), 0) as pending_withdrawals,
@@ -1279,6 +1389,7 @@ begin
   insert into public.daily_bonus_claims (user_id, claim_date, amount, streak_day)
   values (v_me, v_today, v_amount, v_streak);
 
+  -- v15.2: daily bonus goes to balance only (not withdrawable)
   select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
   if v_has_rupee then
     execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 returning balance into $3 $sql$
@@ -1794,10 +1905,8 @@ begin
 end $$;
 
 -- ============================================================
--- 30. REFUND SAFETY — pending_stakes + guarded refund
+-- 29. REFUND SAFETY — pending_stakes + guarded refund (v15.2)
 -- ============================================================
--- (pending_stakes table was created in section 1c above)
-
 create or replace function public.log_stake_debit()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
@@ -1805,7 +1914,7 @@ begin
     insert into public.pending_stakes (user_id, game_type, entry_fee, status)
     values (
       new.user_id,
-      'unknown',                -- store unknown so refund RPC matches regardless of display name
+      'unknown',
       abs(new.amount),
       'pending'
     );
@@ -1819,6 +1928,9 @@ after insert on public.transactions
 for each row
 execute procedure public.log_stake_debit();
 
+-- ============================================================
+-- 30. REFUND_MY_PENDING_STAKE (v15.2: rate limits + flagging)
+-- ============================================================
 create or replace function public.refund_my_pending_stake(
   p_game_type text,
   p_reason text default 'Refund'
@@ -1826,9 +1938,47 @@ create or replace function public.refund_my_pending_stake(
 declare
   v_me uuid := auth.uid();
   v_stake public.pending_stakes;
+  v_refunds_1h integer;
+  v_refunds_24h integer;
 begin
   if v_me is null then
     return json_build_object('ok', false, 'reason', 'not_authenticated');
+  end if;
+
+  -- Count recent refunds
+  select count(*) into v_refunds_1h
+  from public.transactions
+  where user_id = v_me
+    and type = 'credit'
+    and description ilike 'Stake Refunded%'
+    and created_at > now() - interval '1 hour';
+
+  select count(*) into v_refunds_24h
+  from public.transactions
+  where user_id = v_me
+    and type = 'credit'
+    and description ilike 'Stake Refunded%'
+    and created_at > now() - interval '24 hours';
+
+  -- Hard limits
+  if v_refunds_1h >= 5 then
+    insert into public.fairplay_blocks (user_a, user_b, reason)
+    values (v_me, v_me, 'Refund abuse: ' || v_refunds_1h || ' refunds in last hour');
+    return json_build_object(
+      'ok', false,
+      'reason', 'refund_rate_limit_hourly',
+      'message', 'Too many refunds this hour. Account flagged for review.'
+    );
+  end if;
+
+  if v_refunds_24h >= 15 then
+    insert into public.fairplay_blocks (user_a, user_b, reason)
+    values (v_me, v_me, 'Refund abuse: ' || v_refunds_24h || ' refunds in 24h');
+    return json_build_object(
+      'ok', false,
+      'reason', 'refund_rate_limit_daily',
+      'message', 'Daily refund limit reached. Account flagged for review.'
+    );
   end if;
 
   select * into v_stake
@@ -1843,6 +1993,7 @@ begin
     return json_build_object('ok', true, 'nothing_to_refund', true);
   end if;
 
+  -- ✅ v15.2: refund to balance only, NOT real_earnings
   update public.wallet
     set balance = balance + v_stake.entry_fee, updated_at = now()
     where user_id = v_me;
@@ -1854,11 +2005,58 @@ begin
     set status = 'refunded', refund_reason = p_reason, refunded_at = now()
     where id = v_stake.id;
 
+  -- Warn user as they approach limit
+  if v_refunds_1h >= 3 then
+    insert into public.notifications (user_id, title, body, type, icon)
+    values (v_me, '⚠️ Refund Warning',
+      'You have requested ' || (v_refunds_1h + 1) || ' refunds this hour. Excessive refunds may flag your account.',
+      'alert', 'alert');
+  end if;
+
   return json_build_object('ok', true, 'refunded', v_stake.entry_fee);
 end; $$;
 
 grant execute on function public.refund_my_pending_stake(text, text) to authenticated;
 
 -- ============================================================
--- END OF SCHEMA v15.1
+-- 31. SUSPICIOUS USERS ADMIN VIEW (v15.2 NEW)
+-- ============================================================
+create or replace view public.admin_suspicious_users as
+select
+  u.id as user_id,
+  u.full_name as name,
+  u.email as email,
+  coalesce(w.balance, 0) as balance,
+  coalesce(w.real_earnings, 0) as real_earnings,
+  (coalesce(w.balance, 0) - coalesce(w.real_earnings, 0)) as non_withdrawable,
+  coalesce((select count(*) from public.transactions t
+    where t.user_id = u.id
+      and t.type = 'credit'
+      and t.description ilike 'Stake Refunded%'
+      and t.created_at > now() - interval '24 hours'
+  ), 0) as refunds_24h,
+  coalesce((select count(*) from public.fairplay_blocks fb
+    where fb.user_a = u.id or fb.user_b = u.id
+  ), 0) as fairplay_blocks,
+  coalesce((select count(*) from public.withdrawal_requests wr
+    where wr.user_id = u.id and wr.status = 'pending'
+  ), 0) as pending_withdrawals,
+  to_char(u.last_seen at time zone 'Asia/Kolkata', 'DD Mon YYYY, HH12:MI AM') as last_seen_ist
+from public.users u
+left join public.wallet w on w.user_id = u.id
+where
+  -- flag accounts where non-withdrawable > 50% of balance OR many refunds
+  (coalesce(w.balance, 0) - coalesce(w.real_earnings, 0)) > (coalesce(w.balance, 0) * 0.5)
+  or (select count(*) from public.transactions t
+    where t.user_id = u.id
+      and t.type = 'credit'
+      and t.description ilike 'Stake Refunded%'
+      and t.created_at > now() - interval '24 hours'
+  ) >= 5
+order by (coalesce(w.balance, 0) - coalesce(w.real_earnings, 0)) desc;
+
+grant select on public.admin_suspicious_users to authenticated;
+
+-- ============================================================
+-- END OF SCHEMA v15.2
 -- ============================================================
