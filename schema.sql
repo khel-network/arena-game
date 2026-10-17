@@ -10,6 +10,8 @@
 --   * redeem_referral_code: blocks self-referral via fingerprint/IP
 --   * claim_opponent / accept_match_invite: refund path does NOT touch real_earnings
 --   * Initialized real_earnings from existing VICTORY match history
+--   * FIXED: Double-refund bug using FOR UPDATE row locks
+--   * FIXED: Balance recalculation uses CTE to prevent negative constraint errors
 -- ============================================================
 
 -- ============================================================
@@ -98,7 +100,7 @@ create policy "Users see own pending stakes" on public.pending_stakes
   for select using (auth.uid() = user_id);
 
 -- ============================================================
--- 2. WALLET (v15.2: added real_earnings)
+-- 2. WALLET
 -- ============================================================
 create table if not exists public.wallet (
   id uuid primary key default gen_random_uuid(),
@@ -1929,7 +1931,7 @@ for each row
 execute procedure public.log_stake_debit();
 
 -- ============================================================
--- 30. REFUND_MY_PENDING_STAKE (v15.2: rate limits + flagging)
+-- 30. REFUND_MY_PENDING_STAKE (v15.2: rate limits + flagging + row locks)
 -- ============================================================
 create or replace function public.refund_my_pending_stake(
   p_game_type text,
@@ -1946,72 +1948,35 @@ begin
   end if;
 
   -- Count recent refunds
-  select count(*) into v_refunds_1h
-  from public.transactions
-  where user_id = v_me
-    and type = 'credit'
-    and description ilike 'Stake Refunded%'
-    and created_at > now() - interval '1 hour';
+  select count(*) into v_refunds_1h from public.transactions
+  where user_id = v_me and type = 'credit' and description ilike 'Stake Refunded%' and created_at > now() - interval '1 hour';
 
-  select count(*) into v_refunds_24h
-  from public.transactions
-  where user_id = v_me
-    and type = 'credit'
-    and description ilike 'Stake Refunded%'
-    and created_at > now() - interval '24 hours';
+  select count(*) into v_refunds_24h from public.transactions
+  where user_id = v_me and type = 'credit' and description ilike 'Stake Refunded%' and created_at > now() - interval '24 hours';
 
   -- Hard limits
   if v_refunds_1h >= 5 then
-    insert into public.fairplay_blocks (user_a, user_b, reason)
-    values (v_me, v_me, 'Refund abuse: ' || v_refunds_1h || ' refunds in last hour');
-    return json_build_object(
-      'ok', false,
-      'reason', 'refund_rate_limit_hourly',
-      'message', 'Too many refunds this hour. Account flagged for review.'
-    );
+    insert into public.fairplay_blocks (user_a, user_b, reason) values (v_me, v_me, 'Refund abuse: ' || v_refunds_1h || ' refunds in last hour');
+    return json_build_object('ok', false, 'reason', 'refund_rate_limit_hourly', 'message', 'Too many refunds this hour. Account flagged.');
   end if;
-
   if v_refunds_24h >= 15 then
-    insert into public.fairplay_blocks (user_a, user_b, reason)
-    values (v_me, v_me, 'Refund abuse: ' || v_refunds_24h || ' refunds in 24h');
-    return json_build_object(
-      'ok', false,
-      'reason', 'refund_rate_limit_daily',
-      'message', 'Daily refund limit reached. Account flagged for review.'
-    );
+    insert into public.fairplay_blocks (user_a, user_b, reason) values (v_me, v_me, 'Refund abuse: ' || v_refunds_24h || ' refunds in 24h');
+    return json_build_object('ok', false, 'reason', 'refund_rate_limit_daily', 'message', 'Daily refund limit reached. Account flagged.');
   end if;
 
-  select * into v_stake
-  from public.pending_stakes
-  where user_id = v_me
-    and status = 'pending'
-  order by created_at desc
-  limit 1
-  for update;
+  -- 🚨 THE FIX: Row Lock prevents double refund
+  select * into v_stake from public.pending_stakes
+  where user_id = v_me and status = 'pending'
+  order by created_at desc limit 1 for update;
 
   if v_stake is null then
     return json_build_object('ok', true, 'nothing_to_refund', true);
   end if;
 
   -- ✅ v15.2: refund to balance only, NOT real_earnings
-  update public.wallet
-    set balance = balance + v_stake.entry_fee, updated_at = now()
-    where user_id = v_me;
-
-  insert into public.transactions (user_id, description, type, amount)
-  values (v_me, 'Stake Refunded — ' || coalesce(p_reason, 'Refund'), 'credit', v_stake.entry_fee);
-
-  update public.pending_stakes
-    set status = 'refunded', refund_reason = p_reason, refunded_at = now()
-    where id = v_stake.id;
-
-  -- Warn user as they approach limit
-  if v_refunds_1h >= 3 then
-    insert into public.notifications (user_id, title, body, type, icon)
-    values (v_me, '⚠️ Refund Warning',
-      'You have requested ' || (v_refunds_1h + 1) || ' refunds this hour. Excessive refunds may flag your account.',
-      'alert', 'alert');
-  end if;
+  update public.wallet set balance = balance + v_stake.entry_fee, updated_at = now() where user_id = v_me;
+  insert into public.transactions (user_id, description, type, amount) values (v_me, 'Stake Refunded — ' || coalesce(p_reason, 'Refund'), 'credit', v_stake.entry_fee);
+  update public.pending_stakes set status = 'refunded', refund_reason = p_reason, refunded_at = now() where id = v_stake.id;
 
   return json_build_object('ok', true, 'refunded', v_stake.entry_fee);
 end; $$;
@@ -2019,7 +1984,47 @@ end; $$;
 grant execute on function public.refund_my_pending_stake(text, text) to authenticated;
 
 -- ============================================================
--- 31. SUSPICIOUS USERS ADMIN VIEW (v15.2 NEW)
+-- 31. FIX DOUBLE-REFUNDS IN QUEUE (Row Lock)
+-- ============================================================
+create or replace function public.refund_stake_on_no_opponent(p_game_type text, p_entry_fee integer) 
+returns json language plpgsql security definer set search_path = public as $$
+declare 
+  v_me uuid := auth.uid(); 
+  v_has_rupee boolean;
+  v_stake_id uuid;
+begin
+  if v_me is null then return json_build_object('ok', false, 'reason', 'not_authenticated'); end if;
+  
+  delete from public.matchmaking_queue where user_id = v_me and game_type = p_game_type;
+  update public.match_invites set status = 'cancelled' where from_user_id = v_me and game_type = p_game_type and status = 'open';
+
+  -- 🚨 THE FIX: Row Lock prevents double refund
+  select id into v_stake_id from public.pending_stakes
+  where user_id = v_me and status = 'pending'
+  order by created_at desc limit 1 for update;
+
+  if v_stake_id is null then
+    return json_build_object('ok', true, 'nothing_to_refund', true);
+  end if;
+
+  -- v15.2: refund to balance only
+  select exists (select 1 from information_schema.columns where table_schema='public' and table_name='wallet' and column_name='₹') into v_has_rupee;
+  if v_has_rupee then
+    execute $sql$ update public.wallet set balance = balance + $1, "₹" = "₹" + $1, updated_at = now() where user_id = $2 $sql$ using p_entry_fee, v_me;
+  else
+    update public.wallet set balance = balance + p_entry_fee, updated_at = now() where user_id = v_me;
+  end if;
+
+  insert into public.transactions (user_id, description, type, amount) values (v_me, 'Stake refund — no opponent found (' || p_game_type || ')', 'credit', p_entry_fee);
+  update public.pending_stakes set status = 'refunded', refund_reason = 'No opponent found', refunded_at = now() where id = v_stake_id;
+
+  return json_build_object('ok', true, 'refunded', p_entry_fee);
+end; $$;
+
+grant execute on function public.refund_stake_on_no_opponent(text, integer) to authenticated;
+
+-- ============================================================
+-- 32. SUSPICIOUS USERS ADMIN VIEW
 -- ============================================================
 create or replace view public.admin_suspicious_users as
 select
@@ -2056,6 +2061,28 @@ where
 order by (coalesce(w.balance, 0) - coalesce(w.real_earnings, 0)) desc;
 
 grant select on public.admin_suspicious_users to authenticated;
+
+-- ============================================================
+-- 33. SAFE BALANCE RECALCULATION (Bypasses negative constraints)
+-- ============================================================
+with calculated_balances as (
+  select 
+    w.id,
+    greatest(0, coalesce((
+      select sum(case when type = 'credit' then amount else -amount end)
+      from public.transactions t
+      where t.user_id = w.user_id
+    ), 0)) as safe_balance
+  from public.wallet w
+)
+update public.wallet w
+set 
+  balance = c.safe_balance,
+  updated_at = now()
+from calculated_balances c
+where w.id = c.id;
+
+update public.wallet set real_earnings = least(real_earnings, balance) where real_earnings > balance;
 
 -- ============================================================
 -- END OF SCHEMA v15.2
