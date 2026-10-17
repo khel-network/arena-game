@@ -1,12 +1,13 @@
 -- ============================================================
--- ADMIN INVESTIGATE USER v2.1 (Fixes UI Parameter Mismatch)
+-- ADMIN INVESTIGATE USER v2.0
+-- Includes Refund Farming & Fraud Detection Logic
 -- ============================================================
 
--- 1. Drop the old function to prevent caching/parameter conflicts
+-- 1. Drop the old function to prevent parameter name conflicts
 drop function if exists public.admin_investigate_user(text);
 
--- 2. Create the new updated function using 'p_query' to match your UI
-create or replace function public.admin_investigate_user(p_query text)
+-- 2. Create the new updated function
+create or replace function public.admin_investigate_user(p_identifier text)
 returns json language plpgsql security definer set search_path = public as $$
 declare
   v_user record;
@@ -22,9 +23,9 @@ begin
     return json_build_object('ok', false, 'message', 'Forbidden');
   end if;
 
-  -- Find user by email or UUID using the 'p_query' parameter
+  -- Find user by email or UUID
   select * into v_user from public.users 
-  where email = p_query or id::text = p_query limit 1;
+  where email = p_identifier or id::text = p_identifier limit 1;
   
   if v_user is null then 
     return json_build_object('ok', false, 'message', 'User not found'); 
