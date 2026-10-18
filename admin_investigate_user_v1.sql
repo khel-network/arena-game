@@ -1,7 +1,3 @@
--- ============================================================
--- ADMIN INVESTIGATE USER v5.0 (Original UI Structure + Fraud Logic)
--- ============================================================
-
 drop function if exists public.admin_investigate_user(text);
 
 create or replace function public.admin_investigate_user(p_query text)
@@ -15,12 +11,15 @@ declare
   v_refunds_24h integer := 0;
   v_is_suspicious boolean := false;
   v_warning_message text := '';
+  v_fairplay_blocks integer := 0;
+  v_stakes_count integer := 0;
+  v_withdrawals_count integer := 0;
 begin
   if not public.is_admin() then
     return json_build_object('ok', false, 'message', 'Forbidden');
   end if;
 
-  -- Find user
+  -- 1. Find user
   select * into v_user from public.users 
   where email = p_query or id::text = p_query limit 1;
   
@@ -30,12 +29,21 @@ begin
 
   select * into v_wallet from public.wallet where user_id = v_user.id;
 
-  -- Count refunds for Fraud Detection
+  -- 2. Calculate fraud stats
   select count(*) into v_total_refunds from public.transactions 
   where user_id = v_user.id and type = 'credit' and description ilike 'Stake Refunded%';
 
   select count(*) into v_refunds_24h from public.transactions 
   where user_id = v_user.id and type = 'credit' and description ilike 'Stake Refunded%' and created_at > now() - interval '24 hours';
+
+  select count(*) into v_fairplay_blocks from public.fairplay_blocks 
+  where user_a = v_user.id or user_b = v_user.id;
+
+  select count(*) into v_stakes_count from public.transactions 
+  where user_id = v_user.id and type = 'debit' and description ilike 'Stake%';
+
+  select count(*) into v_withdrawals_count from public.withdrawal_requests 
+  where user_id = v_user.id;
 
   -- Suspicious Checks
   if v_total_refunds >= 3 then
@@ -53,7 +61,7 @@ begin
     v_warning_message := 'High non-withdrawable balance detected (Fake money from refunds).';
   end if;
 
-  -- Get recent transactions (exact original format)
+  -- Get recent transactions
   select coalesce(json_agg(t), '[]'::json) into v_recent_tx
   from (
     select description, type, amount, to_char(created_at at time zone 'Asia/Kolkata', 'DD Mon HH12:MI AM') as date 
@@ -62,16 +70,19 @@ begin
     order by created_at desc limit 30
   ) t;
 
-  -- Compile stats exactly as the original UI expected
+  -- 3. Compile stats EXACTLY as the original UI expects
   select json_build_object(
     'total_matches', (select count(*) from public.match_history where user_id = v_user.id),
     'wins', (select count(*) from public.match_history where user_id = v_user.id and result = 'VICTORY'),
     'total_refunds', v_total_refunds,
     'refunds_recent', v_refunds_24h,
-    'fairplay_blocks', (select count(*) from public.fairplay_blocks where user_a = v_user.id or user_b = v_user.id)
+    'fairplay_blocks', v_fairplay_blocks,
+    'stakes', v_stakes_count,
+    'withdrawals', v_withdrawals_count,
+    'sessions', (select json_build_object('completed', count(case when status = 'completed' then 1 end), 'abandoned', count(case when status = 'abandoned' then 1 end)) from public.game_sessions where player1_id = v_user.id or player2_id = v_user.id)
   ) into v_stats;
 
-  -- Return final JSON (Exact Original Structure + Suspicious Detection)
+  -- 4. Return final JSON
   return json_build_object(
     'ok', true,
     'user', json_build_object(
@@ -83,7 +94,9 @@ begin
     'wallet', json_build_object(
       'balance', coalesce(v_wallet.balance, 0),
       'real_earnings', coalesce(v_wallet.real_earnings, 0),
-      'suspicious_funds', (coalesce(v_wallet.balance, 0) - coalesce(v_wallet.real_earnings, 0))
+      'suspicious_funds', (coalesce(v_wallet.balance, 0) - coalesce(v_wallet.real_earnings, 0)),
+      'total_credits', (select coalesce(sum(amount), 0) from public.transactions where user_id = v_user.id and type = 'credit'),
+      'total_debits', (select coalesce(sum(amount), 0) from public.transactions where user_id = v_user.id and type = 'debit')
     ),
     'stats', v_stats,
     'suspicious_detection', json_build_object(
