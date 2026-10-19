@@ -2119,9 +2119,13 @@ Your ₹<span id="no-opp-refund">20</span> entry has been refunded.
 <div class="rupee">₹<span id="paymentAmount">50</span></div>
 <span class="label" id="bonusDisplay" style="color:#5b3df0; font-weight:600;">+₹10 Bonus</span>
 </div>
-<div id="paymentStatus" class="payment-status waiting">
-<span class="spinner"></span>
-<span>Creating payment...</span>
+<div id="paymentStatus" class="payment-status waiting" style="flex-direction: column; gap: 10px; padding: 14px;">
+  <div id="payment-status-text" style="display: flex; align-items: center; gap: 8px;">
+    <span class="spinner"></span>
+    <span>Creating payment...</span>
+  </div>
+  <!-- NEW BUTTON: This forces the browser to open a popup tab -->
+  <button id="open-payment-btn" style="display:none; width:100%; padding:10px; background:#5b3df0; color:#fff; border-radius:8px; font-weight:700; font-size:0.9rem; border:none; cursor:pointer;">Click Here to Open Payment</button>
 </div>
 <button id="cancelPaymentBtn" class="cancel-payment-btn">Cancel Payment</button>
 </div>
@@ -2933,9 +2937,18 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
       timeout_url: currentUrl + '?status=timeout&order_id=' + orderId,
     }, {
       onResponse: function(paymentUrl) {
-        st.innerHTML = `<span class="spinner"></span><span>Opening payment page...</span>`;
-if (paymentUrl) window.open(paymentUrl, 'ZapUPI_Payment', 'width=600,height=800');
-  document.getElementById('initiatePaymentBtn').disabled = false;
+        // Show the new button instead of trying to auto-open
+        document.getElementById('payment-status-text').innerHTML = `<i class="fas fa-check-circle" style="color:#16c46b;"></i><span style="color:#161522; font-weight:600;">Payment Link Ready!</span>`;
+        
+        const openBtn = document.getElementById('open-payment-btn');
+        openBtn.style.display = 'block';
+        
+        // When they click this button, it will open as a popup (or new tab safely)
+        openBtn.onclick = function() {
+            window.open(paymentUrl, 'ZapUPI_Payment', 'width=500,height=750');
+        };
+
+        document.getElementById('initiatePaymentBtn').disabled = false;
         paymentLock = false;
         document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
       },
