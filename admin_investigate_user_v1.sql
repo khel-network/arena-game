@@ -27,6 +27,8 @@ declare
   v_sessions_abandoned integer;
   v_blocks_against integer;
   v_blocks_caused integer;
+  v_top_up_count integer;
+  v_top_up_sum bigint;
   v_suspicion_score integer := 0;
   v_flags jsonb := '[]'::jsonb;
   v_activity jsonb := '[]'::jsonb;
@@ -67,12 +69,16 @@ begin
   select coalesce(sum(case when type='credit' then amount else 0 end), 0), coalesce(sum(case when type='debit'  then amount else 0 end), 0)
     into v_credits, v_debits from public.transactions where user_id = v_uid;
 
-  -- Stakes & Refunds (LIFETIME)
+  -- Stakes & Refunds
   select count(*), coalesce(sum(amount), 0) into v_stake_count, v_stake_sum
     from public.transactions where user_id = v_uid and type = 'debit' and description ilike 'Stake%';
     
   select count(*), coalesce(sum(amount), 0) into v_refund_count, v_refund_sum
     from public.transactions where user_id = v_uid and type = 'credit' and description ilike 'Stake Refunded%';
+
+  -- Real Money Top-Ups
+  select count(*), coalesce(sum(amount), 0) into v_top_up_count, v_top_up_sum
+    from public.transactions where user_id = v_uid and type = 'credit' and description ilike 'Top-up%';
 
   select count(*) into v_refunds_1h from public.transactions
     where user_id = v_uid and type = 'credit' and description ilike 'Stake Refunded%' and created_at > now() - interval '1 hour';
@@ -94,33 +100,33 @@ begin
   select count(*) into v_blocks_against from public.fairplay_blocks where user_b = v_uid;
   select count(*) into v_blocks_caused from public.fairplay_blocks where user_a = v_uid;
 
-  -- 🚨 SUSPICION LOGIC 🚨
+  -- 🚨 SUSPICION LOGIC (WITH EASY EXPLANATIONS) 🚨
   
-  -- 1. High suspicious funds (Fake money from refunds)
+  -- 1. Fake Funds
   if v_suspicious_funds >= 100 then
     v_suspicion_score := v_suspicion_score + 50;
-    v_flag_texts := array_append(v_flag_texts, '⚠️ Fake Funds: Wallet has ₹' || v_suspicious_funds || ' that did not come from legitimate match wins.');
+    v_flag_texts := array_append(v_flag_texts, '⚠️ Fake Funds: Wallet has ₹' || v_suspicious_funds || ' that did not come from match wins. This usually happens when a user exploits double-refunds to artificially inflate their balance.');
   elsif v_suspicious_funds >= 50 then
     v_suspicion_score := v_suspicion_score + 25;
     v_flag_texts := array_append(v_flag_texts, '⚠️ Suspicious Funds: Wallet has ₹' || v_suspicious_funds || ' in unearned credits.');
   end if;
 
-  -- 2. LIFETIME Refund Count (Catches past exploiters)
+  -- 2. Lifetime Refund Count
   if v_refund_count >= 5 then
     v_suspicion_score := v_suspicion_score + 40;
-    v_flag_texts := array_append(v_flag_texts, '⚠️ Refund Abuse: High lifetime refund count (' || v_refund_count || ' total refunds).');
+    v_flag_texts := array_append(v_flag_texts, '⚠️ Refund Abuse: User has ' || v_refund_count || ' total refunds. This indicates they are repeatedly cancelling matchmaking (or matchmaking is failing) to trigger refunds.');
   end if;
 
   -- 3. Recent Refund Burst
   if v_refunds_24h >= 3 then
     v_suspicion_score := v_suspicion_score + 30;
-    v_flag_texts := array_append(v_flag_texts, '⚠️ Recent Activity: ' || v_refunds_24h || ' refunds in the last 24 hours.');
+    v_flag_texts := array_append(v_flag_texts, '⚠️ Recent Activity: ' || v_refunds_24h || ' refunds in the last 24 hours. High frequency of cancelled matches.');
   end if;
 
   -- 4. Refunds > Stakes
   if v_refund_count > v_stake_count and v_refund_count > 0 then
     v_suspicion_score := v_suspicion_score + 30;
-    v_flag_texts := array_append(v_flag_texts, '⚠️ Anomaly: Has more refunds (' || v_refund_count || ') than stakes placed (' || v_stake_count || ').');
+    v_flag_texts := array_append(v_flag_texts, '⚠️ Anomaly: User has more refunds (' || v_refund_count || ') than stakes placed (' || v_stake_count || ').');
   end if;
 
   if v_suspicion_score > 100 then v_suspicion_score := 100; end if;
@@ -128,7 +134,7 @@ begin
   -- Set Boolean for UI Red/Green Box
   if v_suspicion_score >= 30 then
     v_is_suspicious := true;
-    v_clean_message := array_to_string(v_flag_texts, E'\n'); 
+    v_clean_message := array_to_string(v_flag_texts, E'\n\n'); 
     
     for i in 1 .. array_length(v_flag_texts, 1) loop
        v_flags := v_flags || jsonb_build_object('level', 'critical', 'title', 'Risk Detected', 'detail', v_flag_texts[i]);
@@ -141,6 +147,8 @@ begin
     select 'stake' as kind, description as label, amount, type, created_at from public.transactions where user_id = v_uid and description ilike 'Stake%'
     union all
     select 'refund' as kind, description as label, amount, type, created_at from public.transactions where user_id = v_uid and description ilike 'Stake Refunded%'
+    union all
+    select 'topup' as kind, description as label, amount, type, created_at from public.transactions where user_id = v_uid and description ilike 'Top-up%'
     union all
     select 'match' as kind, (game || ' · ' || result) as label, reward as amount, null as type, created_at from public.match_history where user_id = v_uid
     union all
@@ -162,6 +170,7 @@ begin
       'stake_count', v_stake_count, 'stake_sum', v_stake_sum,
       'refund_count', v_refund_count, 'refund_sum', v_refund_sum,
       'refunds_1h', v_refunds_1h, 'refunds_24h', v_refunds_24h,
+      'top_up_count', v_top_up_count, 'top_up_sum', v_top_up_sum,
       'refund_ratio', case when v_stake_count > 0 then round(v_refund_count::numeric / v_stake_count::numeric, 2) else 0 end
     ),
     'matches', jsonb_build_object(
