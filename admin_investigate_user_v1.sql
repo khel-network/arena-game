@@ -1,5 +1,5 @@
 -- ============================================================
--- ADMIN: User Investigation Tool (UI PERFECT MATCH)
+-- ADMIN: User Investigation Tool (Working UI + Perfect Flags)
 -- ============================================================
 
 create or replace function public.admin_investigate_user(p_query text)
@@ -115,7 +115,7 @@ begin
   -- Set Boolean for UI Red/Green Box
   if v_suspicion_score >= 30 then
     v_is_suspicious := true;
-    v_clean_message := '⚠️ ' || jsonb_array_element_text(v_flags, 0)::jsonb->>'title'; -- Grabs the first flag title
+    v_clean_message := 'Suspicious activity detected. Score: ' || v_suspicion_score;
   end if;
 
   -- Activity
@@ -131,7 +131,7 @@ begin
     order by created_at desc limit 30
   ) x;
 
-  -- 🌟 THE UI EXACT MATCH
+  -- 🌟 THE UI EXACT MATCH + EXTRA FALLBACKS
   v_result := jsonb_build_object(
     'ok', true,
     'profile', jsonb_build_object(
@@ -155,15 +155,22 @@ begin
     'withdrawals', jsonb_build_object('total', v_wd_count, 'paid', v_wd_paid, 'pending', v_wd_pending, 'rejected', v_wd_rejected),
     'fairplay', jsonb_build_object('blocks_against', v_blocks_against, 'blocks_caused', v_blocks_caused),
     
-    -- 🌟 SUSPICION DETECTION (Wired into the UI)
+    -- 🌟 SUSPICION DETECTION (All possible keys added for UI)
     'suspicion', jsonb_build_object(
       'score', v_suspicion_score, 
       'level', case when v_suspicion_score >= 60 then 'high' when v_suspicion_score >= 30 then 'medium' when v_suspicion_score > 0 then 'low' else 'clean' end,
       'flags', v_flags,
-      'is_suspicious', v_is_suspicious,   -- The boolean your UI needs
-      'message', v_clean_message          -- The text your UI needs
+      'is_suspicious', v_is_suspicious,
+      'is_suspicious_flag', v_is_suspicious,
+      'suspicious', v_is_suspicious,
+      'message', v_clean_message,
+      'warning', v_clean_message
     ),
-    'activity', v_activity
+    'activity', v_activity,
+    
+    -- Fallbacks (in case UI reads from root)
+    'is_suspicious', v_is_suspicious,
+    'message', v_clean_message
   );
 
   return v_result;
