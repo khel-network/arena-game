@@ -761,6 +761,7 @@ window.loadDailyClaims = loadDailyClaims;
 
 async function loadAll() { await Promise.all([loadStats(), loadRecentUsers(), loadRecentWithdrawals(), loadRecentTx()]); }
 window.loadAll = loadAll;
+
 // ============================================================
 // INVESTIGATE USER
 // ============================================================
@@ -788,36 +789,38 @@ async function runInvestigation() {
     const score = Number(sus.score || 0);
     const level = sus.level || 'clean';
 
-    const scoreColor =
-      level === 'high' ? 'var(--red)'
-      : level === 'medium' ? 'var(--amber)'
-      : level === 'low' ? 'var(--amber)'
-      : 'var(--green)';
+    const scoreColor = level === 'high' ? 'var(--red)' : level === 'medium' ? 'var(--amber)' : level === 'low' ? 'var(--amber)' : 'var(--green)';
+    const scoreLabel = level === 'high' ? 'HIGH RISK' : level === 'medium' ? 'SUSPICIOUS' : level === 'low' ? 'MILD FLAGS' : 'CLEAN';
 
-    const scoreLabel =
-      level === 'high' ? 'HIGH RISK'
-      : level === 'medium' ? 'SUSPICIOUS'
-      : level === 'low' ? 'MILD FLAGS'
-      : 'CLEAN';
-
-    const flagsHtml = (sus.flags && sus.flags.length)
-      ? sus.flags.map(f => {
-          const c = f.level === 'critical' ? 'var(--red)' : 'var(--amber)';
-          const icon = f.level === 'critical' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle';
-          return `<div style="display:flex;gap:10px;padding:12px 14px;border-radius:10px;background:#fafafc;border-left:3px solid ${c};margin-bottom:8px;">
-            <i class="fas ${icon}" style="color:${c};margin-top:2px;flex-shrink:0;"></i>
-            <div style="flex:1;min-width:0;">
-              <div style="font-weight:700;font-size:0.85rem;">${escapeHtml(f.title)}</div>
-              <div style="font-size:0.75rem;color:var(--muted);line-height:1.5;margin-top:2px;">${escapeHtml(f.detail)}</div>
-            </div>
-          </div>`;
-        }).join('')
-      : '<div style="padding:12px;background:#f0fdf4;border-radius:10px;color:var(--green);font-size:0.82rem;font-weight:600;"><i class="fas fa-check-circle"></i> No suspicious patterns detected. Account looks clean.</div>';
+    // MULTIPLE FLAGS DISPLAY LOGIC
+    let flagsHtml = '';
+    if (sus.message && sus.message.includes('⚠️')) {
+      const lines = sus.message.split('\n\n').filter(x => x.trim() !== '');
+      flagsHtml = lines.map(line => `
+        <div style="display:flex;gap:10px;padding:12px 14px;border-radius:10px;background:#fafafc;border-left:3px solid var(--red);margin-bottom:8px;">
+          <i class="fas fa-exclamation-triangle" style="color:var(--red);margin-top:2px;flex-shrink:0;"></i>
+          <div style="flex:1;min-width:0;font-size:0.85rem;color:var(--ink);line-height:1.5;">${escapeHtml(line)}</div>
+        </div>
+      `).join('');
+    } else if (sus.flags && sus.flags.length) {
+      flagsHtml = sus.flags.map(f => {
+        const c = f.level === 'critical' ? 'var(--red)' : 'var(--amber)';
+        return `<div style="display:flex;gap:10px;padding:12px 14px;border-radius:10px;background:#fafafc;border-left:3px solid ${c};margin-bottom:8px;">
+          <i class="fas fa-exclamation-triangle" style="color:${c};margin-top:2px;flex-shrink:0;"></i>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:0.85rem;">${escapeHtml(f.title)}</div>
+            <div style="font-size:0.75rem;color:var(--muted);line-height:1.5;margin-top:2px;">${escapeHtml(f.detail)}</div>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      flagsHtml = '<div style="padding:12px;background:#f0fdf4;border-radius:10px;color:var(--green);font-size:0.82rem;font-weight:600;"><i class="fas fa-check-circle"></i> No suspicious patterns detected. Account looks clean.</div>';
+    }
 
     const activity = data.activity || [];
     const activityHtml = activity.map(a => {
-      const cMap = { stake: 'var(--primary)', refund: 'var(--amber)', match: 'var(--green)', withdrawal: 'var(--red)' };
-      const iMap = { stake: 'fa-circle-dot', refund: 'fa-undo', match: 'fa-gamepad', withdrawal: 'fa-hand-holding-usd' };
+      const cMap = { stake: 'var(--primary)', refund: 'var(--amber)', match: 'var(--green)', withdrawal: 'var(--red)', topup: 'var(--green)' };
+      const iMap = { stake: 'fa-circle-dot', refund: 'fa-undo', match: 'fa-gamepad', withdrawal: 'fa-hand-holding-usd', topup: 'fa-credit-card' };
       const c = cMap[a.kind] || 'var(--muted)';
       const i = iMap[a.kind] || 'fa-circle';
       const amt = (a.type === 'credit' || a.kind === 'refund')
@@ -856,6 +859,8 @@ async function runInvestigation() {
       </div>
 
       <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label"><i class="fas fa-credit-card" style="color:var(--green);"></i> Real Money Top-Ups</div><div class="stat-value green">${formatRupees(m.top_up_sum)}</div><div class="stat-hint">Total deposited</div></div>
+        <div class="stat-card"><div class="stat-label"><i class="fas fa-trophy" style="color:var(--primary);"></i> Real Winnings</div><div class="stat-value" style="color:var(--primary);">${formatRupees(m.real_earnings)}</div><div class="stat-hint">Withdrawable match earnings</div></div>
         <div class="stat-card"><div class="stat-label"><i class="fas fa-wallet"></i> Wallet Balance</div><div class="stat-value">${formatRupees(p.wallet_balance)}</div><div class="stat-hint">${formatRupees(m.total_credits)} credits · ${formatRupees(m.total_debits)} debits</div></div>
         <div class="stat-card"><div class="stat-label"><i class="fas fa-circle-dot"></i> Stakes</div><div class="stat-value">${m.stake_count || 0}</div><div class="stat-hint">Total ₹${m.stake_sum || 0}</div></div>
         <div class="stat-card"><div class="stat-label"><i class="fas fa-undo"></i> Refunds</div><div class="stat-value" style="color:${m.refund_ratio > 1.5 ? 'var(--red)' : m.refund_ratio > 1.2 ? 'var(--amber)' : 'var(--ink)'};">${m.refund_count || 0}</div><div class="stat-hint">Ratio ${m.refund_ratio || 0} · ₹${m.refund_sum || 0} back</div></div>
@@ -897,7 +902,7 @@ async function runInvestigation() {
 
       <div class="card">
         <h3>Activity Timeline</h3>
-        <p class="card-sub">Last 30 events: stakes, refunds, matches, withdrawals</p>
+        <p class="card-sub">Last 30 events: top-ups, stakes, refunds, matches, withdrawals</p>
         <div style="max-height:500px;overflow-y:auto;">${activityHtml}</div>
       </div>
     `;
@@ -949,6 +954,7 @@ const NOTIFY_TEMPLATES = {
     { id: 'wd_processing', label: 'Withdrawal Processing', icon: 'bell', title: 'Withdrawal in progress', body: 'Your withdrawal request is being processed. It will be paid within 7–8 hours.', type: 'info' },
     { id: 'wd_paid', label: 'Withdrawal Paid', icon: 'check', title: 'Withdrawal paid', body: 'Your withdrawal has been successfully paid to your UPI ID.', type: 'success' },
     { id: 'wd_rejected', label: 'Withdrawal Rejected', icon: 'alert', title: 'Withdrawal rejected', body: 'Your withdrawal could not be processed. The amount has been refunded to your wallet.', type: 'alert' },
+    { id: 'wd_rejected_fraud', label: 'Blocked (Fraud)', icon: 'alert', title: 'Withdrawal Blocked', body: 'Your withdrawal was blocked because your balance contains unearned refund credits. Only winnings from real matches can be withdrawn. Please play real matches to unlock.', type: 'alert' },
     { id: 'payment_failed', label: 'Payment Failed', icon: 'alert', title: 'Payment failed', body: 'Your last payment did not go through. Please try again or contact support.', type: 'alert' }
   ],
   issues: [
