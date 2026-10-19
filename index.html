@@ -2632,6 +2632,24 @@ async function subscribeToWalletRealtime() {
         loadTransactions().then(() => { renderTxModalList(); renderLedger(); });
       }
     })
+    // 🌟 NEW LISTENER: Watch for payment approvals
+    .on('postgres_changes', {
+      event: 'UPDATE', schema: 'public', table: 'payment_requests',
+      filter: 'user_id=eq.' + currentUser.id
+    }, (payload) => {
+      if (payload.new?.status === 'approved') {
+        // Payment was approved in the other tab!
+        const modal = document.getElementById('paymentModal');
+        if (modal && modal.classList.contains('show')) {
+          // Close the "Opening payment page..." popup
+          closePaymentModal();
+          showPaymentAnimation(payload.new.tokens_to_credit);
+          showWalletToast(payload.new.tokens_to_credit, 'credit', 'Wallet top-up successful');
+        }
+        // Refresh wallet data just in case
+        loadWallet().then(() => updateUI());
+      }
+    })
     .subscribe();
 }
 function animateBalanceChange(fromVal, toVal) {
@@ -2916,8 +2934,8 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
     }, {
       onResponse: function(paymentUrl) {
         st.innerHTML = `<span class="spinner"></span><span>Opening payment page...</span>`;
-        if (paymentUrl) window.open(paymentUrl, '_blank');
-        document.getElementById('initiatePaymentBtn').disabled = false;
+if (paymentUrl) window.open(paymentUrl, 'ZapUPI_Payment', 'width=600,height=800');
+  document.getElementById('initiatePaymentBtn').disabled = false;
         paymentLock = false;
         document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
       },
@@ -5071,8 +5089,20 @@ function startPresenceHeartbeat() {
   touchPresence();
   if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
   presenceHeartbeatTimer = setInterval(touchPresence, 5000);
-  document.addEventListener('visibilitychange', () => { if (isTabActive()) touchPresence(); });
-  window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
+ document.addEventListener('visibilitychange', () => { 
+  if (isTabActive()) {
+    touchPresence(); 
+    // If the user switches back to this tab, refresh their wallet
+    if (currentUser) {
+      loadWallet().then(() => {
+        updateUI();
+        const modal = document.getElementById('paymentModal');
+        if (modal && modal.classList.contains('show')) closePaymentModal();
+      });
+    }
+  } 
+});
+window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
 }
   // ===== FAIRPLAY BLOCKS (realtime) =====
 let fairplayChannel = null;
