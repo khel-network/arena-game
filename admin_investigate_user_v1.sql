@@ -1,13 +1,10 @@
--- ============================================================
--- ADMIN: User Investigation Tool (Working UI + Perfect Flags)
--- ============================================================
-
 create or replace function public.admin_investigate_user(p_query text)
 returns json language plpgsql security definer set search_path = public as $$
 declare
   v_uid uuid;
   v_user record;
   v_wallet integer;
+  v_real_earnings integer;
   v_result json;
   v_credits bigint;
   v_debits bigint;
@@ -35,13 +32,11 @@ declare
   v_activity jsonb := '[]'::jsonb;
   v_is_suspicious boolean := false;
   v_clean_message text := 'No suspicious patterns detected. Account looks clean.';
+  v_suspicious_funds integer := 0;
+  v_flag_texts text[] := '{}';
 begin
   if not public.is_admin() then
     return json_build_object('ok', false, 'message', 'Forbidden');
-  end if;
-
-  if p_query is null or length(trim(p_query)) = 0 then
-    return json_build_object('ok', false, 'message', 'Provide email or UUID');
   end if;
 
   begin
@@ -61,13 +56,18 @@ begin
   -- Profile & Wallet
   select id, email, full_name, avatar_url, referral_code, referred_by, created_at, last_seen, device_fingerprint, last_ip
     into v_user from public.users where id = v_uid;
-  select coalesce(balance, 0) into v_wallet from public.wallet where user_id = v_uid;
+    
+  select coalesce(balance, 0), coalesce(real_earnings, 0) 
+    into v_wallet, v_real_earnings 
+    from public.wallet where user_id = v_uid;
+
+  v_suspicious_funds := v_wallet - v_real_earnings;
 
   -- Transactions
   select coalesce(sum(case when type='credit' then amount else 0 end), 0), coalesce(sum(case when type='debit'  then amount else 0 end), 0)
     into v_credits, v_debits from public.transactions where user_id = v_uid;
 
-  -- Stakes & Refunds
+  -- Stakes & Refunds (LIFETIME)
   select count(*), coalesce(sum(amount), 0) into v_stake_count, v_stake_sum
     from public.transactions where user_id = v_uid and type = 'debit' and description ilike 'Stake%';
     
@@ -94,20 +94,33 @@ begin
   select count(*) into v_blocks_against from public.fairplay_blocks where user_b = v_uid;
   select count(*) into v_blocks_caused from public.fairplay_blocks where user_a = v_uid;
 
-  -- Suspicion Logic
-  if v_stake_count > 0 and (v_refund_count::numeric / v_stake_count::numeric) > 1.5 then
+  -- 🚨 SUSPICION LOGIC 🚨
+  
+  -- 1. High suspicious funds (Fake money from refunds)
+  if v_suspicious_funds >= 100 then
+    v_suspicion_score := v_suspicion_score + 50;
+    v_flag_texts := array_append(v_flag_texts, '⚠️ Fake Funds: Wallet has ₹' || v_suspicious_funds || ' that did not come from legitimate match wins.');
+  elsif v_suspicious_funds >= 50 then
+    v_suspicion_score := v_suspicion_score + 25;
+    v_flag_texts := array_append(v_flag_texts, '⚠️ Suspicious Funds: Wallet has ₹' || v_suspicious_funds || ' in unearned credits.');
+  end if;
+
+  -- 2. LIFETIME Refund Count (Catches past exploiters)
+  if v_refund_count >= 5 then
     v_suspicion_score := v_suspicion_score + 40;
-    v_flags := v_flags || jsonb_build_object('level', 'critical', 'title', 'Refund ratio abuse', 'detail', 'Has ' || v_refund_count || ' refunds for ' || v_stake_count || ' stakes.');
+    v_flag_texts := array_append(v_flag_texts, '⚠️ Refund Abuse: High lifetime refund count (' || v_refund_count || ' total refunds).');
   end if;
 
-  if v_refunds_1h >= 5 then
+  -- 3. Recent Refund Burst
+  if v_refunds_24h >= 3 then
     v_suspicion_score := v_suspicion_score + 30;
-    v_flags := v_flags || jsonb_build_object('level', 'critical', 'title', 'Refund burst detected', 'detail', v_refunds_1h || ' refunds in the last hour.');
+    v_flag_texts := array_append(v_flag_texts, '⚠️ Recent Activity: ' || v_refunds_24h || ' refunds in the last 24 hours.');
   end if;
 
-  if v_refund_sum > v_stake_sum and v_refund_sum > 0 then
+  -- 4. Refunds > Stakes
+  if v_refund_count > v_stake_count and v_refund_count > 0 then
     v_suspicion_score := v_suspicion_score + 30;
-    v_flags := v_flags || jsonb_build_object('level', 'critical', 'title', 'Refunds exceed stakes', 'detail', 'Total refunded ₹' || v_refund_sum || ' > total staked ₹' || v_stake_sum);
+    v_flag_texts := array_append(v_flag_texts, '⚠️ Anomaly: Has more refunds (' || v_refund_count || ') than stakes placed (' || v_stake_count || ').');
   end if;
 
   if v_suspicion_score > 100 then v_suspicion_score := 100; end if;
@@ -115,7 +128,11 @@ begin
   -- Set Boolean for UI Red/Green Box
   if v_suspicion_score >= 30 then
     v_is_suspicious := true;
-    v_clean_message := 'Suspicious activity detected. Score: ' || v_suspicion_score;
+    v_clean_message := array_to_string(v_flag_texts, E'\n'); 
+    
+    for i in 1 .. array_length(v_flag_texts, 1) loop
+       v_flags := v_flags || jsonb_build_object('level', 'critical', 'title', 'Risk Detected', 'detail', v_flag_texts[i]);
+    end loop;
   end if;
 
   -- Activity
@@ -131,7 +148,7 @@ begin
     order by created_at desc limit 30
   ) x;
 
-  -- 🌟 THE UI EXACT MATCH + EXTRA FALLBACKS
+  -- BUILD EXACT UI MATCH JSON
   v_result := jsonb_build_object(
     'ok', true,
     'profile', jsonb_build_object(
@@ -155,22 +172,14 @@ begin
     'withdrawals', jsonb_build_object('total', v_wd_count, 'paid', v_wd_paid, 'pending', v_wd_pending, 'rejected', v_wd_rejected),
     'fairplay', jsonb_build_object('blocks_against', v_blocks_against, 'blocks_caused', v_blocks_caused),
     
-    -- 🌟 SUSPICION DETECTION (All possible keys added for UI)
     'suspicion', jsonb_build_object(
       'score', v_suspicion_score, 
       'level', case when v_suspicion_score >= 60 then 'high' when v_suspicion_score >= 30 then 'medium' when v_suspicion_score > 0 then 'low' else 'clean' end,
       'flags', v_flags,
       'is_suspicious', v_is_suspicious,
-      'is_suspicious_flag', v_is_suspicious,
-      'suspicious', v_is_suspicious,
-      'message', v_clean_message,
-      'warning', v_clean_message
+      'message', v_clean_message
     ),
-    'activity', v_activity,
-    
-    -- Fallbacks (in case UI reads from root)
-    'is_suspicious', v_is_suspicious,
-    'message', v_clean_message
+    'activity', v_activity
   );
 
   return v_result;
