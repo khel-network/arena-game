@@ -2668,7 +2668,7 @@ async function subscribeToWalletRealtime() {
 function startPaymentPolling() {
   if (paymentPollInterval) clearInterval(paymentPollInterval);
   
-  // Check every 3 seconds
+  // Check every 2 seconds instead of 3
   paymentPollInterval = setInterval(async () => {
     try {
       // Get the latest payment request for this user
@@ -2684,21 +2684,21 @@ function startPaymentPolling() {
         clearInterval(paymentPollInterval);
         paymentPollInterval = null;
         
-        // Auto-close the modal and show success!
-        closePaymentModal();
+        // 1. Close the Iframe immediately
+        closeIframePayment();
         
-        // Ensure animation shows and hides properly
+        // 2. Show the Success Animation
         showPaymentAnimation(data.tokens_to_credit);
         showWalletToast(data.tokens_to_credit, 'credit', 'Wallet top-up successful');
         
-        // Reload user wallet
+        // 3. Reload Wallet
         await loadWallet();
         updateUI();
       }
     } catch (e) {
       console.log('Polling error', e);
     }
-  }, 3000);
+  }, 2000); // Poll every 2 seconds
 }
 function animateBalanceChange(fromVal, toVal) {
   const el = document.getElementById('balance-value');
@@ -2975,7 +2975,7 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
     sessionStorage.setItem('pending_order_' + orderId, JSON.stringify({ amount: customAmount, tokens }));
     ZapUPI.createOrder({
       zap_key: ZAPUPI_API_KEY, order_id: orderId, amount: customAmount.toString(),
-      success_url: currentUrl + '?status=success&order_id=' + orderId,
+success_url: currentUrl + '?status=success&order_id=' + orderId + '&iframe=1',
       failed_url: currentUrl + '?status=failed&order_id=' + orderId,
       timeout_url: currentUrl + '?status=timeout&order_id=' + orderId,
     }, {
@@ -5869,7 +5869,15 @@ function stripHashFromUrl() {
 }
 stripHashFromUrl();
 window.addEventListener('load', stripHashFromUrl);
-
+// 👇 ADD THIS CODE HERE 👇
+// Listen for messages from the iframe
+window.addEventListener('message', function(event) {
+  if (event.data && event.data.status === 'success') {
+    closeIframePayment();
+    loadWallet().then(() => updateUI());
+  }
+});
+// 👆 END OF ADDED CODE 👆
 routeOnLoad();
 // ===== DEEP-LINK =====
 (function handleGameParam() {
