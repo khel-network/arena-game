@@ -5830,7 +5830,8 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
     activeGame = { name: pendingGame.name, type: pendingGame.type };
     currentEntryFee = pendingGame.entry;
     currentReward = pendingGame.reward;
-    const exitStake = document.getElementById('exit-stake-amt'); if (exitStake) exitStake.textContent = '₹' + pendingGame.entry;
+    const exitStake = document.getElementById('exit-stake-amt'); 
+    if (exitStake) exitStake.textContent = '₹' + pendingGame.entry;
     matchmakingLock = true;
     beginMatchmaking();
   } 
@@ -5909,62 +5910,10 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
         btn.disabled = false;
       }
     }, 1000);
-    gameTimers.push(countdownTimer); // Ensure it clears if they close
-  }
-    // Setup fake bot environment
-    activeGame = { name: pendingGame.name, type: pendingGame.type };
-    currentEntryFee = 0;
-    currentReward = 0;
-    isGameActive = true;
-    isRealPlayerMatch = false;
-    myRole = 'player1';
-    activeGameSessionId = 'fake_session_123';
-    arenaLaunchInProgress = true;
-    
-    // Show Fake Matchmaking for realism
-    const matchOverlay = document.getElementById('match-overlay');
-    const matchTitle = document.getElementById('match-title');
-    const matchStatus = document.getElementById('match-status');
-    const mmStake = document.getElementById('mm-entry-stake');
-    const searchingView = document.getElementById('mm-searching-view');
-    const blockedView = document.getElementById('mm-blocked-view');
-    
-    if (blockedView) blockedView.style.display = 'none';
-    if (searchingView) searchingView.style.display = 'block';
-    if (matchTitle) matchTitle.textContent = 'Finding Real Opponent';
-    if (matchStatus) matchStatus.textContent = 'Searching for real players...';
-    if (mmStake) mmStake.textContent = 'FREE TRIAL';
-    matchOverlay.classList.remove('hidden');
-    
-    // Wait 2.5 seconds then launch the bot
-    setTimeout(() => {
-      matchOverlay.classList.add('hidden');
-      
-      const botName = INDIAN_BOT_NAMES[Math.floor(Math.random() * INDIAN_BOT_NAMES.length)];
-      const botId = 'bot_' + Date.now();
-      const botOpponent = { name: botName, seed: botId, isBot: true, id: botId };
-      
-      arenaLaunchInProgress = false;
-      
-      // Directly launch the arena, bypassing the timeout/refund logic
-      activeOpponent = botOpponent;
-      isGameActive = true;
-      lockBodyScroll();
-      const myName = playerNameEl.textContent;
-      const myAvatar = document.getElementById('avatar')?.src || '';
-      arenaUserAvatar.src = myAvatar || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(myName);
-      arenaUserName.textContent = myName;
-      arenaOppName.textContent = botOpponent.name;
-      arenaOppAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(botOpponent.seed);
-      arenaOverlay.classList.remove('hidden');
-      
-      launchLiveGame(activeGame.type, botOpponent, 'fake_session_123', 'player1');
-      
-      btn.disabled = false;
-    }, 2500);
+    gameTimers.push(countdownTimer);
   }
 });
-
+  
 // Hook into launchArena for bots
 window.originalLaunchArena = launchArena;
 window.launchArena = async function(opponent, sessionInfo) {
