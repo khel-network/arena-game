@@ -841,8 +841,9 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .app-wrap .payment-modal .cancel-payment-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #ddd6fe; border-radius: 12px; color: #5c5a6e; font-weight: 600; margin-top: 8px; transition: 0.2s; min-height: 44px; }
 .app-wrap .payment-modal .cancel-payment-btn:hover { background: linear-gradient(135deg, #f3f0ff, #ede9fe); }
-.app-wrap .payment-animation-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; }
-.app-wrap .payment-animation-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+.app-wrap .payment-animation-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none !important; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; }
+.app-wrap .payment-animation-overlay.show { display: flex !important; animation: fadeIn 0.3s ease; }
+  .app-wrap .payment-animation-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
 .app-wrap .payment-animation-overlay .checkmark { width: 100px; height: 100px; border-radius: 50%; background: #16c46b; display: flex; align-items: center; justify-content: center; animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
 @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .app-wrap .payment-animation-overlay .checkmark svg { width: 60px; height: 60px; color: #fff; }
@@ -2680,6 +2681,8 @@ function startPaymentPolling() {
         
         // Auto-close the modal and show success!
         closePaymentModal();
+        
+        // Ensure animation shows and hides properly
         showPaymentAnimation(data.tokens_to_credit);
         showWalletToast(data.tokens_to_credit, 'credit', 'Wallet top-up successful');
         
@@ -5816,6 +5819,10 @@ async function initDashboard() {
   } catch (e) { console.error(e); }
 }
 async function routeOnLoad() {
+   // 🌟 FORCE HIDE STUCK OVERLAYS ON LOAD
+  document.getElementById('paymentAnimation')?.classList.remove('show');
+  document.getElementById('paymentModal')?.classList.remove('show');
+  document.getElementById('confettiContainer').innerHTML = '';
   const { data: { session } } = await client.auth.getSession();
   if (session) {
     document.getElementById('page-landing').style.display = 'none';
