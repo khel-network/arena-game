@@ -843,7 +843,6 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 .app-wrap .payment-modal .cancel-payment-btn:hover { background: linear-gradient(135deg, #f3f0ff, #ede9fe); }
 .app-wrap .payment-animation-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none !important; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; }
 .app-wrap .payment-animation-overlay.show { display: flex !important; animation: fadeIn 0.3s ease; }
-  .app-wrap .payment-animation-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
 .app-wrap .payment-animation-overlay .checkmark { width: 100px; height: 100px; border-radius: 50%; background: #16c46b; display: flex; align-items: center; justify-content: center; animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
 @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .app-wrap .payment-animation-overlay .checkmark svg { width: 60px; height: 60px; color: #fff; }
@@ -2126,13 +2125,19 @@ Your ₹<span id="no-opp-refund">20</span> entry has been refunded.
     <span>Creating payment...</span>
   </div>
 </div>
-  <!-- NEW BUTTON: This forces the browser to open a popup tab -->
-  <button id="open-payment-btn" style="display:none; width:100%; padding:10px; background:#5b3df0; color:#fff; border-radius:8px; font-weight:700; font-size:0.9rem; border:none; cursor:pointer;">Click Here to Open Payment</button>
-</div>
 <button id="cancelPaymentBtn" class="cancel-payment-btn">Cancel Payment</button>
 </div>
 </div>
-
+<!-- NEW: In-App Payment Iframe -->
+<div id="paymentIframeOverlay" class="modal-overlay hidden" style="z-index: 9999; background: rgba(0,0,0,0.8);">
+  <div class="modal-card" style="max-width: 500px; width: 100%; padding: 0; overflow: hidden; height: 85vh; display: flex; flex-direction: column;">
+    <div style="padding: 12px 16px; background: #f8f6ff; border-bottom: 1px solid #eee9f7; display: flex; justify-content: space-between; align-items: center;">
+      <strong style="font-family: 'Poppins', sans-serif; color: #161522;">Secure Payment</strong>
+      <button onclick="closeIframePayment()" style="background: none; border: none; font-size: 1.5rem; color: #e2555a; cursor: pointer; padding: 0 10px;">&times;</button>
+    </div>
+    <iframe id="zapupi_iframe" src="" style="flex: 1; width: 100%; border: none;"></iframe>
+  </div>
+</div>
 <div id="paymentAnimation" class="payment-animation-overlay">
 <div class="checkmark">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -2954,7 +2959,7 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
   document.getElementById('bonusDisplay').textContent = bonus > 0 ? `+${bonus}% Bonus → ₹${tokens}` : `₹${tokens}`;
   const st = document.getElementById('paymentStatus');
   st.className = 'payment-status waiting';
-  st.innerHTML = `<span class="spinner"></span><span>Creating payment...</span>`;
+  st.innerHTML = `<span class="spinner"></span><span>Connecting to secure gateway...</span>`;
   modal.classList.add('show');
   const currentUrl = window.location.origin + window.location.pathname;
 
@@ -2963,7 +2968,6 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
     st.innerHTML = `<span>Payment gateway not loaded. Please refresh.</span>`;
     this.disabled = false; paymentLock = false;
     this.innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
-    showToast('Payment gateway not loaded', 'error');
     return;
   }
 
@@ -2975,30 +2979,23 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
       failed_url: currentUrl + '?status=failed&order_id=' + orderId,
       timeout_url: currentUrl + '?status=timeout&order_id=' + orderId,
     }, {
-         onResponse: function(paymentUrl) {
-        // Safely inject the button into the existing status container
-        st.innerHTML = `
-          <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
-            <div style="display:flex; align-items:center; justify-content:center; gap:8px; color:#16c46b; font-weight:700;">
-              <i class="fas fa-check-circle"></i> Payment Link Ready!
-            </div>
-            <button id="open-payment-btn" style="width:100%; padding:12px; background:#5b3df0; color:#fff; border-radius:8px; font-weight:800; font-size:0.9rem; border:none; cursor:pointer; box-shadow: 0 4px 12px rgba(91,61,240,0.3);">
-              Open Payment Page
-            </button>
-          </div>
-        `;
+      onResponse: function(paymentUrl) {
+        // 🌟 INSTANTLY OPEN THE IFRAME (No new tabs!)
+        const iframe = document.getElementById('zapupi_iframe');
+        iframe.src = paymentUrl;
+        document.getElementById('paymentIframeOverlay').classList.remove('hidden');
         
-        // Attach the click event to the newly created button
-        document.getElementById('open-payment-btn').onclick = function() {
-            window.open(paymentUrl, 'ZapUPI_Payment', 'width=500,height=750');
-        };
-
-        // Reset the main submit button
+        // Hide the initial modal behind it
+        modal.classList.remove('show');
+        
+        // Start checking if payment is done in the background
+        startPaymentPolling();
+        
         document.getElementById('initiatePaymentBtn').disabled = false;
         paymentLock = false;
         document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
       },
-           onError: function(err) {
+      onError: function(err) {
         st.className = 'payment-status error';
         st.innerHTML = `<span>Error: ${escapeHtml(err || 'Please try again')}</span>`;
         showToast('Payment error: ' + (err || 'unknown'), 'error');
@@ -3015,12 +3012,16 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
     document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
   });
 });
+
+// Add this helper function to close the iframe
+function closeIframePayment() {
+  document.getElementById('paymentIframeOverlay').classList.add('hidden');
+  document.getElementById('zapupi_iframe').src = '';
+  if (paymentPollInterval) { clearInterval(paymentPollInterval); paymentPollInterval = null; }
+}
+
 function closePaymentModal() {
-  if (paymentPollInterval) {
-    clearInterval(paymentPollInterval);
-    paymentPollInterval = null;
-  }
-  
+  closeIframePayment();
   document.getElementById('paymentModal').classList.remove('show');
   document.getElementById('paymentStatus').className = 'payment-status waiting';
   document.getElementById('paymentStatus').innerHTML = `<span class="spinner"></span><span>Creating payment...</span>`;
@@ -3050,7 +3051,7 @@ function showPaymentAnimation(amount) {
     p.style.animationDelay = (Math.random() * 2) + 's';
     container.appendChild(p);
   }
-  setTimeout(() => { ov.classList.remove('show'); container.innerHTML = ''; }, 4000);
+  setTimeout(() => { ov.classList.remove('show'); container.innerHTML = ''; closeIframePayment(); }, 4000);
 }
 
 async function approvePaymentOrder(orderId) {
@@ -5819,9 +5820,11 @@ async function initDashboard() {
   } catch (e) { console.error(e); }
 }
 async function routeOnLoad() {
-   // 🌟 FORCE HIDE STUCK OVERLAYS ON LOAD
+  // 🌟 FORCE HIDE STUCK OVERLAYS ON LOAD
   document.getElementById('paymentAnimation')?.classList.remove('show');
+  document.getElementById('paymentAnimation')?.style.setProperty('display', 'none', 'important');
   document.getElementById('paymentModal')?.classList.remove('show');
+  document.getElementById('paymentIframeOverlay')?.classList.add('hidden');
   document.getElementById('confettiContainer').innerHTML = '';
   const { data: { session } } = await client.auth.getSession();
   if (session) {
