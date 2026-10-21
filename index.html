@@ -3371,65 +3371,143 @@ function runTicTacToe(opponent, live) {
   render();
 }
 
-function runConnect4(opponent, live) {
+function runConnectFour(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
-  const ROWS = 6, COLS = 7;
-  let board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
-  let gameOver = false;
   const isLive = !!live;
-  const myChip = myRole === 'player1' ? '1' : '2';
+  if (!isLive) { stage.innerHTML = '<p style="text-align:center;color:#5c5a6e">This game needs a live opponent.</p>'; return; }
+  const me = myRole, opp = myRole === 'player1' ? 'player2' : 'player1';
+  let gameOver = false, endHandled = false, outcome = null, moveNo = 0, fresh = false;
   let myTurn = (myRole === 'player1');
-  let endHandled = false;
-  function render() {
-    let cols = '';
-    for (let c = 0; c < COLS; c++) {
-      let cells = '';
-      for (let r = 0; r < ROWS; r++) { const v = board[r][c]; cells += `<div class="c4-cell ${v ? 'player' + v : ''}"></div>`; }
-      cols += `<div class="c4-col" data-col="${c}">${cells}</div>`;
-    }
-    const turnText = gameOver ? '' : (myTurn ? 'Your Turn — pick a column' : (opponent.name + "'s Turn"));
-    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p><div style="font-size:0.85rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:8px;">${turnText}</div><div class="c4-board">${cols}</div></div>`;
-    if (!gameOver && myTurn) { document.querySelectorAll('.c4-col').forEach(col => { col.addEventListener('click', () => { dropChip(parseInt(col.dataset.col), myChip); }); }); }
-  }
-  async function dropChip(col, chip) {
-    if (gameOver) return;
-    let row = -1;
-    for (let r = ROWS - 1; r >= 0; r--) if (!board[r][col]) { row = r; break; }
-    if (row === -1) return;
-    board[row][col] = chip;
-    myTurn = false;
-    render();
-    const finalState = { board: board.map(r => [...r]) };
-    const win = checkWin(chip);
-    if (win) { gameOver = true; if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, currentUser.id); } setTimeout(() => endDuel(true, 'Connect 4 victory.'), 700); return; }
-    if (board[0].every(c => c)) { gameOver = true; if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, null); } setTimeout(endDrawnMatch, 500); return; }
-    if (isLive) { const nextTurn = myRole === 'player1' ? 'player2' : 'player1'; await pushSessionState(live.sessionId, finalState, nextTurn); }
-  }
-  function checkWin(chip) {
-    for (let r = 0; r < ROWS; r++) for (let c = 0; c <= COLS - 4; c++) if (board[r][c] === chip && board[r][c+1] === chip && board[r][c+2] === chip && board[r][c+3] === chip) return true;
-    for (let r = 0; r <= ROWS - 4; r++) for (let c = 0; c < COLS; c++) if (board[r][c] === chip && board[r+1][c] === chip && board[r+2][c] === chip && board[r+3][c] === chip) return true;
-    for (let r = 0; r <= ROWS - 4; r++) for (let c = 0; c <= COLS - 4; c++) if (board[r][c] === chip && board[r+1][c+1] === chip && board[r+2][c+2] === chip && board[r+3][c+3] === chip) return true;
-    for (let r = 0; r <= ROWS - 4; r++) for (let c = 3; c < COLS; c++) if (board[r][c] === chip && board[r+1][c-1] === chip && board[r+2][c-2] === chip && board[r+3][c-3] === chip) return true;
-    return false;
-  }
-  if (isLive) {
-    subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') {
-        if (newState && Array.isArray(newState.board) && !gameOver) { board = newState.board.map(r => [...r]); render(); }
-        if (gameOver) return;
-        gameOver = true; endHandled = true;
-        const iWon = winnerId === currentUser.id;
-        const isDraw = !winnerId;
-        setTimeout(() => { if (isDraw) endDrawnMatch(); else if (iWon) endDuel(true, 'Connect 4 victory.'); else endDuel(false, 'Opponent connected four.'); }, 500);
-        return;
+  const ROWS = 6, COLS = 7;
+  let grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  let last = null, winCells = [];
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); gameTimers.push(t); return t; };
+  const setTurn = t => { myTurn = t; };
+
+  const CSS = `<style>
+    .sk-wrap{width:100%;max-width:400px;margin:0 auto;text-align:center;color:#2a2640}
+    .sk-info{font-size:.72rem;color:#5c5a6e;margin-bottom:8px}
+    .sk-bar{display:flex;gap:8px;margin-bottom:10px}
+    .sk-chip{flex:1;padding:8px 10px;border-radius:12px;font-size:.8rem;font-weight:700;background:#fff;border:2px solid transparent;box-shadow:0 2px 8px rgba(91,61,240,.12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:box-shadow .2s}
+    .sk-chip.me{color:#5b3df0;border-color:#5b3df0}
+    .sk-chip.op{color:#c47d12;border-color:#f0a742}
+    .sk-chip.act{box-shadow:0 0 0 3px rgba(91,61,240,.18),0 4px 14px rgba(91,61,240,.28)}
+    .sk-status{font-size:.9rem;font-weight:700;margin:6px 0 12px}
+    .c4-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px}
+    .c4-board{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:8px;border-radius:20px;background:linear-gradient(160deg,#6a4dff,#4328c9);box-shadow:0 12px 30px rgba(91,61,240,.4);overflow:hidden}
+    .c4-col{display:flex;flex-direction:column;gap:4px;padding:0;border:0;border-radius:10px;background:transparent;cursor:pointer;transition:background .15s}
+    .c4-col:disabled{cursor:default}
+    .c4-col:not(:disabled):hover{background:rgba(255,255,255,.16)}
+    .c4-slot{aspect-ratio:1;border-radius:50%;background:#f8f6ff;box-shadow:inset 0 4px 7px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
+    .c4-disc{width:84%;height:84%;border-radius:50%}
+    .c4-disc.mine{background:radial-gradient(circle at 35% 30%,#ffd98f,#f0a742 60%,#c97f14);box-shadow:0 2px 5px rgba(0,0,0,.3)}
+    .c4-disc.theirs{background:radial-gradient(circle at 35% 30%,#ffa3b0,#ff5d73 60%,#d03a52);box-shadow:0 2px 5px rgba(0,0,0,.3)}
+    .c4-disc.drop{animation:c4-drop .55s cubic-bezier(.4,0,.8,.5)}
+    .c4-disc.win{animation:c4-win .6s ease-in-out infinite alternate;box-shadow:0 0 0 4px #fff,0 0 16px 4px rgba(255,255,255,.8)}
+    @keyframes c4-drop{0%{transform:translateY(calc(var(--d) * -118%))}55%{transform:translateY(0)}72%{transform:translateY(-9%)}88%{transform:translateY(0)}100%{transform:translateY(0)}}
+    @keyframes c4-win{from{transform:scale(1)}to{transform:scale(1.12)}}
+  </style>`;
+
+  const statusText = () => outcome ? (outcome === 'me' ? '🏆 You won!' : outcome === 'opp' ? 'You lost this one' : '🤝 Draw')
+    : gameOver ? 'Game over' : myTurn ? 'Your turn — pick a column' : esc(opponent.name) + "'s turn";
+  const head = (a, b) => `
+    <p class="sk-info">Entry ₹${currentEntryFee} · Win ₹${currentReward} · LIVE</p>
+    <div class="sk-bar">
+      <div class="sk-chip me ${myTurn && !gameOver ? 'act' : ''}">You ${a}</div>
+      <div class="sk-chip op ${!myTurn && !gameOver ? 'act' : ''}">${esc(opponent.name)} ${b}</div>
+    </div>
+    <div class="sk-status" style="color:${myTurn || outcome === 'me' ? '#5b3df0' : '#c47d12'}">${statusText()}</div>`;
+
+  function judge(g) {
+    const DIRS = [[0, 1], [1, 0], [1, 1], [1, -1]];
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const v = g[r][c]; if (!v) continue;
+      for (const [dr, dc] of DIRS) {
+        const cells = [[r, c]];
+        for (let k = 1; k < 4; k++) {
+          const rr = r + dr * k, cc = c + dc * k;
+          if (rr < 0 || rr >= ROWS || cc < 0 || cc >= COLS || g[rr][cc] !== v) break;
+          cells.push([rr, cc]);
+        }
+        if (cells.length === 4) return { winner: v, cells };
       }
-      if (newState && Array.isArray(newState.board) && !gameOver) { board = newState.board.map(r => [...r]); myTurn = (turn === myRole); render(); }
-    });
+    }
+    return g[0].every(Boolean) ? { winner: 'draw', cells: [] } : null;
   }
+  const snapshot = () => ({ grid, last, n: moveNo });
+  function apply(s) {
+    if (!s || !Array.isArray(s.grid)) return false;
+    grid = s.grid.map(r => r.slice()); last = s.last || null; moveNo = s.n;
+    const r = judge(grid); winCells = (r && r.cells) || [];
+    return true;
+  }
+
+  function render() {
+    const anim = fresh; fresh = false;
+    const canPlay = myTurn && !gameOver;
+    const cols = Array.from({ length: COLS }, (_, c) => {
+      const slots = Array.from({ length: ROWS }, (_, r) => {
+        const v = grid[r][c];
+        const isLast = anim && last && last.r === r && last.c === c;
+        const isWin = winCells.some(w => w[0] === r && w[1] === c);
+        return `<div class="c4-slot"><div class="c4-disc ${v ? (v === me ? 'mine' : 'theirs') : ''} ${isLast ? 'drop' : ''} ${isWin ? 'win' : ''}" style="--d:${r + 1}"></div></div>`;
+      }).join('');
+      return `<button class="c4-col" data-c="${c}" ${!canPlay || grid[0][c] ? 'disabled' : ''}>${slots}</button>`;
+    }).join('');
+    stage.innerHTML = `${CSS}<div class="sk-wrap">${head('<span class="c4-dot" style="background:#f0a742"></span>', '<span class="c4-dot" style="background:#ff5d73"></span>')}<div class="c4-board">${cols}</div></div>`;
+    stage.querySelectorAll('.c4-col').forEach(b => b.addEventListener('click', () => makeMove(+b.dataset.c)));
+  }
+
+  const say = (o, why) => later(() => {
+    if (o === 'me') endDuel(true, why || 'Connect Four victory!');
+    else if (o === 'opp') endDuel(false, why || 'Opponent connected four first.');
+    else endDrawnMatch();
+  }, 1200);
+
+  async function conclude(o, why) {
+    if (gameOver) return;
+    gameOver = true; outcome = o; render();
+    if (!endHandled) {
+      endHandled = true;
+      const wid = o === 'me' ? currentUser.id : o === 'opp' ? opponent.id : null;
+      try { await endSessionWithState(live.sessionId, snapshot(), wid); } catch (e) { console.error(e); }
+    }
+    say(o, why);
+  }
+
+  async function makeMove(c) {
+    if (gameOver || !myTurn) return;
+    let r = -1;
+    for (let i = ROWS - 1; i >= 0; i--) if (!grid[i][c]) { r = i; break; }
+    if (r < 0) return;
+    grid[r][c] = me; last = { r, c }; moveNo++; fresh = true;
+    const res = judge(grid);
+    if (res) {
+      winCells = res.cells;
+      return conclude(res.winner === 'draw' ? 'draw' : 'me', res.winner === 'draw' ? '' : 'You connected four in a row!');
+    }
+    setTurn(false); render();
+    try { await pushSessionState(live.sessionId, snapshot(), opp); } catch (e) { console.error(e); }
+  }
+
+  subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
+    if (status === 'completed') {
+      if (gameOver) return;
+      if (newState && typeof newState.n === 'number' && newState.n > moveNo) apply(newState);
+      gameOver = true; endHandled = true; fresh = true;
+      outcome = winnerId === currentUser.id ? 'me' : winnerId ? 'opp' : 'draw';
+      render(); say(outcome);
+      return;
+    }
+    if (gameOver || !newState || typeof newState.n !== 'number' || newState.n <= moveNo) return;
+    if (!apply(newState)) return;
+    fresh = true; setTurn(turn === me); render();
+  });
+
   render();
 }
-
 function runNim(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -3481,111 +3559,142 @@ function runNim(opponent, live) {
   render();
 }
 
-function runDots(opponent, live) {
+function runDotsAndBoxes(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
   const isLive = !!live;
-  const N = 4;
-  const DOT = N + 1;
-  let H = Array.from({ length: DOT }, () => Array(N).fill(null));
-  let V = Array.from({ length: N }, () => Array(DOT).fill(null));
-  let B = Array.from({ length: N }, () => Array(N).fill(null));
-  let myChip = myRole === 'player1' ? '1' : '2';
+  if (!isLive) { stage.innerHTML = '<p style="text-align:center;color:#5c5a6e">This game needs a live opponent.</p>'; return; }
+  const me = myRole, opp = myRole === 'player1' ? 'player2' : 'player1';
+  let gameOver = false, endHandled = false, outcome = null, moveNo = 0, fresh = false;
   let myTurn = (myRole === 'player1');
-  let gameOver = false;
-  let endHandled = false;
-  function countCompletedBoxes() {
-    let mine = 0, theirs = 0;
-    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
-      if (B[r][c] === '1') mine++; else if (B[r][c] === '2') theirs++;
-    }
-    return { mine, theirs };
+  const N = 4, S = 62, M = 26, W = M * 2 + N * S;
+  let H = Array.from({ length: N + 1 }, () => Array(N).fill(null));
+  let V = Array.from({ length: N }, () => Array(N + 1).fill(null));
+  let B = Array.from({ length: N }, () => Array(N).fill(null));
+  let last = null;
+  const score = r => B.flat().filter(x => x === r).length;
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); gameTimers.push(t); return t; };
+  const setTurn = t => { myTurn = t; };
+  const col = o => (o === me ? '#5b3df0' : '#f0a742');
+  const initial = esc(((opponent.name || '?').charAt(0) || '?').toUpperCase());
+
+  const CSS = `<style>
+    .sk-wrap{width:100%;max-width:380px;margin:0 auto;text-align:center;color:#2a2640}
+    .sk-info{font-size:.72rem;color:#5c5a6e;margin-bottom:8px}
+    .sk-bar{display:flex;gap:8px;margin-bottom:10px}
+    .sk-chip{flex:1;padding:8px 10px;border-radius:12px;font-size:.8rem;font-weight:700;background:#fff;border:2px solid transparent;box-shadow:0 2px 8px rgba(91,61,240,.12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:box-shadow .2s}
+    .sk-chip.me{color:#5b3df0;border-color:#5b3df0}
+    .sk-chip.op{color:#c47d12;border-color:#f0a742}
+    .sk-chip.act{box-shadow:0 0 0 3px rgba(91,61,240,.18),0 4px 14px rgba(91,61,240,.28)}
+    .sk-status{font-size:.9rem;font-weight:700;margin:6px 0 12px}
+    .db-svg{width:100%;max-width:340px;background:#fff;border-radius:22px;box-shadow:0 10px 30px rgba(91,61,240,.22)}
+    .db-hit{stroke:transparent;stroke-width:26;stroke-linecap:round;cursor:pointer}
+    .db-hit:hover{stroke:rgba(91,61,240,.28)}
+    .db-new{stroke-dasharray:80;animation:db-draw .3s ease-out}
+    .db-box{animation:db-fill .4s ease-out;transform-origin:center;transform-box:fill-box}
+    @keyframes db-draw{from{stroke-dashoffset:80}to{stroke-dashoffset:0}}
+    @keyframes db-fill{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+  </style>`;
+
+  const statusText = () => outcome ? (outcome === 'me' ? '🏆 You won!' : outcome === 'opp' ? 'You lost this one' : '🤝 Draw')
+    : gameOver ? 'Game over' : myTurn ? 'Your turn — draw a line' : esc(opponent.name) + "'s turn";
+  const head = (a, b) => `
+    <p class="sk-info">Entry ₹${currentEntryFee} · Win ₹${currentReward} · LIVE</p>
+    <div class="sk-bar">
+      <div class="sk-chip me ${myTurn && !gameOver ? 'act' : ''}">You · ${a}</div>
+      <div class="sk-chip op ${!myTurn && !gameOver ? 'act' : ''}">${esc(opponent.name)} · ${b}</div>
+    </div>
+    <div class="sk-status" style="color:${myTurn || outcome === 'me' ? '#5b3df0' : '#c47d12'}">${statusText()}</div>`;
+
+  const snapshot = () => ({ H, V, B, last, n: moveNo });
+  function apply(s) {
+    if (!s || !Array.isArray(s.H) || !Array.isArray(s.V) || !Array.isArray(s.B)) return false;
+    H = s.H.map(r => r.slice()); V = s.V.map(r => r.slice()); B = s.B.map(r => r.slice());
+    last = s.last || null; moveNo = s.n;
+    return true;
   }
-  function checkBoxesCompleted(byChip) {
-    let completed = 0;
-    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
-      if (!B[r][c] && H[r][c] && H[r+1][c] && V[r][c] && V[r][c+1]) { B[r][c] = byChip; completed++; }
-    }
-    return completed;
-  }
+
   function render() {
-    const counts = countCompletedBoxes();
-    const myBoxes = myChip === '1' ? counts.mine : counts.theirs;
-    const oppBoxes = myChip === '1' ? counts.theirs : counts.mine;
-    const cellPx = 44, linePx = 10, dotPx = 10;
-    let gridHtml = `<div style="display:inline-grid;grid-template-columns:${dotPx}px repeat(${N}, ${cellPx}px ${linePx}px) ${dotPx}px;grid-template-rows:${dotPx}px repeat(${N}, ${cellPx}px ${linePx}px) ${dotPx}px;align-items:center;justify-items:center;position:relative;padding:4px;">`;
-    for (let r = 0; r <= N; r++) {
-      for (let c = 0; c <= N; c++) {
-        const dotRow = r * 2 + 1, dotCol = c * 2 + 1;
-        gridHtml += `<div style="grid-row:${dotRow};grid-column:${dotCol};width:${dotPx}px;height:${dotPx}px;border-radius:50%;background:#5b3df0;"></div>`;
-        if (c < N) {
-          const val = H[r][c]; const cls = val ? ('player' + val) : '';
-          gridHtml += `<div class="dots-line-h ${cls}" data-type="H" data-r="${r}" data-c="${c}" style="grid-row:${dotRow};grid-column:${c*2+2};width:100%;height:${linePx}px;"></div>`;
-        }
-      }
-      if (r < N) {
-        for (let c = 0; c <= N; c++) {
-          if (c < N) {
-            const val = V[r][c]; const cls = val ? ('player' + val) : '';
-            gridHtml += `<div class="dots-line-v ${cls}" data-type="V" data-r="${r}" data-c="${c}" style="grid-row:${r*2+2};grid-column:${c*2+1};width:${linePx}px;height:100%;"></div>`;
-          }
-          if (c < N) {
-            const bval = B[r][c]; const bcls = bval ? ('player' + bval) : '';
-            gridHtml += `<div class="dots-cell ${bcls}" style="grid-row:${r*2+2};grid-column:${c*2+2};width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;color:${bval==='1' ? '#5b3df0' : bval==='2' ? '#f0a742' : 'transparent'};">${bval ? '●' : ''}</div>`;
-          }
-        }
+    const anim = fresh; fresh = false;
+    const canPlay = myTurn && !gameOver;
+    const px = c => M + c * S, py = r => M + r * S;
+    let boxes = '', lines = '', hits = '', dots = '';
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const o = B[r][c]; if (!o) continue;
+      boxes += `<rect class="db-box" x="${px(c) + 5}" y="${py(r) + 5}" width="${S - 10}" height="${S - 10}" rx="12" fill="${col(o)}" fill-opacity=".22"/>
+        <text x="${px(c) + S / 2}" y="${py(r) + S / 2 + 7}" text-anchor="middle" font-size="20" font-weight="800" fill="${col(o)}">${o === me ? 'Y' : initial}</text>`;
+    }
+    const segs = [];
+    for (let r = 0; r <= N; r++) for (let c = 0; c < N; c++) segs.push(['h', r, c]);
+    for (let r = 0; r < N; r++) for (let c = 0; c <= N; c++) segs.push(['v', r, c]);
+    for (const [t, r, c] of segs) {
+      const o = (t === 'h' ? H : V)[r][c];
+      const [x1, y1, x2, y2] = t === 'h' ? [px(c), py(r), px(c + 1), py(r)] : [px(c), py(r), px(c), py(r + 1)];
+      if (o) {
+        const isLast = anim && last && last.t === t && last.r === r && last.c === c;
+        lines += `<line class="${isLast ? 'db-new' : ''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col(o)}" stroke-width="7" stroke-linecap="round"/>`;
+      } else {
+        lines += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#e4dfff" stroke-width="3" stroke-linecap="round"/>`;
+        if (canPlay) hits += `<line class="db-hit" data-t="${t}" data-r="${r}" data-c="${c}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
       }
     }
-    gridHtml += `</div>`;
-    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p><div style="display:flex;justify-content:space-around;margin:8px 0;font-size:0.85rem;font-weight:700;"><span style="color:#5b3df0;">You: ${myBoxes}</span><span style="color:#f0a742;">${opponent.name}: ${oppBoxes}</span></div><div style="font-size:0.8rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:10px;">${gameOver ? 'Game over' : (myTurn ? 'Your Turn — tap a line' : opponent.name + "'s Turn")}</div>${gridHtml}</div>`;
-    if (!gameOver && myTurn) {
-      document.querySelectorAll('.dots-line-h:not(.player1):not(.player2), .dots-line-v:not(.player1):not(.player2)').forEach(el => {
-        el.addEventListener('click', () => { drawLine(el.dataset.type, parseInt(el.dataset.r), parseInt(el.dataset.c)); });
-      });
-    }
+    for (let r = 0; r <= N; r++) for (let c = 0; c <= N; c++) dots += `<circle cx="${px(c)}" cy="${py(r)}" r="6.5" fill="#2a2640" style="pointer-events:none"/>`;
+    stage.innerHTML = `${CSS}<div class="sk-wrap">${head(score(me), score(opp))}
+      <svg class="db-svg" viewBox="0 0 ${W} ${W}">${boxes}${lines}${hits}${dots}</svg></div>`;
+    stage.querySelectorAll('.db-hit').forEach(el => el.addEventListener('click', () => makeMove(el.dataset.t, +el.dataset.r, +el.dataset.c)));
   }
-  async function drawLine(type, r, c) {
+
+  const say = (o, why) => later(() => {
+    if (o === 'me') endDuel(true, why || 'Dots and Boxes victory!');
+    else if (o === 'opp') endDuel(false, why || 'Opponent claimed more boxes.');
+    else endDrawnMatch();
+  }, 1200);
+
+  async function conclude(o, why) {
     if (gameOver) return;
-    if (type === 'H') { if (H[r][c]) return; H[r][c] = myChip; }
-    else { if (V[r][c]) return; V[r][c] = myChip; }
-    const completed = checkBoxesCompleted(myChip);
-    if (completed === 0) myTurn = false;
-    render();
-    const totalBoxes = B.flat().filter(v => v).length;
-    const finalState = { H, V, B };
-    if (totalBoxes === N * N) {
-      gameOver = true;
-      const counts = countCompletedBoxes();
-      const mine = myChip === '1' ? counts.mine : counts.theirs;
-      const theirs = myChip === '1' ? counts.theirs : counts.mine;
-      if (isLive && !endHandled) {
-        endHandled = true;
-        const winnerId = mine > theirs ? currentUser.id : (mine < theirs ? opponent.id : null);
-        await endSessionWithState(live.sessionId, finalState, winnerId);
-      }
-      if (mine > theirs) setTimeout(() => endDuel(true, `You completed ${mine} boxes vs ${theirs}.`), 600);
-      else if (mine < theirs) setTimeout(() => endDuel(false, `Opponent completed ${theirs} boxes vs ${mine}.`), 600);
-      else setTimeout(endDrawnMatch, 500);
+    gameOver = true; outcome = o; render();
+    if (!endHandled) {
+      endHandled = true;
+      const wid = o === 'me' ? currentUser.id : o === 'opp' ? opponent.id : null;
+      try { await endSessionWithState(live.sessionId, snapshot(), wid); } catch (e) { console.error(e); }
+    }
+    say(o, why);
+  }
+
+  async function makeMove(t, r, c) {
+    if (gameOver || !myTurn) return;
+    const arr = t === 'h' ? H : V;
+    if (!arr[r] || arr[r][c]) return;
+    arr[r][c] = me; last = { t, r, c }; moveNo++; fresh = true;
+    const cand = t === 'h' ? [[r - 1, c], [r, c]] : [[r, c - 1], [r, c]];
+    let gained = 0;
+    for (const [br, bc] of cand) {
+      if (br < 0 || bc < 0 || br >= N || bc >= N || B[br][bc]) continue;
+      if (H[br][bc] && H[br + 1][bc] && V[br][bc] && V[br][bc + 1]) { B[br][bc] = me; gained++; }
+    }
+    if (B.flat().every(Boolean)) {
+      const a = score(me), b = score(opp);
+      return conclude(a > b ? 'me' : a < b ? 'opp' : 'draw', a > b ? `You claimed ${a} of 16 boxes!` : a < b ? `Opponent claimed ${b} of 16 boxes.` : '');
+    }
+    setTurn(gained > 0); render();
+    try { await pushSessionState(live.sessionId, snapshot(), gained > 0 ? me : opp); } catch (e) { console.error(e); }
+  }
+
+  subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
+    if (status === 'completed') {
+      if (gameOver) return;
+      if (newState && typeof newState.n === 'number' && newState.n > moveNo) apply(newState);
+      gameOver = true; endHandled = true; fresh = true;
+      outcome = winnerId === currentUser.id ? 'me' : winnerId ? 'opp' : 'draw';
+      render(); say(outcome);
       return;
     }
-    if (!myTurn) {
-      if (isLive) { const nextTurn = myRole === 'player1' ? 'player2' : 'player1'; await pushSessionState(live.sessionId, finalState, nextTurn); }
-    } else if (isLive) { await pushSessionState(live.sessionId, finalState, myRole); }
-  }
-  if (isLive) {
-    subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') {
-        if (newState && !gameOver) { if (newState.H) H = newState.H; if (newState.V) V = newState.V; if (newState.B) B = newState.B; render(); }
-        if (gameOver) return;
-        gameOver = true; endHandled = true;
-        const iWon = winnerId === currentUser.id;
-        const isDraw = !winnerId;
-        setTimeout(() => { if (isDraw) endDrawnMatch(); else if (iWon) endDuel(true, 'Dots & Boxes victory.'); else endDuel(false, 'Opponent won Dots & Boxes.'); }, 500);
-        return;
-      }
-      if (newState && !gameOver) { if (newState.H) H = newState.H; if (newState.V) V = newState.V; if (newState.B) B = newState.B; myTurn = (turn === myRole); render(); }
-    });
-  }
+    if (gameOver || !newState || typeof newState.n !== 'number' || newState.n <= moveNo) return;
+    if (!apply(newState)) return;
+    fresh = true; setTurn(turn === me); render();
+  });
+
   render();
 }
 
