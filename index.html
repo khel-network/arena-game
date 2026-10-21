@@ -841,8 +841,8 @@ h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .app-wrap .payment-modal .cancel-payment-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #ddd6fe; border-radius: 12px; color: #5c5a6e; font-weight: 600; margin-top: 8px; transition: 0.2s; min-height: 44px; }
 .app-wrap .payment-modal .cancel-payment-btn:hover { background: linear-gradient(135deg, #f3f0ff, #ede9fe); }
-.app-wrap .payment-animation-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none !important; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; }
-.app-wrap .payment-animation-overlay.show { display: flex !important; animation: fadeIn 0.3s ease; }
+.app-wrap .payment-animation-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; }
+.app-wrap .payment-animation-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
 .app-wrap .payment-animation-overlay .checkmark { width: 100px; height: 100px; border-radius: 50%; background: #16c46b; display: flex; align-items: center; justify-content: center; animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
 @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .app-wrap .payment-animation-overlay .checkmark svg { width: 60px; height: 60px; color: #fff; }
@@ -2108,21 +2108,6 @@ Your ₹<span id="no-opp-refund">20</span> entry has been refunded.
   </div>
 </div>
 
-<!-- ===== IN-APP PAYMENT BOX ===== -->
-<div id="paymentIframeOverlay" class="modal-overlay hidden" style="z-index: 9999; background: rgba(22,21,34,0.85); display: flex; align-items: center; justify-content: center; position: fixed; inset: 0;">
-  <div class="modal-card" style="max-width: 500px; width: 100%; height: 85vh; padding: 0; overflow: hidden; display: flex; flex-direction: column; border-radius: 20px; background: #fff; position: relative;">
-    
-    <!-- Header with Close Button -->
-    <div style="padding: 12px 16px; background: #f8f6ff; border-bottom: 1px solid #eee9f7; display: flex; justify-content: space-between; align-items: center;">
-      <strong style="font-family: 'Poppins', sans-serif; color: #161522; font-size: 0.95rem;">Secure Payment</strong>
-      <button onclick="closeIframePayment()" style="background: #fff; border: 1px solid #eee9f7; font-size: 1.2rem; color: #e2555a; cursor: pointer; padding: 4px 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">&times;</button>
-    </div>
-
-    <!-- The Iframe -->
-    <iframe id="zapupi_iframe" src="" style="flex: 1; width: 100%; border: none; background: #fff;"></iframe>
-    
-  </div>
-</div>
 <!-- Payment Modal -->
 <div id="paymentModal" class="payment-modal-overlay">
 <div class="payment-modal">
@@ -2134,11 +2119,9 @@ Your ₹<span id="no-opp-refund">20</span> entry has been refunded.
 <div class="rupee">₹<span id="paymentAmount">50</span></div>
 <span class="label" id="bonusDisplay" style="color:#5b3df0; font-weight:600;">+₹10 Bonus</span>
 </div>
-<div id="paymentStatus" class="payment-status waiting" style="flex-direction: column; gap: 10px; padding: 14px;">
-  <div id="payment-status-text" style="display: flex; align-items: center; gap: 8px;">
-    <span class="spinner"></span>
-    <span>Creating payment...</span>
-  </div>
+<div id="paymentStatus" class="payment-status waiting">
+<span class="spinner"></span>
+<span>Creating payment...</span>
 </div>
 <button id="cancelPaymentBtn" class="cancel-payment-btn">Cancel Payment</button>
 </div>
@@ -2649,63 +2632,7 @@ async function subscribeToWalletRealtime() {
         loadTransactions().then(() => { renderTxModalList(); renderLedger(); });
       }
     })
-    // 🌟 NEW LISTENER: Watch for payment approvals
-    .on('postgres_changes', {
-      event: 'UPDATE', schema: 'public', table: 'payment_requests',
-      filter: 'user_id=eq.' + currentUser.id
-    }, (payload) => {
-      if (payload.new?.status === 'approved') {
-        // Payment was approved in the other tab!
-        const modal = document.getElementById('paymentModal');
-        if (modal && modal.classList.contains('show')) {
-          // Close the "Opening payment page..." popup
-          closePaymentModal();
-          showPaymentAnimation(payload.new.tokens_to_credit);
-          showWalletToast(payload.new.tokens_to_credit, 'credit', 'Wallet top-up successful');
-        }
-        // Refresh wallet data just in case
-        loadWallet().then(() => updateUI());
-      }
-    })
     .subscribe();
-}
-  let paymentPollInterval = null;
-
-function startPaymentPolling() {
-  if (paymentPollInterval) clearInterval(paymentPollInterval);
-  
-  // Check every 2 seconds
-  paymentPollInterval = setInterval(async () => {
-    try {
-      // Get the latest payment request for this user
-      const { data, error } = await client
-        .from('payment_requests')
-        .select('status, tokens_to_credit')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      // 🚨 IF THE DATABASE SAYS APPROVED, CELEBRATE!
-      if (data && data.status === 'approved') {
-        clearInterval(paymentPollInterval);
-        paymentPollInterval = null;
-        
-        // Close the modal
-        closePaymentModal(); 
-        
-        // Show the confetti animation
-        showPaymentAnimation(data.tokens_to_credit);
-        showWalletToast(data.tokens_to_credit, 'credit', 'Wallet top-up successful');
-        
-        // Reload wallet balance
-        await loadWallet();
-        updateUI();
-      }
-    } catch (e) {
-      console.log('Polling error', e);
-    }
-  }, 2000);
 }
 function animateBalanceChange(fromVal, toVal) {
   const el = document.getElementById('balance-value');
@@ -2966,7 +2893,7 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
   document.getElementById('bonusDisplay').textContent = bonus > 0 ? `+${bonus}% Bonus → ₹${tokens}` : `₹${tokens}`;
   const st = document.getElementById('paymentStatus');
   st.className = 'payment-status waiting';
-  st.innerHTML = `<span class="spinner"></span><span>Connecting to secure gateway...</span>`;
+  st.innerHTML = `<span class="spinner"></span><span>Creating payment...</span>`;
   modal.classList.add('show');
   const currentUrl = window.location.origin + window.location.pathname;
 
@@ -2975,6 +2902,7 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
     st.innerHTML = `<span>Payment gateway not loaded. Please refresh.</span>`;
     this.disabled = false; paymentLock = false;
     this.innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
+    showToast('Payment gateway not loaded', 'error');
     return;
   }
 
@@ -2982,26 +2910,13 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
     sessionStorage.setItem('pending_order_' + orderId, JSON.stringify({ amount: customAmount, tokens }));
     ZapUPI.createOrder({
       zap_key: ZAPUPI_API_KEY, order_id: orderId, amount: customAmount.toString(),
-success_url: currentUrl + '?status=success&order_id=' + orderId + '&iframe=1',
+      success_url: currentUrl + '?status=success&order_id=' + orderId,
       failed_url: currentUrl + '?status=failed&order_id=' + orderId,
       timeout_url: currentUrl + '?status=timeout&order_id=' + orderId,
     }, {
-          onResponse: function(paymentUrl) {
-        // 🌟 OPEN IN THE BOX (IFRAME)
-        const iframe = document.getElementById('zapupi_iframe');
-        iframe.src = paymentUrl;
-        
-        // Show the box
-        const overlay = document.getElementById('paymentIframeOverlay');
-        overlay.classList.remove('hidden');
-        overlay.style.display = 'flex';
-        
-        // Hide the first modal
-        modal.classList.remove('show');
-        
-        // Start checking if payment is done in background
-        startPaymentPolling();
-        
+      onResponse: function(paymentUrl) {
+        st.innerHTML = `<span class="spinner"></span><span>Opening payment page...</span>`;
+        if (paymentUrl) window.open(paymentUrl, '_blank');
         document.getElementById('initiatePaymentBtn').disabled = false;
         paymentLock = false;
         document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
@@ -3023,24 +2938,7 @@ success_url: currentUrl + '?status=success&order_id=' + orderId + '&iframe=1',
     document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
   });
 });
-
-// Add this helper function to close the iframe
-function closeIframePayment() {
-  const overlay = document.getElementById('paymentIframeOverlay');
-  if (overlay) {
-    overlay.classList.add('hidden');
-    overlay.style.display = 'none'; // 🌟 THIS IS THE FIX
-  }
-  const iframe = document.getElementById('zapupi_iframe');
-  if (iframe) iframe.src = '';
-  
-  if (paymentPollInterval) { 
-    clearInterval(paymentPollInterval); 
-    paymentPollInterval = null; 
-  }
-}
 function closePaymentModal() {
-  closeIframePayment();
   document.getElementById('paymentModal').classList.remove('show');
   document.getElementById('paymentStatus').className = 'payment-status waiting';
   document.getElementById('paymentStatus').innerHTML = `<span class="spinner"></span><span>Creating payment...</span>`;
@@ -3070,7 +2968,7 @@ function showPaymentAnimation(amount) {
     p.style.animationDelay = (Math.random() * 2) + 's';
     container.appendChild(p);
   }
-  setTimeout(() => { ov.classList.remove('show'); container.innerHTML = ''; closeIframePayment(); }, 4000);
+  setTimeout(() => { ov.classList.remove('show'); container.innerHTML = ''; }, 4000);
 }
 
 async function approvePaymentOrder(orderId) {
@@ -5173,20 +5071,8 @@ function startPresenceHeartbeat() {
   touchPresence();
   if (presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
   presenceHeartbeatTimer = setInterval(touchPresence, 5000);
- document.addEventListener('visibilitychange', () => { 
-  if (isTabActive()) {
-    touchPresence(); 
-    // If the user switches back to this tab, refresh their wallet
-    if (currentUser) {
-      loadWallet().then(() => {
-        updateUI();
-        const modal = document.getElementById('paymentModal');
-        if (modal && modal.classList.contains('show')) closePaymentModal();
-      });
-    }
-  } 
-});
-window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
+  document.addEventListener('visibilitychange', () => { if (isTabActive()) touchPresence(); });
+  window.addEventListener('focus', () => { if (isTabActive()) touchPresence(); });
 }
   // ===== FAIRPLAY BLOCKS (realtime) =====
 let fairplayChannel = null;
@@ -5839,12 +5725,6 @@ async function initDashboard() {
   } catch (e) { console.error(e); }
 }
 async function routeOnLoad() {
-  // 🌟 FORCE HIDE STUCK OVERLAYS ON LOAD
-  document.getElementById('paymentAnimation')?.classList.remove('show');
-  document.getElementById('paymentAnimation')?.style.setProperty('display', 'none', 'important');
-  document.getElementById('paymentModal')?.classList.remove('show');
-  document.getElementById('paymentIframeOverlay')?.classList.add('hidden');
-  document.getElementById('confettiContainer').innerHTML = '';
   const { data: { session } } = await client.auth.getSession();
   if (session) {
     document.getElementById('page-landing').style.display = 'none';
@@ -5888,22 +5768,6 @@ function stripHashFromUrl() {
 }
 stripHashFromUrl();
 window.addEventListener('load', stripHashFromUrl);
-// Listen for URL changes inside the iframe
-window.addEventListener('message', function(event) {
-  if (event.data && (event.data.status === 'success' || (event.data.url && event.data.url.includes('status=success')))) {
-    closeIframePayment();
-    loadWallet().then(() => updateUI());
-  }
-});
-
-// Also, check the iframe URL directly every 2 seconds
-setInterval(() => {
-  const iframe = document.getElementById('zapupi_iframe');
-  if (iframe && iframe.src && iframe.src.includes('status=success')) {
-    closeIframePayment();
-    loadWallet().then(() => updateUI());
-  }
-}, 2000);
 
 routeOnLoad();
 // ===== DEEP-LINK =====
