@@ -3374,8 +3374,6 @@ function runTicTacToe(opponent, live) {
 function runConnectFour(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
-  const isLive = !!live;
-  if (!isLive) { stage.innerHTML = '<p style="text-align:center;color:#5c5a6e">This game needs a live opponent.</p>'; return; }
   const me = myRole, opp = myRole === 'player1' ? 'player2' : 'player1';
   let gameOver = false, endHandled = false, outcome = null, moveNo = 0, fresh = false;
   let myTurn = (myRole === 'player1');
@@ -3387,16 +3385,18 @@ function runConnectFour(opponent, live) {
   const setTurn = t => { myTurn = t; };
 
   const CSS = `<style>
-    .sk-wrap{width:100%;max-width:400px;margin:0 auto;text-align:center;color:#2a2640}
-    .sk-info{font-size:.72rem;color:#5c5a6e;margin-bottom:8px}
-    .sk-bar{display:flex;gap:8px;margin-bottom:10px}
-    .sk-chip{flex:1;padding:8px 10px;border-radius:12px;font-size:.8rem;font-weight:700;background:#fff;border:2px solid transparent;box-shadow:0 2px 8px rgba(91,61,240,.12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:box-shadow .2s}
+    .sk-wrap{width:100%;max-width:100%;margin:0 auto;text-align:center;color:#2a2640;display:flex;flex-direction:column;align-items:center;}
+    .sk-info{font-size:0.72rem;color:#5c5a6e;margin-bottom:8px}
+    .sk-bar{display:flex;gap:8px;margin-bottom:10px;width:100%}
+    .sk-chip{flex:1;padding:8px 10px;border-radius:12px;font-size:0.8rem;font-weight:700;background:#fff;border:2px solid transparent;box-shadow:0 2px 8px rgba(91,61,240,.12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:box-shadow .2s}
     .sk-chip.me{color:#5b3df0;border-color:#5b3df0}
     .sk-chip.op{color:#c47d12;border-color:#f0a742}
     .sk-chip.act{box-shadow:0 0 0 3px rgba(91,61,240,.18),0 4px 14px rgba(91,61,240,.28)}
-    .sk-status{font-size:.9rem;font-weight:700;margin:6px 0 12px}
+    .sk-status{font-size:0.9rem;font-weight:700;margin:6px 0 12px}
     .c4-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px}
-    .c4-board{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:8px;border-radius:20px;background:linear-gradient(160deg,#6a4dff,#4328c9);box-shadow:0 12px 30px rgba(91,61,240,.4);overflow:hidden}
+    
+    /* EXACT SAME BOARD STYLING AS YOUR IMAGE */
+    .c4-board{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:8px;border-radius:20px;background:linear-gradient(160deg,#6a4dff,#4328c9);box-shadow:0 12px 30px rgba(91,61,240,.4);overflow:hidden;width:100%;max-width:320px;margin:0 auto;}
     .c4-col{display:flex;flex-direction:column;gap:4px;padding:0;border:0;border-radius:10px;background:transparent;cursor:pointer;transition:background .15s}
     .c4-col:disabled{cursor:default}
     .c4-col:not(:disabled):hover{background:rgba(255,255,255,.16)}
