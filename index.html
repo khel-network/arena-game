@@ -3293,85 +3293,152 @@ function launchLiveGame(type, opponent, sessionId, initialTurn) {
 function runTicTacToe(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
-  const WIN_LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-  let board = Array(9).fill(null);
-  let gameOver = false;
-  const isLive = !!live;
-  const mySymbol = myRole === 'player1' ? 'X' : 'O';
-  const oppSymbol = mySymbol === 'X' ? 'O' : 'X';
-  let myTurn = (myRole === 'player1');
-  let endHandled = false;
+
+  // SAFETY FIX: Prevents white box crash
+  const currentRole = (typeof myRole !== 'undefined' && myRole) ? myRole : 'player1';
+  
+  const me = currentRole; 
+  const opp = me === 'player1' ? 'player2' : 'player1';
+  let gameOver = false, endHandled = false, outcome = null, moveNo = 0, fresh = false;
+  let myTurn = (me === 'player1');
+  let board = Array(9).fill(null), lastMove = -1, winLine = null;
+  
+  const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  const mark = r => (r === 'player1' ? 'X' : 'O');
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); gameTimers.push(t); return t; };
+  const setTurn = t => { myTurn = t; };
+
+  // Premium CSS Styling (Claude-style)
+  const CSS = `<style>
+    .sk-wrap{width:100%;max-width:100%;margin:0 auto;text-align:center;color:#2a2640;display:flex;flex-direction:column;align-items:center;}
+    .sk-info{font-size:0.72rem;color:#5c5a6e;margin-bottom:8px; letter-spacing:0.02em;}
+    .sk-bar{display:flex;gap:10px;margin-bottom:16px;width:100%;max-width:320px;}
+    .sk-chip{flex:1;padding:10px;border-radius:14px;font-size:0.85rem;font-weight:700;background:#fff;border:2px solid transparent;box-shadow:0 4px 12px rgba(91,61,240,.08);transition:all .3s cubic-bezier(0.4, 0, 0.2, 1); display:flex; align-items:center; justify-content:center; gap:6px;}
+    .sk-chip.me{color:#5b3df0;border-color:#5b3df0; background:#f8f6ff;}
+    .sk-chip.op{color:#c47d12;border-color:#f0a742; background:#fffbf5;}
+    .sk-chip.act{box-shadow:0 0 0 3px rgba(91,61,240,.15),0 6px 16px rgba(91,61,240,.2); transform:translateY(-2px);}
+    .sk-status{font-size:1rem;font-weight:800;margin:0 0 16px; color:#161522; min-height:24px;}
+    
+    /* Smooth Floating Board */
+    .ttt-board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;border-radius:24px;background:#fff;box-shadow:0 12px 36px rgba(91,61,240,.12); width:100%;max-width:300px; margin:0 auto;}
+    .ttt-cell{aspect-ratio:1;border:0;border-radius:16px;background:#f8f6ff;font-size:3.5rem;font-weight:800;cursor:pointer;transition:all .15s ease;display:flex;align-items:center;justify-content:center;padding:0; box-shadow:inset 0 2px 6px rgba(0,0,0,0.02);}
+    .ttt-cell:disabled{cursor:default;}
+    .ttt-cell:not(:disabled):hover{background:#ede9fe;transform:scale(1.04); box-shadow:inset 0 2px 6px rgba(0,0,0,0.05);}
+    
+    /* Smooth Colors */
+    .ttt-cell.mine{color:#5b3df0; text-shadow: 0 2px 10px rgba(91,61,240,0.2);}
+    .ttt-cell.theirs{color:#f0a742; text-shadow: 0 2px 10px rgba(240,167,66,0.2);}
+    
+    /* Pop-in Animation */
+    .ttt-cell.pop span{animation:ttt-pop .4s cubic-bezier(0.34, 1.56, 0.64, 1); display:inline-block;}
+    @keyframes ttt-pop{0%{transform:scale(0) rotate(-20deg);opacity:0}70%{transform:scale(1.15) rotate(5deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
+    
+    /* Winning Highlight */
+    .ttt-cell.win{background:#fff3d6; animation:ttt-win .8s ease-in-out infinite alternate; box-shadow:0 0 0 3px #f0a742;}
+    @keyframes ttt-win{from{transform:scale(1);}to{transform:scale(1.06);}}
+  </style>`;
+
+  const statusText = () => outcome ? (outcome === 'me' ? '🏆 You won!' : outcome === 'opp' ? 'You lost this one' : '🤝 Draw')
+    : gameOver ? 'Game over' : myTurn ? 'Your turn' : esc(opponent.name) + "'s turn";
+    
+  const head = (a, b) => `
+    <p class="sk-info">Entry ₹${currentEntryFee} · Win ₹${currentReward} · LIVE</p>
+    <div class="sk-bar">
+      <div class="sk-chip me ${myTurn && !gameOver ? 'act' : ''}">You (${a})</div>
+      <div class="sk-chip op ${!myTurn && !gameOver ? 'act' : ''}">${esc(opponent.name)} (${b})</div>
+    </div>
+    <div class="sk-status" style="color:${outcome === 'me' ? '#16c46b' : outcome === 'opp' ? '#e2555a' : myTurn ? '#5b3df0' : '#c47d12'}">${statusText()}</div>`;
+
+  function judge(b) {
+    for (const l of LINES) if (b[l[0]] && b[l[0]] === b[l[1]] && b[l[0]] === b[l[2]]) return { winner: b[l[0]], line: l };
+    return b.every(Boolean) ? { winner: 'draw' } : null;
+  }
+  
+  const snapshot = () => ({ board, lastMove, n: moveNo });
+  
+  function apply(s) {
+    if (!s || !Array.isArray(s.board)) return false;
+    board = s.board.slice(); 
+    lastMove = typeof s.lastMove === 'number' ? s.lastMove : -1; 
+    moveNo = s.n;
+    const r = judge(board); 
+    winLine = (r && r.line) || null;
+    return true;
+  }
+
   function render() {
-    let cells = '';
-    board.forEach((val, i) => {
-      const cls = val ? (val === 'X' ? 'x-mark filled' : 'o-mark filled') : '';
-      cells += `<div class="ttt-cell ${cls}" data-idx="${i}">${val || ''}</div>`;
-    });
-    const turnText = gameOver ? '' : (myTurn ? 'Your Turn' : (opponent.name + "'s Turn"));
-    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p><div style="font-size:0.85rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:8px;">${turnText}</div><div class="ttt-wrapper"><div class="ttt-board">${cells}</div><svg class="ttt-line-overlay" id="ttt-line" viewBox="0 0 210 210"></svg></div></div>`;
-    if (!gameOver && myTurn) {
-      document.querySelectorAll('.ttt-cell:not(.filled)').forEach(cell => {
-        cell.addEventListener('click', () => { const idx = parseInt(cell.dataset.idx); if (board[idx]) return; handleMove(idx, mySymbol); });
+    const anim = fresh; fresh = false;
+    const canPlay = myTurn && !gameOver;
+    
+    const cells = board.map((c, i) => {
+      const isMine = c === me;
+      const isWin = winLine && winLine.includes(i);
+      return `<button class="ttt-cell ${c ? (isMine ? 'mine' : 'theirs') : ''} ${anim && i === lastMove ? 'pop' : ''} ${isWin ? 'win' : ''}"
+        data-i="${i}" ${!canPlay || c ? 'disabled' : ''}><span>${c ? mark(c) : ''}</span></button>`;
+    }).join('');
+    
+    stage.innerHTML = `${CSS}<div class="sk-wrap">${head(mark(me), mark(opp))}<div class="ttt-board">${cells}</div></div>`;
+    
+    if (canPlay) {
+      stage.querySelectorAll('.ttt-cell:not(:disabled)').forEach(b => {
+        b.addEventListener('click', () => makeMove(+b.dataset.i));
       });
     }
   }
-  async function handleMove(idx, sym) {
+
+  const say = (o, why) => later(() => {
+    if (o === 'me') endDuel(true, why || 'Tic-Tac-Toe victory!');
+    else if (o === 'opp') endDuel(false, why || 'Opponent completed a line.');
+    else endDrawnMatch();
+  }, 1300);
+
+  async function conclude(o, why) {
     if (gameOver) return;
-    board[idx] = sym;
-    myTurn = false;
-    render();
-    const winner = findWinner();
-    const finalState = { board: [...board] };
-    if (winner === sym) {
-      gameOver = true; drawLine(getWinLine(sym));
-      if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, currentUser.id); }
-      setTimeout(() => endDuel(true, 'Tic-Tac-Toe victory.'), 700); return;
+    gameOver = true; outcome = o; render();
+    if (!endHandled) {
+      endHandled = true;
+      const wid = o === 'me' ? currentUser.id : o === 'opp' ? opponent.id : null;
+      try { await endSessionWithState(live.sessionId, snapshot(), wid); } catch (e) { console.error(e); }
     }
-    if (winner === oppSymbol) {
-      gameOver = true; drawLine(getWinLine(oppSymbol));
-      if (isLive && !endHandled) { endHandled = true; await pushSessionState(live.sessionId, finalState, myRole === 'player1' ? 'player2' : 'player1'); await endSessionWithState(live.sessionId, finalState, opponent.id); }
-      setTimeout(() => endDuel(false, 'Opponent completed a line.'), 700); return;
+    say(o, why);
+  }
+
+  async function makeMove(i) {
+    if (gameOver || !myTurn || board[i]) return;
+    
+    board[i] = me; 
+    lastMove = i; 
+    moveNo++; 
+    fresh = true;
+    
+    const res = judge(board);
+    if (res) {
+      if (res.line) winLine = res.line;
+      return conclude(res.winner === 'draw' ? 'draw' : 'me', res.winner === 'draw' ? '' : 'You completed a line of three!');
     }
-    if (board.every(c => c)) {
-      gameOver = true;
-      if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, null); }
-      setTimeout(endDrawnMatch, 500); return;
+    
+    setTurn(false); render();
+    try { await pushSessionState(live.sessionId, snapshot(), opp); } catch (e) { console.error(e); }
+  }
+
+  subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
+    if (status === 'completed') {
+      if (gameOver) return;
+      if (newState && typeof newState.n === 'number' && newState.n > moveNo) apply(newState);
+      gameOver = true; endHandled = true; fresh = true;
+      outcome = winnerId === currentUser.id ? 'me' : winnerId ? 'opp' : 'draw';
+      render(); say(outcome);
+      return;
     }
-    if (isLive) { const nextTurn = myRole === 'player1' ? 'player2' : 'player1'; await pushSessionState(live.sessionId, finalState, nextTurn); }
-  }
-  function findWinner() { for (const line of WIN_LINES) { const [a,b,c] = line; if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a]; } return null; }
-  function getWinLine(sym) { return WIN_LINES.find(line => line.every(i => board[i] === sym)); }
-  function drawLine(line) {
-    const svg = document.getElementById('ttt-line'); if (!svg || !line) return;
-    svg.innerHTML = '';
-    const size = 210, cellSize = (size - 16) / 3, gap = 4, pad = 8;
-    const centers = [0,1,2,3,4,5,6,7,8].map(i => { const r = Math.floor(i/3), c = i%3; return [pad + c * (cellSize + gap) + cellSize/2, pad + r * (cellSize + gap) + cellSize/2]; });
-    const [x1,y1] = centers[line[0]], [x2,y2] = centers[line[2]];
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    path.setAttribute('x1', x1); path.setAttribute('y1', y1);
-    path.setAttribute('x2', x1); path.setAttribute('y2', y1);
-    path.setAttribute('class', 'ttt-winline');
-    svg.appendChild(path);
-    requestAnimationFrame(() => { path.style.transition = 'x2 .35s ease, y2 .35s ease'; path.setAttribute('x2', x2); path.setAttribute('y2', y2); });
-  }
-  if (isLive) {
-    subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') {
-        if (newState && Array.isArray(newState.board) && !gameOver) { board = newState.board; render(); const w = findWinner(); if (w) drawLine(getWinLine(w)); }
-        if (gameOver) return;
-        gameOver = true; endHandled = true;
-        const iWon = winnerId === currentUser.id;
-        const isDraw = !winnerId;
-        setTimeout(() => { if (isDraw) endDrawnMatch(); else if (iWon) endDuel(true, 'Tic-Tac-Toe victory.'); else endDuel(false, 'Opponent completed a line.'); }, 500);
-        return;
-      }
-      if (newState && Array.isArray(newState.board) && !gameOver) { board = newState.board; myTurn = (turn === myRole); render(); }
-    });
-  }
+    if (gameOver || !newState || typeof newState.n !== 'number' || newState.n <= moveNo) return;
+    if (!apply(newState)) return;
+    fresh = true; setTurn(turn === me); render();
+  });
+
   render();
 }
-
-function runConnectFour(opponent, live) {
+  function runConnectFour(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
   
