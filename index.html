@@ -4615,64 +4615,11 @@ function runFruitBlade(opponent, live) {
     });
   }
 
-  tick();
+  // THE FIX: Delay the render loop slightly so the CSS modal animation finishes
+  setTimeout(() => {
+    if (typeof tick === 'function') tick();
+  }, 300);
 }
-function runTap(opponent, live) {
-  const stage = document.getElementById('arena-stage');
-  if (!stage) return;
-  const isLive = !!live;
-  let myTaps = 0, oppTaps = 0;
-  let timeLeft = 5;
-  let gameOver = false;
-  let endHandled = false;
-  let timer = null;
-  function render() {
-    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p><div style="display:flex;justify-content:space-around;margin:8px 0;font-size:0.85rem;font-weight:700;"><span style="color:#5b3df0;">You: ${myTaps}</span><span style="color:#f0a742;">${opponent.name}: ${oppTaps}</span></div><div style="font-size:1.4rem;font-weight:800;color:#5b3df0;margin:10px 0;">Time: ${timeLeft}s</div><button id="tap-btn" style="width:180px;height:180px;border-radius:50%;background:linear-gradient(135deg,#5b3df0,#8b6ff0);color:#fff;font-size:1.5rem;font-weight:900;border:none;cursor:pointer;box-shadow:0 8px 30px rgba(91,61,240,0.4);" ${gameOver ? 'disabled' : ''}>TAP!</button><p style="font-size:0.8rem;color:#5c5a6e;margin-top:14px;">Tap as many times as you can in 5 seconds!</p></div>`;
-    if (!gameOver) {
-      document.getElementById('tap-btn')?.addEventListener('click', () => {
-        myTaps++;
-        render();
-        if (isLive) pushSessionState(live.sessionId, { myTaps, oppTaps }, myRole);
-      });
-    }
-  }
-  render();
-  timer = setInterval(() => {
-    timeLeft--;
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      gameOver = true;
-      render();
-      const finalState = { myTaps, oppTaps };
-      const winnerId = myTaps > oppTaps ? currentUser.id : (myTaps < oppTaps ? opponent.id : null);
-      if (isLive && !endHandled) { endHandled = true; endSessionWithState(live.sessionId, finalState, winnerId); }
-      if (myTaps > oppTaps) setTimeout(() => endDuel(true, `You tapped ${myTaps} times.`), 600);
-      else if (myTaps < oppTaps) setTimeout(() => endDuel(false, `Opponent tapped ${oppTaps} times.`), 600);
-      else setTimeout(endDrawnMatch, 500);
-      return;
-    }
-    render();
-  }, 1000);
-  gameTimers.push(timer);
-  if (isLive) {
-    subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') {
-        if (gameOver) return;
-        gameOver = true; endHandled = true;
-        const iWon = winnerId === currentUser.id;
-        const isDraw = !winnerId;
-        setTimeout(() => { if (isDraw) endDrawnMatch(); else if (iWon) endDuel(true, 'Tap Race victory!'); else endDuel(false, 'Opponent tapped faster.'); }, 500);
-        return;
-      }
-      if (newState && !gameOver) {
-        if (typeof newState.myTaps === 'number') myTaps = newState.myTaps;
-        if (typeof newState.oppTaps === 'number') oppTaps = newState.oppTaps;
-        render();
-      }
-    });
-  }
-}
-
 function runHigherLower(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
