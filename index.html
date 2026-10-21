@@ -5966,21 +5966,63 @@ function simulateBotMove(gameType, state, nextTurn) {
 }
 
 function calculateBotMove(type, state) {
+  // BOT DIFFICULTY: 0.0 (Flawless) to 1.0 (Pure Noob).
+  // 0.8 means 80% chance to play randomly (like a noob), 20% chance to play smart.
+  const NOOB_CHANCE = 0.8; 
+
   if (type === 'tictactoe') {
     let board = state.board;
     const empty = board.map((c, i) => c === null ? i : null).filter(v => v !== null);
     if (empty.length === 0) return null;
-    for (let i of empty) { let temp = [...board]; temp[i] = 'player2'; if (checkTTTWin(temp, 'player2')) return { board: temp, lastMove: i, n: state.n + 1 }; }
-    for (let i of empty) { let temp = [...board]; temp[i] = 'player1'; if (checkTTTWin(temp, 'player1')) return { board: temp, lastMove: i, n: state.n + 1 }; }
+
+    // If bot plays "smart" (20% chance), try to win or block
+    if (Math.random() > NOOB_CHANCE) {
+      // 1. Try to win
+      for (let i of empty) { 
+        let temp = [...board]; temp[i] = 'player2'; 
+        if (checkTTTWin(temp, 'player2')) return { board: temp, lastMove: i, n: state.n + 1 }; 
+      }
+      // 2. Try to block
+      for (let i of empty) { 
+        let temp = [...board]; temp[i] = 'player1'; 
+        if (checkTTTWin(temp, 'player1')) return { board: temp, lastMove: i, n: state.n + 1 }; 
+      }
+    }
+    
+    // Otherwise, pick a random empty spot
     let idx = empty[Math.floor(Math.random() * empty.length)];
     let temp = [...board]; temp[idx] = 'player2';
     return { board: temp, lastMove: idx, n: state.n + 1 };
   }
+
   if (type === 'connect4') {
     let grid = state.grid;
     let validCols = [];
     for (let c = 0; c < 7; c++) if (!grid[0][c]) validCols.push(c);
     if (validCols.length === 0) return null;
+    
+    // If bot plays "smart" (20% chance), try to win or block
+    if (Math.random() > NOOB_CHANCE) {
+      for (let c of validCols) {
+        let r = -1;
+        for (let i = 5; i >= 0; i--) if (!grid[i][c]) { r = i; break; }
+        // Check if dropping here wins for bot
+        let temp = grid.map(row => [...row]); temp[r][c] = 'player2';
+        if (checkC4Win(temp, 'player2')) return { grid: temp, last: {r, c}, n: state.n + 1 };
+      }
+      for (let c of validCols) {
+        let r = -1;
+        for (let i = 5; i >= 0; i--) if (!grid[i][c]) { r = i; break; }
+        // Check if dropping here blocks player
+        let temp = grid.map(row => [...row]); temp[r][c] = 'player1';
+        if (checkC4Win(temp, 'player1')) {
+            let realTemp = grid.map(row => [...row]); realTemp[r][c] = 'player2';
+            return { grid: realTemp, last: {r, c}, n: state.n + 1 };
+        }
+      }
+    }
+
+    // Otherwise, pick a random valid column
     let c = validCols[Math.floor(Math.random() * validCols.length)];
     let r = -1;
     for (let i = 5; i >= 0; i--) if (!grid[i][c]) { r = i; break; }
@@ -5988,25 +6030,60 @@ function calculateBotMove(type, state) {
     tempGrid[r][c] = 'player2';
     return { grid: tempGrid, last: { r, c }, n: state.n + 1 };
   }
+
   if (type === 'dots') {
     let H = state.H, V = state.V, B = state.B;
     let valid = [];
     for (let r = 0; r <= 4; r++) for (let c = 0; c < 4; c++) if (!H[r][c]) valid.push(['h', r, c]);
     for (let r = 0; r < 4; r++) for (let c = 0; c <= 4; c++) if (!V[r][c]) valid.push(['v', r, c]);
+    
     if (!valid.length) return null;
+    
+    // Dots is complex, so we just let the bot pick randomly 90% of the time
+    // If it picks the 10% smart move, it will complete a box if possible
+    if (Math.random() > 0.9) {
+       for (const [t, r, c] of valid) {
+          let tempH = H.map(row => [...row]), tempV = V.map(row => [...row]), tempB = B.map(row => [...row]);
+          if (t === 'h') tempH[r][c] = 'player2'; else tempV[r][c] = 'player2';
+          
+          // Check if this move completes a box
+          let completed = 0;
+          for (let br = 0; br < 4; br++) for (let bc = 0; bc < 4; bc++) {
+            if (!tempB[br][bc] && tempH[br][bc] && tempH[br+1][bc] && tempV[br][bc] && tempV[br][bc+1]) { tempB[br][bc] = 'player2'; completed++; }
+          }
+          if (completed > 0) return { H: tempH, V: tempV, B: tempB, last: { t, r, c }, n: state.n + 1 };
+       }
+    }
+
+    // Random move
     let pick = valid[Math.floor(Math.random() * valid.length)];
     let tempH = H.map(r => [...r]), tempV = V.map(r => [...r]), tempB = B.map(r => [...r]);
     if (pick[0] === 'h') tempH[pick[1]][pick[2]] = 'player2'; else tempV[pick[1]][pick[2]] = 'player2';
     return { H: tempH, V: tempV, B: tempB, last: { t: pick[0], r: pick[1], c: pick[2] }, n: state.n + 1 };
   }
+  
   return state;
 }
 
-function checkTTTWin(b, sym) {
-  const L = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-  return L.some(l => b[l[0]] === sym && b[l[1]] === sym && b[l[2]] === sym);
+// Helper for Connect 4 Win Check
+function checkC4Win(g, chip) {
+  const ROWS = 6, COLS = 7;
+  const DIRS = [[0, 1], [1, 0], [1, 1], [1, -1]];
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    const v = g[r][c]; if (!v) continue;
+    for (const [dr, dc] of DIRS) {
+      let count = 1;
+      for (let k = 1; k < 4; k++) {
+        const rr = r + dr * k, cc = c + dc * k;
+        if (rr < 0 || rr >= ROWS || cc < 0 || cc >= COLS || g[rr][cc] !== v) break;
+        count++;
+      }
+      if (count === 4) return true;
+    }
+  }
+  return false;
 }
-
+  
 // ===== PLAY BUTTON =====
 document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
   const helpBtn = e.target.closest('.help-btn');
