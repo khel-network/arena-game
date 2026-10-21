@@ -2128,16 +2128,7 @@ Your ₹<span id="no-opp-refund">20</span> entry has been refunded.
 <button id="cancelPaymentBtn" class="cancel-payment-btn">Cancel Payment</button>
 </div>
 </div>
-<!-- NEW: In-App Payment Iframe -->
-<div id="paymentIframeOverlay" class="modal-overlay hidden" style="z-index: 9999; background: rgba(0,0,0,0.8);">
-  <div class="modal-card" style="max-width: 500px; width: 100%; padding: 0; overflow: hidden; height: 85vh; display: flex; flex-direction: column;">
-    <div style="padding: 12px 16px; background: #f8f6ff; border-bottom: 1px solid #eee9f7; display: flex; justify-content: space-between; align-items: center;">
-      <strong style="font-family: 'Poppins', sans-serif; color: #161522;">Secure Payment</strong>
-      <button onclick="closeIframePayment()" style="background: none; border: none; font-size: 1.5rem; color: #e2555a; cursor: pointer; padding: 0 10px;">&times;</button>
-    </div>
-    <iframe id="zapupi_iframe" src="" style="flex: 1; width: 100%; border: none;"></iframe>
-  </div>
-</div>
+
 <div id="paymentAnimation" class="payment-animation-overlay">
 <div class="checkmark">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -2668,7 +2659,7 @@ async function subscribeToWalletRealtime() {
 function startPaymentPolling() {
   if (paymentPollInterval) clearInterval(paymentPollInterval);
   
-  // Check every 2 seconds instead of 3
+  // Check every 2 seconds
   paymentPollInterval = setInterval(async () => {
     try {
       // Get the latest payment request for this user
@@ -2680,25 +2671,26 @@ function startPaymentPolling() {
         .limit(1)
         .maybeSingle();
 
+      // 🚨 IF THE DATABASE SAYS APPROVED, CELEBRATE!
       if (data && data.status === 'approved') {
         clearInterval(paymentPollInterval);
         paymentPollInterval = null;
         
-        // 1. Close the Iframe immediately
-        closeIframePayment();
+        // Close the modal
+        closePaymentModal(); 
         
-        // 2. Show the Success Animation
+        // Show the confetti animation
         showPaymentAnimation(data.tokens_to_credit);
         showWalletToast(data.tokens_to_credit, 'credit', 'Wallet top-up successful');
         
-        // 3. Reload Wallet
+        // Reload wallet balance
         await loadWallet();
         updateUI();
       }
     } catch (e) {
       console.log('Polling error', e);
     }
-  }, 2000); // Poll every 2 seconds
+  }, 2000);
 }
 function animateBalanceChange(fromVal, toVal) {
   const el = document.getElementById('balance-value');
@@ -2979,16 +2971,14 @@ success_url: currentUrl + '?status=success&order_id=' + orderId + '&iframe=1',
       failed_url: currentUrl + '?status=failed&order_id=' + orderId,
       timeout_url: currentUrl + '?status=timeout&order_id=' + orderId,
     }, {
-      onResponse: function(paymentUrl) {
-        // 🌟 INSTANTLY OPEN THE IFRAME (No new tabs!)
-        const iframe = document.getElementById('zapupi_iframe');
-        iframe.src = paymentUrl;
-        document.getElementById('paymentIframeOverlay').classList.remove('hidden');
+           onResponse: function(paymentUrl) {
+        // 🌟 OPEN IN NEW TAB (The reliable way)
+        window.open(paymentUrl, '_blank');
         
-        // Hide the initial modal behind it
-        modal.classList.remove('show');
+        // Update the modal text
+        st.innerHTML = `<div style="text-align:center; padding: 10px; color: #16c46b; font-weight: 700;"><i class="fas fa-check-circle"></i> Payment page opened in a new tab.<br><span style="font-size:0.8rem; color:#5c5a6e; font-weight:normal; margin-top:6px; display:block;">Complete the payment there. This page will update automatically.</span></div>`;
         
-        // Start checking if payment is done in the background
+        // Start checking if the payment is done in the background
         startPaymentPolling();
         
         document.getElementById('initiatePaymentBtn').disabled = false;
@@ -5869,15 +5859,7 @@ function stripHashFromUrl() {
 }
 stripHashFromUrl();
 window.addEventListener('load', stripHashFromUrl);
-// 👇 ADD THIS CODE HERE 👇
-// Listen for messages from the iframe
-window.addEventListener('message', function(event) {
-  if (event.data && event.data.status === 'success') {
-    closeIframePayment();
-    loadWallet().then(() => updateUI());
-  }
-});
-// 👆 END OF ADDED CODE 👆
+
 routeOnLoad();
 // ===== DEEP-LINK =====
 (function handleGameParam() {
