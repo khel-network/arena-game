@@ -4211,8 +4211,9 @@ function runFruitBlade(opponent, live) {
   const currentRole = (typeof myRole !== 'undefined' && myRole) ? myRole : 'player1';
   const me = currentRole, opp = me === 'player1' ? 'player2' : 'player1';
   
+  // THE FIX: Defined gameActive so the loop doesn't crash
+  let gameActive = true;
   let gameOver = false;
-  let endHandled = false;
   let myScore = 0;
   let oppScore = 0;
   let timeLeft = 30;
