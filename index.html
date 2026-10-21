@@ -3111,8 +3111,7 @@ const GAME_CATALOG = [
   { type: 'tictactoe', name: 'Tic-Tac-Toe Blitz', desc: 'Classic 3x3 grid combat. Get three in a row to win.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 30, banner: '/images/tictactoe-banner.png', featured: true },
   { type: 'connect4', name: 'Connect 4', desc: 'Drop discs and connect four in a row. Strategic battles.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 30, banner: '/images/connect4-banner.png', featured: true },
   { type: 'memory', name: 'Memory Match', desc: 'Flip pairs and clear the board. Test your memory.', badge: 'BRAIN', category: 'brain', entry: 20, reward: 30, banner: '/images/memory-banner.png', featured: true },
-  { type: 'mathduel', name: 'Math Duel', desc: 'Solve equations fastest to win. Quick math.', badge: 'MATH', category: 'math', entry: 20, reward: 30, banner: '/images/mathduel-banner.png', featured: true },
-  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed.', badge: 'SPEED', category: 'reflex', entry: 20, reward: 30, banner: '/images/tap-banner.png', featured: true },
+  { type: 'fruitblade', name: 'Fruit Blade', desc: 'Swipe to slice fruits and avoid bombs. Fastest reflexes win.', badge: 'REFLEX', category: 'reflex', entry: 20, reward: 30, banner: '/images/fruitblade-banner.png', featured: true },  { type: 'tap', name: 'Tap Race', desc: 'Most taps in 5 seconds wins. Pure speed.', badge: 'SPEED', category: 'reflex', entry: 20, reward: 30, banner: '/images/tap-banner.png', featured: true },
   { type: 'nim', name: 'Nim Duel', desc: 'Take stones from piles. Player who takes the last stone wins.', badge: 'STRATEGY', category: 'strategy', entry: 20, reward: 30, banner: '/images/nim-banner.png', featured: true },
   { type: 'dots', name: 'Dots & Boxes', desc: 'Complete more boxes than your opponent on a 4x4 grid.', badge: 'STRATEGY', category: 'strategy', entry: 25, reward: 40, banner: '/images/dots-banner.png' },
   { type: 'memorylg', name: 'Lights Out', desc: 'Tap tiles to toggle them and their neighbors. Clear all lights.', badge: 'BRAIN', category: 'brain', entry: 25, reward: 40, banner: '/images/lightsout-banner.png' },
@@ -3269,7 +3268,7 @@ function launchLiveGame(type, opponent, sessionId, initialTurn) {
     case 'battleship': runTowerStack(opponent, { sessionId, initialTurn }); break;
     case 'scramble': runScramble(opponent, { sessionId, initialTurn }); break;
     case 'memory': runMemory(opponent, { sessionId, initialTurn }); break;
-    case 'mathduel': runMathDuel(opponent, { sessionId, initialTurn }); break;
+    case 'fruitblade': runFruitBlade(opponent, { sessionId, initialTurn }); break;
     case 'tap': runTap(opponent, { sessionId, initialTurn }); break;
     case 'higherlower': runHigherLower(opponent, { sessionId, initialTurn }); break;
     case 'simon': runSimon(opponent, { sessionId, initialTurn }); break;
@@ -4205,77 +4204,419 @@ function runMemory(opponent, live) {
 
   render();
 }
-function runMathDuel(opponent, live) {
+function runFruitBlade(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
-  const isLive = !!live;
-  let myScore = 0, oppScore = 0;
-  let round = 1;
-  const MAX_ROUNDS = 5;
+  
+  const currentRole = (typeof myRole !== 'undefined' && myRole) ? myRole : 'player1';
+  const me = currentRole, opp = me === 'player1' ? 'player2' : 'player1';
+  
   let gameOver = false;
   let endHandled = false;
-  let myTurn = (myRole === 'player1');
-  const seedStr = (live?.sessionId || 'local') + '-mathduel';
-  let seed = 0; for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
-  function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
-  const a = 3 + Math.floor(rnd() * 12);
-  const b = 3 + Math.floor(rnd() * 12);
-  const ops = ['+', '-', '×'];
-  const op = ops[Math.floor(rnd() * ops.length)];
-  let answer;
-  if (op === '+') answer = a + b;
-  else if (op === '-') answer = a - b;
-  else answer = a * b;
-  function render() {
-    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p><div style="display:flex;justify-content:space-around;margin:8px 0;font-size:0.85rem;font-weight:700;"><span style="color:#5b3df0;">You: ${myScore}</span><span style="color:#918fa3;">Round ${round}/${MAX_ROUNDS}</span><span style="color:#f0a742;">${opponent.name}: ${oppScore}</span></div><div style="font-size:2rem;font-weight:900;color:#161522;margin:20px 0;padding:20px;background:#f8f6ff;border-radius:16px;display:inline-block;">${a} ${op} ${b} = ?</div><div style="margin-top:14px;"><input type="number" id="math-input" style="padding:12px 16px;border-radius:10px;border:2px solid #e9e5f5;font-size:1.2rem;width:160px;text-align:center;" ${myTurn && !gameOver ? '' : 'disabled'} /><button class="btn-primary" id="math-submit" style="margin-left:8px;padding:12px 24px;border-radius:10px;" ${myTurn && !gameOver ? '' : 'disabled'}>Submit</button></div><p style="font-size:0.75rem;color:#5c5a6e;margin-top:10px;">${gameOver ? 'Game over' : (myTurn ? 'Your Turn' : opponent.name + "'s Turn")}</p></div>`;
-    if (myTurn && !gameOver) {
-      const input = document.getElementById('math-input');
-      document.getElementById('math-submit')?.addEventListener('click', submit);
-      input?.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
-      input?.focus();
+  let myScore = 0;
+  let oppScore = 0;
+  let timeLeft = 30;
+  let shakeMag = 0;
+  let isSwiping = false;
+  
+  let fruits = [];
+  let fruitHalves = [];
+  let stains = [];
+  let particles = [];
+  let bladeTrace = [];
+  let floaters = [];
+  let smokePuffs = [];
+
+  // ==========================================
+  // PHOTOREALISTIC SHADING & TEXTURE PIPELINES
+  // ==========================================
+  function drawPhotorealSpecular(c, r, offsetX = -0.3, offsetY = -0.35, scaleX = 0.45, scaleY = 0.22, rot = -0.35) {
+    c.save(); c.translate(r * offsetX, r * offsetY); c.rotate(rot);
+    const grad = c.createRadialGradient(0, 0, 0, 0, 0, r * scaleX);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
+    grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.28)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    c.fillStyle = grad; c.beginPath(); c.ellipse(0, 0, r * scaleX, r * scaleY, 0, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+
+  function drawWatermelonSkin(c, r) {
+    const grad = c.createRadialGradient(-r * 0.4, -r * 0.4, r * 0.1, 0, 0, r);
+    grad.addColorStop(0, '#40916c'); grad.addColorStop(0.4, '#2d6a4f'); grad.addColorStop(0.85, '#1b4332'); grad.addColorStop(1, '#081c15');
+    c.fillStyle = grad; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#0a2318'; c.lineWidth = 4.5; c.lineCap = 'round'; c.lineJoin = 'round';
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2; c.beginPath(); c.moveTo(Math.cos(a) * (r * 0.15), Math.sin(a) * (r * 0.15));
+      const a1 = a + 0.1, a2 = a - 0.08;
+      c.lineTo(Math.cos(a1) * (r * 0.5), Math.sin(a1) * (r * 0.5)); c.lineTo(Math.cos(a2) * (r * 0.8), Math.sin(a2) * (r * 0.8)); c.lineTo(Math.cos(a) * (r * 0.96), Math.sin(a) * (r * 0.96)); c.stroke();
+    }
+    drawPhotorealSpecular(c, r);
+  }
+
+  function drawWatermelonFlesh(c, r, cutAngle, side) {
+    c.save(); c.beginPath(); c.arc(0, 0, r, cutAngle + (side === 1 ? 0 : Math.PI), cutAngle + (side === 1 ? Math.PI : Math.PI * 2)); c.closePath(); c.clip();
+    c.fillStyle = '#1b4332'; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#e8f5e9'; c.beginPath(); c.arc(0, 0, r * 0.92, 0, Math.PI * 2); c.fill();
+    const pulp = c.createRadialGradient(0, 0, r * 0.08, 0, 0, r * 0.84);
+    pulp.addColorStop(0, '#d90429'); pulp.addColorStop(0.75, '#ef233c'); pulp.addColorStop(0.95, '#ff4d6d'); pulp.addColorStop(1, '#ffccd5');
+    c.fillStyle = pulp; c.beginPath(); c.arc(0, 0, r * 0.84, 0, Math.PI * 2); c.fill();
+    for (let i = -3; i <= 3; i++) {
+      if (i === 0) continue;
+      const sa = cutAngle + (side === 1 ? 0.35 : Math.PI + 0.35) + (i * 0.38);
+      const sr = r * 0.56, sx = Math.cos(sa) * sr, sy = Math.sin(sa) * sr;
+      c.save(); c.translate(sx, sy); c.rotate(sa + Math.PI / 2);
+      c.fillStyle = '#110d0a'; c.beginPath(); c.ellipse(0, 0, 2.5, 5, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = 'rgba(255,255,255,0.7)'; c.beginPath(); c.arc(-0.8, -1.5, 0.9, 0, Math.PI * 2); c.fill(); c.restore();
+    }
+    c.restore();
+  }
+
+  function drawOrangeSkin(c, r) {
+    const grad = c.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r);
+    grad.addColorStop(0, '#ffba08'); grad.addColorStop(0.5, '#f48c06'); grad.addColorStop(0.85, '#dc2f02'); grad.addColorStop(1, '#9d0208');
+    c.fillStyle = grad; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+    c.fillStyle = 'rgba(157, 2, 8, 0.28)';
+    for (let i = 0; i < 40; i++) { const a = (i / 40) * Math.PI * 2; const dist = r * (0.3 + (i % 5) * 0.13); c.fillRect(Math.cos(a) * dist, Math.sin(a) * dist, 1.6, 1.6); }
+    drawPhotorealSpecular(c, r);
+  }
+
+  function drawOrangeFlesh(c, r, cutAngle, side) {
+    c.save(); c.beginPath(); c.arc(0, 0, r, cutAngle + (side === 1 ? 0 : Math.PI), cutAngle + (side === 1 ? Math.PI : Math.PI * 2)); c.closePath(); c.clip();
+    c.fillStyle = '#dc2f02'; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#fff3b0'; c.beginPath(); c.arc(0, 0, r * 0.93, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#f48c06'; c.beginPath(); c.arc(0, 0, r * 0.86, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#fff8cc'; c.lineWidth = 1.8;
+    for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(a) * (r * 0.86), Math.sin(a) * (r * 0.86)); c.stroke(); }
+    c.fillStyle = '#fff8cc'; c.beginPath(); c.arc(0, 0, r * 0.14, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+
+  function drawKiwiSkin(c, r) {
+    const grad = c.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r);
+    grad.addColorStop(0, '#9c6644'); grad.addColorStop(0.65, '#7f4f24'); grad.addColorStop(1, '#462b0e');
+    c.fillStyle = grad; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = 'rgba(221, 184, 146, 0.55)'; c.lineWidth = 1.2;
+    for (let i = 0; i < 48; i++) { const a = (i / 48) * Math.PI * 2; const len = 3.5 + (i % 3) * 1.5; c.beginPath(); c.moveTo(Math.cos(a) * (r - 1), Math.sin(a) * (r - 1)); c.lineTo(Math.cos(a) * (r + len), Math.sin(a) * (r + len)); c.stroke(); }
+    drawPhotorealSpecular(c, r, -0.3, -0.3, 0.4, 0.2);
+  }
+
+  function drawKiwiFlesh(c, r, cutAngle, side) {
+    c.save(); c.beginPath(); c.arc(0, 0, r, cutAngle + (side === 1 ? 0 : Math.PI), cutAngle + (side === 1 ? Math.PI : Math.PI * 2)); c.closePath(); c.clip();
+    c.fillStyle = '#583101'; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+    const pulp = c.createRadialGradient(0, 0, r * 0.22, 0, 0, r * 0.92);
+    pulp.addColorStop(0, '#f1faee'); pulp.addColorStop(0.3, '#d8f3dc'); pulp.addColorStop(0.55, '#74c69d'); pulp.addColorStop(0.85, '#40916c'); pulp.addColorStop(1, '#2d6a4f');
+    c.fillStyle = pulp; c.beginPath(); c.arc(0, 0, r * 0.92, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = 'rgba(255, 255, 255, 0.35)'; c.lineWidth = 1;
+    for (let i = 0; i < 28; i++) { const a = (i / 28) * Math.PI * 2; c.beginPath(); c.moveTo(Math.cos(a) * (r * 0.25), Math.sin(a) * (r * 0.25)); c.lineTo(Math.cos(a) * (r * 0.72), Math.sin(a) * (r * 0.72)); c.stroke(); }
+    c.fillStyle = '#f8f9fa'; c.beginPath(); c.arc(0, 0, r * 0.24, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#080808';
+    for (let i = 0; i < 24; i++) { const a = (i / 24) * Math.PI * 2; const sr = r * 0.44 + (Math.sin(i * 4) * 2.5); c.beginPath(); c.ellipse(Math.cos(a) * sr, Math.sin(a) * sr, 1.4, 2.2, a, 0, Math.PI * 2); c.fill(); }
+    c.restore();
+  }
+
+  function drawAppleSkin(c, r) {
+    const grad = c.createRadialGradient(-r * 0.3, -r * 0.35, r * 0.1, 0, 0, r);
+    grad.addColorStop(0, '#ffea00'); grad.addColorStop(0.25, '#d90429'); grad.addColorStop(0.85, '#7a0016'); grad.addColorStop(1, '#3a0009');
+    c.fillStyle = grad; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = 'rgba(255, 200, 0, 0.25)'; c.lineWidth = 1.5;
+    for (let i = 0; i < 20; i++) { const a = (i / 20) * Math.PI * 2; c.beginPath(); c.moveTo(Math.cos(a) * (r * 0.3), Math.sin(a) * (r * 0.3)); c.lineTo(Math.cos(a) * (r * 0.94), Math.sin(a) * (r * 0.94)); c.stroke(); }
+    c.strokeStyle = '#4a2810'; c.lineWidth = 3.5; c.lineCap = 'round'; c.beginPath(); c.moveTo(0, -r * 0.85); c.quadraticCurveTo(r * 0.15, -r * 1.25, r * 0.22, -r * 1.35); c.stroke();
+    drawPhotorealSpecular(c, r, -0.35, -0.35, 0.5, 0.25);
+  }
+
+  function drawAppleFlesh(c, r, cutAngle, side) {
+    c.save(); c.beginPath(); c.arc(0, 0, r, cutAngle + (side === 1 ? 0 : Math.PI), cutAngle + (side === 1 ? Math.PI : Math.PI * 2)); c.closePath(); c.clip();
+    c.fillStyle = '#a4001c'; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+    const flesh = c.createRadialGradient(0, 0, r * 0.1, 0, 0, r * 0.94);
+    flesh.addColorStop(0, '#fefae0'); flesh.addColorStop(0.8, '#fcf6bd'); flesh.addColorStop(1, '#f7e1a0');
+    c.fillStyle = flesh; c.beginPath(); c.arc(0, 0, r * 0.94, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#654321'; c.beginPath(); c.ellipse(0, 0, 3, 6, cutAngle, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+
+  function drawPhotorealBomb(c, r) {
+    const grad = c.createRadialGradient(-r * 0.4, -r * 0.4, r * 0.1, 0, 0, r);
+    grad.addColorStop(0, '#606470'); grad.addColorStop(0.4, '#282a36'); grad.addColorStop(0.85, '#12131a'); grad.addColorStop(1, '#050608');
+    c.fillStyle = grad; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,0.07)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(0, -r); c.lineTo(0, r); c.stroke();
+    drawPhotorealSpecular(c, r, -0.4, -0.4, 0.35, 0.18, -0.4);
+    const brass = c.createLinearGradient(-8, -r - 7, 8, -r);
+    brass.addColorStop(0, '#8c7030'); brass.addColorStop(0.5, '#e0b853'); brass.addColorStop(1, '#5c4518');
+    c.fillStyle = brass; c.fillRect(-7, -r - 7, 14, 8); c.strokeStyle = '#2b1f07'; c.lineWidth = 1; c.strokeRect(-7, -r - 7, 14, 8);
+    c.strokeStyle = '#c49a6c'; c.lineWidth = 3.5; c.lineCap = 'round'; c.beginPath(); c.moveTo(0, -r - 7); c.bezierCurveTo(-8, -r - 18, 14, -r - 26, 6, -r - 33); c.stroke();
+    const tipX = 6, tipY = -r - 33;
+    c.shadowColor = '#ff2200'; c.shadowBlur = 18; c.fillStyle = '#ffffff'; c.beginPath(); c.arc(tipX, tipY, 4.5, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#ff9e00'; c.beginPath(); c.arc(tipX, tipY, 7.5, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#ffd000'; c.lineWidth = 1.8;
+    for (let i = 0; i < 7; i++) { const a = Math.random() * Math.PI * 2; const len = 5 + Math.random() * 10; c.beginPath(); c.moveTo(tipX, tipY); c.lineTo(tipX + Math.cos(a) * len, tipY + Math.sin(a) * len); c.stroke(); }
+    c.shadowBlur = 0;
+    if (Math.random() < 0.4) { smokePuffs.push({ x: tipX, y: tipY, vx: (Math.random() - 0.5) * 1.5, vy: -1.8 - Math.random() * 1.5, r: 3 + Math.random() * 3, alpha: 0.7 }); }
+  }
+
+  const FRUIT_SPECIES = [
+    { name: 'watermelon', r: 38, drawSkin: drawWatermelonSkin, drawFlesh: drawWatermelonFlesh, pts: 3, juice: '#e63946' },
+    { name: 'orange', r: 32, drawSkin: drawOrangeSkin, drawFlesh: drawOrangeFlesh, pts: 2, juice: '#f48c06' },
+    { name: 'kiwi', r: 28, drawSkin: drawKiwiSkin, drawFlesh: drawKiwiFlesh, pts: 4, juice: '#74c69d' },
+    { name: 'apple', r: 34, drawSkin: drawAppleSkin, drawFlesh: drawAppleFlesh, pts: 3, juice: '#ffccd5' }
+  ];
+
+  // ==========================================
+  // GAME UI SETUP
+  // ==========================================
+  stage.innerHTML = `
+    <style>
+      .fb-container { width: 100%; max-width: 400px; margin: 0 auto; background: #040208; border-radius: 20px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
+      .fb-hud { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+      .fb-card { flex: 1; padding: 10px 14px; background: rgba(18, 14, 38, 0.88); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; display: flex; flex-direction: column; }
+      .fb-card.me { border-color: rgba(105, 65, 255, 0.6); box-shadow: inset 0 0 15px rgba(105, 65, 255, 0.2); }
+      .fb-card.opp { border-color: rgba(255, 183, 3, 0.5); text-align: right; }
+      .fb-label { font-size: 0.65rem; color: #8e8aa8; font-weight: 800; letter-spacing: 1.2px; }
+      .fb-val { font-size: 1.4rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+      .fb-card.me .fb-val { color: #00f0ff; text-shadow: 0 0 12px rgba(0, 240, 255, 0.6); }
+      .fb-card.opp .fb-val { color: #ffb703; }
+      .fb-timer { width: 48px; height: 48px; border-radius: 50%; background: #15102d; border: 2px solid #6941ff; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; color: #fff; box-shadow: 0 0 20px rgba(105, 65, 255, 0.4); }
+      .fb-canvas-wrap { width: 100%; border-radius: 20px; overflow: hidden; background: radial-gradient(circle at 50% 20%, #1e1545 0%, #0d0822 65%, #040208 100%); }
+      #fb-canvas { width: 100%; height: 400px; display: block; touch-action: none; cursor: crosshair; }
+    </style>
+    <div class="fb-container">
+      <div class="fb-hud">
+        <div class="fb-card me"><span class="fb-label">YOU</span><span class="fb-val" id="fb-my-score">0</span></div>
+        <div class="fb-timer" id="fb-timer">30</div>
+        <div class="fb-card opp"><span class="fb-label">${escapeHtml(opponent.name).toUpperCase()}</span><span class="fb-val" id="fb-opp-score">0</span></div>
+      </div>
+      <div class="fb-canvas-wrap">
+        <canvas id="fb-canvas" width="400" height="400"></canvas>
+      </div>
+    </div>
+  `;
+
+  const cvs = document.getElementById('fb-canvas');
+  const ctx = cvs.getContext('2d');
+
+  class Fruit {
+    constructor() {
+      this.isBomb = Math.random() < 0.18;
+      this.spec = this.isBomb ? null : FRUIT_SPECIES[Math.floor(Math.random() * FRUIT_SPECIES.length)];
+      this.r = this.isBomb ? 30 : this.spec.r;
+      this.x = 50 + Math.random() * (cvs.width - 100);
+      this.y = cvs.height + 45;
+      this.vx = (cvs.width / 2 - this.x) * 0.016 + (Math.random() - 0.5) * 2.2;
+      this.vy = -(12.8 + Math.random() * 3.4);
+      this.rot = Math.random() * Math.PI * 2;
+      this.rotSpeed = (Math.random() - 0.5) * 0.06;
+      this.sliced = false;
+    }
+    update() { this.x += this.vx; this.y += this.vy; this.vy += 0.33; this.rot += this.rotSpeed; }
+    render(c) { c.save(); c.translate(this.x, this.y); c.rotate(this.rot); if (this.isBomb) drawPhotorealBomb(c, this.r); else this.spec.drawSkin(c, this.r); c.restore(); }
+  }
+
+  class FruitHalf {
+    constructor(parent, side, cutAngle) {
+      this.spec = parent.spec; this.x = parent.x; this.y = parent.y; this.r = parent.r; this.rot = parent.rot; this.cutAngle = cutAngle; this.side = side;
+      const normal = cutAngle + (side * Math.PI / 2);
+      this.vx = parent.vx * 0.4 + Math.cos(normal) * (4.5 + Math.random() * 2);
+      this.vy = parent.vy * 0.5 + Math.sin(normal) * (4.5 + Math.random() * 2);
+      this.rotSpeed = parent.rotSpeed + side * 0.07;
+    }
+    update() { this.x += this.vx; this.y += this.vy; this.vy += 0.36; this.rot += this.rotSpeed; }
+    render(c) { c.save(); c.translate(this.x, this.y); c.rotate(this.rot); this.spec.drawFlesh(c, this.r, this.cutAngle - this.rot, this.side); c.restore(); }
+  }
+
+  function addBladePoint(x, y) {
+    bladeTrace.push({ x, y, life: 1.0 });
+    if (bladeTrace.length > 2) testIntersection(bladeTrace[bladeTrace.length - 2], bladeTrace[bladeTrace.length - 1]);
+  }
+
+  function testIntersection(p1, p2) {
+    const cutAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+    let comboCount = 0;
+    for (let i = fruits.length - 1; i >= 0; i--) {
+      const f = fruits[i];
+      if (f.sliced) continue;
+      const dx = p2.x - p1.x, dy = p2.y - p1.y, len = Math.hypot(dx, dy);
+      if (len === 0) continue;
+      const u = Math.max(0, Math.min(1, ((f.x - p1.x) * dx + (f.y - p1.y) * dy) / (len * len)));
+      const cx = p1.x + u * dx, cy = p1.y + u * dy;
+      const dist = Math.hypot(f.x - cx, f.y - cy);
+      if (dist < f.r + 8) {
+        f.sliced = true;
+        if (f.isBomb) { detonateBomb(f.x, f.y); return; }
+        comboCount++;
+        myScore += f.spec.pts;
+        document.getElementById('fb-my-score').textContent = myScore;
+        shakeMag = 9;
+        spawnJuice(f.x, f.y, f.spec.juice);
+        fruitHalves.push(new FruitHalf(f, 1, cutAngle));
+        fruitHalves.push(new FruitHalf(f, -1, cutAngle));
+        fruits.splice(i, 1);
+      }
+    }
+    if (comboCount > 1) {
+      const bonus = comboCount * 3;
+      myScore += bonus;
+      document.getElementById('fb-my-score').textContent = myScore;
+      floaters.push({ text: `${comboCount}x COMBO! +${bonus}`, x: p2.x, y: p2.y - 15, alpha: 1.0, color: '#00f0ff' });
     }
   }
-  async function submit() {
-    const val = parseInt(document.getElementById('math-input')?.value);
-    if (isNaN(val) || gameOver) return;
-    const correct = val === answer;
-    if (correct) myScore++;
-    myTurn = false;
-    render();
-    const finalState = { myScore, oppScore, round };
-    if (myScore >= 3 || round >= MAX_ROUNDS) {
-      gameOver = true;
-      const winnerId = myScore > oppScore ? currentUser.id : (myScore < oppScore ? opponent.id : null);
-      if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, winnerId); }
-      if (myScore > oppScore) setTimeout(() => endDuel(true, 'Math Duel victory!'), 500);
-      else if (myScore < oppScore) setTimeout(() => endDuel(false, 'Opponent solved more.'), 500);
-      else setTimeout(endDrawnMatch, 500);
-      return;
+
+  function spawnJuice(x, y, color) {
+    stains.push({ x, y, r: 25 + Math.random() * 20, color, alpha: 0.38 });
+    for (let i = 0; i < 26; i++) {
+      const spd = 3.5 + Math.random() * 8.5, a = Math.random() * Math.PI * 2;
+      particles.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 2 + Math.random() * 3.5, color, life: 1.0 });
     }
-    if (isLive) await pushSessionState(live.sessionId, finalState, myRole === 'player1' ? 'player2' : 'player1');
   }
-  if (isLive) {
+
+  function detonateBomb(x, y) {
+    shakeMag = 35;
+    for (let i = 0; i < 80; i++) {
+      const a = Math.random() * Math.PI * 2, spd = 4 + Math.random() * 15;
+      particles.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 3 + Math.random() * 7, color: Math.random() > 0.4 ? '#ff0055' : '#ffb703', life: 1.8 });
+    }
+    finishGame(false, 'Tactical Bomb Detonated!');
+  }
+
+  cvs.addEventListener('pointerdown', (e) => {
+    isSwiping = true; const r = cvs.getBoundingClientRect();
+    bladeTrace = []; addBladePoint(e.clientX - r.left, e.clientY - r.top);
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!isSwiping || !gameActive) return; const r = cvs.getBoundingClientRect();
+    addBladePoint(e.clientX - r.left, e.clientY - r.top);
+  });
+  window.addEventListener('pointerup', () => { isSwiping = false; });
+
+  function tick() {
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    ctx.save();
+    if (shakeMag > 0.5) { ctx.translate((Math.random() - 0.5) * shakeMag, (Math.random() - 0.5) * shakeMag); shakeMag *= 0.88; }
+
+    for (let i = stains.length - 1; i >= 0; i--) {
+      const s = stains[i]; ctx.fillStyle = s.color; ctx.globalAlpha = s.alpha;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+      s.alpha -= 0.0007; if (s.alpha <= 0) stains.splice(i, 1);
+    }
+    ctx.globalAlpha = 1.0;
+
+    for (let i = smokePuffs.length - 1; i >= 0; i--) {
+      const sm = smokePuffs[i]; sm.x += sm.vx; sm.y += sm.vy; sm.r += 0.25; sm.alpha -= 0.02;
+      ctx.fillStyle = `rgba(180, 180, 200, ${Math.max(0, sm.alpha)})`;
+      ctx.beginPath(); ctx.arc(sm.x, sm.y, sm.r, 0, Math.PI * 2); ctx.fill();
+      if (sm.alpha <= 0) smokePuffs.splice(i, 1);
+    }
+
+    for (let i = fruits.length - 1; i >= 0; i--) {
+      fruits[i].update(); fruits[i].render(ctx);
+      if (fruits[i].y > cvs.height + 60) fruits.splice(i, 1);
+    }
+
+    for (let i = fruitHalves.length - 1; i >= 0; i--) {
+      fruitHalves[i].update(); fruitHalves[i].render(ctx);
+      if (fruitHalves[i].y > cvs.height + 60) fruitHalves.splice(i, 1);
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= 0.024;
+      ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life);
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+    ctx.globalAlpha = 1.0;
+
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    for (let i = bladeTrace.length - 1; i >= 0; i--) {
+      bladeTrace[i].life -= 0.065; if (bladeTrace[i].life <= 0) bladeTrace.splice(i, 1);
+    }
+    if (bladeTrace.length > 1) {
+      for (let i = 1; i < bladeTrace.length; i++) {
+        const p1 = bladeTrace[i - 1], p2 = bladeTrace[i];
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 11 * p2.life; ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 16; ctx.stroke();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3.5 * p2.life; ctx.stroke();
+      }
+    }
+    ctx.restore();
+
+    for (let i = floaters.length - 1; i >= 0; i--) {
+      const f = floaters[i]; f.y -= 1.3; f.alpha -= 0.02;
+      ctx.fillStyle = f.color; ctx.globalAlpha = Math.max(0, f.alpha);
+      ctx.font = '900 16px Inter'; ctx.textAlign = 'center'; ctx.shadowColor = f.color; ctx.shadowBlur = 8;
+      ctx.fillText(f.text, f.x, f.y);
+      if (f.alpha <= 0) floaters.splice(i, 1);
+    }
+    ctx.globalAlpha = 1.0;
+    ctx.restore();
+    if (gameActive) requestAnimationFrame(tick);
+  }
+
+  // Realtime sync to opponent
+  function syncScores() {
+    if (!live.sessionId || gameOver) return;
+    pushSessionState(live.sessionId, { myScore, timeLeft, n: Date.now() }, opp);
+  }
+
+  // Spawner
+  const spawnTimer = setInterval(() => {
+    if (!gameActive || gameOver) return;
+    const count = Math.random() > 0.4 ? 1 : 2;
+    for (let i = 0; i < count; i++) fruits.push(new Fruit());
+  }, 950);
+  gameTimers.push(spawnTimer);
+
+  // Bot simulator (only for the opponent's side)
+  const botTimer = setInterval(() => {
+    if (!gameActive || gameOver) return;
+    if (Math.random() > 0.35) {
+      oppScore += Math.floor(Math.random() * 3) + 2;
+      document.getElementById('fb-opp-score').textContent = oppScore;
+    }
+    syncScores();
+  }, 1200);
+  gameTimers.push(botTimer);
+
+  // Countdown
+  const matchTimer = setInterval(() => {
+    if (!gameActive || gameOver) return;
+    timeLeft--;
+    document.getElementById('fb-timer').textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(matchTimer);
+      finishGame(myScore > oppScore, myScore >= oppScore ? 'You dominated the tournament duel!' : 'Opponent edged out a higher slice score.');
+    }
+  }, 1000);
+  gameTimers.push(matchTimer);
+
+  async function finishGame(won, reason) {
+    if (gameOver) return;
+    gameOver = true;
+    setTimeout(() => {
+      if (won) endDuel(true, reason);
+      else endDuel(false, reason);
+    }, 1500);
+  }
+
+  // Listen for opponent score updates
+  if (live.sessionId) {
     subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
       if (status === 'completed') {
         if (gameOver) return;
-        gameOver = true; endHandled = true;
-        const iWon = winnerId === currentUser.id;
-        const isDraw = !winnerId;
-        setTimeout(() => { if (isDraw) endDrawnMatch(); else if (iWon) endDuel(true, 'Math Duel victory!'); else endDuel(false, 'Opponent solved more.'); }, 500);
+        gameOver = true;
+        setTimeout(() => {
+          if (winnerId === currentUser.id) endDuel(true, 'Fruit Blade victory!');
+          else if (winnerId) endDuel(false, 'Opponent sliced more fruit.');
+          else endDrawnMatch();
+        }, 1000);
         return;
       }
-      if (newState && !gameOver) {
-        if (typeof newState.myScore === 'number') myScore = newState.myScore;
-        if (typeof newState.oppScore === 'number') oppScore = newState.oppScore;
-        if (typeof newState.round === 'number') round = newState.round;
-        myTurn = (turn === myRole);
-        render();
+      if (newState && typeof newState.oppScore !== 'undefined') {
+        // The opponent is sending their score, update the display
+        if (typeof newState.myScore === 'number') {
+          oppScore = newState.myScore; // Swap perspective
+          document.getElementById('fb-opp-score').textContent = oppScore;
+        }
       }
     });
   }
-  render();
-}
 
+  tick();
+}
 function runTap(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
