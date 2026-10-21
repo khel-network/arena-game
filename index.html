@@ -5815,6 +5815,7 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
     btn.disabled = true;
     btn.textContent = 'Connecting...';
     
+    // Save free trial usage
     let trialsUsed = parseInt(localStorage.getItem('skillclash_free_trials_used') || '0');
     localStorage.setItem('skillclash_free_trials_used', (trialsUsed + 1).toString());
     localStorage.setItem('skillclash_free_trial_last_played', Date.now().toString());
@@ -5822,28 +5823,33 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
     modal.classList.remove('show');
     saveScrollY();
     
+    // Setup fake bot environment
     activeGame = { name: pendingGame.name, type: pendingGame.type };
     currentEntryFee = 0;
     currentReward = 0;
     isGameActive = true;
     isRealPlayerMatch = false;
     myRole = 'player1';
-    activeGameSessionId = null;
+    activeGameSessionId = 'fake_session_123';
     arenaLaunchInProgress = true;
     
+    // Show Fake Matchmaking for realism
     const matchOverlay = document.getElementById('match-overlay');
     const matchTitle = document.getElementById('match-title');
     const matchStatus = document.getElementById('match-status');
     const mmStake = document.getElementById('mm-entry-stake');
     const searchingView = document.getElementById('mm-searching-view');
+    const blockedView = document.getElementById('mm-blocked-view');
     
+    if (blockedView) blockedView.style.display = 'none';
     if (searchingView) searchingView.style.display = 'block';
     if (matchTitle) matchTitle.textContent = 'Finding Real Opponent';
     if (matchStatus) matchStatus.textContent = 'Searching for real players...';
     if (mmStake) mmStake.textContent = 'FREE TRIAL';
     matchOverlay.classList.remove('hidden');
     
-    setTimeout(async () => {
+    // Wait 2.5 seconds then launch the bot
+    setTimeout(() => {
       matchOverlay.classList.add('hidden');
       
       const botName = INDIAN_BOT_NAMES[Math.floor(Math.random() * INDIAN_BOT_NAMES.length)];
@@ -5851,10 +5857,23 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
       const botOpponent = { name: botName, seed: botId, isBot: true, id: botId };
       
       arenaLaunchInProgress = false;
-      await window.originalLaunchArena(botOpponent, null);
+      
+      // Directly launch the arena, bypassing the timeout/refund logic
+      activeOpponent = botOpponent;
+      isGameActive = true;
+      lockBodyScroll();
+      const myName = playerNameEl.textContent;
+      const myAvatar = document.getElementById('avatar')?.src || '';
+      arenaUserAvatar.src = myAvatar || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(myName);
+      arenaUserName.textContent = myName;
+      arenaOppName.textContent = botOpponent.name;
+      arenaOppAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(botOpponent.seed);
+      arenaOverlay.classList.remove('hidden');
+      
+      launchLiveGame(activeGame.type, botOpponent, 'fake_session_123', 'player1');
       
       btn.disabled = false;
-    }, 3500);
+    }, 2500);
   }
 });
 
