@@ -3581,55 +3581,143 @@ function runTicTacToe(opponent, live) {
 function runNim(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
-  const isLive = !!live;
+  const currentRole = (typeof myRole !== 'undefined' && myRole) ? myRole : 'player1';
+  const me = currentRole, opp = me === 'player1' ? 'player2' : 'player1';
+  let gameOver = false, endHandled = false, outcome = null, moveNo = 0, fresh = false;
+  let myTurn = (me === 'player1');
   let piles = [3, 5, 7];
-  let gameOver = false;
-  let myTurn = (myRole === 'player1');
-  let endHandled = false;
+  
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); gameTimers.push(t); return t; };
+  const setTurn = t => { myTurn = t; };
+
+  const CSS = `<style>
+    .sk-wrap{width:100%;max-width:100%;margin:0 auto;text-align:center;color:#2a2640;display:flex;flex-direction:column;align-items:center;}
+    .sk-info{font-size:0.72rem;color:#5c5a6e;margin-bottom:8px}
+    .sk-bar{display:flex;gap:8px;margin-bottom:10px;width:100%}
+    .sk-chip{flex:1;padding:8px 10px;border-radius:12px;font-size:0.8rem;font-weight:700;background:#fff;border:2px solid transparent;box-shadow:0 2px 8px rgba(91,61,240,.12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:box-shadow .2s}
+    .sk-chip.me{color:#5b3df0;border-color:#5b3df0}
+    .sk-chip.op{color:#c47d12;border-color:#f0a742}
+    .sk-chip.act{box-shadow:0 0 0 3px rgba(91,61,240,.18),0 4px 14px rgba(91,61,240,.28)}
+    .sk-status{font-size:0.9rem;font-weight:700;margin:6px 0 12px}
+    
+    .nim-board{display:flex;gap:16px;justify-content:center;margin:20px 0;width:100%;}
+    .nim-pile{flex:1;max-width:100px;padding:16px 10px;border-radius:20px;background:#fff;box-shadow:0 8px 24px rgba(91,61,240,.12);cursor:pointer;transition:all .2s cubic-bezier(0.34, 1.56, 0.64, 1);border:2px solid transparent;}
+    .nim-pile:not(.disabled):hover{transform:translateY(-4px) scale(1.05);border-color:#5b3df0;box-shadow:0 12px 32px rgba(91,61,240,.2);}
+    .nim-pile.disabled{cursor:default;opacity:0.6;box-shadow:none;background:#f8f6ff;}
+    .nim-count{font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;color:#5b3df0;margin-bottom:6px;}
+    .nim-dots{font-size:0.8rem;letter-spacing:2px;color:#161522;line-height:1.2;word-break:break-all;}
+    .nim-label{font-size:0.65rem;color:#918fa3;margin-top:8px;text-transform:uppercase;letter-spacing:0.05em;}
+  </style>`;
+
+  const statusText = () => outcome ? (outcome === 'me' ? '🏆 You won!' : outcome === 'opp' ? 'You lost this one' : '🤝 Draw')
+    : gameOver ? 'Game over' : myTurn ? 'Your turn — take 1 or 2 stones' : esc(opponent.name) + "'s turn";
+  const head = (a, b) => `
+    <p class="sk-info">Entry ₹${currentEntryFee} · Win ₹${currentReward} · LIVE</p>
+    <div class="sk-bar">
+      <div class="sk-chip me ${myTurn && !gameOver ? 'act' : ''}">You ${a}</div>
+      <div class="sk-chip op ${!myTurn && !gameOver ? 'act' : ''}">${esc(opponent.name)} ${b}</div>
+    </div>
+    <div class="sk-status" style="color:${myTurn || outcome === 'me' ? '#5b3df0' : '#c47d12'}">${statusText()}</div>`;
+
+  const snapshot = () => ({ piles, n: moveNo });
+  function apply(s) {
+    if (!s || !Array.isArray(s.piles)) return false;
+    piles = s.piles.slice(); moveNo = s.n;
+    return true;
+  }
+
   function render() {
     const totalStones = piles.reduce((a,b) => a+b, 0);
-    let html = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p><div style="font-size:0.85rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:10px;">${gameOver ? 'Game over' : (myTurn ? 'Your Turn — take 1 or 2 stones' : (opponent.name + "'s Turn"))}</div><div class="nim-row" style="display:flex;gap:14px;justify-content:center;margin:14px 0;">`;
-    piles.forEach((count, i) => { html += `<div class="nim-pile ${(!myTurn || gameOver || count === 0) ? 'disabled' : ''}" data-pile="${i}" style="padding:10px 14px;border-radius:12px;background:#f8f6ff;border:2px solid #e9e5f5;cursor:pointer;min-width:70px;"><div style="font-weight:800;font-size:1.1rem;color:#5b3df0;">${count}</div><div style="font-size:0.75rem;letter-spacing:1px;color:#161522;">${'●'.repeat(count) || '—'}</div><div style="font-size:0.65rem;color:#918fa3;margin-top:4px;">Pile ${i+1}</div></div>`; });
-    html += `</div><p style="font-size:0.75rem;color:#5c5a6e;margin-top:12px;">${totalStones} stones remaining · Take the last stone to win</p></div>`;
-    stage.innerHTML = html;
-    if (!gameOver && myTurn) { document.querySelectorAll('.nim-pile').forEach(pile => { pile.addEventListener('click', () => { const i = parseInt(pile.dataset.pile); if (piles[i] === 0) return; showTakeButtons(i); }); }); }
+    const canPlay = myTurn && !gameOver;
+    let pilesHtml = piles.map((count, i) => {
+      const dis = (!canPlay || count === 0) ? 'disabled' : '';
+      return `<div class="nim-pile ${dis}" data-pile="${i}">
+        <div class="nim-count">${count}</div>
+        <div class="nim-dots">${'●'.repeat(count) || '—'}</div>
+        <div class="nim-label">Pile ${i+1}</div>
+      </div>`;
+    }).join('');
+    
+    stage.innerHTML = `${CSS}<div class="sk-wrap">${head('', '')}
+      <div class="nim-board">${pilesHtml}</div>
+      <p style="font-size:0.75rem;color:#5c5a6e;">${totalStones} stones remaining · Take the last stone to win</p>
+    </div>`;
+    
+    if (canPlay) {
+      stage.querySelectorAll('.nim-pile:not(.disabled)').forEach(el => {
+        el.addEventListener('click', () => showTakeButtons(parseInt(el.dataset.pile)));
+      });
+    }
   }
+
   function showTakeButtons(pileIdx) {
     const maxTake = Math.min(2, piles[pileIdx]);
     let buttons = '';
-    for (let t = 1; t <= maxTake; t++) buttons += `<button class="nim-take-btn" data-take="${t}" style="padding:10px 20px;border-radius:10px;background:#5b3df0;color:#fff;font-weight:700;cursor:pointer;">Take ${t}</button>`;
-    stage.innerHTML += `<div style="position:fixed;inset:0;background:rgba(22,21,34,0.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:2000;" id="nim-take-overlay"><div class="modal-card" style="max-width:280px;text-align:center;background:#fff;padding:20px;border-radius:16px;"><h3 style="margin-bottom:12px;">Pile ${pileIdx+1} has ${piles[pileIdx]} stones</h3><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">${buttons}</div><button class="btn-cancel" id="nim-cancel" style="margin-top:12px;padding:10px;width:100%;border-radius:10px;background:transparent;border:1px solid #eee9f7;color:#5c5a6e;">Cancel</button></div></div>`;
-    document.querySelectorAll('#nim-take-overlay .nim-take-btn').forEach(btn => { btn.addEventListener('click', () => { const t = parseInt(btn.dataset.take); document.getElementById('nim-take-overlay').remove(); makeMove(pileIdx, t); }); });
+    for (let t = 1; t <= maxTake; t++) {
+      buttons += `<button class="nim-take-btn" data-take="${t}" style="padding:12px 24px;border-radius:12px;background:#5b3df0;color:#fff;font-weight:700;font-size:1rem;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(91,61,240,0.3);">Take ${t}</button>`;
+    }
+    stage.innerHTML += `<div style="position:fixed;inset:0;background:rgba(22,21,34,0.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:2000;" id="nim-take-overlay">
+      <div class="modal-card" style="max-width:300px;text-align:center;background:#fff;padding:24px;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+        <h3 style="margin-bottom:16px;font-family:Poppins;font-size:1.2rem;color:#161522;">Pile ${pileIdx+1} has ${piles[pileIdx]} stones</h3>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">${buttons}</div>
+        <button class="btn-cancel" id="nim-cancel" style="margin-top:20px;padding:12px;width:100%;border-radius:12px;background:transparent;border:2px solid #eee9f7;color:#5c5a6e;font-weight:700;cursor:pointer;">Cancel</button>
+      </div>
+    </div>`;
+    document.querySelectorAll('#nim-take-overlay .nim-take-btn').forEach(btn => {
+      btn.addEventListener('click', () => { document.getElementById('nim-take-overlay').remove(); makeMove(pileIdx, parseInt(btn.dataset.take)); });
+    });
     document.getElementById('nim-cancel')?.addEventListener('click', () => { document.getElementById('nim-take-overlay').remove(); });
   }
-  async function makeMove(pileIdx, take) {
+
+  const say = (o, why) => later(() => {
+    if (o === 'me') endDuel(true, why || 'Nim victory!');
+    else if (o === 'opp') endDuel(false, why || 'Opponent took the last stone.');
+    else endDrawnMatch();
+  }, 1200);
+
+  async function conclude(o, why) {
     if (gameOver) return;
+    gameOver = true; outcome = o; render();
+    if (!endHandled) {
+      endHandled = true;
+      const wid = o === 'me' ? currentUser.id : o === 'opp' ? opponent.id : null;
+      try { await endSessionWithState(live.sessionId, snapshot(), wid); } catch (e) { console.error(e); }
+    }
+    say(o, why);
+  }
+
+  async function makeMove(pileIdx, take) {
+    if (gameOver || !myTurn) return;
     piles[pileIdx] -= take;
     const total = piles.reduce((a,b) => a+b, 0);
+    moveNo++; fresh = true;
     myTurn = false;
     render();
-    const finalState = { piles: [...piles] };
-    if (total === 0) { gameOver = true; if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, currentUser.id); } setTimeout(() => endDuel(true, 'You took the last stone.'), 700); return; }
-    if (isLive) { const nextTurn = myRole === 'player1' ? 'player2' : 'player1'; await pushSessionState(live.sessionId, finalState, nextTurn); }
+    
+    if (total === 0) {
+      return conclude('me', 'You took the last stone!');
+    }
+    try { await pushSessionState(live.sessionId, snapshot(), opp); } catch (e) { console.error(e); }
   }
-  if (isLive) {
-    subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') {
-        if (newState && Array.isArray(newState.piles) && !gameOver) { piles = newState.piles; render(); }
-        if (gameOver) return;
-        gameOver = true; endHandled = true;
-        const iWon = winnerId === currentUser.id;
-        const isDraw = !winnerId;
-        setTimeout(() => { if (isDraw) endDrawnMatch(); else if (iWon) endDuel(true, 'You took the last stone.'); else endDuel(false, 'Opponent took the last stone.'); }, 500);
-        return;
-      }
-      if (newState && Array.isArray(newState.piles) && !gameOver) { piles = newState.piles; myTurn = (turn === myRole); render(); }
-    });
-  }
+
+  subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
+    if (status === 'completed') {
+      if (gameOver) return;
+      if (newState && typeof newState.n === 'number' && newState.n > moveNo) apply(newState);
+      gameOver = true; endHandled = true; fresh = true;
+      outcome = winnerId === currentUser.id ? 'me' : winnerId ? 'opp' : 'draw';
+      render(); say(outcome);
+      return;
+    }
+    if (gameOver || !newState || typeof newState.n !== 'number' || newState.n <= moveNo) return;
+    if (!apply(newState)) return;
+    fresh = true; setTurn(turn === me); render();
+  });
+
   render();
 }
-
-function runDotsAndBoxes(opponent, live) {
+  function runDotsAndBoxes(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
 
@@ -3968,95 +4056,155 @@ function runScramble(opponent, live) {
 function runMemory(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
-  const isLive = !!live;
-  let cards = [];
-  let revealed = [];
-  let matched = [];
-  let gameOver = false;
-  let endHandled = false;
-  let myTurn = (myRole === 'player1');
+  const currentRole = (typeof myRole !== 'undefined' && myRole) ? myRole : 'player1';
+  const me = currentRole, opp = me === 'player1' ? 'player2' : 'player1';
+  let gameOver = false, endHandled = false, outcome = null, moveNo = 0;
+  let myTurn = (me === 'player1');
+  let cards = [], revealed = [], matched = [];
   let myPairs = 0, oppPairs = 0;
   let lock = false;
+  
   const EMOJIS = ['🍎','🍌','🍇','🍓','🍒','🍑','🍍','🥝'];
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); gameTimers.push(t); return t; };
+  const setTurn = t => { myTurn = t; };
+
   const seedStr = (live?.sessionId || 'local') + '-memory';
   let seed = 0; for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
   function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+  
   function initCards() {
     const deck = [...EMOJIS, ...EMOJIS];
     for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
     cards = deck;
   }
   initCards();
+
+  const CSS = `<style>
+    .sk-wrap{width:100%;max-width:100%;margin:0 auto;text-align:center;color:#2a2640;display:flex;flex-direction:column;align-items:center;}
+    .sk-info{font-size:0.72rem;color:#5c5a6e;margin-bottom:8px}
+    .sk-bar{display:flex;gap:8px;margin-bottom:10px;width:100%}
+    .sk-chip{flex:1;padding:8px 10px;border-radius:12px;font-size:0.8rem;font-weight:700;background:#fff;border:2px solid transparent;box-shadow:0 2px 8px rgba(91,61,240,.12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:box-shadow .2s}
+    .sk-chip.me{color:#5b3df0;border-color:#5b3df0}
+    .sk-chip.op{color:#c47d12;border-color:#f0a742}
+    .sk-chip.act{box-shadow:0 0 0 3px rgba(91,61,240,.18),0 4px 14px rgba(91,61,240,.28)}
+    .sk-status{font-size:0.9rem;font-weight:700;margin:6px 0 12px}
+    
+    .mem-board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:320px;margin:0 auto;width:100%;}
+    .mem-card{aspect-ratio:1;border-radius:14px;background:linear-gradient(135deg,#5b3df0,#7c5cf5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:0 4px 12px rgba(91,61,240,0.3);transform-style:preserve-3d;}
+    .mem-card.revealed{background:#fff;border:2px solid #5b3df0;color:#161522;transform:rotateY(180deg);box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+    .mem-card.matched{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:2px solid #16c46b;color:#065f46;box-shadow:0 4px 12px rgba(22,196,107,0.2);}
+  </style>`;
+
+  const statusText = () => outcome ? (outcome === 'me' ? '🏆 You won!' : outcome === 'opp' ? 'You lost this one' : '🤝 Draw')
+    : gameOver ? 'Game over' : myTurn ? 'Your turn — flip two cards' : esc(opponent.name) + "'s turn";
+  const head = (a, b) => `
+    <p class="sk-info">Entry ₹${currentEntryFee} · Win ₹${currentReward} · LIVE</p>
+    <div class="sk-bar">
+      <div class="sk-chip me ${myTurn && !gameOver ? 'act' : ''}">You · ${a}</div>
+      <div class="sk-chip op ${!myTurn && !gameOver ? 'act' : ''}">${esc(opponent.name)} · ${b}</div>
+    </div>
+    <div class="sk-status" style="color:${myTurn || outcome === 'me' ? '#5b3df0' : '#c47d12'}">${statusText()}</div>`;
+
+  const snapshot = () => ({ matched, myPairs, oppPairs, n: moveNo, revealed: [] });
+  
+  function apply(s) {
+    if (!s) return false;
+    if (s.matched) matched = s.matched;
+    if (typeof s.myPairs === 'number') myPairs = s.myPairs;
+    if (typeof s.oppPairs === 'number') oppPairs = s.oppPairs;
+    moveNo = s.n;
+    revealed = [];
+    return true;
+  }
+
   function render() {
-    let html = '';
-    cards.forEach((emoji, i) => {
+    const canPlay = myTurn && !gameOver && !lock;
+    let html = cards.map((emoji, i) => {
       const isRevealed = revealed.includes(i) || matched.includes(i);
       const isMatched = matched.includes(i);
-      html += `<div class="mem-card ${isRevealed ? 'revealed' : ''} ${isMatched ? 'matched' : ''}" data-idx="${i}">${isRevealed ? emoji : ''}</div>`;
-    });
-    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p><div style="display:flex;justify-content:space-around;margin:8px 0;font-size:0.85rem;font-weight:700;"><span style="color:#5b3df0;">You: ${myPairs}</span><span style="color:#f0a742;">${opponent.name}: ${oppPairs}</span></div><div style="font-size:0.8rem;font-weight:700;color:${myTurn ? '#5b3df0' : '#f0a742'};margin-bottom:10px;">${gameOver ? 'Game over' : (myTurn ? 'Your Turn' : opponent.name + "'s Turn")}</div><div class="mem-board">${html}</div></div>`;
-    if (!gameOver && myTurn && !lock) {
-      document.querySelectorAll('.mem-card:not(.matched)').forEach(card => {
+      return `<div class="mem-card ${isRevealed ? 'revealed' : ''} ${isMatched ? 'matched' : ''}" data-idx="${i}">${isRevealed ? emoji : ''}</div>`;
+    }).join('');
+    
+    stage.innerHTML = `${CSS}<div class="sk-wrap">${head(myPairs, oppPairs)}<div class="mem-board">${html}</div></div>`;
+    
+    if (canPlay) {
+      stage.querySelectorAll('.mem-card:not(.matched):not(.revealed)').forEach(card => {
         card.addEventListener('click', () => flipCard(parseInt(card.dataset.idx)));
       });
     }
   }
+
+  const say = (o, why) => later(() => {
+    if (o === 'me') endDuel(true, why || 'Memory Match victory!');
+    else if (o === 'opp') endDuel(false, why || 'Opponent found more pairs.');
+    else endDrawnMatch();
+  }, 1200);
+
+  async function conclude(o, why) {
+    if (gameOver) return;
+    gameOver = true; outcome = o; render();
+    if (!endHandled) {
+      endHandled = true;
+      const wid = o === 'me' ? currentUser.id : o === 'opp' ? opponent.id : null;
+      try { await endSessionWithState(live.sessionId, snapshot(), wid); } catch (e) { console.error(e); }
+    }
+    say(o, why);
+  }
+
   async function flipCard(idx) {
     if (gameOver || !myTurn || lock) return;
     if (revealed.includes(idx) || matched.includes(idx)) return;
+    
     revealed.push(idx);
     render();
+    
     if (revealed.length === 2) {
       lock = true;
       const [a, b] = revealed;
-      await new Promise(r => setTimeout(r, 700));
+      await new Promise(r => setTimeout(r, 800));
+      
       if (cards[a] === cards[b]) {
         matched.push(a, b);
         revealed = [];
         myPairs++;
-        const finalState = { revealed: [], matched, myPairs, oppPairs };
+        lock = false;
+        moveNo++;
+        
         if (matched.length === cards.length) {
-          gameOver = true;
-          if (isLive && !endHandled) { endHandled = true; await endSessionWithState(live.sessionId, finalState, currentUser.id); }
-          setTimeout(() => endDuel(true, `You found all ${myPairs} pairs.`), 500);
-          return;
+          return conclude('me', `You found all ${myPairs} pairs.`);
         }
         render();
-        lock = false;
-        if (isLive) await pushSessionState(live.sessionId, finalState, myRole);
+        try { await pushSessionState(live.sessionId, snapshot(), me); } catch (e) { console.error(e); }
       } else {
         revealed = [];
         myTurn = false;
-        render();
         lock = false;
-        if (isLive) await pushSessionState(live.sessionId, { revealed: [], matched, myPairs, oppPairs }, myRole === 'player1' ? 'player2' : 'player1');
+        render();
+        moveNo++;
+        try { await pushSessionState(live.sessionId, snapshot(), opp); } catch (e) { console.error(e); }
       }
     } else {
       render();
-      lock = false;
     }
   }
-  if (isLive) {
-    subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') {
-        if (gameOver) return;
-        gameOver = true; endHandled = true;
-        const iWon = winnerId === currentUser.id;
-        setTimeout(() => { if (iWon) endDuel(true, 'Memory Match victory.'); else endDuel(false, 'Opponent found more pairs.'); }, 500);
-        return;
-      }
-      if (newState && !gameOver) {
-        if (newState.matched) matched = newState.matched;
-        if (typeof newState.myPairs === 'number') myPairs = newState.myPairs;
-        if (typeof newState.oppPairs === 'number') oppPairs = newState.oppPairs;
-        myTurn = (turn === myRole);
-        render();
-      }
-    });
-  }
+
+  subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
+    if (status === 'completed') {
+      if (gameOver) return;
+      if (newState && typeof newState.n === 'number' && newState.n > moveNo) apply(newState);
+      gameOver = true; endHandled = true;
+      outcome = winnerId === currentUser.id ? 'me' : winnerId ? 'opp' : 'draw';
+      render(); say(outcome);
+      return;
+    }
+    if (gameOver || !newState || typeof newState.n !== 'number' || newState.n <= moveNo) return;
+    if (!apply(newState)) return;
+    setTurn(turn === me); render();
+  });
+
   render();
 }
-
 function runMathDuel(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
@@ -4730,67 +4878,139 @@ function runMathChain(opponent, live) {
 function runRPS(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
-  const isLive = !!live;
-  const CHOICES = ['✊', '✋', '✌️'];
+  const currentRole = (typeof myRole !== 'undefined' && myRole) ? myRole : 'player1';
+  const me = currentRole, opp = me === 'player1' ? 'player2' : 'player1';
+  let gameOver = false, endHandled = false, outcome = null, moveNo = 0, fresh = false;
   let myScore = 0, oppScore = 0;
   let myChoice = null, oppChoice = null;
-  let gameOver = false;
-  let endHandled = false;
-  let myTurn = true;
+  const CHOICES = ['✊', '✋', '✌️'];
+  const NAMES = ['Rock', 'Paper', 'Scissors'];
+  
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); gameTimers.push(t); return t; };
+
+  const CSS = `<style>
+    .sk-wrap{width:100%;max-width:100%;margin:0 auto;text-align:center;color:#2a2640;display:flex;flex-direction:column;align-items:center;}
+    .sk-info{font-size:0.72rem;color:#5c5a6e;margin-bottom:8px}
+    .sk-bar{display:flex;gap:8px;margin-bottom:10px;width:100%}
+    .sk-chip{flex:1;padding:8px 10px;border-radius:12px;font-size:0.8rem;font-weight:700;background:#fff;border:2px solid transparent;box-shadow:0 2px 8px rgba(91,61,240,.12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:box-shadow .2s}
+    .sk-chip.me{color:#5b3df0;border-color:#5b3df0}
+    .sk-chip.op{color:#c47d12;border-color:#f0a742}
+    .sk-chip.act{box-shadow:0 0 0 3px rgba(91,61,240,.18),0 4px 14px rgba(91,61,240,.28)}
+    .sk-status{font-size:0.9rem;font-weight:700;margin:6px 0 12px}
+    
+    .rps-arena{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:300px;margin:20px auto;}
+    .rps-hand{width:100px;height:100px;border-radius:24px;background:#f8f6ff;display:flex;align-items:center;justify-content:center;font-size:3.5rem;box-shadow:inset 0 4px 10px rgba(0,0,0,0.05);transition:all 0.3s;}
+    .rps-hand.mine{background:#ede9fe;border:2px solid #5b3df0;}
+    .rps-hand.theirs{background:#fffbf5;border:2px solid #f0a742;}
+    .rps-vs{font-family:Poppins;font-weight:800;color:#918fa3;font-size:1.2rem;}
+    
+    .rps-choices{display:flex;gap:12px;justify-content:center;margin-top:24px;}
+    .rps-btn{width:80px;height:80px;border-radius:20px;background:#fff;border:2px solid #e9e5f5;font-size:2.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+    .rps-btn:hover:not(:disabled){transform:translateY(-4px) scale(1.05);border-color:#5b3df0;box-shadow:0 8px 20px rgba(91,61,240,0.2);}
+    .rps-btn:disabled{opacity:0.5;cursor:not-allowed;transform:scale(0.95);}
+  </style>`;
+
+  const statusText = () => outcome ? (outcome === 'me' ? '🏆 You won!' : outcome === 'opp' ? 'You lost this one' : '🤝 Draw')
+    : gameOver ? 'Game over' : myChoice ? 'Waiting for opponent...' : 'Pick your move';
+  const head = (a, b) => `
+    <p class="sk-info">Entry ₹${currentEntryFee} · Win ₹${currentReward} · LIVE</p>
+    <div class="sk-bar">
+      <div class="sk-chip me ${!myChoice && !gameOver ? 'act' : ''}">You · ${a}</div>
+      <div class="sk-chip op ${myChoice && !gameOver ? 'act' : ''}">${esc(opponent.name)} · ${b}</div>
+    </div>
+    <div class="sk-status" style="color:${outcome === 'me' ? '#16c46b' : outcome === 'opp' ? '#e2555a' : '#5b3df0'}">${statusText()}</div>`;
+
   function render() {
-    stage.innerHTML = `<div style="width:100%;text-align:center;"><p style="font-size:0.72rem;color:#5c5a6e;margin-bottom:6px;">Entry ₹${currentEntryFee} · Win ₹${currentReward}${isLive ? ' · LIVE' : ''}</p><div style="display:flex;justify-content:space-around;margin:8px 0;font-size:0.85rem;font-weight:700;"><span style="color:#5b3df0;">You: ${myScore}</span><span style="color:#f0a742;">${opponent.name}: ${oppScore}</span></div><div style="font-size:2rem;margin:20px 0;">${myChoice || '❔'} vs ${oppChoice || '❔'}</div><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:12px 0;">${CHOICES.map((c, i) => `<button class="rps-btn" data-idx="${i}" style="font-size:2.6rem;padding:14px 22px;background:#fff;border:2px solid #e9e5f5;border-radius:16px;cursor:pointer;" ${myChoice !== null ? 'disabled' : ''}>${c}</button>`).join('')}</div></div>`;
-    if (myChoice === null && !gameOver) {
-      document.querySelectorAll('.rps-btn').forEach(btn => {
-        btn.addEventListener('click', () => pickChoice(parseInt(btn.dataset.idx)));
+    const canPlay = myChoice === null && !gameOver;
+    
+    let choicesHtml = CHOICES.map((c, i) => 
+      `<button class="rps-btn" data-idx="${i}" ${!canPlay ? 'disabled' : ''}>${c}</button>`
+    ).join('');
+
+    stage.innerHTML = `${CSS}<div class="sk-wrap">${head(myScore, oppScore)}
+      <div class="rps-arena">
+        <div class="rps-hand mine">${myChoice || '❔'}</div>
+        <div class="rps-vs">VS</div>
+        <div class="rps-hand theirs">${oppChoice || '❔'}</div>
+      </div>
+      <div class="rps-choices">${choicesHtml}</div>
+    </div>`;
+    
+    if (canPlay) {
+      stage.querySelectorAll('.rps-btn').forEach(btn => {
+        btn.addEventListener('click', () => makeMove(parseInt(btn.dataset.idx)));
       });
     }
   }
-  async function pickChoice(idx) {
+
+  const say = (o, why) => later(() => {
+    if (o === 'me') endDuel(true, why || 'RPS victory!');
+    else if (o === 'opp') endDuel(false, why || 'Opponent won RPS.');
+    else endDrawnMatch();
+  }, 1500);
+
+  async function conclude(o, why) {
+    if (gameOver) return;
+    gameOver = true; outcome = o; render();
+    if (!endHandled) {
+      endHandled = true;
+      const wid = o === 'me' ? currentUser.id : o === 'opp' ? opponent.id : null;
+      try { await endSessionWithState(live.sessionId, { myScore, oppScore, n: moveNo }, wid); } catch (e) { console.error(e); }
+    }
+    say(o, why);
+  }
+
+  async function makeMove(idx) {
     if (myChoice !== null || gameOver) return;
     myChoice = CHOICES[idx];
     render();
-    if (isLive) await pushSessionState(live.sessionId, { myChoiceIdx: idx, myScore, oppScore }, myRole === 'player1' ? 'player2' : 'player1');
+    try { await pushSessionState(live.sessionId, { myChoiceIdx: idx, myScore, oppScore, n: ++moveNo }, opp); } catch (e) { console.error(e); }
   }
-  render();
-  if (isLive) {
-    subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
-      if (status === 'completed') {
-        if (gameOver) return;
-        gameOver = true; endHandled = true;
-        const iWon = winnerId === currentUser.id;
-        const isDraw = !winnerId;
-        setTimeout(() => { if (isDraw) endDrawnMatch(); else if (iWon) endDuel(true, 'RPS victory!'); else endDuel(false, 'Opponent won RPS.'); }, 500);
-        return;
-      }
-      if (newState && !gameOver) {
-        if (typeof newState.myScore === 'number') myScore = newState.myScore;
-        if (typeof newState.oppScore === 'number') oppScore = newState.oppScore;
-        if (typeof newState.myChoiceIdx === 'number') {
-          oppChoice = CHOICES[newState.myChoiceIdx];
-          if (myChoice !== null) {
-            const myIdx = CHOICES.indexOf(myChoice);
-            const oppIdx = newState.myChoiceIdx;
-            if (myIdx !== oppIdx) {
-              if ((myIdx === 0 && oppIdx === 2) || (myIdx === 1 && oppIdx === 0) || (myIdx === 2 && oppIdx === 1)) myScore++;
-              else oppScore++;
-            }
-            myChoice = null; oppChoice = null;
-            if (myScore >= 2 || oppScore >= 2) {
-              gameOver = true;
-              const wId = myScore > oppScore ? currentUser.id : opponent.id;
-              if (!endHandled) { endHandled = true; endSessionWithState(live.sessionId, { myScore, oppScore }, wId); }
-              setTimeout(() => { if (myScore > oppScore) endDuel(true, 'RPS victory!'); else endDuel(false, 'Opponent won RPS.'); }, 500);
-              return;
-            }
-            render();
-          }
-        }
-        render();
-      }
-    });
-  }
-}
 
+  subscribeToSession(live.sessionId, (newState, turn, status, winnerId) => {
+    if (status === 'completed') {
+      if (gameOver) return;
+      gameOver = true; endHandled = true; fresh = true;
+      outcome = winnerId === currentUser.id ? 'me' : winnerId ? 'opp' : 'draw';
+      render(); say(outcome);
+      return;
+    }
+    if (gameOver || !newState || typeof newState.n !== 'number' || newState.n <= moveNo) return;
+    
+    if (typeof newState.myChoiceIdx === 'number') {
+      oppChoice = CHOICES[newState.myChoiceIdx];
+      myScore = newState.oppScore; // Swap scores because state is mirrored
+      oppScore = newState.myScore;
+      
+      if (myChoice !== null) {
+        const myIdx = CHOICES.indexOf(myChoice);
+        const oppIdx = newState.myChoiceIdx;
+        if (myIdx !== oppIdx) {
+          if ((myIdx === 0 && oppIdx === 2) || (myIdx === 1 && oppIdx === 0) || (myIdx === 2 && oppIdx === 1)) myScore++;
+          else oppScore++;
+        }
+        
+        render();
+        
+        if (myScore >= 2 || oppScore >= 2) {
+          setTimeout(() => {
+            if (myScore > oppScore) conclude('me', 'You won the series!');
+            else conclude('opp', 'Opponent won the series.');
+          }, 1000);
+        } else {
+          setTimeout(() => {
+            myChoice = null; oppChoice = null;
+            pushSessionState(live.sessionId, { myChoiceIdx: null, myScore: oppScore, oppScore: myScore, n: ++moveNo }, me);
+            render();
+          }, 1500);
+        }
+      }
+    }
+  });
+
+  render();
+}
 function runDice(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
