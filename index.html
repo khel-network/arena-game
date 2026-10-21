@@ -2124,6 +2124,7 @@ Your ₹<span id="no-opp-refund">20</span> entry has been refunded.
     <span class="spinner"></span>
     <span>Creating payment...</span>
   </div>
+</div>
   <!-- NEW BUTTON: This forces the browser to open a popup tab -->
   <button id="open-payment-btn" style="display:none; width:100%; padding:10px; background:#5b3df0; color:#fff; border-radius:8px; font-weight:700; font-size:0.9rem; border:none; cursor:pointer;">Click Here to Open Payment</button>
 </div>
@@ -2656,6 +2657,41 @@ async function subscribeToWalletRealtime() {
     })
     .subscribe();
 }
+  let paymentPollInterval = null;
+
+function startPaymentPolling() {
+  if (paymentPollInterval) clearInterval(paymentPollInterval);
+  
+  // Check every 3 seconds
+  paymentPollInterval = setInterval(async () => {
+    try {
+      // Get the latest payment request for this user
+      const { data, error } = await client
+        .from('payment_requests')
+        .select('status, tokens_to_credit')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (data && data.status === 'approved') {
+        clearInterval(paymentPollInterval);
+        paymentPollInterval = null;
+        
+        // Auto-close the modal and show success!
+        closePaymentModal();
+        showPaymentAnimation(data.tokens_to_credit);
+        showWalletToast(data.tokens_to_credit, 'credit', 'Wallet top-up successful');
+        
+        // Reload user wallet
+        await loadWallet();
+        updateUI();
+      }
+    } catch (e) {
+      console.log('Polling error', e);
+    }
+  }, 3000);
+}
 function animateBalanceChange(fromVal, toVal) {
   const el = document.getElementById('balance-value');
   if (!el) return;
@@ -2977,6 +3013,11 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
   });
 });
 function closePaymentModal() {
+  if (paymentPollInterval) {
+    clearInterval(paymentPollInterval);
+    paymentPollInterval = null;
+  }
+  
   document.getElementById('paymentModal').classList.remove('show');
   document.getElementById('paymentStatus').className = 'payment-status waiting';
   document.getElementById('paymentStatus').innerHTML = `<span class="spinner"></span><span>Creating payment...</span>`;
