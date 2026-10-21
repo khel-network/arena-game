@@ -2936,23 +2936,30 @@ document.getElementById('initiatePaymentBtn')?.addEventListener('click', functio
       failed_url: currentUrl + '?status=failed&order_id=' + orderId,
       timeout_url: currentUrl + '?status=timeout&order_id=' + orderId,
     }, {
-      onResponse: function(paymentUrl) {
-        // Show the new button instead of trying to auto-open
-        document.getElementById('payment-status-text').innerHTML = `<i class="fas fa-check-circle" style="color:#16c46b;"></i><span style="color:#161522; font-weight:600;">Payment Link Ready!</span>`;
+         onResponse: function(paymentUrl) {
+        // Safely inject the button into the existing status container
+        st.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+            <div style="display:flex; align-items:center; justify-content:center; gap:8px; color:#16c46b; font-weight:700;">
+              <i class="fas fa-check-circle"></i> Payment Link Ready!
+            </div>
+            <button id="open-payment-btn" style="width:100%; padding:12px; background:#5b3df0; color:#fff; border-radius:8px; font-weight:800; font-size:0.9rem; border:none; cursor:pointer; box-shadow: 0 4px 12px rgba(91,61,240,0.3);">
+              Open Payment Page
+            </button>
+          </div>
+        `;
         
-        const openBtn = document.getElementById('open-payment-btn');
-        openBtn.style.display = 'block';
-        
-        // When they click this button, it will open as a popup (or new tab safely)
-        openBtn.onclick = function() {
+        // Attach the click event to the newly created button
+        document.getElementById('open-payment-btn').onclick = function() {
             window.open(paymentUrl, 'ZapUPI_Payment', 'width=500,height=750');
         };
 
+        // Reset the main submit button
         document.getElementById('initiatePaymentBtn').disabled = false;
         paymentLock = false;
         document.getElementById('initiatePaymentBtn').innerHTML = '<i class="fas fa-qrcode"></i> Pay with ZapUPI';
       },
-      onError: function(err) {
+           onError: function(err) {
         st.className = 'payment-status error';
         st.innerHTML = `<span>Error: ${escapeHtml(err || 'Please try again')}</span>`;
         showToast('Payment error: ' + (err || 'unknown'), 'error');
