@@ -5726,7 +5726,7 @@ function openMatchOptions(type, name, entry, reward) {
   document.getElementById('mo-entry-val').textContent = `₹${entry}`;
   document.getElementById('mo-reward-val').textContent = `₹${reward}`;
   document.getElementById('mo-balance-note').textContent = `Balance ₹${currentBalance} → ₹${Math.max(0, currentBalance - entry)} • Stake refunded on draw or cancel`;
-  document.getElementById('mo-players-online').textContent = Math.floor(1000 + Math.random() * 800).toLocaleString();
+document.getElementById('mo-players-online').textContent = Math.floor(300 + Math.random() * 100).toLocaleString();
   
   const graphicEl = document.getElementById('mo-graphic');
   if (type === 'tictactoe') graphicEl.textContent = 'XO';
@@ -5741,36 +5741,59 @@ function openMatchOptions(type, name, entry, reward) {
   selectMatchType('paid');
 }
 
+let freeTrialLiveInterval = null;
+
 function updateFreeTrialUI() {
   const now = Date.now();
   let trialsUsed = parseInt(localStorage.getItem('skillclash_free_trials_used') || '0');
   const lastPlayed = parseInt(localStorage.getItem('skillclash_free_trial_last_played') || '0');
   
-  if (now - lastPlayed > 3600000) {
-    trialsUsed = 0;
-    localStorage.setItem('skillclash_free_trials_used', '0');
-  }
-  
-  const triesLeft = Math.max(0, 2 - trialsUsed);
   const freeOpt = document.getElementById('mo-opt-free');
   const triesEl = document.getElementById('mo-free-tries');
   const statusEl = document.getElementById('mo-free-status');
   
-  triesEl.textContent = triesLeft;
-  
-  if (triesLeft === 0) {
-    freeOpt.style.opacity = '0.5';
-    freeOpt.style.pointerEvents = 'none';
-    statusEl.innerHTML = 'Locked • Wait 60m for next trial';
-    statusEl.style.color = '#e2555a';
-  } else {
-    freeOpt.style.opacity = '1';
-    freeOpt.style.pointerEvents = 'auto';
-    statusEl.innerHTML = '<span class="mo-dot"></span> Starts instantly';
-    statusEl.style.color = '#a19fbb';
-  }
-}
+  function tick() {
+    const currentNow = Date.now();
+    // Check if 60 minutes has passed
+    if (currentNow - lastPlayed > 3600000) {
+      trialsUsed = 0;
+      localStorage.setItem('skillclash_free_trials_used', '0');
+    }
 
+    const triesLeft = Math.max(0, 2 - trialsUsed);
+    triesEl.textContent = triesLeft;
+    
+    if (triesLeft === 0) {
+      freeOpt.style.opacity = '0.6';
+      freeOpt.style.pointerEvents = 'none';
+      
+      // Calculate remaining time
+      const timePassed = currentNow - lastPlayed;
+      const timeLeft = 3600000 - timePassed;
+      
+      if (timeLeft > 0) {
+        const mins = Math.floor(timeLeft / 60000);
+        const secs = Math.floor((timeLeft % 60000) / 1000);
+        // Example: Locked • Wait 59m 20s
+        statusEl.innerHTML = `<span style="color:#e2555a;">Locked • Wait ${mins}m ${secs}s</span>`;
+      } else {
+        // Time is up, unlock it
+        tick();
+      }
+    } else {
+      freeOpt.style.opacity = '1';
+      freeOpt.style.pointerEvents = 'auto';
+      statusEl.innerHTML = '<span class="mo-dot"></span> Starts instantly';
+      statusEl.style.color = '#a19fbb';
+    }
+  }
+
+  // Clear any old timer before starting a new one
+  if (freeTrialLiveInterval) clearInterval(freeTrialLiveInterval);
+  
+  tick(); // Run immediately
+  freeTrialLiveInterval = setInterval(tick, 1000); // Run every second
+}
 function selectMatchType(type) {
   selectedMatchType = type;
   document.getElementById('mo-opt-paid').classList.toggle('selected', type === 'paid');
@@ -5812,6 +5835,7 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
     beginMatchmaking();
   } 
   else {
+    // FREE TRIAL LOGIC
     btn.disabled = true;
     btn.textContent = 'Connecting...';
     
@@ -5823,6 +5847,70 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
     modal.classList.remove('show');
     saveScrollY();
     
+    activeGame = { name: pendingGame.name, type: pendingGame.type };
+    currentEntryFee = 0;
+    currentReward = 0;
+    isGameActive = true;
+    isRealPlayerMatch = false;
+    myRole = 'player1';
+    activeGameSessionId = 'fake_session_123';
+    arenaLaunchInProgress = true;
+    
+    const matchOverlay = document.getElementById('match-overlay');
+    const matchTitle = document.getElementById('match-title');
+    const matchStatus = document.getElementById('match-status');
+    const mmStake = document.getElementById('mm-entry-stake');
+    const searchingView = document.getElementById('mm-searching-view');
+    const blockedView = document.getElementById('mm-blocked-view');
+    const progEl = document.getElementById('mm-prog');
+    const numEl = document.getElementById('mm-num');
+    
+    if (blockedView) blockedView.style.display = 'none';
+    if (searchingView) searchingView.style.display = 'block';
+    if (matchTitle) matchTitle.textContent = 'Finding Real Opponent';
+    if (matchStatus) matchStatus.textContent = 'Searching for real players...';
+    if (mmStake) mmStake.textContent = 'FREE TRIAL';
+    matchOverlay.classList.remove('hidden');
+    
+    // Visual Countdown Timer
+    let timeLeft = 4;
+    const circumference = 276.46;
+    if (numEl) numEl.textContent = timeLeft;
+    if (progEl) progEl.style.strokeDashoffset = 0;
+
+    const countdownTimer = setInterval(() => {
+      timeLeft--;
+      if (numEl) numEl.textContent = timeLeft > 0 ? timeLeft : 0;
+      if (progEl) progEl.style.strokeDashoffset = circumference * (1 - timeLeft / 4);
+      
+      if (timeLeft <= 0) {
+        clearInterval(countdownTimer);
+        matchOverlay.classList.add('hidden');
+        
+        const botName = INDIAN_BOT_NAMES[Math.floor(Math.random() * INDIAN_BOT_NAMES.length)];
+        const botId = 'bot_' + Date.now();
+        const botOpponent = { name: botName, seed: botId, isBot: true, id: botId };
+        
+        arenaLaunchInProgress = false;
+        activeOpponent = botOpponent;
+        isGameActive = true;
+        lockBodyScroll();
+        
+        const myName = playerNameEl.textContent;
+        const myAvatar = document.getElementById('avatar')?.src || '';
+        arenaUserAvatar.src = myAvatar || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(myName);
+        arenaUserName.textContent = myName;
+        arenaOppName.textContent = botOpponent.name;
+        arenaOppAvatar.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(botOpponent.seed);
+        arenaOverlay.classList.remove('hidden');
+        
+        launchLiveGame(activeGame.type, botOpponent, 'fake_session_123', 'player1');
+        
+        btn.disabled = false;
+      }
+    }, 1000);
+    gameTimers.push(countdownTimer); // Ensure it clears if they close
+  }
     // Setup fake bot environment
     activeGame = { name: pendingGame.name, type: pendingGame.type };
     currentEntryFee = 0;
