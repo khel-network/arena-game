@@ -3565,11 +3565,14 @@ function runNim(opponent, live) {
 function runDotsAndBoxes(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
-  const isLive = !!live;
-  if (!isLive) { stage.innerHTML = '<p style="text-align:center;color:#5c5a6e">This game needs a live opponent.</p>'; return; }
-  const me = myRole, opp = myRole === 'player1' ? 'player2' : 'player1';
+
+  // SAFETY FIX: Prevents white box crash if global variable isn't ready
+  const currentRole = (typeof myRole !== 'undefined' && myRole) ? myRole : 'player1';
+  
+  const me = currentRole; 
+  const opp = me === 'player1' ? 'player2' : 'player1';
   let gameOver = false, endHandled = false, outcome = null, moveNo = 0, fresh = false;
-  let myTurn = (myRole === 'player1');
+  let myTurn = (me === 'player1');
   const N = 4, S = 62, M = 26, W = M * 2 + N * S;
   let H = Array.from({ length: N + 1 }, () => Array(N).fill(null));
   let V = Array.from({ length: N }, () => Array(N + 1).fill(null));
@@ -3583,15 +3586,15 @@ function runDotsAndBoxes(opponent, live) {
   const initial = esc(((opponent.name || '?').charAt(0) || '?').toUpperCase());
 
   const CSS = `<style>
-    .sk-wrap{width:100%;max-width:380px;margin:0 auto;text-align:center;color:#2a2640}
-    .sk-info{font-size:.72rem;color:#5c5a6e;margin-bottom:8px}
-    .sk-bar{display:flex;gap:8px;margin-bottom:10px}
-    .sk-chip{flex:1;padding:8px 10px;border-radius:12px;font-size:.8rem;font-weight:700;background:#fff;border:2px solid transparent;box-shadow:0 2px 8px rgba(91,61,240,.12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:box-shadow .2s}
+    .sk-wrap{width:100%;max-width:100%;margin:0 auto;text-align:center;color:#2a2640;display:flex;flex-direction:column;align-items:center;}
+    .sk-info{font-size:0.72rem;color:#5c5a6e;margin-bottom:8px}
+    .sk-bar{display:flex;gap:8px;margin-bottom:10px;width:100%}
+    .sk-chip{flex:1;padding:8px 10px;border-radius:12px;font-size:0.8rem;font-weight:700;background:#fff;border:2px solid transparent;box-shadow:0 2px 8px rgba(91,61,240,.12);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:box-shadow .2s}
     .sk-chip.me{color:#5b3df0;border-color:#5b3df0}
     .sk-chip.op{color:#c47d12;border-color:#f0a742}
     .sk-chip.act{box-shadow:0 0 0 3px rgba(91,61,240,.18),0 4px 14px rgba(91,61,240,.28)}
-    .sk-status{font-size:.9rem;font-weight:700;margin:6px 0 12px}
-    .db-svg{width:100%;max-width:340px;background:#fff;border-radius:22px;box-shadow:0 10px 30px rgba(91,61,240,.22)}
+    .sk-status{font-size:0.9rem;font-weight:700;margin:6px 0 12px}
+    .db-svg{width:100%;max-width:340px;background:#fff;border-radius:22px;box-shadow:0 10px 30px rgba(91,61,240,.22);margin:0 auto;}
     .db-hit{stroke:transparent;stroke-width:26;stroke-linecap:round;cursor:pointer}
     .db-hit:hover{stroke:rgba(91,61,240,.28)}
     .db-new{stroke-dasharray:80;animation:db-draw .3s ease-out}
@@ -3700,8 +3703,7 @@ function runDotsAndBoxes(opponent, live) {
 
   render();
 }
-
-function runLightsOut(opponent, live) {
+  function runLightsOut(opponent, live) {
   const stage = document.getElementById('arena-stage');
   if (!stage) return;
   const isLive = !!live;
