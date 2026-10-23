@@ -263,7 +263,7 @@ tr:hover td { background: #fafafc; }
     <button class="sidebar-link" data-view="users"><i class="fas fa-users"></i> All Users <span class="sidebar-badge" id="badge-users"></span></button>
     <button class="sidebar-link" data-view="investigate"><i class="fas fa-user-secret"></i> Investigate User</button>
     <button class="sidebar-link" data-view="wallet"><i class="fas fa-wallet"></i> Wallet Tools</button>
-
+    <button class="sidebar-link" data-view="trials"><i class="fas fa-ticket-alt"></i> Grant Free Trials</button>
     <div class="sidebar-label">Money</div>
     <button class="sidebar-link" data-view="withdrawals"><i class="fas fa-hand-holding-usd"></i> Withdrawals <span class="sidebar-badge" id="badge-withdrawals"></span></button>
     <button class="sidebar-link" data-view="transactions"><i class="fas fa-receipt"></i> Transactions</button>
@@ -369,6 +369,35 @@ tr:hover td { background: #fafafc; }
           <div class="field"><label>Amount (₹)</label><input type="number" id="adjust-amount" placeholder="50 or -50" /></div>
           <div class="field"><label>Reason</label><input type="text" id="adjust-reason" placeholder="Support refund" /></div>
           <div class="field full"><button class="btn-primary" onclick="doAdjustBalance()" style="width:100%;justify-content:center;padding:14px;"><i class="fas fa-check"></i> Apply</button></div>
+        </div>
+      </div>
+    </section>
+
+       <!-- GRANT FREE TRIALS -->
+    <section id="view-trials" class="view">
+      <div class="main-header">
+        <div>
+          <h1 class="main-title">Grant Free Trials</h1>
+          <p class="main-sub">Give a user more free trial matches</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Give Trials</h3>
+        <p class="card-sub">Enter the user's email and the total number of trials they should have.</p>
+        <div class="form-grid">
+          <div class="field full">
+            <label>User Email</label>
+            <input type="email" id="trial-user-email" placeholder="user@example.com" />
+          </div>
+          <div class="field full">
+            <label>Number of Trials (Total)</label>
+            <input type="number" id="trial-count" value="5" min="0" />
+          </div>
+          <div class="field full">
+            <button class="btn-primary" onclick="doGrantTrials()" style="width:100%;justify-content:center;padding:14px;">
+              <i class="fas fa-check"></i> Update Trials
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -1174,6 +1203,34 @@ function backToTicketsList() {
   loadTickets();
 }
 window.backToTicketsList = backToTicketsList;
+
+// ===== GRANT TRIALS LOGIC =====
+async function doGrantTrials() {
+  const email = document.getElementById('trial-user-email').value.trim();
+  const count = parseInt(document.getElementById('trial-count').value);
+
+  if (!email) return toast('Please enter an email', 'error');
+  if (isNaN(count) || count < 0) return toast('Please enter a valid number', 'error');
+
+  try {
+    const { data, error } = await client.rpc('admin_grant_trials', { 
+      p_email: email, 
+      p_count: count 
+    });
+
+    if (error) throw error;
+    
+    if (data && data.ok) {
+      toast(`Success! ${email} now has ${count} trials.`);
+      document.getElementById('trial-user-email').value = '';
+    } else {
+      toast(data?.message || 'User not found', 'error');
+    }
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+window.doGrantTrials = doGrantTrials;
 
 // ===== Boot =====
 initNotifyTemplates();
