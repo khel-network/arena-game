@@ -5764,8 +5764,9 @@ async function openMatchOptions(type, name, entry, reward) {
   pendingGame = { type, name, entry, reward };
   const modal = document.getElementById('match-options-modal');
   
-  // Lock background scroll
-  lockPageScroll();
+  // Lock background scroll seamlessly
+  saveScrollY();
+  lockBodyScroll();
   
   document.getElementById('mo-game-title').textContent = name;
   document.getElementById('mo-category').textContent = `${GAME_CATALOG.find(g => g.type === type)?.badge || 'STRATEGY'} • 1V1`;
@@ -5894,7 +5895,8 @@ function selectMatchType(type) {
 
 document.getElementById('mo-close-btn')?.addEventListener('click', () => {
   document.getElementById('match-options-modal').classList.remove('show');
-  unlockPageScroll(); // Unlock background scroll
+  unlockBodyScroll();
+  restoreScrollY();
 });
 
 document.getElementById('mo-opt-paid')?.addEventListener('click', () => selectMatchType('paid'));
@@ -5910,7 +5912,7 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
       return;
     }
     modal.classList.remove('show');
-    saveScrollY();
+    // Don't unlock here, the game arena will take over the lock seamlessly
     activeGame = { name: pendingGame.name, type: pendingGame.type };
     currentEntryFee = pendingGame.entry;
     currentReward = pendingGame.reward;
@@ -5940,7 +5942,7 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
     } catch (e) { console.error('Failed to deduct trial', e); }
     
     modal.classList.remove('show');
-    saveScrollY();
+    // Don't unlock here, the game arena will take over the lock seamlessly
     
     activeGame = { name: pendingGame.name, type: pendingGame.type };
     currentEntryFee = 0;
