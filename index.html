@@ -5763,36 +5763,18 @@ function updateFreeTrialUI() {
   
   const triesLeft = currentUser.free_trials;
 
-  function tick() {
-    triesEl.textContent = triesLeft;
-    
-    if (triesLeft <= 0) {
-      freeOpt.style.opacity = '0.6';
-      freeOpt.style.pointerEvents = 'none';
-      // We removed the timer since it's now DB controlled
-      statusEl.innerHTML = `<span style="color:#e2555a;">Locked • 0 trials left</span>`;
-    } else {
-      freeOpt.style.opacity = '1';
-      freeOpt.style.pointerEvents = 'auto';
-      statusEl.innerHTML = '<span class="mo-dot"></span> Starts instantly';
-      statusEl.style.color = '#a19fbb';
-    }
-  }
-  tick();
-}
-    } else {
-      freeOpt.style.opacity = '1';
-      freeOpt.style.pointerEvents = 'auto';
-      statusEl.innerHTML = '<span class="mo-dot"></span> Starts instantly';
-      statusEl.style.color = '#a19fbb';
-    }
-  }
-
-  // Clear any old timer before starting a new one
-  if (freeTrialLiveInterval) clearInterval(freeTrialLiveInterval);
+  triesEl.textContent = triesLeft;
   
-  tick(); // Run immediately
-  freeTrialLiveInterval = setInterval(tick, 1000); // Run every second
+  if (triesLeft <= 0) {
+    freeOpt.style.opacity = '0.6';
+    freeOpt.style.pointerEvents = 'none';
+    statusEl.innerHTML = `<span style="color:#e2555a;">Locked • 0 trials left</span>`;
+  } else {
+    freeOpt.style.opacity = '1';
+    freeOpt.style.pointerEvents = 'auto';
+    statusEl.innerHTML = '<span class="mo-dot"></span> Starts instantly';
+    statusEl.style.color = '#a19fbb';
+  }
 }
 function selectMatchType(type) {
   selectedMatchType = type;
