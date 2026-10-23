@@ -6062,30 +6062,17 @@ function simulateBotMove(gameType, state, nextTurn) {
 }
 
 function calculateBotMove(type, state) {
-  // BOT DIFFICULTY: 0.0 (Flawless) to 1.0 (Pure Noob).
-  // 0.8 means 80% chance to play randomly (like a noob), 20% chance to play smart.
-  const NOOB_CHANCE = 0.8; 
+  const NOOB_CHANCE = 0.6; 
+  const isSmart = Math.random() > NOOB_CHANCE;
 
   if (type === 'tictactoe') {
     let board = state.board;
     const empty = board.map((c, i) => c === null ? i : null).filter(v => v !== null);
     if (empty.length === 0) return null;
-
-    // If bot plays "smart" (20% chance), try to win or block
-    if (Math.random() > NOOB_CHANCE) {
-      // 1. Try to win
-      for (let i of empty) { 
-        let temp = [...board]; temp[i] = 'player2'; 
-        if (checkTTTWin(temp, 'player2')) return { board: temp, lastMove: i, n: state.n + 1 }; 
-      }
-      // 2. Try to block
-      for (let i of empty) { 
-        let temp = [...board]; temp[i] = 'player1'; 
-        if (checkTTTWin(temp, 'player1')) return { board: temp, lastMove: i, n: state.n + 1 }; 
-      }
+    if (isSmart) {
+      for (let i of empty) { let temp = [...board]; temp[i] = 'player2'; if (checkTTTWin(temp, 'player2')) return { board: temp, lastMove: i, n: state.n + 1 }; }
+      for (let i of empty) { let temp = [...board]; temp[i] = 'player1'; if (checkTTTWin(temp, 'player1')) return { board: temp, lastMove: i, n: state.n + 1 }; }
     }
-    
-    // Otherwise, pick a random empty spot
     let idx = empty[Math.floor(Math.random() * empty.length)];
     let temp = [...board]; temp[idx] = 'player2';
     return { board: temp, lastMove: idx, n: state.n + 1 };
@@ -6096,20 +6083,14 @@ function calculateBotMove(type, state) {
     let validCols = [];
     for (let c = 0; c < 7; c++) if (!grid[0][c]) validCols.push(c);
     if (validCols.length === 0) return null;
-    
-    // If bot plays "smart" (20% chance), try to win or block
-    if (Math.random() > NOOB_CHANCE) {
+    if (isSmart) {
       for (let c of validCols) {
-        let r = -1;
-        for (let i = 5; i >= 0; i--) if (!grid[i][c]) { r = i; break; }
-        // Check if dropping here wins for bot
+        let r = -1; for (let i = 5; i >= 0; i--) if (!grid[i][c]) { r = i; break; }
         let temp = grid.map(row => [...row]); temp[r][c] = 'player2';
         if (checkC4Win(temp, 'player2')) return { grid: temp, last: {r, c}, n: state.n + 1 };
       }
       for (let c of validCols) {
-        let r = -1;
-        for (let i = 5; i >= 0; i--) if (!grid[i][c]) { r = i; break; }
-        // Check if dropping here blocks player
+        let r = -1; for (let i = 5; i >= 0; i--) if (!grid[i][c]) { r = i; break; }
         let temp = grid.map(row => [...row]); temp[r][c] = 'player1';
         if (checkC4Win(temp, 'player1')) {
             let realTemp = grid.map(row => [...row]); realTemp[r][c] = 'player2';
@@ -6117,13 +6098,9 @@ function calculateBotMove(type, state) {
         }
       }
     }
-
-    // Otherwise, pick a random valid column
     let c = validCols[Math.floor(Math.random() * validCols.length)];
-    let r = -1;
-    for (let i = 5; i >= 0; i--) if (!grid[i][c]) { r = i; break; }
-    let tempGrid = grid.map(row => [...row]);
-    tempGrid[r][c] = 'player2';
+    let r = -1; for (let i = 5; i >= 0; i--) if (!grid[i][c]) { r = i; break; }
+    let tempGrid = grid.map(row => [...row]); tempGrid[r][c] = 'player2';
     return { grid: tempGrid, last: { r, c }, n: state.n + 1 };
   }
 
@@ -6132,17 +6109,11 @@ function calculateBotMove(type, state) {
     let valid = [];
     for (let r = 0; r <= 4; r++) for (let c = 0; c < 4; c++) if (!H[r][c]) valid.push(['h', r, c]);
     for (let r = 0; r < 4; r++) for (let c = 0; c <= 4; c++) if (!V[r][c]) valid.push(['v', r, c]);
-    
     if (!valid.length) return null;
-    
-    // Dots is complex, so we just let the bot pick randomly 90% of the time
-    // If it picks the 10% smart move, it will complete a box if possible
-    if (Math.random() > 0.9) {
+    if (isSmart) {
        for (const [t, r, c] of valid) {
           let tempH = H.map(row => [...row]), tempV = V.map(row => [...row]), tempB = B.map(row => [...row]);
           if (t === 'h') tempH[r][c] = 'player2'; else tempV[r][c] = 'player2';
-          
-          // Check if this move completes a box
           let completed = 0;
           for (let br = 0; br < 4; br++) for (let bc = 0; bc < 4; bc++) {
             if (!tempB[br][bc] && tempH[br][bc] && tempH[br+1][bc] && tempV[br][bc] && tempV[br][bc+1]) { tempB[br][bc] = 'player2'; completed++; }
@@ -6150,14 +6121,73 @@ function calculateBotMove(type, state) {
           if (completed > 0) return { H: tempH, V: tempV, B: tempB, last: { t, r, c }, n: state.n + 1 };
        }
     }
-
-    // Random move
     let pick = valid[Math.floor(Math.random() * valid.length)];
     let tempH = H.map(r => [...r]), tempV = V.map(r => [...r]), tempB = B.map(r => [...r]);
     if (pick[0] === 'h') tempH[pick[1]][pick[2]] = 'player2'; else tempV[pick[1]][pick[2]] = 'player2';
     return { H: tempH, V: tempV, B: tempB, last: { t: pick[0], r: pick[1], c: pick[2] }, n: state.n + 1 };
   }
-  
+
+  // ===== NEW BOT BRAINS FOR OTHER GAMES =====
+  if (type === 'memory') {
+    // 30% chance to remember a perfect pair, otherwise pick randomly
+    if (isSmart && state.matched) {
+      const available = state.matched.map((m, i) => ({ m, i })).filter(x => !state.matched.includes(x.m));
+      for (const a of available) {
+        const b = available.find(x => x !== a && x.m === a.m);
+        if (b) return { matched: [...state.matched, a.i, b.i], myPairs: (state.oppPairs || 0) + 1, oppPairs: state.myPairs || 0, n: state.n + 1, revealed: [] };
+      }
+    }
+    return { matched: state.matched || [], myPairs: state.oppPairs || 0, oppPairs: state.myPairs || 0, n: state.n + 1, revealed: [] };
+  }
+
+  if (type === 'rps') {
+    // Bot picks a random move
+    return { myChoiceIdx: Math.floor(Math.random() * 3), myScore: state.oppScore || 0, oppScore: state.myScore || 0, n: state.n + 1 };
+  }
+
+  if (type === 'mathchain') {
+    // 60% chance to solve it correctly, otherwise fail
+    const current = state.current || 15;
+    const delta = Math.floor(Math.random() * 9) + 1;
+    const op = Math.random() < 0.5 ? '+' : '-';
+    const answer = op === '+' ? current + delta : current - delta;
+    if (isSmart) return { myScore: (state.oppScore || 0) + 1, oppScore: state.myScore || 0, current: answer, round: (state.round || 0) + 1 };
+    return { myScore: state.oppScore || 0, oppScore: state.myScore || 0, current: current, round: (state.round || 0) + 1 };
+  }
+
+  if (type === 'tap') {
+    // Simulate the bot tapping 30-70 times
+    const taps = Math.floor(Math.random() * 40) + 30;
+    return { myTaps: taps, oppTaps: state.myTaps || 0 };
+  }
+
+  if (type === 'reflex' || type === 'whack' || type === 'oddone' || type === 'reaction' || type === 'stroop') {
+    // Give bot a random score between 5 and 12 so it feels like a real player
+    const score = Math.floor(Math.random() * 8) + 5;
+    return { myScore: score, oppScore: state.myScore || 0, myTime: Math.floor(Math.random() * 300) + 250, oppTime: state.myTime || 0 };
+  }
+
+  if (type === 'simon') {
+    // Bot survives 3-5 rounds
+    const seq = Math.floor(Math.random() * 3) + 3;
+    return { sequence: Array.from({length: seq}, () => Math.floor(Math.random() * 4)), myScore: seq, oppScore: state.myScore || 0 };
+  }
+
+  if (type === 'dice') {
+    // Bot rolls a random die
+    return { myRoll: Math.floor(Math.random() * 6) + 1, myScore: state.oppScore || 0, oppScore: state.myScore || 0 };
+  }
+
+  if (type === 'scramble' || type === 'recall') {
+    // Bot gets 2 points by default (so you have to actually try to win)
+    return { myScore: 2, oppScore: state.myScore || 0, word: state.word, sequence: state.sequence || [1,2,3], round: (state.round || 1) + 1 };
+  }
+
+  if (type === 'fruitblade') {
+    // Bot scores 15-35 points
+    return { myScore: Math.floor(Math.random() * 20) + 15, timeLeft: state.timeLeft || 30, n: Date.now() };
+  }
+
   return state;
 }
 
