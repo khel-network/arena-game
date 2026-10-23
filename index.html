@@ -5764,6 +5764,9 @@ async function openMatchOptions(type, name, entry, reward) {
   pendingGame = { type, name, entry, reward };
   const modal = document.getElementById('match-options-modal');
   
+  // Lock background scroll
+  lockPageScroll();
+  
   document.getElementById('mo-game-title').textContent = name;
   document.getElementById('mo-category').textContent = `${GAME_CATALOG.find(g => g.type === type)?.badge || 'STRATEGY'} • 1V1`;
   document.getElementById('mo-entry-val').textContent = `₹${entry}`;
@@ -5891,6 +5894,7 @@ function selectMatchType(type) {
 
 document.getElementById('mo-close-btn')?.addEventListener('click', () => {
   document.getElementById('match-options-modal').classList.remove('show');
+  unlockPageScroll(); // Unlock background scroll
 });
 
 document.getElementById('mo-opt-paid')?.addEventListener('click', () => selectMatchType('paid'));
