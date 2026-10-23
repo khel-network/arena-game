@@ -5751,31 +5751,82 @@ async function openMatchOptions(type, name, entry, reward) {
 }
 let freeTrialLiveInterval = null;
 
+let freeTrialCountdownInterval = null;
+
 function updateFreeTrialUI() {
-  // If we haven't loaded the user's DB trials yet, wait.
-  if (!currentUser || currentUser.free_trials === null || currentUser.free_trials === undefined) {
-    return;
-  }
+  if (!currentUser) return;
 
   const freeOpt = document.getElementById('mo-opt-free');
   const triesEl = document.getElementById('mo-free-tries');
   const statusEl = document.getElementById('mo-free-status');
   
-  const triesLeft = currentUser.free_trials;
+  let triesLeft = currentUser.free_trials || 0;
 
-  triesEl.textContent = triesLeft;
-  
-  if (triesLeft <= 0) {
+  // Clear any existing countdown
+  if (freeTrialCountdownInterval) clearInterval(freeTrialCountdownInterval);
+
+  function tick() {
+    if (triesLeft > 0) {
+      // User has trials left
+      triesEl.textContent = triesLeft;
+      freeOpt.style.opacity = '1';
+      freeOpt.style.pointerEvents = 'auto';
+      statusEl.innerHTML = '<span class="mo-dot"></span> Starts instantly';
+      statusEl.style.color = '#a19fbb';
+      return;
+    }
+
+    // User has 0 trials - Check the timer
+    if (!currentUser.last_trial_at) {
+      // Failsafe: If no timestamp exists, unlock instantly
+      triesEl.textContent = '0';
+      freeOpt.style.opacity = '1';
+      freeOpt.style.pointerEvents = 'auto';
+      statusEl.innerHTML = '<span class="mo-dot"></span> Ready';
+      return;
+    }
+
+    const lastPlayed = new Date(currentUser.last_trial_at).getTime();
+    const cooldownMs = 60 * 60 * 1000; // 60 minutes in milliseconds
+    const now = new Date().getTime();
+    const timePassed = now - lastPlayed;
+    const timeLeft = cooldownMs - timePassed;
+
+    if (timeLeft <= 0) {
+      // 60 minutes have passed! Reset trials to 2 locally and in DB
+      triesLeft = 2;
+      triesEl.textContent = triesLeft;
+      freeOpt.style.opacity = '1';
+      freeOpt.style.pointerEvents = 'auto';
+      statusEl.innerHTML = '<span class="mo-dot"></span> Starts instantly';
+      statusEl.style.color = '#a19fbb';
+      
+      // Update local state
+      currentUser.free_trials = 2;
+      currentUser.last_trial_at = null;
+      
+      // Update database so it permanently resets
+      client.from('users').update({ free_trials: 2, last_trial_at: null }).eq('id', currentUser.id).then();
+      clearInterval(freeTrialCountdownInterval);
+      return;
+    }
+
+    // Still on cooldown - Show the 59M 20S timer
+    triesEl.textContent = '0';
     freeOpt.style.opacity = '0.6';
     freeOpt.style.pointerEvents = 'none';
-    statusEl.innerHTML = `<span style="color:#e2555a;">Locked • 0 trials left</span>`;
-  } else {
-    freeOpt.style.opacity = '1';
-    freeOpt.style.pointerEvents = 'auto';
-    statusEl.innerHTML = '<span class="mo-dot"></span> Starts instantly';
-    statusEl.style.color = '#a19fbb';
+    
+    const minutes = Math.floor(timeLeft / 60000);
+    const seconds = Math.floor((timeLeft % 60000) / 1000);
+    const formattedTime = `${minutes}M ${seconds < 10 ? '0' : ''}${seconds}S`;
+    
+    statusEl.innerHTML = `<span style="color:#e2555a; font-weight: 700;">Locked • ${formattedTime}</span>`;
   }
+
+  tick(); // Run immediately
+  freeTrialCountdownInterval = setInterval(tick, 1000); // Run every second
 }
+
 function selectMatchType(type) {
   selectedMatchType = type;
   document.getElementById('mo-opt-paid').classList.toggle('selected', type === 'paid');
@@ -5825,10 +5876,18 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
        // Deduct 1 trial from the database
     try {
       const newCount = Math.max(0, (currentUser.free_trials || 0) - 1);
-      await client.from('users').update({ free_trials: newCount }).eq('id', currentUser.id);
+      const updates = { free_trials: newCount };
+      
+      // If they just hit 0, record the exact time
+      if (newCount === 0) {
+        updates.last_trial_at = new Date().toISOString();
+      }
+      
+      await client.from('users').update(updates).eq('id', currentUser.id);
       currentUser.free_trials = newCount;
+      if (newCount === 0) currentUser.last_trial_at = updates.last_trial_at;
     } catch (e) { console.error('Failed to deduct trial', e); }
-
+    
     modal.classList.remove('show');
     saveScrollY();
     
@@ -6809,8 +6868,11 @@ async function initDashboard() {
     await loadUserName();
         // Load free trials from DB on startup
     try {
-      const { data: tData } = await client.from('users').select('free_trials').eq('id', currentUser.id).single();
-      if (tData) currentUser.free_trials = tData.free_trials;
+    const { data: tData } = await client.from('users').select('free_trials, last_trial_at').eq('id', currentUser.id).single();
+if (tData) {
+  currentUser.free_trials = tData.free_trials;
+  currentUser.last_trial_at = tData.last_trial_at;
+}
     } catch(e) {}
     await recordTermsAcceptance();
     try {
