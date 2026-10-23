@@ -2703,6 +2703,7 @@ function showApkFallback() {
 // ===== SUPABASE HELPERS =====
 async function loadUserName() {
   const meta = currentUser.user_metadata || {};
+  currentUser.free_trials = null; // We will load this from DB
   const local = localStorage.getItem('skillclash_name_' + currentUser.id);
   const fallback = local || meta.full_name || meta.name || (currentUser.email ? currentUser.email.split('@')[0] : 'Player');
   let dbName = null;
@@ -5717,7 +5718,7 @@ async function beginMatchmaking() {
 // ============================================================
 // MATCH OPTIONS & FREE TRIAL ENGINE
 // ============================================================
-function openMatchOptions(type, name, entry, reward) {
+async function openMatchOptions(type, name, entry, reward) {
   pendingGame = { type, name, entry, reward };
   const modal = document.getElementById('match-options-modal');
   
@@ -5726,7 +5727,7 @@ function openMatchOptions(type, name, entry, reward) {
   document.getElementById('mo-entry-val').textContent = `₹${entry}`;
   document.getElementById('mo-reward-val').textContent = `₹${reward}`;
   document.getElementById('mo-balance-note').textContent = `Balance ₹${currentBalance} → ₹${Math.max(0, currentBalance - entry)} • Stake refunded on draw or cancel`;
-document.getElementById('mo-players-online').textContent = Math.floor(300 + Math.random() * 100).toLocaleString();
+  document.getElementById('mo-players-online').textContent = Math.floor(300 + Math.random() * 100).toLocaleString();
   
   const graphicEl = document.getElementById('mo-graphic');
   if (type === 'tictactoe') graphicEl.textContent = 'XO';
@@ -5735,51 +5736,50 @@ document.getElementById('mo-players-online').textContent = Math.floor(300 + Math
   else if (type === 'fruitblade') graphicEl.textContent = '🍉';
   else graphicEl.textContent = '⚔️';
 
+  // Fetch the latest trial count from Supabase
+  try {
+    const { data } = await client.from('users').select('free_trials').eq('id', currentUser.id).single();
+    if (data && typeof data.free_trials === 'number') {
+      currentUser.free_trials = data.free_trials;
+    }
+  } catch(e) { console.error('Failed to load trials', e); }
+
   updateFreeTrialUI();
   
   modal.classList.add('show');
   selectMatchType('paid');
 }
-
 let freeTrialLiveInterval = null;
 
 function updateFreeTrialUI() {
-  const now = Date.now();
-  let trialsUsed = parseInt(localStorage.getItem('skillclash_free_trials_used') || '0');
-  const lastPlayed = parseInt(localStorage.getItem('skillclash_free_trial_last_played') || '0');
-  
+  // If we haven't loaded the user's DB trials yet, wait.
+  if (!currentUser || currentUser.free_trials === null || currentUser.free_trials === undefined) {
+    return;
+  }
+
   const freeOpt = document.getElementById('mo-opt-free');
   const triesEl = document.getElementById('mo-free-tries');
   const statusEl = document.getElementById('mo-free-status');
   
-  function tick() {
-    const currentNow = Date.now();
-    // Check if 60 minutes has passed
-    if (currentNow - lastPlayed > 3600000) {
-      trialsUsed = 0;
-      localStorage.setItem('skillclash_free_trials_used', '0');
-    }
+  const triesLeft = currentUser.free_trials;
 
-    const triesLeft = Math.max(0, 2 - trialsUsed);
+  function tick() {
     triesEl.textContent = triesLeft;
     
-    if (triesLeft === 0) {
+    if (triesLeft <= 0) {
       freeOpt.style.opacity = '0.6';
       freeOpt.style.pointerEvents = 'none';
-      
-      // Calculate remaining time
-      const timePassed = currentNow - lastPlayed;
-      const timeLeft = 3600000 - timePassed;
-      
-      if (timeLeft > 0) {
-        const mins = Math.floor(timeLeft / 60000);
-        const secs = Math.floor((timeLeft % 60000) / 1000);
-        // Example: Locked • Wait 59m 20s
-        statusEl.innerHTML = `<span style="color:#e2555a;">Locked • Wait ${mins}m ${secs}s</span>`;
-      } else {
-        // Time is up, unlock it
-        tick();
-      }
+      // We removed the timer since it's now DB controlled
+      statusEl.innerHTML = `<span style="color:#e2555a;">Locked • 0 trials left</span>`;
+    } else {
+      freeOpt.style.opacity = '1';
+      freeOpt.style.pointerEvents = 'auto';
+      statusEl.innerHTML = '<span class="mo-dot"></span> Starts instantly';
+      statusEl.style.color = '#a19fbb';
+    }
+  }
+  tick();
+}
     } else {
       freeOpt.style.opacity = '1';
       freeOpt.style.pointerEvents = 'auto';
@@ -5840,10 +5840,12 @@ document.getElementById('mo-start-btn')?.addEventListener('click', async () => {
     btn.disabled = true;
     btn.textContent = 'Connecting...';
     
-    // Save free trial usage
-    let trialsUsed = parseInt(localStorage.getItem('skillclash_free_trials_used') || '0');
-    localStorage.setItem('skillclash_free_trials_used', (trialsUsed + 1).toString());
-    localStorage.setItem('skillclash_free_trial_last_played', Date.now().toString());
+       // Deduct 1 trial from the database
+    try {
+      const newCount = Math.max(0, (currentUser.free_trials || 0) - 1);
+      await client.from('users').update({ free_trials: newCount }).eq('id', currentUser.id);
+      currentUser.free_trials = newCount;
+    } catch (e) { console.error('Failed to deduct trial', e); }
 
     modal.classList.remove('show');
     saveScrollY();
@@ -6823,6 +6825,11 @@ async function initDashboard() {
     currentUser = session.user;
     if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '—';
     await loadUserName();
+        // Load free trials from DB on startup
+    try {
+      const { data: tData } = await client.from('users').select('free_trials').eq('id', currentUser.id).single();
+      if (tData) currentUser.free_trials = tData.free_trials;
+    } catch(e) {}
     await recordTermsAcceptance();
     try {
       const fp = await getDeviceFingerprint();
