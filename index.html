@@ -1410,7 +1410,7 @@ body.notif-open {
   position: fixed; inset: 0; z-index: 999999;
   background: #fafafc;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 .anim-2 { 
   position: relative; width: 44px; height: 44px; 
@@ -6967,12 +6967,12 @@ async function routeOnLoad() {
     else { document.getElementById('page-landing').style.display = 'block'; document.getElementById('app-auth-screen').classList.remove('active'); }
   }
 
-  // --- Hide the loader smoothly ---
+   // --- Hide the loader smoothly ---
   const loader = document.getElementById('global-page-loader');
   if (loader) {
     loader.style.opacity = '0';
     loader.style.visibility = 'hidden';
-    setTimeout(() => loader.remove(), 400); 
+    setTimeout(() => loader.remove(), 200); 
   }
 }
 window.addEventListener('beforeunload', (e) => {
@@ -7028,6 +7028,17 @@ routeOnLoad();
     if (attempts > 200) clearInterval(tryLaunch);
   }, 300);
 })();
+
+// ===== SAFETY TIMEOUT FOR LOADER =====
+// Force-hide loader after 1.5 seconds max, so it never feels stuck
+setTimeout(() => {
+  const loader = document.getElementById('global-page-loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    loader.style.visibility = 'hidden';
+    setTimeout(() => loader.remove(), 200);
+  }
+}, 1500);
 
 console.log('SkillClash v19 loaded — Match Options, Free Trial, Premium Games');
 </script>
