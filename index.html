@@ -5736,11 +5736,12 @@ async function openMatchOptions(type, name, entry, reward) {
   else if (type === 'fruitblade') graphicEl.textContent = '🍉';
   else graphicEl.textContent = '⚔️';
 
-  // Fetch the latest trial count from Supabase
+   // Fetch the latest trial count from Supabase
   try {
-    const { data } = await client.from('users').select('free_trials').eq('id', currentUser.id).single();
-    if (data && typeof data.free_trials === 'number') {
-      currentUser.free_trials = data.free_trials;
+    const { data } = await client.from('users').select('free_trials, last_trial_at').eq('id', currentUser.id).single();
+    if (data) {
+      currentUser.free_trials = data.free_trials || 0;
+      currentUser.last_trial_at = data.last_trial_at;
     }
   } catch(e) { console.error('Failed to load trials', e); }
 
@@ -5776,16 +5777,12 @@ function updateFreeTrialUI() {
       return;
     }
 
-    // User has 0 trials - Check the timer
+     // User has 0 trials - Check the timer
     if (!currentUser.last_trial_at) {
-      // Failsafe: If no timestamp exists, unlock instantly
-      triesEl.textContent = '0';
-      freeOpt.style.opacity = '1';
-      freeOpt.style.pointerEvents = 'auto';
-      statusEl.innerHTML = '<span class="mo-dot"></span> Ready';
-      return;
+      // If they have 0 trials but no timestamp, start the timer NOW.
+      currentUser.last_trial_at = new Date().toISOString();
+      client.from('users').update({ last_trial_at: currentUser.last_trial_at }).eq('id', currentUser.id).then();
     }
-
     const lastPlayed = new Date(currentUser.last_trial_at).getTime();
     const cooldownMs = 60 * 60 * 1000; // 60 minutes in milliseconds
     const now = new Date().getTime();
