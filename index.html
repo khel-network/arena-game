@@ -1404,9 +1404,52 @@ body.notif-open {
 .mo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .mo-note { text-align: center; font-size: 0.6rem; color: #5c5a6e; margin-top: 4px; }
+
+/* ===== GLOBAL LOADER (AI CORE) ===== */
+#global-page-loader {
+  position: fixed; inset: 0; z-index: 999999;
+  background: rgba(22, 21, 34, 0.95);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+.anim-2 { 
+  position: relative; width: 44px; height: 44px; 
+  background: #5b3df0; border-radius: 50%; 
+  box-shadow: 0 0 20px #5b3df0; 
+  animation: pulseCore 1.5s infinite; 
+}
+.anim-2::before { 
+  content: ''; position: absolute; inset: -15px; 
+  border-radius: 50%; border: 2px solid rgba(91, 61, 240, 0.3); 
+  animation: ripple 1.5s infinite; 
+}
+.anim-2::after { 
+  content: ''; position: absolute; inset: -30px; 
+  border-radius: 50%; border: 2px solid rgba(240, 167, 66, 0.2); 
+  animation: ripple 1.5s infinite 0.3s; 
+}
+@keyframes pulseCore { 
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px #5b3df0; } 
+  50% { transform: scale(1.1); box-shadow: 0 0 40px #5b3df0; } 
+}
+@keyframes ripple { 
+  0% { transform: scale(0.5); opacity: 1; } 
+  100% { transform: scale(1.5); opacity: 0; } 
+}
+@keyframes pulseText { 
+  0%, 100% { opacity: 0.5; } 
+  50% { opacity: 1; } 
+}
 </style>
 </head>
 <body>
+
+<!-- GLOBAL PAGE LOADER (AI CORE) -->
+<div id="global-page-loader">
+  <div class="anim-2"></div>
+  <div style="margin-top: 28px; color: #fff; font-size: 0.9rem; font-weight: 600; letter-spacing: 1px; animation: pulseText 2s infinite;">Loading SkillClash...</div>
+</div>
 
 <div class="background-wash"></div>
 <!-- ===== APP AUTH SCREEN (only visible in app mode, logged out) ===== -->
@@ -6923,6 +6966,14 @@ async function routeOnLoad() {
     document.getElementById('dashboard').classList.add('hidden');
     if (isInstalledApp) { document.getElementById('page-landing').style.display = 'none'; document.getElementById('app-auth-screen').classList.add('active'); }
     else { document.getElementById('page-landing').style.display = 'block'; document.getElementById('app-auth-screen').classList.remove('active'); }
+  }
+
+  // --- Hide the loader smoothly ---
+  const loader = document.getElementById('global-page-loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    loader.style.visibility = 'hidden';
+    setTimeout(() => loader.remove(), 400); 
   }
 }
 window.addEventListener('beforeunload', (e) => {
