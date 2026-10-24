@@ -47,7 +47,7 @@ body {
   background: #fafafc; color: #161522;
   -webkit-font-smoothing: antialiased; line-height: 1.5;
 }
-body.game-active { overflow: hidden; position: fixed; width: 100%; height: 100%; top: 0; left: 0; touch-action: none; overscroll-behavior: none; }
+body.game-active { overflow: hidden !important; touch-action: none; overscroll-behavior: none; }
 a { text-decoration: none; color: inherit; }
 button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 ul { list-style: none; }
@@ -2579,8 +2579,14 @@ const noOpponentOverlay = document.getElementById('no-opponent-overlay');
 // ===== SCROLL =====
 function saveScrollY() { savedScrollY = window.scrollY || window.pageYOffset || 0; }
 function restoreScrollY() { requestAnimationFrame(() => window.scrollTo({ top: savedScrollY, behavior: 'auto' })); }
-function lockBodyScroll() { document.body.classList.add('game-active'); }
-function unlockBodyScroll() { document.body.classList.remove('game-active'); }
+function lockBodyScroll() { 
+  document.body.classList.add('game-active'); 
+}
+function unlockBodyScroll() { 
+  document.body.classList.remove('game-active'); 
+  // Restore the exact scroll position so it doesn't jump
+  window.scrollTo(0, savedScrollY); 
+}
 
 // ===== TOASTS =====
 function showWalletToast(amount, type, reason) {
@@ -5775,8 +5781,7 @@ async function openMatchOptions(type, name, entry, reward) {
   pendingGame = { type, name, entry, reward };
   const modal = document.getElementById('match-options-modal');
   
-  // Lock background scroll seamlessly
-  saveScrollY();
+  // Lock background scroll seamlessly (do NOT saveScrollY here to prevent jump)
   lockBodyScroll();
   
   document.getElementById('mo-game-title').textContent = name;
@@ -6231,6 +6236,9 @@ document.getElementById('gamesGrid')?.addEventListener('click', function(e) {
   const gameName = btn.dataset.game, gameType = btn.dataset.type;
   const entry = parseInt(btn.dataset.entry) || 20, reward = parseInt(btn.dataset.reward) || 30;
   if (!gameName || !gameType) return;
+  
+  // Save scroll position RIGHT BEFORE opening the popup
+  saveScrollY(); 
   openMatchOptions(gameType, gameName, entry, reward);
 });
 
