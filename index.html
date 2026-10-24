@@ -3419,6 +3419,24 @@ function buildGameCardHTML(g) {
     svgBanner = `<svg class="nb" viewBox="0 0 280 190" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="gen-bg" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#3a22a0"/><stop offset="1" stop-color="#0b0720"/></radialGradient><filter id="gen-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><rect width="280" height="190" fill="url(#gen-bg)"/><g filter="url(#gen-glow)" fill="none" stroke-linecap="round" stroke-width="4"><circle class="pls" style="--d:0s" cx="140" cy="95" r="40" stroke="${g.featured ? '#ffc062' : '#b7a6ff'}"/><circle class="tw" cx="140" cy="95" r="60" stroke="#8f78ff" stroke-width="2" stroke-opacity="0.5"/><path class="strike" style="--d:1.5s" stroke="#fff" stroke-width="2" d="M120 95H160M140 75V115"/></g></svg>`;
   }
 
+  return `<div class="game-card${featuredClass}" data-category="${g.category}">
+    <div class="card-media" style="background:#0b0720; display:flex; align-items:center; justify-content:center;">
+      ${svgBanner}
+      <span class="card-badge">${escapeHtml(g.badge)}</span>
+      <button class="help-btn" data-help="${escapeHtml(g.type)}" title="How to play">?</button>
+    </div>
+    <div class="card-content">
+      <h3 class="card-title">${escapeHtml(g.name)}</h3>
+      <p class="card-desc">${escapeHtml(g.desc)}</p>
+      <div class="card-meta">
+        <span>₹${g.entry}</span>
+        <span class="win">+₹${g.reward}</span>
+      </div>
+      <button class="play-btn" data-game="${escapeHtml(g.name)}" data-type="${escapeHtml(g.type)}" data-entry="${g.entry}" data-reward="${g.reward}">Play</button>
+    </div>
+  </div>`;
+}
+
 function renderGameCards() {
   const grid = document.getElementById('gamesGrid');
   if (!grid) return;
